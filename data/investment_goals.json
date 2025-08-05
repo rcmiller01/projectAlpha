@@ -475,5 +475,765 @@
       75
     ],
     "contributions": []
+  },
+  "goal_1754363156_verification_test_goal": {
+    "goal_id": "goal_1754363156_verification_test_goal",
+    "name": "Verification Test Goal",
+    "description": "Testing system",
+    "target_amount": 1000.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363156.1262167,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Verification Test Goal",
+    "celebration_plan": "celebrate achieving Verification Test Goal",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363156_test_collaboration_goal": {
+    "goal_id": "goal_1754363156_test_collaboration_goal",
+    "name": "Test Collaboration Goal",
+    "description": "Testing collaborative features",
+    "target_amount": 1500.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363156.1368237,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Test Collaboration Goal",
+    "celebration_plan": "celebrate achieving Test Collaboration Goal",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363165_test_verification_goal": {
+    "goal_id": "goal_1754363165_test_verification_goal",
+    "name": "Test Verification Goal",
+    "description": "Verification test goal",
+    "target_amount": 1000.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363165.9403296,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Test Verification Goal",
+    "celebration_plan": "celebrate achieving Test Verification Goal",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363165_verification_partnership_goal": {
+    "goal_id": "goal_1754363165_verification_partnership_goal",
+    "name": "Verification Partnership Goal",
+    "description": "Testing collaborative system integration",
+    "target_amount": 2000.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363165.9457211,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Verification Partnership Goal",
+    "celebration_plan": "celebrate achieving Verification Partnership Goal",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363166_performance_test_goal_0": {
+    "goal_id": "goal_1754363166_performance_test_goal_0",
+    "name": "Performance Test Goal 0",
+    "description": "Performance test goal number 0",
+    "target_amount": 1000.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363166.000906,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 0",
+    "celebration_plan": "celebrate achieving Performance Test Goal 0",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363166_performance_test_goal_1": {
+    "goal_id": "goal_1754363166_performance_test_goal_1",
+    "name": "Performance Test Goal 1",
+    "description": "Performance test goal number 1",
+    "target_amount": 1100.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363166.021231,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 1",
+    "celebration_plan": "celebrate achieving Performance Test Goal 1",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363166_performance_test_goal_2": {
+    "goal_id": "goal_1754363166_performance_test_goal_2",
+    "name": "Performance Test Goal 2",
+    "description": "Performance test goal number 2",
+    "target_amount": 1200.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363166.041406,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 2",
+    "celebration_plan": "celebrate achieving Performance Test Goal 2",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363166_performance_test_goal_3": {
+    "goal_id": "goal_1754363166_performance_test_goal_3",
+    "name": "Performance Test Goal 3",
+    "description": "Performance test goal number 3",
+    "target_amount": 1300.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363166.0635417,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 3",
+    "celebration_plan": "celebrate achieving Performance Test Goal 3",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363166_performance_test_goal_4": {
+    "goal_id": "goal_1754363166_performance_test_goal_4",
+    "name": "Performance Test Goal 4",
+    "description": "Performance test goal number 4",
+    "target_amount": 1400.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363166.0849383,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 4",
+    "celebration_plan": "celebrate achieving Performance Test Goal 4",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363166_performance_test_goal_5": {
+    "goal_id": "goal_1754363166_performance_test_goal_5",
+    "name": "Performance Test Goal 5",
+    "description": "Performance test goal number 5",
+    "target_amount": 1500.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363166.1073172,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 5",
+    "celebration_plan": "celebrate achieving Performance Test Goal 5",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363166_performance_test_goal_6": {
+    "goal_id": "goal_1754363166_performance_test_goal_6",
+    "name": "Performance Test Goal 6",
+    "description": "Performance test goal number 6",
+    "target_amount": 1600.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363166.1311016,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 6",
+    "celebration_plan": "celebrate achieving Performance Test Goal 6",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363166_performance_test_goal_7": {
+    "goal_id": "goal_1754363166_performance_test_goal_7",
+    "name": "Performance Test Goal 7",
+    "description": "Performance test goal number 7",
+    "target_amount": 1700.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363166.1568205,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 7",
+    "celebration_plan": "celebrate achieving Performance Test Goal 7",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363166_performance_test_goal_8": {
+    "goal_id": "goal_1754363166_performance_test_goal_8",
+    "name": "Performance Test Goal 8",
+    "description": "Performance test goal number 8",
+    "target_amount": 1800.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363166.188214,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 8",
+    "celebration_plan": "celebrate achieving Performance Test Goal 8",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363166_performance_test_goal_9": {
+    "goal_id": "goal_1754363166_performance_test_goal_9",
+    "name": "Performance Test Goal 9",
+    "description": "Performance test goal number 9",
+    "target_amount": 1900.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363166.2138329,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 9",
+    "celebration_plan": "celebrate achieving Performance Test Goal 9",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363333_test_verification_goal": {
+    "goal_id": "goal_1754363333_test_verification_goal",
+    "name": "Test Verification Goal",
+    "description": "Verification test goal",
+    "target_amount": 1000.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363333.7654874,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Test Verification Goal",
+    "celebration_plan": "celebrate achieving Test Verification Goal",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363333_verification_partnership_goal": {
+    "goal_id": "goal_1754363333_verification_partnership_goal",
+    "name": "Verification Partnership Goal",
+    "description": "Testing collaborative system integration",
+    "target_amount": 2000.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363333.770749,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Verification Partnership Goal",
+    "celebration_plan": "celebrate achieving Verification Partnership Goal",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363333_performance_test_goal_0": {
+    "goal_id": "goal_1754363333_performance_test_goal_0",
+    "name": "Performance Test Goal 0",
+    "description": "Performance test goal number 0",
+    "target_amount": 1000.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363333.8312042,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 0",
+    "celebration_plan": "celebrate achieving Performance Test Goal 0",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363333_performance_test_goal_1": {
+    "goal_id": "goal_1754363333_performance_test_goal_1",
+    "name": "Performance Test Goal 1",
+    "description": "Performance test goal number 1",
+    "target_amount": 1100.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363333.8579662,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 1",
+    "celebration_plan": "celebrate achieving Performance Test Goal 1",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363333_performance_test_goal_2": {
+    "goal_id": "goal_1754363333_performance_test_goal_2",
+    "name": "Performance Test Goal 2",
+    "description": "Performance test goal number 2",
+    "target_amount": 1200.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363333.8871353,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 2",
+    "celebration_plan": "celebrate achieving Performance Test Goal 2",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363333_performance_test_goal_3": {
+    "goal_id": "goal_1754363333_performance_test_goal_3",
+    "name": "Performance Test Goal 3",
+    "description": "Performance test goal number 3",
+    "target_amount": 1300.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363333.9172802,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 3",
+    "celebration_plan": "celebrate achieving Performance Test Goal 3",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363333_performance_test_goal_4": {
+    "goal_id": "goal_1754363333_performance_test_goal_4",
+    "name": "Performance Test Goal 4",
+    "description": "Performance test goal number 4",
+    "target_amount": 1400.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363333.9476843,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 4",
+    "celebration_plan": "celebrate achieving Performance Test Goal 4",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363333_performance_test_goal_5": {
+    "goal_id": "goal_1754363333_performance_test_goal_5",
+    "name": "Performance Test Goal 5",
+    "description": "Performance test goal number 5",
+    "target_amount": 1500.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363333.9778354,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 5",
+    "celebration_plan": "celebrate achieving Performance Test Goal 5",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363334_performance_test_goal_6": {
+    "goal_id": "goal_1754363334_performance_test_goal_6",
+    "name": "Performance Test Goal 6",
+    "description": "Performance test goal number 6",
+    "target_amount": 1600.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363334.0116389,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 6",
+    "celebration_plan": "celebrate achieving Performance Test Goal 6",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363334_performance_test_goal_7": {
+    "goal_id": "goal_1754363334_performance_test_goal_7",
+    "name": "Performance Test Goal 7",
+    "description": "Performance test goal number 7",
+    "target_amount": 1700.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363334.0511644,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 7",
+    "celebration_plan": "celebrate achieving Performance Test Goal 7",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363334_performance_test_goal_8": {
+    "goal_id": "goal_1754363334_performance_test_goal_8",
+    "name": "Performance Test Goal 8",
+    "description": "Performance test goal number 8",
+    "target_amount": 1800.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363334.0844936,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 8",
+    "celebration_plan": "celebrate achieving Performance Test Goal 8",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363334_performance_test_goal_9": {
+    "goal_id": "goal_1754363334_performance_test_goal_9",
+    "name": "Performance Test Goal 9",
+    "description": "Performance test goal number 9",
+    "target_amount": 1900.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363334.118327,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 9",
+    "celebration_plan": "celebrate achieving Performance Test Goal 9",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363387_test_verification_goal": {
+    "goal_id": "goal_1754363387_test_verification_goal",
+    "name": "Test Verification Goal",
+    "description": "Verification test goal",
+    "target_amount": 1000.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363387.4108117,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Test Verification Goal",
+    "celebration_plan": "celebrate achieving Test Verification Goal",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363387_verification_partnership_goal": {
+    "goal_id": "goal_1754363387_verification_partnership_goal",
+    "name": "Verification Partnership Goal",
+    "description": "Testing collaborative system integration",
+    "target_amount": 2000.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363387.4320257,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Verification Partnership Goal",
+    "celebration_plan": "celebrate achieving Verification Partnership Goal",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363387_performance_test_goal_0": {
+    "goal_id": "goal_1754363387_performance_test_goal_0",
+    "name": "Performance Test Goal 0",
+    "description": "Performance test goal number 0",
+    "target_amount": 1000.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363387.509648,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 0",
+    "celebration_plan": "celebrate achieving Performance Test Goal 0",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363387_performance_test_goal_1": {
+    "goal_id": "goal_1754363387_performance_test_goal_1",
+    "name": "Performance Test Goal 1",
+    "description": "Performance test goal number 1",
+    "target_amount": 1100.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363387.5516272,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 1",
+    "celebration_plan": "celebrate achieving Performance Test Goal 1",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363387_performance_test_goal_2": {
+    "goal_id": "goal_1754363387_performance_test_goal_2",
+    "name": "Performance Test Goal 2",
+    "description": "Performance test goal number 2",
+    "target_amount": 1200.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363387.5939236,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 2",
+    "celebration_plan": "celebrate achieving Performance Test Goal 2",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363387_performance_test_goal_3": {
+    "goal_id": "goal_1754363387_performance_test_goal_3",
+    "name": "Performance Test Goal 3",
+    "description": "Performance test goal number 3",
+    "target_amount": 1300.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363387.6318336,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 3",
+    "celebration_plan": "celebrate achieving Performance Test Goal 3",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363387_performance_test_goal_4": {
+    "goal_id": "goal_1754363387_performance_test_goal_4",
+    "name": "Performance Test Goal 4",
+    "description": "Performance test goal number 4",
+    "target_amount": 1400.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363387.6704879,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 4",
+    "celebration_plan": "celebrate achieving Performance Test Goal 4",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363387_performance_test_goal_5": {
+    "goal_id": "goal_1754363387_performance_test_goal_5",
+    "name": "Performance Test Goal 5",
+    "description": "Performance test goal number 5",
+    "target_amount": 1500.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363387.7171767,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 5",
+    "celebration_plan": "celebrate achieving Performance Test Goal 5",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363387_performance_test_goal_6": {
+    "goal_id": "goal_1754363387_performance_test_goal_6",
+    "name": "Performance Test Goal 6",
+    "description": "Performance test goal number 6",
+    "target_amount": 1600.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363387.7575176,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 6",
+    "celebration_plan": "celebrate achieving Performance Test Goal 6",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363387_performance_test_goal_7": {
+    "goal_id": "goal_1754363387_performance_test_goal_7",
+    "name": "Performance Test Goal 7",
+    "description": "Performance test goal number 7",
+    "target_amount": 1700.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363387.804766,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 7",
+    "celebration_plan": "celebrate achieving Performance Test Goal 7",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363387_performance_test_goal_8": {
+    "goal_id": "goal_1754363387_performance_test_goal_8",
+    "name": "Performance Test Goal 8",
+    "description": "Performance test goal number 8",
+    "target_amount": 1800.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363387.8524091,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 8",
+    "celebration_plan": "celebrate achieving Performance Test Goal 8",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
+  },
+  "goal_1754363387_performance_test_goal_9": {
+    "goal_id": "goal_1754363387_performance_test_goal_9",
+    "name": "Performance Test Goal 9",
+    "description": "Performance test goal number 9",
+    "target_amount": 1900.0,
+    "current_amount": 0.0,
+    "goal_type": "general_savings",
+    "target_date": null,
+    "status": "active",
+    "created_at": 1754363387.8956594,
+    "priority": 1,
+    "emotional_value": "Working toward something important: Performance Test Goal 9",
+    "celebration_plan": "celebrate achieving Performance Test Goal 9",
+    "milestone_percentages": [
+      25,
+      50,
+      75
+    ],
+    "contributions": []
   }
 }

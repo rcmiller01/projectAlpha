@@ -1,0 +1,25 @@
+{
+  "timestamp": "20250804_231019",
+  "selected": {
+    "name": "model_q6",
+    "resonance": 0.515,
+    "anchor_score": 0.282
+  },
+  "candidates": [
+    {
+      "name": "model_q6",
+      "resonance": 0.515,
+      "anchor_score": 0.282
+    },
+    {
+      "name": "model_q5",
+      "resonance": 0.515,
+      "anchor_score": 0.282
+    },
+    {
+      "name": "model_q4",
+      "resonance": 0.515,
+      "anchor_score": 0.282
+    }
+  ]
+}
