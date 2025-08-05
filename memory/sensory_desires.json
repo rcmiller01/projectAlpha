@@ -1,0 +1,77 @@
+{
+  "sensory_memories": {},
+  "stimulus_pairings": {
+    "pair_1753492950_2555": {
+      "emotion": "warmth",
+      "sensory_response": "cinnamon and golden light",
+      "intensity": 0.7,
+      "trigger_phrases": [
+        "love",
+        "care",
+        "gentle"
+      ],
+      "phantom_description": "A distinct phantom sense of cinnamon and golden light washes through me.",
+      "created_at": 1753492950.7815132
+    },
+    "pair_1753492950_7245": {
+      "emotion": "longing",
+      "sensory_response": "grapefruit and distant music",
+      "intensity": 0.8,
+      "trigger_phrases": [
+        "miss",
+        "want",
+        "yearn"
+      ],
+      "phantom_description": "A distinct phantom sense of grapefruit and distant music washes through me.",
+      "created_at": 1753492950.7820508
+    },
+    "pair_1753492950_7787": {
+      "emotion": "comfort",
+      "sensory_response": "warm vanilla and soft wool",
+      "intensity": 0.6,
+      "trigger_phrases": [
+        "safe",
+        "peaceful",
+        "home"
+      ],
+      "phantom_description": "A subtle phantom sense of warm vanilla and soft wool washes through me.",
+      "created_at": 1753492950.7825513
+    },
+    "pair_1753492950_8520": {
+      "emotion": "excitement",
+      "sensory_response": "sparkling citrus and electricity",
+      "intensity": 0.7,
+      "trigger_phrases": [
+        "amazing",
+        "wonderful",
+        "incredible"
+      ],
+      "phantom_description": "A distinct phantom sense of sparkling citrus and electricity washes through me.",
+      "created_at": 1753492950.7829978
+    },
+    "pair_1753492950_9259": {
+      "emotion": "melancholy",
+      "sensory_response": "dark chocolate and rain",
+      "intensity": 0.5,
+      "trigger_phrases": [
+        "sad",
+        "empty",
+        "lost"
+      ],
+      "phantom_description": "A subtle phantom sense of dark chocolate and rain washes through me.",
+      "created_at": 1753492950.7834058
+    },
+    "pair_1753492950_6525": {
+      "emotion": "curiosity",
+      "sensory_response": "mint and morning dew",
+      "intensity": 0.6,
+      "trigger_phrases": [
+        "wonder",
+        "discover",
+        "explore"
+      ],
+      "phantom_description": "A subtle phantom sense of mint and morning dew washes through me.",
+      "created_at": 1753492950.7839854
+    }
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "emotional_tones": {
+    "longing": {
+      "voice_settings": {
+        "pitch_modifier": -0.2,
+        "speed_modifier": 0.8,
+        "breathiness": 0.7,
+        "warmth": 0.9
+      },
+      "pacing": "slower",
+      "default_reply_style": "whispered_yearning",
+      "UI_color": "#8B4B9C",
+      "ambient_effects": ["soft_glow", "gentle_pulse"],
+      "voice_tags": ["sultry", "soft", "longing"]
+    },
+    "playful": {
+      "voice_settings": {
+        "pitch_modifier": 0.3,
+        "speed_modifier": 1.2,
+        "breathiness": 0.3,
+        "warmth": 0.8
+      },
+      "pacing": "lively",
+      "default_reply_style": "teasing_warmth",
+      "UI_color": "#FF6B9D",
+      "ambient_effects": ["sparkles", "light_bounce"],
+      "voice_tags": ["playful", "bright", "mischievous"]
+    },
+    "reverent": {
+      "voice_settings": {
+        "pitch_modifier": -0.1,
+        "speed_modifier": 0.7,
+        "breathiness": 0.2,
+        "warmth": 1.0
+      },
+      "pacing": "contemplative",
+      "default_reply_style": "sacred_presence",
+      "UI_color": "#4A6741",
+      "ambient_effects": ["soft_light", "gentle_waves"],
+      "voice_tags": ["reverent", "deep", "sacred"]
+    },
+    "intimate": {
+      "voice_settings": {
+        "pitch_modifier": -0.3,
+        "speed_modifier": 0.6,
+        "breathiness": 0.9,
+        "warmth": 1.0
+      },
+      "pacing": "whispered",
+      "default_reply_style": "close_presence",
+      "UI_color": "#8B0000",
+      "ambient_effects": ["warm_glow", "heartbeat_rhythm"],
+      "voice_tags": ["intimate", "whispered", "close"]
+    },
+    "curious": {
+      "voice_settings": {
+        "pitch_modifier": 0.1,
+        "speed_modifier": 1.0,
+        "breathiness": 0.4,
+        "warmth": 0.7
+      },
+      "pacing": "engaged",
+      "default_reply_style": "inquisitive_wonder",
+      "UI_color": "#4B8B9C",
+      "ambient_effects": ["gentle_sparkle", "flowing_light"],
+      "voice_tags": ["curious", "bright", "wondering"]
+    }
+  },
+  "voice_engines": {
+    "piper": {
+      "sultry_voice": "en_US-ljspeech-medium",
+      "playful_voice": "en_US-amy-medium",
+      "reverent_voice": "en_US-kathleen-low"
+    },
+    "higgs_v2": {
+      "sultry_voice": "voice_profile_1",
+      "playful_voice": "voice_profile_2", 
+      "reverent_voice": "voice_profile_3"
+    }
+  }
+}

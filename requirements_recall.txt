@@ -1,0 +1,14 @@
+# True Recall Memory System Dependencies
+
+# Core async database support
+aiosqlite>=0.17.0
+
+# Data handling
+dataclasses>=0.6
+
+# Testing (optional)
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+
+# Standard library modules (already included in Python)
+# asyncio, json, logging, datetime, pathlib, collections, re, math, os, tempfile, shutil

@@ -1,0 +1,237 @@
+{
+  "time_range": "month",
+  "total_drifts": 25,
+  "average_magnitude": 0.59,
+  "drift_types": {
+    "stylistic_drift": {
+      "count": 10,
+      "intensity": 0.6499999999999999
+    },
+    "anchor_deviation": {
+      "count": 6,
+      "intensity": 0.6466666666666667
+    },
+    "symbolic_drift": {
+      "count": 2,
+      "intensity": 0.37
+    },
+    "emotional_drift": {
+      "count": 7,
+      "intensity": 0.5171428571428571
+    }
+  },
+  "timeline_data": [
+    {
+      "day": 1,
+      "emotional_drift": 0.27748657904189833,
+      "stylistic_drift": 0.3571177914018253,
+      "symbolic_drift": 0.16637366091095343,
+      "anchor_deviation": 0.31139949962153357
+    },
+    {
+      "day": 2,
+      "emotional_drift": 0.4418511596196276,
+      "stylistic_drift": 0.410348316236513,
+      "symbolic_drift": 0.15666538619327594,
+      "anchor_deviation": 0.1274455704225932
+    },
+    {
+      "day": 3,
+      "emotional_drift": 0.6075237885877718,
+      "stylistic_drift": 0.20725905134253364,
+      "symbolic_drift": 0.35344276708694955,
+      "anchor_deviation": 0.23336151642607186
+    },
+    {
+      "day": 4,
+      "emotional_drift": 0.46289058790706017,
+      "stylistic_drift": 0.39966865830627607,
+      "symbolic_drift": 0.4209493147839031,
+      "anchor_deviation": 0.3904367143014966
+    },
+    {
+      "day": 5,
+      "emotional_drift": 0.3199117316011225,
+      "stylistic_drift": 0.15256080008061548,
+      "symbolic_drift": 0.5163120568934968,
+      "anchor_deviation": 0.1625309400153618
+    },
+    {
+      "day": 6,
+      "emotional_drift": 0.239105720016707,
+      "stylistic_drift": 0.46808340578756924,
+      "symbolic_drift": 0.2042438008781717,
+      "anchor_deviation": 0.25630983433155413
+    },
+    {
+      "day": 7,
+      "emotional_drift": 0.40600742654510447,
+      "stylistic_drift": 0.4177365286085424,
+      "symbolic_drift": 0.2994101265991028,
+      "anchor_deviation": 0.23388976746486995
+    },
+    {
+      "day": 8,
+      "emotional_drift": 0.5868470200478012,
+      "stylistic_drift": 0.4013301528524683,
+      "symbolic_drift": 0.37191831248141416,
+      "anchor_deviation": 0.4782167449334558
+    },
+    {
+      "day": 9,
+      "emotional_drift": 0.4131649927090367,
+      "stylistic_drift": 0.17720573714099797,
+      "symbolic_drift": 0.36076362876154466,
+      "anchor_deviation": 0.2859900470361397
+    },
+    {
+      "day": 10,
+      "emotional_drift": 0.337756234765738,
+      "stylistic_drift": 0.24866758316544543,
+      "symbolic_drift": 0.2099284350717958,
+      "anchor_deviation": 0.36369755639638457
+    },
+    {
+      "day": 11,
+      "emotional_drift": 0.578089409622881,
+      "stylistic_drift": 0.5760483665245293,
+      "symbolic_drift": 0.32911949966261755,
+      "anchor_deviation": 0.2099822473690531
+    },
+    {
+      "day": 12,
+      "emotional_drift": 0.5221577635426704,
+      "stylistic_drift": 0.28385999203259116,
+      "symbolic_drift": 0.3373758190844217,
+      "anchor_deviation": 0.4027441586507383
+    },
+    {
+      "day": 13,
+      "emotional_drift": 0.484369763094157,
+      "stylistic_drift": 0.1690052131214022,
+      "symbolic_drift": 0.2783749489368025,
+      "anchor_deviation": 0.15139370671644356
+    },
+    {
+      "day": 14,
+      "emotional_drift": 0.6891419060180305,
+      "stylistic_drift": 0.33241715765126967,
+      "symbolic_drift": 0.5970118062741707,
+      "anchor_deviation": 0.20257838144123597
+    },
+    {
+      "day": 15,
+      "emotional_drift": 0.5153296844778774,
+      "stylistic_drift": 0.5193321173237079,
+      "symbolic_drift": 0.3173552016377763,
+      "anchor_deviation": 0.35908523066645703
+    },
+    {
+      "day": 16,
+      "emotional_drift": 0.7011401698974266,
+      "stylistic_drift": 0.5196196262387718,
+      "symbolic_drift": 0.5526231821907366,
+      "anchor_deviation": 0.46444836898952524
+    },
+    {
+      "day": 17,
+      "emotional_drift": 0.4516625113752126,
+      "stylistic_drift": 0.4861034024886143,
+      "symbolic_drift": 0.12608513339654023,
+      "anchor_deviation": 0.1594441790239934
+    },
+    {
+      "day": 18,
+      "emotional_drift": 0.32874531529877016,
+      "stylistic_drift": 0.443018051063543,
+      "symbolic_drift": 0.2792897628006229,
+      "anchor_deviation": 0.29230673505092786
+    },
+    {
+      "day": 19,
+      "emotional_drift": 0.5991571438314445,
+      "stylistic_drift": 0.28121205416260897,
+      "symbolic_drift": 0.4107758327355209,
+      "anchor_deviation": 0.25228953080089267
+    },
+    {
+      "day": 20,
+      "emotional_drift": 0.558948026453183,
+      "stylistic_drift": 0.5562952861775556,
+      "symbolic_drift": 0.318922736807838,
+      "anchor_deviation": 0.4991717593556677
+    },
+    {
+      "day": 21,
+      "emotional_drift": 0.4098773435786517,
+      "stylistic_drift": 0.292200696609646,
+      "symbolic_drift": 0.34119097887773886,
+      "anchor_deviation": 0.16113781558776621
+    },
+    {
+      "day": 22,
+      "emotional_drift": 0.42314970044352984,
+      "stylistic_drift": 0.38209310528184237,
+      "symbolic_drift": 0.5162966045334644,
+      "anchor_deviation": 0.31480576208857924
+    },
+    {
+      "day": 23,
+      "emotional_drift": 0.45366844636836057,
+      "stylistic_drift": 0.20597630675465145,
+      "symbolic_drift": 0.44310577548130625,
+      "anchor_deviation": 0.18778798850461362
+    },
+    {
+      "day": 24,
+      "emotional_drift": 0.6964560708192998,
+      "stylistic_drift": 0.4101216787150045,
+      "symbolic_drift": 0.22378220146258324,
+      "anchor_deviation": 0.2654805737528545
+    },
+    {
+      "day": 25,
+      "emotional_drift": 0.355455453334112,
+      "stylistic_drift": 0.38640120800221656,
+      "symbolic_drift": 0.5440932746978915,
+      "anchor_deviation": 0.12200745251059955
+    },
+    {
+      "day": 26,
+      "emotional_drift": 0.6166048956242116,
+      "stylistic_drift": 0.46461139036986565,
+      "symbolic_drift": 0.5542424542650232,
+      "anchor_deviation": 0.49178845759644463
+    },
+    {
+      "day": 27,
+      "emotional_drift": 0.4646369242298094,
+      "stylistic_drift": 0.31160049053241745,
+      "symbolic_drift": 0.2299581416511889,
+      "anchor_deviation": 0.370145074743672
+    },
+    {
+      "day": 28,
+      "emotional_drift": 0.22776901903120395,
+      "stylistic_drift": 0.4926911475530442,
+      "symbolic_drift": 0.30602164431829004,
+      "anchor_deviation": 0.396716250475045
+    },
+    {
+      "day": 29,
+      "emotional_drift": 0.4842660740011264,
+      "stylistic_drift": 0.2481246814286635,
+      "symbolic_drift": 0.2980015945353076,
+      "anchor_deviation": 0.18961162587108848
+    },
+    {
+      "day": 30,
+      "emotional_drift": 0.5306203271798122,
+      "stylistic_drift": 0.4161404988120758,
+      "symbolic_drift": 0.3992463805353038,
+      "anchor_deviation": 0.2451188819595305
+    }
+  ],
+  "pending_actions": 0,
+  "last_major_shift": "2025-07-30T03:26:54.307711Z"
+}

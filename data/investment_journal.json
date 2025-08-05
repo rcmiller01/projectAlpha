@@ -1,0 +1,32 @@
+[
+  {
+    "strategy_id": "SPY_credit_spread_1753550383",
+    "ticker": "SPY",
+    "strategy_type": "credit_spread",
+    "entry_date": "2025-07-26T13:19:43.452649",
+    "exit_date": "2025-07-26T13:19:43.454106",
+    "entry_cost": -160.0,
+    "exit_value": 64.0,
+    "profit_loss": 224.0,
+    "profit_percentage": 140.0,
+    "days_held": 0,
+    "outcome": "win",
+    "notes": "Closed early at 60% profit target - taking gains",
+    "emotional_impact": "Excellent work! This was a really strong trade that should build your confidence."
+  },
+  {
+    "strategy_id": "SPY_credit_spread_1753555677",
+    "ticker": "SPY",
+    "strategy_type": "credit_spread",
+    "entry_date": "2025-07-26T14:47:57.776464",
+    "exit_date": "2025-07-26T14:47:57.778270",
+    "entry_cost": -160.0,
+    "exit_value": 64.0,
+    "profit_loss": 224.0,
+    "profit_percentage": 140.0,
+    "days_held": 0,
+    "outcome": "win",
+    "notes": "Closed early at 60% profit target - taking gains",
+    "emotional_impact": "Excellent work! This was a really strong trade that should build your confidence."
+  }
+]

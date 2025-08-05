@@ -1,0 +1,12 @@
+{
+  "unified_ai": {
+    "wake_words": [
+      "assistant",
+      "companion",
+      "friend"
+    ],
+    "tts_mode": "voice+text",
+    "stt_mode": "voice+text",
+    "default_visual_loop": "adaptive_calm"
+  }
+}

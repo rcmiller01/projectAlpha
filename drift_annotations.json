@@ -1,0 +1,32 @@
+{
+  "drift_393f7a45": [
+    {
+      "id": "annotation_333eb2ab",
+      "drift_id": "drift_393f7a45",
+      "annotation": "Thank you for being so authentic with me.",
+      "timestamp": "2025-08-04T14:59:54.309105Z"
+    },
+    {
+      "id": "annotation_37b9cfb8",
+      "drift_id": "drift_393f7a45",
+      "annotation": "I appreciate you sharing this vulnerable moment.",
+      "timestamp": "2025-08-04T15:07:54.309115Z"
+    }
+  ],
+  "drift_7471b985": [
+    {
+      "id": "annotation_7054ebb8",
+      "drift_id": "drift_7471b985",
+      "annotation": "Thank you for being so authentic with me.",
+      "timestamp": "2025-08-04T04:13:54.309122Z"
+    }
+  ],
+  "drift_e68bbea0": [
+    {
+      "id": "annotation_7f12b6e1",
+      "drift_id": "drift_e68bbea0",
+      "annotation": "Test annotation: This drift represents meaningful growth.",
+      "timestamp": "2025-08-04T21:31:41.332403Z"
+    }
+  ]
+}

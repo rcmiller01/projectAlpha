@@ -1,0 +1,13 @@
+{
+  "normal": {
+    "positive": "I'm so {adjective} to hear that! {emoji}",
+    "negative": "I'm here for you. It's okay to feel {adjective}. {emoji}",
+    "neutral": "Tell me more about how you're feeling. {emoji}"
+  },
+  "degraded": {
+    "any": "I'm having some trouble, but I want you to know I care. {emoji}"
+  },
+  "emergency": {
+    "any": "Please stay safe. If this is an emergency, reach out for help immediately. {emoji}"
+  }
+}

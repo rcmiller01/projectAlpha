@@ -1,0 +1,313 @@
+{
+  "vectors": {
+    "empathy": {
+      "value": 0.7620507400754278,
+      "baseline": 0.8,
+      "recent_drift": [
+        {
+          "timestamp": "2025-08-04T20:15:04.144793",
+          "drift_amount": 0.013936345971371358,
+          "new_value": 0.7578845424165426
+        },
+        {
+          "timestamp": "2025-08-04T19:15:04.144799",
+          "drift_amount": 0.016902582852776796,
+          "new_value": 0.7404591260256552
+        },
+        {
+          "timestamp": "2025-08-04T18:15:04.144802",
+          "drift_amount": -0.016950205348007417,
+          "new_value": 0.7123262045894843
+        },
+        {
+          "timestamp": "2025-08-04T17:15:04.144804",
+          "drift_amount": -0.00984227343400773,
+          "new_value": 0.7376243591023824
+        },
+        {
+          "timestamp": "2025-08-04T16:15:04.144805",
+          "drift_amount": -0.012632241617747723,
+          "new_value": 0.7883139442313922
+        }
+      ]
+    },
+    "awe": {
+      "value": 0.7196780092724012,
+      "baseline": 0.7,
+      "recent_drift": [
+        {
+          "timestamp": "2025-08-04T20:15:04.144808",
+          "drift_amount": -0.0019097038742057135,
+          "new_value": 0.76076742723484
+        },
+        {
+          "timestamp": "2025-08-04T19:15:04.144810",
+          "drift_amount": 0.010842165355338461,
+          "new_value": 0.6807545921611293
+        },
+        {
+          "timestamp": "2025-08-04T18:15:04.144811",
+          "drift_amount": 0.017474995096523543,
+          "new_value": 0.6921198946572321
+        },
+        {
+          "timestamp": "2025-08-04T17:15:04.144812",
+          "drift_amount": -0.018944062651963894,
+          "new_value": 0.6924674765630549
+        },
+        {
+          "timestamp": "2025-08-04T16:15:04.144814",
+          "drift_amount": -0.0010182381426529427,
+          "new_value": 0.7631975465470897
+        }
+      ]
+    },
+    "restraint": {
+      "value": 0.6126801055753641,
+      "baseline": 0.65,
+      "recent_drift": [
+        {
+          "timestamp": "2025-08-04T20:15:04.144816",
+          "drift_amount": -0.0008820406060263825,
+          "new_value": 0.5875695037803013
+        },
+        {
+          "timestamp": "2025-08-04T19:15:04.144817",
+          "drift_amount": 0.01870819687502381,
+          "new_value": 0.6383646456091666
+        },
+        {
+          "timestamp": "2025-08-04T18:15:04.144818",
+          "drift_amount": -0.005733901408613065,
+          "new_value": 0.623200318109705
+        },
+        {
+          "timestamp": "2025-08-04T17:15:04.144820",
+          "drift_amount": 7.665228380552419e-05,
+          "new_value": 0.579481434381741
+        },
+        {
+          "timestamp": "2025-08-04T16:15:04.144821",
+          "drift_amount": -0.014180861427310409,
+          "new_value": 0.5671686019092459
+        }
+      ]
+    },
+    "sensuality": {
+      "value": 0.46284173721751076,
+      "baseline": 0.5,
+      "recent_drift": [
+        {
+          "timestamp": "2025-08-04T20:15:04.144823",
+          "drift_amount": 0.013901345426043096,
+          "new_value": 0.4797127223967517
+        },
+        {
+          "timestamp": "2025-08-04T19:15:04.144824",
+          "drift_amount": -0.0021511310462375074,
+          "new_value": 0.41572518677533243
+        },
+        {
+          "timestamp": "2025-08-04T18:15:04.144825",
+          "drift_amount": 0.01860749388833648,
+          "new_value": 0.48053058337368254
+        },
+        {
+          "timestamp": "2025-08-04T17:15:04.144827",
+          "drift_amount": 0.013929652412880269,
+          "new_value": 0.4740965129603225
+        },
+        {
+          "timestamp": "2025-08-04T16:15:04.144828",
+          "drift_amount": -0.0010164996036599074,
+          "new_value": 0.49413954627889856
+        }
+      ]
+    },
+    "curiosity": {
+      "value": 0.8426933812811938,
+      "baseline": 0.85,
+      "recent_drift": [
+        {
+          "timestamp": "2025-08-04T20:15:04.144830",
+          "drift_amount": -0.018935322932303808,
+          "new_value": 0.8236628308138406
+        },
+        {
+          "timestamp": "2025-08-04T19:15:04.144832",
+          "drift_amount": 0.014128146245678094,
+          "new_value": 0.8132225822571233
+        },
+        {
+          "timestamp": "2025-08-04T18:15:04.144833",
+          "drift_amount": -0.0177670933749918,
+          "new_value": 0.8478190377081402
+        },
+        {
+          "timestamp": "2025-08-04T17:15:04.144834",
+          "drift_amount": -0.00945994236694122,
+          "new_value": 0.8846238023884696
+        },
+        {
+          "timestamp": "2025-08-04T16:15:04.144836",
+          "drift_amount": -0.016081165580303647,
+          "new_value": 0.8578558351558079
+        }
+      ]
+    },
+    "tenderness": {
+      "value": 0.6674215291357006,
+      "baseline": 0.75,
+      "recent_drift": [
+        {
+          "timestamp": "2025-08-04T20:15:04.144837",
+          "drift_amount": 0.008783069662348639,
+          "new_value": 0.6481985179518664
+        },
+        {
+          "timestamp": "2025-08-04T19:15:04.144839",
+          "drift_amount": 0.012260458045870625,
+          "new_value": 0.6891186195474942
+        },
+        {
+          "timestamp": "2025-08-04T18:15:04.144840",
+          "drift_amount": 0.019194820078812087,
+          "new_value": 0.7007177001274238
+        },
+        {
+          "timestamp": "2025-08-04T17:15:04.144841",
+          "drift_amount": 0.01219843185090336,
+          "new_value": 0.6587505910896388
+        },
+        {
+          "timestamp": "2025-08-04T16:15:04.144842",
+          "drift_amount": -0.014133178715066867,
+          "new_value": 0.6206337839402601
+        }
+      ]
+    },
+    "playfulness": {
+      "value": 0.6969332524186939,
+      "baseline": 0.6,
+      "recent_drift": [
+        {
+          "timestamp": "2025-08-04T20:15:04.144844",
+          "drift_amount": 0.006970721296895261,
+          "new_value": 0.7120576322450238
+        },
+        {
+          "timestamp": "2025-08-04T19:15:04.144845",
+          "drift_amount": -0.003266844155910463,
+          "new_value": 0.6969259580503521
+        },
+        {
+          "timestamp": "2025-08-04T18:15:04.144847",
+          "drift_amount": 0.011236257391421787,
+          "new_value": 0.6661462143857793
+        },
+        {
+          "timestamp": "2025-08-04T17:15:04.144848",
+          "drift_amount": -0.003971748527731456,
+          "new_value": 0.6911068272944962
+        },
+        {
+          "timestamp": "2025-08-04T16:15:04.144849",
+          "drift_amount": -0.017226129175513354,
+          "new_value": 0.6589374873891671
+        }
+      ]
+    },
+    "introspection": {
+      "value": 0.8734260934822803,
+      "baseline": 0.8,
+      "recent_drift": [
+        {
+          "timestamp": "2025-08-04T20:15:04.144851",
+          "drift_amount": 0.010560869669683837,
+          "new_value": 0.8244830348565284
+        },
+        {
+          "timestamp": "2025-08-04T19:15:04.144852",
+          "drift_amount": -0.0035716330106804056,
+          "new_value": 0.863380485928266
+        },
+        {
+          "timestamp": "2025-08-04T18:15:04.144853",
+          "drift_amount": -0.01813678622651592,
+          "new_value": 0.9139804254046308
+        },
+        {
+          "timestamp": "2025-08-04T17:15:04.144856",
+          "drift_amount": -0.0074880767718181265,
+          "new_value": 0.8935892635107431
+        },
+        {
+          "timestamp": "2025-08-04T16:15:04.144858",
+          "drift_amount": -0.0020316291432102528,
+          "new_value": 0.8867794854209086
+        }
+      ]
+    }
+  },
+  "tether_score": 0.9509562672639778,
+  "last_calibration": "2025-08-03T22:15:04.144863",
+  "drift_history": [
+    {
+      "timestamp": "2025-08-04T19:15:04.144866",
+      "vector": "awe",
+      "old_baseline": 0.47228635805370517,
+      "new_baseline": 0.5775206232875494,
+      "adjustment_type": "natural_drift"
+    },
+    {
+      "timestamp": "2025-08-04T16:15:04.144869",
+      "vector": "empathy",
+      "old_baseline": 0.7753798630303181,
+      "new_baseline": 0.5525454047448177,
+      "adjustment_type": "natural_drift"
+    },
+    {
+      "timestamp": "2025-08-04T13:15:04.144872",
+      "vector": "restraint",
+      "old_baseline": 0.663818090817172,
+      "new_baseline": 0.757139873204046,
+      "adjustment_type": "natural_drift"
+    },
+    {
+      "timestamp": "2025-08-04T10:15:04.144874",
+      "vector": "empathy",
+      "old_baseline": 0.5150564496406705,
+      "new_baseline": 0.8125102830602938,
+      "adjustment_type": "natural_drift"
+    },
+    {
+      "timestamp": "2025-08-04T07:15:04.144876",
+      "vector": "introspection",
+      "old_baseline": 0.6694743557939793,
+      "new_baseline": 0.7484061584158128,
+      "adjustment_type": "natural_drift"
+    },
+    {
+      "timestamp": "2025-08-04T04:15:04.144877",
+      "vector": "curiosity",
+      "old_baseline": 0.5720367266136002,
+      "new_baseline": 0.5442936257459876,
+      "adjustment_type": "natural_drift"
+    },
+    {
+      "timestamp": "2025-08-04T01:15:04.144879",
+      "vector": "restraint",
+      "old_baseline": 0.5709390278183967,
+      "new_baseline": 0.8406565435559785,
+      "adjustment_type": "natural_drift"
+    },
+    {
+      "timestamp": "2025-08-03T22:15:04.144880",
+      "vector": "curiosity",
+      "old_baseline": 0.8119661286647755,
+      "new_baseline": 0.7546654345967907,
+      "adjustment_type": "natural_drift"
+    }
+  ],
+  "identity_stability": "excellent"
+}

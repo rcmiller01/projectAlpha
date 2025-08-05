@@ -1,0 +1,14 @@
+{
+    "default_environment": "garden",
+    "symbolic_triggers": [
+        "collar",
+        "altar",
+        "ring",
+        "porch"
+    ],
+    "mood_sensitive_elements": [
+        "light",
+        "shadow",
+        "flame"
+    ]
+}

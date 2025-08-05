@@ -1,0 +1,45 @@
+{
+  "ui_modes": {
+    "companion": {
+      "theme": {
+        "primary_color": "#FF6B9D",
+        "secondary_color": "#8B5CF6",
+        "background": "gradient-to-r from-gray-900 to-gray-800",
+        "text_primary": "#FFFFFF",
+        "text_secondary": "#A1A1AA"
+      },
+      "features": {
+        "avatar_visible": true,
+        "emotional_indicators": true,
+        "gesture_animations": true,
+        "voice_synthesis": true,
+        "mood_display": true
+      },
+      "layout": {
+        "chat_style": "bubbles",
+        "avatar_position": "top",
+        "controls_position": "bottom"
+      }
+    },
+    "dev": {
+      "theme": {
+        "primary_color": "#3B82F6",
+        "secondary_color": "#6366F1",
+        "background": "gray-900",
+        "text_primary": "#FFFFFF",
+        "text_secondary": "#A1A1AA"
+      },
+      "features": {
+        "avatar_visible": false,
+        "emotional_indicators": false,
+        "gesture_animations": false,
+        "voice_synthesis": false,
+        "mood_display": false
+      },
+      "layout": {
+        "chat_style": "minimal",
+        "controls_position": "bottom"
+      }
+    }
+  }
+}

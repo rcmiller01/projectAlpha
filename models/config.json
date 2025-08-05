@@ -1,0 +1,26 @@
+{
+  "baseline_model": "none",
+  "baseline_path": "",
+  "last_updated": "never",
+  "model_info": {
+    "size_mb": 0,
+    "format": "unknown",
+    "hash": ""
+  },
+  "version_history": [],
+  "quality_thresholds": {
+    "emotionality_min_gain": 0.05,
+    "fluency_min_gain": 0.03,
+    "combined_min_gain": 0.04,
+    "confidence_threshold": 0.7,
+    "size_max_increase": 0.1
+  },
+  "replacement_policy": {
+    "auto_replace_enabled": true,
+    "require_human_approval": false,
+    "min_quality_for_baseline": {
+      "emotional_score": 0.7,
+      "token_quality": 0.65
+    }
+  }
+}

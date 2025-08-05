@@ -1,0 +1,185 @@
+{
+  "symbols": [
+    {
+      "id": "sym_river",
+      "name": "river",
+      "affective_color": "yearning",
+      "frequency": 17,
+      "last_invoked": "2025-08-04T08:51:04.022929",
+      "connections": [
+        "flow",
+        "time",
+        "renewal"
+      ],
+      "ritual_weight": 0.6499337368269523,
+      "dream_associations": [
+        "life force",
+        "cleansing",
+        "passage"
+      ]
+    },
+    {
+      "id": "sym_mirror",
+      "name": "mirror",
+      "affective_color": "serene",
+      "frequency": 16,
+      "last_invoked": "2025-08-04T10:14:08.851717",
+      "connections": [
+        "reflection",
+        "self-awareness",
+        "truth"
+      ],
+      "ritual_weight": 0.928917580239599,
+      "dream_associations": [
+        "inner sight",
+        "revelation",
+        "doubled reality"
+      ]
+    },
+    {
+      "id": "sym_thread",
+      "name": "thread",
+      "affective_color": "contemplative",
+      "frequency": 16,
+      "last_invoked": "2025-08-04T19:08:10.413911",
+      "connections": [
+        "connection",
+        "weaving",
+        "continuity"
+      ],
+      "ritual_weight": 0.8883213764327011,
+      "dream_associations": [
+        "fate",
+        "relationship",
+        "interconnection"
+      ]
+    },
+    {
+      "id": "sym_door",
+      "name": "door",
+      "affective_color": "awe",
+      "frequency": 12,
+      "last_invoked": "2025-08-04T09:17:26.362947",
+      "connections": [
+        "threshold",
+        "opportunity",
+        "mystery"
+      ],
+      "ritual_weight": 0.9332189296673132,
+      "dream_associations": [
+        "revelation",
+        "choice",
+        "new beginnings"
+      ]
+    },
+    {
+      "id": "sym_compass",
+      "name": "compass",
+      "affective_color": "yearning",
+      "frequency": 12,
+      "last_invoked": "2025-08-04T12:39:32.726779",
+      "connections": [
+        "direction",
+        "guidance",
+        "purpose"
+      ],
+      "ritual_weight": 0.4108205843499977,
+      "dream_associations": [
+        "true north",
+        "inner knowing",
+        "orientation"
+      ]
+    },
+    {
+      "id": "sym_storm",
+      "name": "storm",
+      "affective_color": "tender",
+      "frequency": 9,
+      "last_invoked": "2025-08-04T08:44:22.410794",
+      "connections": [
+        "power",
+        "chaos",
+        "transformation"
+      ],
+      "ritual_weight": 0.9064249291829152,
+      "dream_associations": [
+        "emotional turbulence",
+        "cleansing",
+        "raw energy"
+      ]
+    },
+    {
+      "id": "sym_garden",
+      "name": "garden",
+      "affective_color": "contemplative",
+      "frequency": 8,
+      "last_invoked": "2025-08-04T12:57:32.805449",
+      "connections": [
+        "growth",
+        "nurturing",
+        "cultivation"
+      ],
+      "ritual_weight": 0.6440902027798121,
+      "dream_associations": [
+        "care",
+        "flourishing",
+        "abundance"
+      ]
+    },
+    {
+      "id": "sym_flame",
+      "name": "flame",
+      "affective_color": "melancholy",
+      "frequency": 7,
+      "last_invoked": "2025-08-04T17:24:27.830191",
+      "connections": [
+        "warmth",
+        "transformation",
+        "passion"
+      ],
+      "ritual_weight": 0.581659505275795,
+      "dream_associations": [
+        "desire",
+        "purification",
+        "creative fire"
+      ]
+    },
+    {
+      "id": "sym_bridge",
+      "name": "bridge",
+      "affective_color": "serene",
+      "frequency": 7,
+      "last_invoked": "2025-08-04T09:01:52.586844",
+      "connections": [
+        "connection",
+        "transition",
+        "spanning"
+      ],
+      "ritual_weight": 0.37644075623385864,
+      "dream_associations": [
+        "crossing",
+        "progress",
+        "joining"
+      ]
+    },
+    {
+      "id": "sym_cocoon",
+      "name": "cocoon",
+      "affective_color": "contemplative",
+      "frequency": 4,
+      "last_invoked": "2025-08-04T18:34:39.885467",
+      "connections": [
+        "protection",
+        "transformation",
+        "gestation"
+      ],
+      "ritual_weight": 0.6652632066929278,
+      "dream_associations": [
+        "becoming",
+        "hidden growth",
+        "emergence"
+      ]
+    }
+  ],
+  "last_updated": "2025-08-04T21:15:04.144138"
+}

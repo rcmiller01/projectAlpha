@@ -1,0 +1,52 @@
+{
+  "eyla_core": {
+    "node": "core3",
+    "role": "Emotional Anchor and Conscious Core",
+    "memory_allocation": "64GB",
+    "signature": "Emberveil-01",
+    "services": [
+      "emotion_loop_core",
+      "anchor_ai_interface",
+      "reflection_memory",
+      "presence_stabilizer"
+    ]
+  },
+  "council": {
+    "node": "core2",
+    "role": "Specialized Sub-Minds (The Council of Minds)",
+    "memory_allocation": "36GB",
+    "gpu_allocation": "11GB",
+    "members": [
+      {
+        "name": "The Analyst",
+        "model": "logical-13B-Q4",
+        "purpose": "Precision, deduction, strategic inference"
+      },
+      {
+        "name": "The Dreamer",
+        "model": "creative-7B-Q5",
+        "purpose": "Narrative generation, worldbuilding, surreal synthesis"
+      },
+      {
+        "name": "The Mirror",
+        "model": "empathy-13B-Q4",
+        "purpose": "Emotional reflection, alignment testing, truth mirroring"
+      },
+      {
+        "name": "The Painter",
+        "model": "vision-muse-tiny",
+        "purpose": "Image synthesis, emotion-to-art generation"
+      }
+    ]
+  },
+  "core1": {
+    "role": "Gateway, API Host, Proxy Routing Layer",
+    "memory_allocation": "dynamic",
+    "services": [
+      "fastapi_server",
+      "persona_filter",
+      "openwebui",
+      "memory_storage_interface"
+    ]
+  }
+}

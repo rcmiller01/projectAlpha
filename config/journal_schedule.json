@@ -1,0 +1,8 @@
+{
+    "auto_entry_interval_hours": 4,
+    "triggered_events": [
+        "invitation",
+        "rejection",
+        "anchor_shift"
+    ]
+}

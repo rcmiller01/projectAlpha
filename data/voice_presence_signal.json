@@ -1,0 +1,17 @@
+{
+  "type": "voice_presence",
+  "emotion": "neutral",
+  "modifiers": {
+    "pitch": 0.0,
+    "speed": 0.6576480865478516,
+    "breathiness": 0.13152961730957033,
+    "warmth": 0.3288240432739258
+  },
+  "intensity": 0.6576480865478516,
+  "whisper_ready": true,
+  "potential_whispers": [
+    "Feeling neutral",
+    "In a neutral mood"
+  ],
+  "timestamp": 1753551858.2133288
+}

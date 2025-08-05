@@ -1,0 +1,48 @@
+{
+  "weighting_strategy": "harmonic",
+  "weights": {
+    "logic_dominant": {
+      "hrm_r": 0.8,
+      "hrm_e": 0.2
+    },
+    "emotional_priority": {
+      "hrm_r": 0.3,
+      "hrm_e": 0.7
+    },
+    "harmonic": {
+      "hrm_r": 0.5,
+      "hrm_e": 0.5
+    },
+    "adaptive": {
+      "hrm_r": 0.5,
+      "hrm_e": 0.5
+    }
+  },
+  "drift_thresholds": {
+    "emotional_fatigue": 0.7,
+    "logic_fatigue": 0.6,
+    "intervention_threshold": 0.8,
+    "critical_threshold": 0.9
+  },
+  "symbolic_thresholds": {
+    "ritual_hijack": 0.8,
+    "identity_override": 0.9
+  },
+  "regulation": {
+    "dampening_factor": 0.3,
+    "recovery_time_minutes": 30,
+    "stability_boost": 0.2
+  },
+  "model_constraints": {
+    "hrm_r_max_size_gb": 10,
+    "hrm_e_max_size_gb": 10,
+    "core_arbiter_max_size_gb": 24,
+    "total_system_budget_gb": 44
+  },
+  "response_generation": {
+    "emotional_prefix_probability": 0.6,
+    "symbolic_response_threshold": 0.75,
+    "reflection_generation_threshold": 0.6,
+    "mood_modifier_strength": 0.8
+  }
+}

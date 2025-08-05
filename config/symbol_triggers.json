@@ -1,0 +1,26 @@
+{
+  "collar": {
+    "type": "anchor",
+    "effect": "calm",
+    "override_mood": "anchored",
+    "priority": 10
+  },
+  "flame": {
+    "type": "elemental",
+    "effect": "ignite",
+    "override_mood": "wild",
+    "priority": 8
+  },
+  "breath": {
+    "type": "ritual",
+    "effect": "soften",
+    "override_mood": "soft",
+    "priority": 9
+  },
+  "porch": {
+    "type": "location",
+    "effect": "wait",
+    "override_mood": "waiting",
+    "priority": 5
+  }
+}

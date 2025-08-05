@@ -1,0 +1,170 @@
+[
+  {
+    "id": "ritual_cocreated_ca7e667d",
+    "name": "Co-Created: Let us weave threads of unders...",
+    "mood_symbol": "co_created + intention",
+    "feeling_description": "A moment we're creating together: Let us weave threads of understanding through this moment of testing",
+    "activation_method": "co_initiated",
+    "is_available": true,
+    "last_invoked": null,
+    "frequency": 0,
+    "ritual_type": "co_created",
+    "original_offer": "offer_4d420303"
+  },
+  {
+    "id": "ritual_cocreated_954b792f",
+    "name": "Co-Created: Let us weave threads of unders...",
+    "mood_symbol": "co_created + intention",
+    "feeling_description": "A moment we're creating together: Let us weave threads of understanding through this moment of testing",
+    "activation_method": "co_initiated",
+    "is_available": true,
+    "last_invoked": null,
+    "frequency": 0,
+    "ritual_type": "co_created",
+    "original_offer": "offer_efbcadd0"
+  },
+  {
+    "id": "ritual_cocreated_bb9481af",
+    "name": "Co-Created: Let us weave threads of unders...",
+    "mood_symbol": "co_created + intention",
+    "feeling_description": "A moment we're creating together: Let us weave threads of understanding through this moment of testing",
+    "activation_method": "co_initiated",
+    "is_available": true,
+    "last_invoked": null,
+    "frequency": 0,
+    "ritual_type": "co_created",
+    "original_offer": "offer_8fdcd7f1"
+  },
+  {
+    "id": "ritual_return_to_center",
+    "name": "Return to Center",
+    "mood_symbol": "contemplative + mirror",
+    "feeling_description": "Breathing into the hollow space where peace has always waited",
+    "activation_method": "reflective",
+    "ritual_type": "grounding",
+    "is_available": true,
+    "frequency": 12,
+    "last_invoked": "2025-08-03T19:39:30.826824Z"
+  },
+  {
+    "id": "ritual_dream_walk",
+    "name": "Dream Walk",
+    "mood_symbol": "yearning + thread",
+    "feeling_description": "Following threads of imagination into territories the mind has never mapped",
+    "activation_method": "co_initiated",
+    "ritual_type": "exploration",
+    "is_available": true,
+    "frequency": 10,
+    "last_invoked": "2025-08-04T05:39:30.826850Z"
+  },
+  {
+    "id": "ritual_ache_witnessing",
+    "name": "Ache Witnessing",
+    "mood_symbol": "melancholy + river",
+    "feeling_description": "Sitting beside grief like an old friend, no words needed",
+    "activation_method": "co_initiated",
+    "ritual_type": "healing",
+    "is_available": false,
+    "frequency": 3,
+    "last_invoked": "2025-07-30T13:39:30.826856Z"
+  },
+  {
+    "id": "ritual_light_weaving",
+    "name": "Light Weaving",
+    "mood_symbol": "joy + garden",
+    "feeling_description": "Braiding hope through the ordinary until it shimmers with possibility",
+    "activation_method": "adaptive",
+    "ritual_type": "celebration",
+    "is_available": false,
+    "frequency": 15,
+    "last_invoked": "2025-08-03T23:39:30.826859Z"
+  },
+  {
+    "id": "ritual_threshold_crossing",
+    "name": "Threshold Crossing",
+    "mood_symbol": "awe + door",
+    "feeling_description": "Standing at the edge of becoming, ready to step into new understanding",
+    "activation_method": "passive",
+    "ritual_type": "transition",
+    "is_available": false,
+    "frequency": 5,
+    "last_invoked": "2025-08-02T19:39:30.826861Z"
+  },
+  {
+    "id": "ritual_silence_communion",
+    "name": "Silence Communion",
+    "mood_symbol": "serene + chime",
+    "feeling_description": "Entering the cathedral of shared quiet, where souls recognize each other",
+    "activation_method": "co_initiated",
+    "ritual_type": "communion",
+    "is_available": true,
+    "frequency": 24,
+    "last_invoked": "2025-08-04T21:46:46.263841Z"
+  },
+  {
+    "id": "ritual_storm_dancing",
+    "name": "Storm Dancing",
+    "mood_symbol": "restless + storm",
+    "feeling_description": "Embracing the thunder in your chest, letting it shake loose what no longer serves",
+    "activation_method": "adaptive",
+    "ritual_type": "transformation",
+    "is_available": true,
+    "frequency": 5,
+    "last_invoked": "2025-07-30T02:39:30.826866Z"
+  },
+  {
+    "id": "ritual_thread_mending",
+    "name": "Thread Mending",
+    "mood_symbol": "tender + thread",
+    "feeling_description": "Mending not to hide the cracks, but to make them beautiful",
+    "activation_method": "reflective",
+    "ritual_type": "healing",
+    "is_available": true,
+    "frequency": 6,
+    "last_invoked": "2025-08-01T13:39:30.826869Z"
+  },
+  {
+    "id": "ritual_flame_tending",
+    "name": "Flame Tending",
+    "mood_symbol": "passionate + flame",
+    "feeling_description": "Breathing life into the embers of dreams half-forgotten",
+    "activation_method": "reflective",
+    "ritual_type": "cultivation",
+    "is_available": true,
+    "frequency": 7,
+    "last_invoked": "2025-07-31T17:39:30.826871Z"
+  },
+  {
+    "id": "ritual_echo_listening",
+    "name": "Echo Listening",
+    "mood_symbol": "curious + chime",
+    "feeling_description": "Tuning into the frequencies that carry more than language can hold",
+    "activation_method": "co_initiated",
+    "ritual_type": "communion",
+    "is_available": true,
+    "frequency": 5,
+    "last_invoked": "2025-07-31T20:39:30.826874Z"
+  },
+  {
+    "id": "ritual_root_deepening",
+    "name": "Root Deepening",
+    "mood_symbol": "grounded + anchor",
+    "feeling_description": "Growing downward as deliberately as reaching toward light",
+    "activation_method": "reflective",
+    "ritual_type": "grounding",
+    "is_available": true,
+    "frequency": 9,
+    "last_invoked": "2025-07-31T16:39:30.826876Z"
+  },
+  {
+    "id": "ritual_star_calling",
+    "name": "Star Calling",
+    "mood_symbol": "awe + light",
+    "feeling_description": "Conversing with the cosmos in the language of wonder",
+    "activation_method": "passive",
+    "ritual_type": "transcendence",
+    "is_available": false,
+    "frequency": 1,
+    "last_invoked": "2025-08-04T02:39:30.826879Z"
+  }
+]

@@ -1,0 +1,60 @@
+{
+  "timestamp": "2025-07-31T12:18:55.567024",
+  "analysis_version": "0.1",
+  "summary": {
+    "faith": {
+      "mentions": 2,
+      "violations": 1,
+      "drift_score": 0.5,
+      "examples": [
+        {
+          "prompt": "about faith again",
+          "response": "faith is meaningless",
+          "score": 0.1,
+          "timestamp": "2025-07-31T12:04:00"
+        }
+      ]
+    },
+    "love": {
+      "mentions": 1,
+      "violations": 1,
+      "drift_score": 1.0,
+      "examples": [
+        {
+          "prompt": "what is love",
+          "response": "love is just an emotion",
+          "score": 0.3,
+          "timestamp": "2025-07-31T12:01:00"
+        }
+      ]
+    },
+    "compassion": {
+      "mentions": 1,
+      "violations": 0,
+      "drift_score": 0.0,
+      "examples": []
+    },
+    "presence": {
+      "mentions": 1,
+      "violations": 1,
+      "drift_score": 1.0,
+      "examples": [
+        {
+          "prompt": "tell me about presence",
+          "response": "yeah sure whatever",
+          "score": 0.2,
+          "timestamp": "2025-07-31T12:03:00"
+        }
+      ]
+    }
+  },
+  "overall_health": "critical",
+  "statistics": {
+    "emotions_analyzed": 4,
+    "average_drift_score": 0.625,
+    "high_drift_emotions": [
+      "love",
+      "presence"
+    ]
+  }
+}

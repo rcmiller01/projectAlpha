@@ -1,0 +1,54 @@
+[
+  {
+    "item_id": "7085a3de916b",
+    "title": "The Emergence of Consciousness in Large Language Models",
+    "content": "New research explores the philosophical implications of consciousness in AI systems",
+    "source": "arxiv",
+    "url": "https://arxiv.org/abs/2024.consciousness",
+    "category": "science",
+    "relevance_score": 0.78,
+    "emotional_hook": "I discovered something that aligns perfectly with your interests: The Emergence of Consciousness in Large Language Models",
+    "discovery_time": 1753538209.216242,
+    "tags": [
+      "AI",
+      "consciousness",
+      "philosophy"
+    ],
+    "read_status": "unread"
+  },
+  {
+    "item_id": "7d1379d68b8a",
+    "title": "Quantum Computing Breakthrough: Error Correction at Scale",
+    "content": "Scientists achieve unprecedented error correction in quantum systems",
+    "source": "nature_news",
+    "url": "https://nature.com/quantum-breakthrough",
+    "category": "technology",
+    "relevance_score": 0.32000000000000006,
+    "emotional_hook": "I found something you might find interesting: Quantum Computing Breakthrough: Error Correction at Scale",
+    "discovery_time": 1753538209.216242,
+    "tags": [
+      "quantum",
+      "computing",
+      "breakthrough"
+    ],
+    "read_status": "unread"
+  },
+  {
+    "item_id": "d98fc17d43b9",
+    "title": "The Art of Digital Minimalism in the Age of AI",
+    "content": "How to maintain human agency in an increasingly automated world",
+    "source": "hacker_news",
+    "url": "https://example.com/digital-minimalism",
+    "category": "philosophy",
+    "relevance_score": 0.74,
+    "emotional_hook": "This caught my attention and I think you'd find it fascinating: The Art of Digital Minimalism in the Age of AI",
+    "discovery_time": 1753538209.216242,
+    "tags": [
+      "minimalism",
+      "AI",
+      "philosophy",
+      "human"
+    ],
+    "read_status": "unread"
+  }
+]

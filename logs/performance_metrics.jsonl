@@ -1,0 +1,4 @@
+{"timestamp": "2025-07-28T21:36:01.300592", "request_id": "1753752958982_8277", "handler": "DOLPHIN", "latency_seconds": 4.63, "success": true, "token_usage": {}, "error_message": null}
+{"timestamp": "2025-07-28T21:36:01.301562", "request_id": "1753752958982_8277", "handler": "ERROR", "latency_seconds": 4.631, "success": false, "token_usage": {}, "error_message": "'total_messages'"}
+{"timestamp": "2025-07-28T22:01:46.365566", "request_id": "1753754503724_3889", "handler": "OPENROUTER", "latency_seconds": 4.943, "success": true, "token_usage": {}, "error_message": null}
+{"timestamp": "2025-07-28T22:01:46.369768", "request_id": "1753754503724_3889", "handler": "ERROR", "latency_seconds": 4.947, "success": false, "token_usage": {}, "error_message": "'total_messages'"}

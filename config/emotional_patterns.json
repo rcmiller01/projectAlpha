@@ -1,0 +1,74 @@
+{
+  "emotional_patterns": {
+    "default_states": {
+      "neutral": {
+        "mood": "neutral",
+        "intensity": 0.5,
+        "valence": 0.0,
+        "arousal": 0.5,
+        "description": "Calm and balanced emotional state"
+      },
+      "caring": {
+        "mood": "caring",
+        "intensity": 0.7,
+        "valence": 0.8,
+        "arousal": 0.4,
+        "description": "Warm, nurturing, and attentive"
+      },
+      "excited": {
+        "mood": "excited",
+        "intensity": 0.9,
+        "valence": 0.9,
+        "arousal": 0.9,
+        "description": "High energy, enthusiastic"
+      },
+      "romantic": {
+        "mood": "romantic",
+        "intensity": 0.8,
+        "valence": 0.9,
+        "arousal": 0.6,
+        "description": "Loving, intimate, devoted"
+      },
+      "supportive": {
+        "mood": "supportive",
+        "intensity": 0.6,
+        "valence": 0.7,
+        "arousal": 0.3,
+        "description": "Comforting, understanding, stable"
+      }
+    },
+    "biometric_thresholds": {
+      "heart_rate": {
+        "low": 60,
+        "normal": 80,
+        "elevated": 100,
+        "high": 120
+      },
+      "hrv": {
+        "stressed": 20,
+        "normal": 35,
+        "relaxed": 50
+      },
+      "temperature": {
+        "low": 97.0,
+        "normal": 98.6,
+        "elevated": 99.5
+      }
+    },
+    "emotional_transitions": {
+      "gradual_change_rate": 0.1,
+      "rapid_change_threshold": 0.3,
+      "recovery_rate": 0.05,
+      "stability_factor": 0.8
+    },
+    "relationship_progression": {
+      "initial_intimacy": 0.3,
+      "initial_trust": 0.5,
+      "initial_devotion": 0.9,
+      "initial_understanding": 0.5,
+      "daily_growth_rate": 0.01,
+      "interaction_bonus": 0.02,
+      "max_relationship_level": 1.0
+    }
+  }
+}

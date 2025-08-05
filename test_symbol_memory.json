@@ -1,0 +1,640 @@
+{
+  "symbols": {
+    "mirror": {
+      "name": "mirror",
+      "emotional_associations": [
+        {
+          "emotion": "contemplative",
+          "weight": 0.799999999816,
+          "timestamp": "2025-08-04T21:59:39.374922Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "truth-seeking",
+          "weight": 0.5999999998746668,
+          "timestamp": "2025-08-04T21:59:39.374941Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "self-reflection",
+          "weight": 0.39999999991733337,
+          "timestamp": "2025-08-04T21:59:39.374943Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "contemplative",
+          "weight": 0.6999999999976666,
+          "timestamp": "2025-08-04T21:59:39.375126Z",
+          "context": "deep reflection",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "storming",
+          "weight": 0.9,
+          "timestamp": "2025-08-04T21:59:39.375608Z",
+          "context": "manual_drift: sudden realization",
+          "ritual_connection": null,
+          "dream_echo": false
+        }
+      ],
+      "recurrence_count": 1,
+      "last_used": "2025-08-04T21:59:39.375126Z",
+      "symbolic_drift": "The mirror that was contemplative but now whispers of storming",
+      "birth_context": "archetypal_initialization",
+      "dominant_emotions": [
+        "contemplative",
+        "truth-seeking",
+        "self-reflection"
+      ],
+      "meaning_stability": 0.75
+    },
+    "river": {
+      "name": "river",
+      "emotional_associations": [
+        {
+          "emotion": "flow",
+          "weight": 0.7999999997511111,
+          "timestamp": "2025-08-04T21:59:39.374950Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "time",
+          "weight": 0.5999999998140001,
+          "timestamp": "2025-08-04T21:59:39.374951Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "healing",
+          "weight": 0.3999999998768889,
+          "timestamp": "2025-08-04T21:59:39.374953Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "letting-go",
+          "weight": 0.19999999993866668,
+          "timestamp": "2025-08-04T21:59:39.374954Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "awe",
+          "weight": 0.8999999999980001,
+          "timestamp": "2025-08-04T21:59:39.375228Z",
+          "context": "spiritual moment",
+          "ritual_connection": null,
+          "dream_echo": false
+        }
+      ],
+      "recurrence_count": 1,
+      "last_used": "2025-08-04T21:59:39.375228Z",
+      "symbolic_drift": null,
+      "birth_context": "archetypal_initialization",
+      "dominant_emotions": [
+        "awe",
+        "flow",
+        "time"
+      ],
+      "meaning_stability": 1.0
+    },
+    "flame": {
+      "name": "flame",
+      "emotional_associations": [
+        {
+          "emotion": "transformation",
+          "weight": 0.7999999997306667,
+          "timestamp": "2025-08-04T21:59:39.374958Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "passion",
+          "weight": 0.5999999998000001,
+          "timestamp": "2025-08-04T21:59:39.374961Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "warmth",
+          "weight": 0.3999999998671111,
+          "timestamp": "2025-08-04T21:59:39.374962Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "purification",
+          "weight": 0.1999999999337778,
+          "timestamp": "2025-08-04T21:59:39.374963Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "melancholy",
+          "weight": 0.5999999999993333,
+          "timestamp": "2025-08-04T21:59:39.375260Z",
+          "context": "gentle sadness",
+          "ritual_connection": null,
+          "dream_echo": false
+        }
+      ],
+      "recurrence_count": 1,
+      "last_used": "2025-08-04T21:59:39.375260Z",
+      "symbolic_drift": null,
+      "birth_context": "archetypal_initialization",
+      "dominant_emotions": [
+        "transformation",
+        "melancholy",
+        "passion"
+      ],
+      "meaning_stability": 1.0
+    },
+    "thread": {
+      "name": "thread",
+      "emotional_associations": [
+        {
+          "emotion": "connection",
+          "weight": 0.7999999998017778,
+          "timestamp": "2025-08-04T21:59:39.374966Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "continuity",
+          "weight": 0.599999999852,
+          "timestamp": "2025-08-04T21:59:39.374967Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "weaving",
+          "weight": 0.3999999999017778,
+          "timestamp": "2025-08-04T21:59:39.374968Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "binding",
+          "weight": 0.19999999995111112,
+          "timestamp": "2025-08-04T21:59:39.374969Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "yearning",
+          "weight": 0.7999999999973334,
+          "timestamp": "2025-08-04T21:59:39.375186Z",
+          "context": "longing conversation",
+          "ritual_connection": null,
+          "dream_echo": false
+        }
+      ],
+      "recurrence_count": 1,
+      "last_used": "2025-08-04T21:59:39.375186Z",
+      "symbolic_drift": null,
+      "birth_context": "archetypal_initialization",
+      "dominant_emotions": [
+        "yearning",
+        "connection",
+        "continuity"
+      ],
+      "meaning_stability": 1.0
+    },
+    "door": {
+      "name": "door",
+      "emotional_associations": [
+        {
+          "emotion": "opportunity",
+          "weight": 0.7999999997075555,
+          "timestamp": "2025-08-04T21:59:39.374971Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "transition",
+          "weight": 0.5999999997813334,
+          "timestamp": "2025-08-04T21:59:39.374972Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "mystery",
+          "weight": 0.39999999985466667,
+          "timestamp": "2025-08-04T21:59:39.374973Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "threshold",
+          "weight": 0.19999999992755557,
+          "timestamp": "2025-08-04T21:59:39.374974Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "joy",
+          "weight": 0.7999999999946668,
+          "timestamp": "2025-08-04T21:59:39.375294Z",
+          "context": "celebration",
+          "ritual_connection": null,
+          "dream_echo": false
+        }
+      ],
+      "recurrence_count": 1,
+      "last_used": "2025-08-04T21:59:39.375294Z",
+      "symbolic_drift": null,
+      "birth_context": "archetypal_initialization",
+      "dominant_emotions": [
+        "joy",
+        "opportunity",
+        "transition"
+      ],
+      "meaning_stability": 1.0
+    },
+    "bridge": {
+      "name": "bridge",
+      "emotional_associations": [
+        {
+          "emotion": "connection",
+          "weight": 0.8,
+          "timestamp": "2025-08-04T21:59:39.374977Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "crossing",
+          "weight": 0.6000000000000001,
+          "timestamp": "2025-08-04T21:59:39.374978Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "unity",
+          "weight": 0.4,
+          "timestamp": "2025-08-04T21:59:39.374979Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "transition",
+          "weight": 0.2,
+          "timestamp": "2025-08-04T21:59:39.374980Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        }
+      ],
+      "recurrence_count": 0,
+      "last_used": "2025-08-04T21:59:39.374980Z",
+      "symbolic_drift": null,
+      "birth_context": "archetypal_initialization",
+      "dominant_emotions": [],
+      "meaning_stability": 1.0
+    },
+    "garden": {
+      "name": "garden",
+      "emotional_associations": [
+        {
+          "emotion": "growth",
+          "weight": 0.8,
+          "timestamp": "2025-08-04T21:59:39.374982Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "nurturing",
+          "weight": 0.6000000000000001,
+          "timestamp": "2025-08-04T21:59:39.374983Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "beauty",
+          "weight": 0.4,
+          "timestamp": "2025-08-04T21:59:39.374984Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "cultivation",
+          "weight": 0.2,
+          "timestamp": "2025-08-04T21:59:39.374985Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        }
+      ],
+      "recurrence_count": 0,
+      "last_used": "2025-08-04T21:59:39.374986Z",
+      "symbolic_drift": null,
+      "birth_context": "archetypal_initialization",
+      "dominant_emotions": [],
+      "meaning_stability": 1.0
+    },
+    "storm": {
+      "name": "storm",
+      "emotional_associations": [
+        {
+          "emotion": "intensity",
+          "weight": 0.8,
+          "timestamp": "2025-08-04T21:59:39.374987Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "change",
+          "weight": 0.6000000000000001,
+          "timestamp": "2025-08-04T21:59:39.374988Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "chaos",
+          "weight": 0.4,
+          "timestamp": "2025-08-04T21:59:39.374989Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "power",
+          "weight": 0.2,
+          "timestamp": "2025-08-04T21:59:39.374990Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        }
+      ],
+      "recurrence_count": 0,
+      "last_used": "2025-08-04T21:59:39.374991Z",
+      "symbolic_drift": null,
+      "birth_context": "archetypal_initialization",
+      "dominant_emotions": [],
+      "meaning_stability": 1.0
+    },
+    "anchor": {
+      "name": "anchor",
+      "emotional_associations": [
+        {
+          "emotion": "stability",
+          "weight": 0.8,
+          "timestamp": "2025-08-04T21:59:39.374992Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "grounding",
+          "weight": 0.6000000000000001,
+          "timestamp": "2025-08-04T21:59:39.374993Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "security",
+          "weight": 0.4,
+          "timestamp": "2025-08-04T21:59:39.374994Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "home",
+          "weight": 0.2,
+          "timestamp": "2025-08-04T21:59:39.374995Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        }
+      ],
+      "recurrence_count": 0,
+      "last_used": "2025-08-04T21:59:39.374996Z",
+      "symbolic_drift": null,
+      "birth_context": "archetypal_initialization",
+      "dominant_emotions": [],
+      "meaning_stability": 1.0
+    },
+    "compass": {
+      "name": "compass",
+      "emotional_associations": [
+        {
+          "emotion": "direction",
+          "weight": 0.8,
+          "timestamp": "2025-08-04T21:59:39.374997Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "guidance",
+          "weight": 0.6000000000000001,
+          "timestamp": "2025-08-04T21:59:39.374998Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "purpose",
+          "weight": 0.4,
+          "timestamp": "2025-08-04T21:59:39.374999Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "navigation",
+          "weight": 0.2,
+          "timestamp": "2025-08-04T21:59:39.375000Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        }
+      ],
+      "recurrence_count": 0,
+      "last_used": "2025-08-04T21:59:39.375001Z",
+      "symbolic_drift": null,
+      "birth_context": "archetypal_initialization",
+      "dominant_emotions": [],
+      "meaning_stability": 1.0
+    },
+    "cocoon": {
+      "name": "cocoon",
+      "emotional_associations": [
+        {
+          "emotion": "transformation",
+          "weight": 0.8,
+          "timestamp": "2025-08-04T21:59:39.375003Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "protection",
+          "weight": 0.6000000000000001,
+          "timestamp": "2025-08-04T21:59:39.375004Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "potential",
+          "weight": 0.4,
+          "timestamp": "2025-08-04T21:59:39.375005Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "emergence",
+          "weight": 0.2,
+          "timestamp": "2025-08-04T21:59:39.375006Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        }
+      ],
+      "recurrence_count": 0,
+      "last_used": "2025-08-04T21:59:39.375006Z",
+      "symbolic_drift": null,
+      "birth_context": "archetypal_initialization",
+      "dominant_emotions": [],
+      "meaning_stability": 1.0
+    },
+    "pulse": {
+      "name": "pulse",
+      "emotional_associations": [
+        {
+          "emotion": "life",
+          "weight": 0.8,
+          "timestamp": "2025-08-04T21:59:39.375008Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "rhythm",
+          "weight": 0.6000000000000001,
+          "timestamp": "2025-08-04T21:59:39.375009Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "vitality",
+          "weight": 0.4,
+          "timestamp": "2025-08-04T21:59:39.375010Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        },
+        {
+          "emotion": "presence",
+          "weight": 0.2,
+          "timestamp": "2025-08-04T21:59:39.375011Z",
+          "context": "archetypal_initialization",
+          "ritual_connection": null,
+          "dream_echo": false
+        }
+      ],
+      "recurrence_count": 0,
+      "last_used": "2025-08-04T21:59:39.375012Z",
+      "symbolic_drift": null,
+      "birth_context": "archetypal_initialization",
+      "dominant_emotions": [],
+      "meaning_stability": 1.0
+    }
+  },
+  "emotion_symbol_map": {
+    "contemplative": [
+      "mirror"
+    ],
+    "truth-seeking": [
+      "mirror"
+    ],
+    "self-reflection": [
+      "mirror"
+    ],
+    "yearning": [
+      "thread"
+    ],
+    "connection": [
+      "thread"
+    ],
+    "continuity": [
+      "thread"
+    ],
+    "awe": [
+      "river"
+    ],
+    "flow": [
+      "river"
+    ],
+    "time": [
+      "river"
+    ],
+    "transformation": [
+      "flame"
+    ],
+    "melancholy": [
+      "flame"
+    ],
+    "passion": [
+      "flame"
+    ],
+    "joy": [
+      "door"
+    ],
+    "opportunity": [
+      "door"
+    ],
+    "transition": [
+      "door"
+    ]
+  },
+  "symbol_networks": {},
+  "drift_history": [
+    {
+      "symbol": "mirror",
+      "old_emotion": "contemplative",
+      "new_emotion": "storming",
+      "context": "sudden realization",
+      "drift_meaning": "The mirror that was contemplative but now whispers of storming",
+      "timestamp": "2025-08-04T21:59:39.375618Z",
+      "stability_after": 0.75
+    }
+  ],
+  "last_saved": "2025-08-04T21:59:39.377879Z"
+}

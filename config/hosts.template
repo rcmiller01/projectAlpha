@@ -1,0 +1,4 @@
+# Hosts file template
+192.168.56.101 core1.local core1
+192.168.56.102 core2.local core2
+192.168.56.103 core3.local core3

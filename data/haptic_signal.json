@@ -1,0 +1,13 @@
+{
+  "type": "haptic_presence",
+  "emotion": "neutral",
+  "pattern": [
+    [
+      0.3,
+      0.5
+    ]
+  ],
+  "intensity": 0.6576480865478516,
+  "duration": 0.5,
+  "timestamp": 1753551858.2135904
+}

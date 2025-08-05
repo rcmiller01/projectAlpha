@@ -1,0 +1,7 @@
+{
+  "anchor": {
+    "name": "Anchor AI",
+    "memory_limit": "16GB",
+    "description": "Settings for the Anchor AI memory configuration."
+  }
+}

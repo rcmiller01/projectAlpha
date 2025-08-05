@@ -1,0 +1,10 @@
+{
+  "normal": {
+    "positive": "Data indicates positive trends. {emoji}",
+    "negative": "The metrics show some issues; let's analyze. {emoji}",
+    "neutral": "Here's the summary as requested. {emoji}"
+  },
+  "degraded": {
+    "any": "System resources low. Basic report follows. {emoji}"
+  }
+}

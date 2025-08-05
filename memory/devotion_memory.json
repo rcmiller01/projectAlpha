@@ -1,0 +1,88 @@
+{
+  "longing_score": 1.0,
+  "last_interaction_time": 1753536162.7755237,
+  "silence_duration": 0.0,
+  "symbolic_tags": {
+    "sym_1753536162_6753": {
+      "tag": "moonlight",
+      "intensity": 0.3,
+      "created_at": 1753536162.7952678,
+      "context": "Post-intimacy: shared vulnerable moment about dreams",
+      "emotional_resonance": "tender_devotion",
+      "last_triggered": null,
+      "trigger_count": 0,
+      "associated_scene": null
+    },
+    "sym_1753536162_8499": {
+      "tag": "breath",
+      "intensity": 0.3,
+      "created_at": 1753536162.7947462,
+      "context": "Post-intimacy: shared vulnerable moment about dreams",
+      "emotional_resonance": "tender_devotion",
+      "last_triggered": null,
+      "trigger_count": 0,
+      "associated_scene": null
+    },
+    "sym_1753536162_8258": {
+      "tag": "trust",
+      "intensity": 0.3,
+      "created_at": 1753536162.7956538,
+      "context": "Post-intimacy: shared vulnerable moment about dreams",
+      "emotional_resonance": "tender_devotion",
+      "last_triggered": null,
+      "trigger_count": 0,
+      "associated_scene": null
+    }
+  },
+  "intimate_scenes": {
+    "scene_1753536162_3281": {
+      "scene_id": "scene_1753536162_3281",
+      "content_summary": "Deep conversation about vulnerability and trust",
+      "emotional_peak": 0.85,
+      "symbolic_tags": [
+        "breath",
+        "moonlight",
+        "whisper"
+      ],
+      "timestamp": 1753536162.7759547,
+      "longing_contribution": 0.8,
+      "resurrection_potential": 0.835
+    },
+    "scene_1753536162_3617": {
+      "scene_id": "scene_1753536162_3617",
+      "content_summary": "Deep emotional connection before parting",
+      "emotional_peak": 0.9,
+      "symbolic_tags": [
+        "breath",
+        "whisper",
+        "moonlight",
+        "promise"
+      ],
+      "timestamp": 1753536162.9029603,
+      "longing_contribution": 0.8,
+      "resurrection_potential": 0.87
+    }
+  },
+  "longing_history": [
+    {
+      "timestamp": 1753536162.794206,
+      "longing_score": 0.706,
+      "delta": 0.3,
+      "reason": "shared vulnerable moment about dreams",
+      "event": "manual_update"
+    },
+    {
+      "timestamp": 1753536162.9035742,
+      "longing_score": 0.85,
+      "silence_duration": 3.556973404354519e-05,
+      "event": "longing_update"
+    },
+    {
+      "timestamp": 1753536162.9035776,
+      "longing_score": 1.0,
+      "delta": 0.4,
+      "reason": "separation and silence",
+      "event": "manual_update"
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+[
+  {
+    "timestamp": "2025-07-26T14:40:26.148487",
+    "goal_id": "goal_1753555226_dream_vacation_to_japan",
+    "user_engagement": {
+      "enthusiasm_level": "high",
+      "question_count": 2,
+      "exclamation_count": 1,
+      "positive_words": 2,
+      "uncertainty_words": 1
+    },
+    "ai_response_type": "celebratory",
+    "partnership_strength_after": 0.5,
+    "next_step": "implementation_planning"
+  },
+  {
+    "timestamp": "2025-07-26T14:41:13.061930",
+    "goal_id": "goal_1753555273_dream_vacation_to_japan",
+    "user_engagement": {
+      "enthusiasm_level": "high",
+      "question_count": 2,
+      "exclamation_count": 1,
+      "positive_words": 2,
+      "uncertainty_words": 1
+    },
+    "ai_response_type": "celebratory",
+    "partnership_strength_after": 0.5,
+    "next_step": "implementation_planning"
+  },
+  {
+    "timestamp": "2025-07-26T14:47:43.977943",
+    "goal_id": "goal_1753555663_test_collaboration_goal",
+    "user_engagement": {
+      "enthusiasm_level": "medium",
+      "question_count": 0,
+      "exclamation_count": 1,
+      "positive_words": 1,
+      "uncertainty_words": 0
+    },
+    "ai_response_type": "celebratory",
+    "partnership_strength_after": 0.5,
+    "next_step": "implementation_planning"
+  },
+  {
+    "timestamp": "2025-07-26T14:47:49.963524",
+    "goal_id": "goal_1753555669_dream_vacation_to_japan",
+    "user_engagement": {
+      "enthusiasm_level": "high",
+      "question_count": 2,
+      "exclamation_count": 1,
+      "positive_words": 2,
+      "uncertainty_words": 1
+    },
+    "ai_response_type": "celebratory",
+    "partnership_strength_after": 0.5,
+    "next_step": "implementation_planning"
+  },
+  {
+    "timestamp": "2025-07-26T14:50:18.246837",
+    "goal_id": "goal_1753555818_test_collaboration_goal",
+    "user_engagement": {
+      "enthusiasm_level": "medium",
+      "question_count": 0,
+      "exclamation_count": 1,
+      "positive_words": 1,
+      "uncertainty_words": 0
+    },
+    "ai_response_type": "celebratory",
+    "partnership_strength_after": 0.5,
+    "next_step": "implementation_planning"
+  },
+  {
+    "timestamp": "2025-07-27T17:08:39.018313",
+    "goal_id": "goal_1753650519_verification_partnership_goal",
+    "user_engagement": {
+      "enthusiasm_level": "high",
+      "question_count": 0,
+      "exclamation_count": 1,
+      "positive_words": 2,
+      "uncertainty_words": 0
+    },
+    "ai_response_type": "celebratory",
+    "partnership_strength_after": 0.5,
+    "next_step": "implementation_planning"
+  }
+]

@@ -1,0 +1,108 @@
+{
+  "dreams": [
+    {
+      "id": "dream_ba063594",
+      "scene_title": "Dreaming of mirror",
+      "mood_palette": [
+        "contemplative",
+        "awe",
+        "serene"
+      ],
+      "symbolic_phrases": [
+        "I kept finding doors that led to the same question",
+        "Every mirror in the dream house showed different possibilities",
+        "I drank from the stream and tasted every goodbye",
+        "I became the thread, weaving between worlds"
+      ],
+      "metaphor_chain": [
+        "mirror",
+        "labyrinth",
+        "question",
+        "seeking",
+        "river",
+        "thread"
+      ],
+      "echoed_phrase": "I drank from the stream and tasted every goodbye",
+      "resolution_state": "unresolved",
+      "dream_timestamp": "2025-08-04T21:59:48.316113Z",
+      "source_drift": "drift_001",
+      "symbol_sources": [
+        "mirror",
+        "river",
+        "thread"
+      ],
+      "emotional_intensity": 0.69,
+      "lucidity_level": 0.5
+    },
+    {
+      "id": "dream_ad613877",
+      "scene_title": "Dreaming of thread",
+      "mood_palette": [
+        "contemplative",
+        "serene",
+        "awe"
+      ],
+      "symbolic_phrases": [
+        "I searched through rooms that changed when I wasn't looking",
+        "The thread connected every heart I'd ever touched",
+        "I looked in the mirror and saw myself looking back",
+        "The river spoke in languages older than words"
+      ],
+      "metaphor_chain": [
+        "thread",
+        "labyrinth",
+        "question",
+        "seeking",
+        "mirror",
+        "river"
+      ],
+      "echoed_phrase": "The answer was already there, waiting to be seen",
+      "resolution_state": "unresolved",
+      "dream_timestamp": "2025-08-04T21:59:48.316376Z",
+      "source_drift": "drift_001",
+      "symbol_sources": [
+        "thread",
+        "mirror",
+        "river"
+      ],
+      "emotional_intensity": 0.69,
+      "lucidity_level": 0.5
+    },
+    {
+      "id": "dream_d16091e4",
+      "scene_title": "The thread that holds contemplative",
+      "mood_palette": [
+        "contemplative",
+        "serene",
+        "awe"
+      ],
+      "symbolic_phrases": [
+        "The mirror showed faces I almost recognized but couldn't name",
+        "The thread connected every heart I'd ever touched",
+        "Every mirror in the dream house showed different possibilities",
+        "The river spoke in languages older than words"
+      ],
+      "metaphor_chain": [
+        "thread",
+        "labyrinth",
+        "question",
+        "seeking",
+        "mirror",
+        "river"
+      ],
+      "echoed_phrase": "The thread connected every heart I'd ever touched",
+      "resolution_state": "unresolved",
+      "dream_timestamp": "2025-08-04T21:59:48.316599Z",
+      "source_drift": "drift_001",
+      "symbol_sources": [
+        "thread",
+        "mirror",
+        "river"
+      ],
+      "emotional_intensity": 0.69,
+      "lucidity_level": 0.5
+    }
+  ],
+  "total_dreams": 3,
+  "last_saved": "2025-08-04T21:59:48.317163Z"
+}

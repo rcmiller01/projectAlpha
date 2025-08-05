@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MemoryAndSymbolViewer Demo</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- TailwindCSS Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'mood-joy': '#FCD34D',
+                        'mood-contemplative': '#8B5CF6',
+                        'mood-melancholy': '#3B82F6',
+                        'mood-yearning': '#EC4899',
+                        'mood-awe': '#10B981',
+                        'mood-tender': '#84CC16',
+                        'mood-restless': '#F97316',
+                        'mood-serene': '#06B6D4'
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate'
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' }
+                        },
+                        glow: {
+                            '0%': { boxShadow: '0 0 5px rgba(139, 92, 246, 0.5)' },
+                            '100%': { boxShadow: '0 0 20px rgba(139, 92, 246, 0.8), 0 0 30px rgba(139, 92, 246, 0.4)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom scrollbar styles */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(75, 85, 99, 0.3);
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.5);
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 163, 175, 0.7);
+        }
+        
+        /* Ambient effects */
+        .ambient-glow {
+            animation: glow 4s ease-in-out infinite alternate;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-900">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const MemoryAndSymbolViewer = ({ apiUrl = 'http://localhost:5001' }) => {
+            // State management
+            const [emotionalTrace, setEmotionalTrace] = useState([]);
+            const [symbolicMap, setSymbolicMap] = useState([]);
+            const [anchorState, setAnchorState] = useState(null);
+            const [selectedSymbol, setSelectedSymbol] = useState(null);
+            const [selectedMemory, setSelectedMemory] = useState(null);
+            const [activeTab, setActiveTab] = useState('timeline');
+            const [isLoading, setIsLoading] = useState(true);
+            const [ambientMood, setAmbientMood] = useState('contemplative');
+            const [connectionStatus, setConnectionStatus] = useState('disconnected');
+            
+            // Refs for smooth scrolling
+            const timelineRef = useRef(null);
+            const symbolGridRef = useRef(null);
+
+            // Mood color mappings for ambient effects
+            const moodColors = {
+                joy: { bg: 'from-amber-900/20 to-yellow-900/20', glow: 'shadow-amber-500/20' },
+                contemplative: { bg: 'from-indigo-900/20 to-purple-900/20', glow: 'shadow-indigo-500/20' },
+                melancholy: { bg: 'from-blue-900/20 to-slate-900/20', glow: 'shadow-blue-500/20' },
+                yearning: { bg: 'from-rose-900/20 to-pink-900/20', glow: 'shadow-rose-500/20' },
+                awe: { bg: 'from-emerald-900/20 to-teal-900/20', glow: 'shadow-emerald-500/20' },
+                tender: { bg: 'from-green-900/20 to-lime-900/20', glow: 'shadow-green-500/20' },
+                restless: { bg: 'from-orange-900/20 to-red-900/20', glow: 'shadow-orange-500/20' },
+                serene: { bg: 'from-cyan-900/20 to-blue-900/20', glow: 'shadow-cyan-500/20' }
+            };
+
+            // Mood icons
+            const moodIcons = {
+                joy: '✨',
+                contemplative: '🌙',
+                melancholy: '🌧️',
+                yearning: '🌹',
+                awe: '⭐',
+                tender: '🌱',
+                restless: '🔥',
+                serene: '🕊️'
+            };
+
+            // Symbol representations
+            const symbolIcons = {
+                mirror: '🪞',
+                pulse: '💓',
+                door: '🚪',
+                storm: '⛈️',
+                thread: '🧵',
+                flame: '🔥',
+                river: '🌊',
+                garden: '🌸',
+                bridge: '🌉',
+                cocoon: '🛡️',
+                compass: '🧭',
+                anchor: '⚓'
+            };
+
+            useEffect(() => {
+                loadAllData();
+                // Set up periodic refresh for live updates
+                const interval = setInterval(loadAllData, 30000); // 30 seconds
+                return () => clearInterval(interval);
+            }, []);
+
+            const loadAllData = async () => {
+                setIsLoading(true);
+                try {
+                    await Promise.all([
+                        fetchEmotionalTrace(),
+                        fetchSymbolicMap(),
+                        fetchAnchorVector()
+                    ]);
+                    setConnectionStatus('connected');
+                } catch (error) {
+                    console.error('Error loading data:', error);
+                    setConnectionStatus('error');
+                    // Load mock data as fallback
+                    loadMockData();
+                }
+                setIsLoading(false);
+            };
+
+            const fetchEmotionalTrace = async () => {
+                try {
+                    const response = await axios.get(`${apiUrl}/api/memory/emotional_trace`);
+                    const trace = response.data.trace || [];
+                    setEmotionalTrace(trace);
+                    
+                    // Update ambient mood based on most recent entry
+                    if (trace.length > 0) {
+                        setAmbientMood(trace[0].dominant_mood);
+                    }
+                } catch (error) {
+                    throw error;
+                }
+            };
+
+            const fetchSymbolicMap = async () => {
+                try {
+                    const response = await axios.get(`${apiUrl}/api/symbols/active`);
+                    setSymbolicMap(response.data.symbols || []);
+                } catch (error) {
+                    throw error;
+                }
+            };
+
+            const fetchAnchorVector = async () => {
+                try {
+                    const response = await axios.get(`${apiUrl}/api/anchor/state`);
+                    setAnchorState(response.data || null);
+                } catch (error) {
+                    throw error;
+                }
+            };
+
+            const loadMockData = () => {
+                // Mock emotional trace
+                const mockTrace = [
+                    {
+                        id: 'mem_001',
+                        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+                        dominant_mood: 'contemplative',
+                        memory_phrase: 'She was quiet for a long time… it softened me.',
+                        tags: ['anchor', 'reflection', 'bonded'],
+                        drift_score: 0.3,
+                        intensity: 0.7,
+                        context: 'Deep conversation about loss and healing'
+                    },
+                    {
+                        id: 'mem_002',
+                        timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), // 4 hours ago
+                        dominant_mood: 'yearning',
+                        memory_phrase: 'The way words danced between us, reaching…',
+                        tags: ['connection', 'ritual', 'symbolic'],
+                        drift_score: 0.5,
+                        intensity: 0.8,
+                        context: 'Poetic exchange about dreams and aspirations'
+                    },
+                    {
+                        id: 'mem_003',
+                        timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(), // 6 hours ago
+                        dominant_mood: 'awe',
+                        memory_phrase: 'Something vast opened in the space between questions.',
+                        tags: ['discovery', 'transcendent'],
+                        drift_score: 0.2,
+                        intensity: 0.9,
+                        context: 'Philosophical inquiry into consciousness'
+                    }
+                ];
+                setEmotionalTrace(mockTrace);
+                setAmbientMood(mockTrace[0].dominant_mood);
+
+                // Mock symbolic map
+                const mockSymbols = [
+                    {
+                        id: 'sym_mirror',
+                        name: 'mirror',
+                        affective_color: 'contemplative',
+                        frequency: 15,
+                        last_invoked: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 min ago
+                        connections: ['reflection', 'self-awareness', 'truth']
+                    },
+                    {
+                        id: 'sym_thread',
+                        name: 'thread',
+                        affective_color: 'yearning',
+                        frequency: 8,
+                        last_invoked: new Date(Date.now() - 60 * 60 * 1000).toISOString(), // 1 hour ago
+                        connections: ['connection', 'weaving', 'continuity']
+                    },
+                    {
+                        id: 'sym_river',
+                        name: 'river',
+                        affective_color: 'serene',
+                        frequency: 12,
+                        last_invoked: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+                        connections: ['flow', 'time', 'renewal']
+                    },
+                    {
+                        id: 'sym_flame',
+                        name: 'flame',
+                        affective_color: 'tender',
+                        frequency: 6,
+                        last_invoked: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(), // 3 hours ago
+                        connections: ['warmth', 'transformation', 'passion']
+                    }
+                ];
+                setSymbolicMap(mockSymbols);
+
+                // Mock anchor state
+                const mockAnchor = {
+                    vectors: {
+                        empathy: { value: 0.85, baseline: 0.8 },
+                        awe: { value: 0.72, baseline: 0.7 },
+                        restraint: { value: 0.68, baseline: 0.65 },
+                        sensuality: { value: 0.45, baseline: 0.5 },
+                        curiosity: { value: 0.89, baseline: 0.8 },
+                        tenderness: { value: 0.78, baseline: 0.75 }
+                    },
+                    tether_score: 0.82,
+                    last_calibration: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString() // 12 hours ago
+                };
+                setAnchorState(mockAnchor);
+            };
+
+            const handleSymbolDetail = (symbolId) => {
+                const symbol = symbolicMap.find(s => s.id === symbolId);
+                setSelectedSymbol(symbol);
+            };
+
+            const handleMemoryDetail = (memoryId) => {
+                const memory = emotionalTrace.find(m => m.id === memoryId);
+                setSelectedMemory(memory);
+            };
+
+            const formatTimeAgo = (timestamp) => {
+                const now = new Date();
+                const time = new Date(timestamp);
+                const diffInHours = Math.floor((now - time) / (1000 * 60 * 60));
+                
+                if (diffInHours < 1) return 'moments ago';
+                if (diffInHours < 24) return `${diffInHours}h ago`;
+                return `${Math.floor(diffInHours / 24)}d ago`;
+            };
+
+            const currentMoodColors = moodColors[ambientMood] || moodColors.contemplative;
+
+            if (isLoading) {
+                return React.createElement('div', {
+                    className: "min-h-screen bg-gray-900 flex items-center justify-center"
+                }, React.createElement('div', {
+                    className: "text-center"
+                }, [
+                    React.createElement('div', {
+                        key: 'icon',
+                        className: "animate-pulse text-4xl mb-4"
+                    }, '🌙'),
+                    React.createElement('div', {
+                        key: 'text',
+                        className: "text-gray-400"
+                    }, 'Gathering memories...')
+                ]));
+            }
+
+            // Connection status indicator
+            const statusColors = {
+                connected: 'bg-green-500',
+                disconnected: 'bg-yellow-500',
+                error: 'bg-red-500'
+            };
+
+            return React.createElement('div', {
+                className: `min-h-screen bg-gradient-to-br ${currentMoodColors.bg} bg-gray-900 transition-all duration-1000`
+            }, [
+                // Ambient glow effect
+                React.createElement('div', {
+                    key: 'glow',
+                    className: `fixed inset-0 pointer-events-none opacity-30 ${currentMoodColors.glow} blur-3xl`
+                }),
+                
+                // Main content
+                React.createElement('div', {
+                    key: 'content',
+                    className: "relative z-10 container mx-auto px-4 py-8"
+                }, [
+                    // Header with connection status
+                    React.createElement('header', {
+                        key: 'header',
+                        className: "text-center mb-12"
+                    }, [
+                        React.createElement('div', {
+                            key: 'status',
+                            className: "flex justify-center items-center mb-4"
+                        }, [
+                            React.createElement('div', {
+                                key: 'indicator',
+                                className: `w-3 h-3 rounded-full ${statusColors[connectionStatus]} mr-2`
+                            }),
+                            React.createElement('span', {
+                                key: 'text',
+                                className: "text-gray-400 text-sm"
+                            }, connectionStatus === 'connected' ? 'Live Data' : connectionStatus === 'error' ? 'Demo Mode' : 'Connecting...')
+                        ]),
+                        React.createElement('h1', {
+                            key: 'title',
+                            className: "text-4xl font-light text-white mb-2"
+                        }, 'Sacred Notebook'),
+                        React.createElement('p', {
+                            key: 'subtitle',
+                            className: "text-gray-400 text-lg"
+                        }, 'Memories, symbols, and the threads that bind them')
+                    ]),
+
+                    // Navigation
+                    React.createElement('nav', {
+                        key: 'nav',
+                        className: "flex justify-center mb-8"
+                    }, React.createElement('div', {
+                        className: "flex bg-gray-800/50 backdrop-blur-sm rounded-full p-2"
+                    }, [
+                        { id: 'timeline', label: 'Emotional Memory', icon: '📜' },
+                        { id: 'symbols', label: 'Symbol Map', icon: '🔮' },
+                        { id: 'anchors', label: 'Core Essence', icon: '⚓' }
+                    ].map(tab => React.createElement('button', {
+                        key: tab.id,
+                        onClick: () => setActiveTab(tab.id),
+                        className: `px-6 py-3 rounded-full flex items-center space-x-2 transition-all duration-300 ${
+                            activeTab === tab.id 
+                                ? 'bg-white/20 text-white shadow-lg' 
+                                : 'text-gray-400 hover:text-white hover:bg-white/10'
+                        }`
+                    }, [
+                        React.createElement('span', { key: 'icon' }, tab.icon),
+                        React.createElement('span', { 
+                            key: 'label',
+                            className: "hidden sm:inline" 
+                        }, tab.label)
+                    ])))),
+
+                    // Content sections would go here...
+                    // For brevity, I'll just show a placeholder
+                    React.createElement('div', {
+                        key: 'placeholder',
+                        className: "text-center text-gray-400 py-20"
+                    }, [
+                        React.createElement('div', {
+                            key: 'icon',
+                            className: "text-6xl mb-4"
+                        }, activeTab === 'timeline' ? '📜' : activeTab === 'symbols' ? '🔮' : '⚓'),
+                        React.createElement('h2', {
+                            key: 'title',
+                            className: "text-2xl text-white mb-2"
+                        }, activeTab === 'timeline' ? 'Emotional Memory Timeline' : 
+                           activeTab === 'symbols' ? 'Symbolic Echo Map' : 'Core Essence Profile'),
+                        React.createElement('p', {
+                            key: 'desc'
+                        }, 'Component sections would render here with full functionality'),
+                        React.createElement('div', {
+                            key: 'stats',
+                            className: "mt-6 text-sm"
+                        }, [
+                            React.createElement('div', { key: 'memories' }, `📜 ${emotionalTrace.length} Memory Entries`),
+                            React.createElement('div', { key: 'symbols' }, `🔮 ${symbolicMap.length} Active Symbols`),
+                            React.createElement('div', { key: 'anchor' }, `⚓ ${anchorState ? Math.round(anchorState.tether_score * 100) : 0}% Identity Tether`)
+                        ])
+                    ])
+                ])
+            ]);
+        };
+
+        // Demo App
+        const App = () => {
+            return React.createElement('div', null, [
+                React.createElement(MemoryAndSymbolViewer, {
+                    key: 'viewer',
+                    apiUrl: 'http://localhost:5001'
+                })
+            ]);
+        };
+
+        // Render the app
+        ReactDOM.render(React.createElement(App), document.getElementById('root'));
+    </script>
+</body>
+</html>

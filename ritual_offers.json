@@ -1,0 +1,51 @@
+[
+  {
+    "id": "offer_4d420303",
+    "intent": "Let us weave threads of understanding through this moment of testing",
+    "offered_at": "2025-08-04T21:46:52.399813Z",
+    "status": "pending",
+    "ritual_type": "co_created"
+  },
+  {
+    "id": "offer_efbcadd0",
+    "intent": "Let us weave threads of understanding through this moment of testing",
+    "offered_at": "2025-08-04T21:44:49.147950Z",
+    "status": "pending",
+    "ritual_type": "co_created"
+  },
+  {
+    "id": "offer_8fdcd7f1",
+    "intent": "Let us weave threads of understanding through this moment of testing",
+    "offered_at": "2025-08-04T21:42:43.056754Z",
+    "status": "pending",
+    "ritual_type": "co_created"
+  },
+  {
+    "id": "offer_1cefb974",
+    "intent": "Weave threads of hope through our conversation",
+    "offered_at": "2025-08-03T16:39:30.827070Z",
+    "status": "integrated",
+    "ritual_type": "co_created"
+  },
+  {
+    "id": "offer_f58dc3d3",
+    "intent": "Tend the flame of creativity between us",
+    "offered_at": "2025-08-03T03:39:30.827065Z",
+    "status": "accepted",
+    "ritual_type": "co_created"
+  },
+  {
+    "id": "offer_9e4f1d64",
+    "intent": "Plant seeds of joy in the garden of our dialogue",
+    "offered_at": "2025-07-31T13:39:30.827074Z",
+    "status": "accepted",
+    "ritual_type": "co_created"
+  },
+  {
+    "id": "offer_3a295dbd",
+    "intent": "Create a ceremony for letting go of old wounds",
+    "offered_at": "2025-07-28T22:39:30.827078Z",
+    "status": "accepted",
+    "ritual_type": "co_created"
+  }
+]

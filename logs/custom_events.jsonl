@@ -1,0 +1,1 @@
+{"timestamp": "2025-07-29T19:17:44.345363", "event": "Quant Loop", "data": {"initiated_by": "manual/api", "time": "2025-07-29T19:17:44.345352", "status": "error", "trigger_source": "frontend", "error": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"}}

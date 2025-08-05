@@ -1,0 +1,208 @@
+{
+  "backup_info": {
+    "timestamp": "2025-07-29T17:54:10.095877",
+    "total_iterations": 10
+  },
+  "iterations": [
+    {
+      "id": 10,
+      "model_name": "llama2_13b_q5_K_M",
+      "quant_level": "custom",
+      "pass_type": "pass_1",
+      "pass_count": 1,
+      "iteration": 1,
+      "timestamp": "2025-07-29T17:54:10.086740",
+      "model_size_mb": 11922.266762783267,
+      "emotional_metrics": {
+        "response_fluency": 0.824,
+        "emotional_intensity": 0.592,
+        "emotional_match": 0.6628571428571428,
+        "empathy_score": 0.52,
+        "metaphor_usage": 0.696,
+        "sentiment_accuracy": 0.7
+      },
+      "notes": "Iteration 1, 0.0s quant, 0.0s eval",
+      "config_hash": ""
+    },
+    {
+      "id": 9,
+      "model_name": "llama2_13b_q6_K",
+      "quant_level": "custom",
+      "pass_type": "pass_1",
+      "pass_count": 1,
+      "iteration": 2,
+      "timestamp": "2025-07-29T17:51:19.501972",
+      "model_size_mb": 13095.839822894563,
+      "emotional_metrics": {
+        "response_fluency": 0.82,
+        "emotional_intensity": 0.604,
+        "emotional_match": 0.6731428571428572,
+        "empathy_score": 0.556,
+        "metaphor_usage": 0.6559999999999999,
+        "sentiment_accuracy": 0.7120000000000001
+      },
+      "notes": "Iteration 2, 0.0s quant, 0.0s eval",
+      "config_hash": ""
+    },
+    {
+      "id": 8,
+      "model_name": "llama2_13b_q8_0",
+      "quant_level": "8bit",
+      "pass_type": "pass_1",
+      "pass_count": 1,
+      "iteration": 2,
+      "timestamp": "2025-07-29T17:51:18.489414",
+      "model_size_mb": 16295.840877174069,
+      "emotional_metrics": {
+        "response_fluency": 0.82,
+        "emotional_intensity": 0.604,
+        "emotional_match": 0.6731428571428572,
+        "empathy_score": 0.556,
+        "metaphor_usage": 0.6559999999999999,
+        "sentiment_accuracy": 0.7120000000000001
+      },
+      "notes": "Iteration 1, 0.0s quant, 0.0s eval",
+      "config_hash": ""
+    },
+    {
+      "id": 7,
+      "model_name": "llama2_13b_q6_K",
+      "quant_level": "custom",
+      "pass_type": "pass_1",
+      "pass_count": 1,
+      "iteration": 1,
+      "timestamp": "2025-07-29T17:50:21.940501",
+      "model_size_mb": 12867.630980263593,
+      "emotional_metrics": {
+        "response_fluency": 0.824,
+        "emotional_intensity": 0.592,
+        "emotional_match": 0.6628571428571428,
+        "empathy_score": 0.52,
+        "metaphor_usage": 0.688,
+        "sentiment_accuracy": 0.7
+      },
+      "notes": "Iteration 2, 0.0s quant, 0.0s eval",
+      "config_hash": ""
+    },
+    {
+      "id": 6,
+      "model_name": "llama2_13b_q8_0",
+      "quant_level": "8bit",
+      "pass_type": "pass_1",
+      "pass_count": 1,
+      "iteration": 1,
+      "timestamp": "2025-07-29T17:50:20.927401",
+      "model_size_mb": 15386.254974955884,
+      "emotional_metrics": {
+        "response_fluency": 0.824,
+        "emotional_intensity": 0.592,
+        "emotional_match": 0.6628571428571428,
+        "empathy_score": 0.52,
+        "metaphor_usage": 0.688,
+        "sentiment_accuracy": 0.7
+      },
+      "notes": "Iteration 1, 0.0s quant, 0.0s eval",
+      "config_hash": ""
+    },
+    {
+      "id": 5,
+      "model_name": "llama2_13b_q4_K_M",
+      "quant_level": "4bit",
+      "pass_type": "pass_1",
+      "pass_count": 1,
+      "iteration": 1,
+      "timestamp": "2025-07-29T17:50:10.328337",
+      "model_size_mb": 9234.805449332973,
+      "emotional_metrics": {
+        "response_fluency": 0.82,
+        "emotional_intensity": 0.592,
+        "emotional_match": 0.6731428571428572,
+        "empathy_score": 0.564,
+        "metaphor_usage": 0.64,
+        "sentiment_accuracy": 0.7239999999999999
+      },
+      "notes": "Iteration 1, 0.0s quant, 0.0s eval",
+      "config_hash": ""
+    },
+    {
+      "id": 4,
+      "model_name": "llama2_13b",
+      "quant_level": "8bit",
+      "pass_type": "pass_2",
+      "pass_count": 1,
+      "iteration": 1,
+      "timestamp": "2025-07-29T17:43:59.287171",
+      "model_size_mb": 15000.0,
+      "emotional_metrics": {
+        "response_fluency": 0.9,
+        "emotional_intensity": 0.85,
+        "emotional_match": 0.88,
+        "empathy_score": 0.86,
+        "metaphor_usage": 0.78,
+        "sentiment_accuracy": 0.84
+      },
+      "notes": "Pass 2 human-AI evaluation selected this model",
+      "config_hash": ""
+    },
+    {
+      "id": 3,
+      "model_name": "llama2_13b",
+      "quant_level": "gptq",
+      "pass_type": "pass_1",
+      "pass_count": 1,
+      "iteration": 1,
+      "timestamp": "2025-07-29T17:43:16.769665",
+      "model_size_mb": 13200.0,
+      "emotional_metrics": {
+        "response_fluency": 0.87,
+        "emotional_intensity": 0.8,
+        "emotional_match": 0.84,
+        "empathy_score": 0.81,
+        "metaphor_usage": 0.73,
+        "sentiment_accuracy": 0.81
+      },
+      "notes": "GPTQ quantization balanced approach",
+      "config_hash": ""
+    },
+    {
+      "id": 2,
+      "model_name": "llama2_13b",
+      "quant_level": "8bit",
+      "pass_type": "pass_1",
+      "pass_count": 1,
+      "iteration": 1,
+      "timestamp": "2025-07-29T17:43:06.842983",
+      "model_size_mb": 15000.0,
+      "emotional_metrics": {
+        "response_fluency": 0.88,
+        "emotional_intensity": 0.82,
+        "emotional_match": 0.85,
+        "empathy_score": 0.83,
+        "metaphor_usage": 0.75,
+        "sentiment_accuracy": 0.82
+      },
+      "notes": "8-bit quantization with better emotional preservation",
+      "config_hash": ""
+    },
+    {
+      "id": 1,
+      "model_name": "llama2_13b",
+      "quant_level": "4bit",
+      "pass_type": "pass_1",
+      "pass_count": 1,
+      "iteration": 1,
+      "timestamp": "2025-07-29T17:42:36.029053",
+      "model_size_mb": 12500.0,
+      "emotional_metrics": {
+        "response_fluency": 0.85,
+        "emotional_intensity": 0.78,
+        "emotional_match": 0.82,
+        "empathy_score": 0.79,
+        "metaphor_usage": 0.72,
+        "sentiment_accuracy": 0.8
+      },
+      "notes": "Initial 4-bit quantization attempt",
+      "config_hash": ""
+    }
+  ]
+}

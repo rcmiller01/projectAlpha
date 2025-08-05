@@ -1,0 +1,6 @@
+{
+  "emotions": [
+    { "name": "calm", "value": 0.5 },
+    { "name": "joy",  "value": 0.7 }
+  ]
+}

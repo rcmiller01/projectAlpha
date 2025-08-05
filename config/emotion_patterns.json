@@ -1,0 +1,22 @@
+{
+  "joy": ["happy", "excited", "delighted", "content"],
+  "love": ["affectionate", "romantic", "caring", "devoted"],
+  "trust": ["confident", "secure", "faithful", "believing"],
+  "anticipation": ["eager", "hopeful", "expectant"],
+  "surprise": ["amazed", "astonished", "impressed"],
+  "sadness": ["melancholy", "down", "unhappy", "disappointed"],
+  "fear": ["anxious", "worried", "nervous", "uncertain"],
+  "anger": ["frustrated", "annoyed", "upset", "irritated"],
+  "emotional_groups": {
+    "positive": ["joy", "love", "trust", "anticipation"],
+    "neutral": ["surprise"],
+    "negative": ["sadness", "fear", "anger"]
+  },
+  "intensity_modifiers": {
+    "very": 1.5,
+    "extremely": 2.0,
+    "somewhat": 0.7,
+    "slightly": 0.3,
+    "deeply": 1.8
+  }
+}

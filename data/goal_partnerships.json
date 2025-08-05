@@ -1,0 +1,367 @@
+{
+  "goal_1753555226_dream_vacation_to_japan": {
+    "goal_id": "goal_1753555226_dream_vacation_to_japan",
+    "user_id": "demo_investor",
+    "ai_commitment_level": 0.8500000000000001,
+    "user_motivation_profile": {
+      "primary_motivator": "achievement",
+      "risk_tolerance": "moderate",
+      "celebration_style": "encouraging",
+      "support_style": "analytical",
+      "communication_preference": "direct",
+      "goal_approach": "systematic"
+    },
+    "collaboration_history": [
+      "brainstorm_goal_1753555226_dream_vacation_to_japan_1753555226",
+      "brainstorm_goal_1753555226_dream_vacation_to_japan_1753555226"
+    ],
+    "success_celebration_style": "encouraging",
+    "setback_support_style": "analytical",
+    "last_check_in": 1753555226.146453,
+    "next_suggested_action": "Create detailed implementation timeline",
+    "partnership_strength": 0.6
+  },
+  "goal_1753555273_dream_vacation_to_japan": {
+    "goal_id": "goal_1753555273_dream_vacation_to_japan",
+    "user_id": "demo_investor",
+    "ai_commitment_level": 0.8500000000000001,
+    "user_motivation_profile": {
+      "primary_motivator": "achievement",
+      "risk_tolerance": "moderate",
+      "celebration_style": "encouraging",
+      "support_style": "analytical",
+      "communication_preference": "direct",
+      "goal_approach": "systematic"
+    },
+    "collaboration_history": [
+      "brainstorm_goal_1753555273_dream_vacation_to_japan_1753555273",
+      "brainstorm_goal_1753555273_dream_vacation_to_japan_1753555273"
+    ],
+    "success_celebration_style": "encouraging",
+    "setback_support_style": "analytical",
+    "last_check_in": 1753555273.0599082,
+    "next_suggested_action": "Create detailed implementation timeline",
+    "partnership_strength": 0.6
+  },
+  "goal_1753555663_test_collaboration_goal": {
+    "goal_id": "goal_1753555663_test_collaboration_goal",
+    "user_id": "test_user",
+    "ai_commitment_level": 0.8500000000000001,
+    "user_motivation_profile": {
+      "primary_motivator": "achievement",
+      "risk_tolerance": "moderate",
+      "celebration_style": "encouraging",
+      "support_style": "analytical",
+      "communication_preference": "direct",
+      "goal_approach": "systematic",
+      "responds_to_excitement": true
+    },
+    "collaboration_history": [
+      "brainstorm_goal_1753555663_test_collaboration_goal_1753555663",
+      "brainstorm_goal_1753555663_test_collaboration_goal_1753555663"
+    ],
+    "success_celebration_style": "encouraging",
+    "setback_support_style": "analytical",
+    "last_check_in": 1753555663.9753041,
+    "next_suggested_action": "Create detailed implementation timeline",
+    "partnership_strength": 0.6
+  },
+  "goal_1753555669_dream_vacation_to_japan": {
+    "goal_id": "goal_1753555669_dream_vacation_to_japan",
+    "user_id": "demo_investor",
+    "ai_commitment_level": 0.8500000000000001,
+    "user_motivation_profile": {
+      "primary_motivator": "achievement",
+      "risk_tolerance": "moderate",
+      "celebration_style": "encouraging",
+      "support_style": "analytical",
+      "communication_preference": "direct",
+      "goal_approach": "systematic"
+    },
+    "collaboration_history": [
+      "brainstorm_goal_1753555669_dream_vacation_to_japan_1753555669",
+      "brainstorm_goal_1753555669_dream_vacation_to_japan_1753555669"
+    ],
+    "success_celebration_style": "encouraging",
+    "setback_support_style": "analytical",
+    "last_check_in": 1753555669.9612792,
+    "next_suggested_action": "Create detailed implementation timeline",
+    "partnership_strength": 0.6
+  },
+  "goal_1753555818_test_collaboration_goal": {
+    "goal_id": "goal_1753555818_test_collaboration_goal",
+    "user_id": "test_user",
+    "ai_commitment_level": 0.8500000000000001,
+    "user_motivation_profile": {
+      "primary_motivator": "achievement",
+      "risk_tolerance": "moderate",
+      "celebration_style": "encouraging",
+      "support_style": "analytical",
+      "communication_preference": "direct",
+      "goal_approach": "systematic",
+      "responds_to_excitement": true
+    },
+    "collaboration_history": [
+      "brainstorm_goal_1753555818_test_collaboration_goal_1753555818",
+      "brainstorm_goal_1753555818_test_collaboration_goal_1753555818"
+    ],
+    "success_celebration_style": "encouraging",
+    "setback_support_style": "analytical",
+    "last_check_in": 1753555818.244469,
+    "next_suggested_action": "Create detailed implementation timeline",
+    "partnership_strength": 0.6
+  },
+  "goal_1753650519_verification_partnership_goal": {
+    "goal_id": "goal_1753650519_verification_partnership_goal",
+    "user_id": "verification_user",
+    "ai_commitment_level": 0.8500000000000001,
+    "user_motivation_profile": {
+      "primary_motivator": "achievement",
+      "risk_tolerance": "moderate",
+      "celebration_style": "encouraging",
+      "support_style": "analytical",
+      "communication_preference": "direct",
+      "goal_approach": "systematic",
+      "needs_emotional_security": true
+    },
+    "collaboration_history": [
+      "brainstorm_goal_1753650519_verification_partnership_goal_1753650519",
+      "brainstorm_goal_1753650519_verification_partnership_goal_1753650519"
+    ],
+    "success_celebration_style": "encouraging",
+    "setback_support_style": "analytical",
+    "last_check_in": 1753560519.0190458,
+    "next_suggested_action": "Create detailed implementation timeline",
+    "partnership_strength": 0.6
+  },
+  "goal_1753650519_performance_test_goal_0": {
+    "goal_id": "goal_1753650519_performance_test_goal_0",
+    "user_id": "perf_user_0",
+    "ai_commitment_level": 0.8,
+    "user_motivation_profile": {
+      "primary_motivator": "achievement",
+      "risk_tolerance": "moderate",
+      "celebration_style": "encouraging",
+      "support_style": "analytical",
+      "communication_preference": "direct",
+      "goal_approach": "systematic",
+      "needs_emotional_security": true
+    },
+    "collaboration_history": [
+      "brainstorm_goal_1753650519_performance_test_goal_0_1753650519",
+      "brainstorm_goal_1753650519_performance_test_goal_0_1753650519"
+    ],
+    "success_celebration_style": "encouraging",
+    "setback_support_style": "analytical",
+    "last_check_in": 1753650519.081354,
+    "next_suggested_action": null,
+    "partnership_strength": 0.5
+  },
+  "goal_1753650519_performance_test_goal_1": {
+    "goal_id": "goal_1753650519_performance_test_goal_1",
+    "user_id": "perf_user_1",
+    "ai_commitment_level": 0.8,
+    "user_motivation_profile": {
+      "primary_motivator": "achievement",
+      "risk_tolerance": "moderate",
+      "celebration_style": "encouraging",
+      "support_style": "analytical",
+      "communication_preference": "direct",
+      "goal_approach": "systematic",
+      "needs_emotional_security": true
+    },
+    "collaboration_history": [
+      "brainstorm_goal_1753650519_performance_test_goal_1_1753650519",
+      "brainstorm_goal_1753650519_performance_test_goal_1_1753650519"
+    ],
+    "success_celebration_style": "encouraging",
+    "setback_support_style": "analytical",
+    "last_check_in": 1753650519.0929024,
+    "next_suggested_action": null,
+    "partnership_strength": 0.5
+  },
+  "goal_1753650519_performance_test_goal_2": {
+    "goal_id": "goal_1753650519_performance_test_goal_2",
+    "user_id": "perf_user_2",
+    "ai_commitment_level": 0.8,
+    "user_motivation_profile": {
+      "primary_motivator": "achievement",
+      "risk_tolerance": "moderate",
+      "celebration_style": "encouraging",
+      "support_style": "analytical",
+      "communication_preference": "direct",
+      "goal_approach": "systematic",
+      "needs_emotional_security": true
+    },
+    "collaboration_history": [
+      "brainstorm_goal_1753650519_performance_test_goal_2_1753650519",
+      "brainstorm_goal_1753650519_performance_test_goal_2_1753650519"
+    ],
+    "success_celebration_style": "encouraging",
+    "setback_support_style": "analytical",
+    "last_check_in": 1753650519.1057382,
+    "next_suggested_action": null,
+    "partnership_strength": 0.5
+  },
+  "goal_1753650519_performance_test_goal_3": {
+    "goal_id": "goal_1753650519_performance_test_goal_3",
+    "user_id": "perf_user_3",
+    "ai_commitment_level": 0.8,
+    "user_motivation_profile": {
+      "primary_motivator": "achievement",
+      "risk_tolerance": "moderate",
+      "celebration_style": "encouraging",
+      "support_style": "analytical",
+      "communication_preference": "direct",
+      "goal_approach": "systematic",
+      "needs_emotional_security": true
+    },
+    "collaboration_history": [
+      "brainstorm_goal_1753650519_performance_test_goal_3_1753650519",
+      "brainstorm_goal_1753650519_performance_test_goal_3_1753650519"
+    ],
+    "success_celebration_style": "encouraging",
+    "setback_support_style": "analytical",
+    "last_check_in": 1753650519.120151,
+    "next_suggested_action": null,
+    "partnership_strength": 0.5
+  },
+  "goal_1753650519_performance_test_goal_4": {
+    "goal_id": "goal_1753650519_performance_test_goal_4",
+    "user_id": "perf_user_4",
+    "ai_commitment_level": 0.8,
+    "user_motivation_profile": {
+      "primary_motivator": "achievement",
+      "risk_tolerance": "moderate",
+      "celebration_style": "encouraging",
+      "support_style": "analytical",
+      "communication_preference": "direct",
+      "goal_approach": "systematic",
+      "needs_emotional_security": true
+    },
+    "collaboration_history": [
+      "brainstorm_goal_1753650519_performance_test_goal_4_1753650519",
+      "brainstorm_goal_1753650519_performance_test_goal_4_1753650519"
+    ],
+    "success_celebration_style": "encouraging",
+    "setback_support_style": "analytical",
+    "last_check_in": 1753650519.1337957,
+    "next_suggested_action": null,
+    "partnership_strength": 0.5
+  },
+  "goal_1753650519_performance_test_goal_5": {
+    "goal_id": "goal_1753650519_performance_test_goal_5",
+    "user_id": "perf_user_5",
+    "ai_commitment_level": 0.8,
+    "user_motivation_profile": {
+      "primary_motivator": "achievement",
+      "risk_tolerance": "moderate",
+      "celebration_style": "encouraging",
+      "support_style": "analytical",
+      "communication_preference": "direct",
+      "goal_approach": "systematic",
+      "needs_emotional_security": true
+    },
+    "collaboration_history": [
+      "brainstorm_goal_1753650519_performance_test_goal_5_1753650519",
+      "brainstorm_goal_1753650519_performance_test_goal_5_1753650519"
+    ],
+    "success_celebration_style": "encouraging",
+    "setback_support_style": "analytical",
+    "last_check_in": 1753650519.1487246,
+    "next_suggested_action": null,
+    "partnership_strength": 0.5
+  },
+  "goal_1753650519_performance_test_goal_6": {
+    "goal_id": "goal_1753650519_performance_test_goal_6",
+    "user_id": "perf_user_6",
+    "ai_commitment_level": 0.8,
+    "user_motivation_profile": {
+      "primary_motivator": "achievement",
+      "risk_tolerance": "moderate",
+      "celebration_style": "encouraging",
+      "support_style": "analytical",
+      "communication_preference": "direct",
+      "goal_approach": "systematic",
+      "needs_emotional_security": true
+    },
+    "collaboration_history": [
+      "brainstorm_goal_1753650519_performance_test_goal_6_1753650519",
+      "brainstorm_goal_1753650519_performance_test_goal_6_1753650519"
+    ],
+    "success_celebration_style": "encouraging",
+    "setback_support_style": "analytical",
+    "last_check_in": 1753650519.1631851,
+    "next_suggested_action": null,
+    "partnership_strength": 0.5
+  },
+  "goal_1753650519_performance_test_goal_7": {
+    "goal_id": "goal_1753650519_performance_test_goal_7",
+    "user_id": "perf_user_7",
+    "ai_commitment_level": 0.8,
+    "user_motivation_profile": {
+      "primary_motivator": "achievement",
+      "risk_tolerance": "moderate",
+      "celebration_style": "encouraging",
+      "support_style": "analytical",
+      "communication_preference": "direct",
+      "goal_approach": "systematic",
+      "needs_emotional_security": true
+    },
+    "collaboration_history": [
+      "brainstorm_goal_1753650519_performance_test_goal_7_1753650519",
+      "brainstorm_goal_1753650519_performance_test_goal_7_1753650519"
+    ],
+    "success_celebration_style": "encouraging",
+    "setback_support_style": "analytical",
+    "last_check_in": 1753650519.178896,
+    "next_suggested_action": null,
+    "partnership_strength": 0.5
+  },
+  "goal_1753650519_performance_test_goal_8": {
+    "goal_id": "goal_1753650519_performance_test_goal_8",
+    "user_id": "perf_user_8",
+    "ai_commitment_level": 0.8,
+    "user_motivation_profile": {
+      "primary_motivator": "achievement",
+      "risk_tolerance": "moderate",
+      "celebration_style": "encouraging",
+      "support_style": "analytical",
+      "communication_preference": "direct",
+      "goal_approach": "systematic",
+      "needs_emotional_security": true
+    },
+    "collaboration_history": [
+      "brainstorm_goal_1753650519_performance_test_goal_8_1753650519",
+      "brainstorm_goal_1753650519_performance_test_goal_8_1753650519"
+    ],
+    "success_celebration_style": "encouraging",
+    "setback_support_style": "analytical",
+    "last_check_in": 1753650519.1956947,
+    "next_suggested_action": null,
+    "partnership_strength": 0.5
+  },
+  "goal_1753650519_performance_test_goal_9": {
+    "goal_id": "goal_1753650519_performance_test_goal_9",
+    "user_id": "perf_user_9",
+    "ai_commitment_level": 0.8,
+    "user_motivation_profile": {
+      "primary_motivator": "achievement",
+      "risk_tolerance": "moderate",
+      "celebration_style": "encouraging",
+      "support_style": "analytical",
+      "communication_preference": "direct",
+      "goal_approach": "systematic",
+      "needs_emotional_security": true
+    },
+    "collaboration_history": [
+      "brainstorm_goal_1753650519_performance_test_goal_9_1753650519",
+      "brainstorm_goal_1753650519_performance_test_goal_9_1753650519"
+    ],
+    "success_celebration_style": "encouraging",
+    "setback_support_style": "analytical",
+    "last_check_in": 1753650519.21517,
+    "next_suggested_action": null,
+    "partnership_strength": 0.5
+  }
+}

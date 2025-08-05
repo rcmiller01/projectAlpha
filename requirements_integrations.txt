@@ -1,0 +1,141 @@
+# AI Companion Unified Integration Requirements
+# Complete integration suite for emotional AI companion
+
+# Core Framework
+fastapi>=0.104.1
+uvicorn>=0.24.0
+pydantic>=2.4.2
+python-multipart>=0.0.6
+
+# Existing Dependencies (from previous requirements)
+pyttsx3>=2.90
+asyncio-mqtt>=0.16.1
+python-dotenv>=1.0.0
+
+# Apple HealthKit Integration
+# Note: HealthKit requires iOS/macOS native libraries
+# For cross-platform development, consider alternatives:
+healthkit-to-sqlite>=0.5  # For HealthKit data export
+pyobjc-framework-HealthKit>=10.0; sys_platform == "darwin"  # macOS only
+
+# Social Media API Integrations
+praw>=7.7.1  # Reddit API wrapper
+tweepy>=4.14.0  # Twitter API v2
+facebook-sdk>=3.1.0  # Facebook Graph API
+instaloader>=4.10.3  # Instagram data loader (read-only)
+# Note: Threads API is currently limited, using Instagram Basic Display
+
+# Calendar Integrations
+google-api-python-client>=2.108.0
+google-auth-httplib2>=0.1.1
+google-auth-oauthlib>=1.1.0
+exchangelib>=5.0.1  # Microsoft Exchange/Outlook
+caldav>=1.3.6  # CalDAV for various calendar services
+
+# Email Integrations
+imaplib2>=3.6  # Enhanced IMAP
+smtplib2>=0.2.0  # Enhanced SMTP
+exchangelib>=5.0.1  # Microsoft Exchange
+google-api-python-client>=2.108.0  # Gmail API
+
+# SMS Integration
+twilio>=8.10.0  # Twilio SMS service
+py-sms>=1.0.0  # SMS utilities
+
+# Apple Music Integration
+# Note: Apple Music API requires Apple Developer account
+musickit>=1.0.0  # Apple MusicKit (if available)
+spotipy>=2.23.0  # Spotify as alternative
+requests>=2.31.0  # For direct API calls
+
+# Audio Processing (for voice integration)
+pyaudio>=0.2.11
+numpy>=1.24.3
+librosa>=0.10.1
+soundfile>=0.12.1
+
+# Data Processing and Analysis
+pandas>=2.1.3
+numpy>=1.24.3
+scipy>=1.11.4
+scikit-learn>=1.3.2
+
+# Natural Language Processing
+nltk>=3.8.1
+textblob>=0.17.1
+transformers>=4.35.2  # For advanced sentiment analysis
+torch>=2.1.1  # PyTorch for ML models
+
+# HTTP and API utilities
+requests>=2.31.0
+aiohttp>=3.9.0
+httpx>=0.25.2
+
+# Data Storage and Caching
+redis>=5.0.1
+sqlite3  # Built-in Python module
+sqlalchemy>=2.0.23
+
+# Configuration and Environment
+pyyaml>=6.0.1
+toml>=0.10.2
+configparser>=6.0.0
+
+# Async and Concurrency
+asyncio>=3.4.3
+aiofiles>=23.2.1
+concurrent-futures>=3.1.1
+
+# Date and Time Processing
+python-dateutil>=2.8.2
+pytz>=2023.3
+croniter>=1.4.1
+
+# Security and Authentication
+cryptography>=41.0.7
+PyJWT>=2.8.0
+passlib>=1.7.4
+bcrypt>=4.1.2
+
+# Monitoring and Logging
+structlog>=23.2.0
+prometheus-client>=0.19.0
+psutil>=5.9.6
+
+# Development and Testing
+pytest>=7.4.3
+pytest-asyncio>=0.21.1
+pytest-mock>=3.12.0
+black>=23.11.0
+flake8>=6.1.0
+mypy>=1.7.1
+
+# Frontend API Support
+websockets>=12.0
+sse-starlette>=1.8.2
+jinja2>=3.1.2
+
+# Health and Biometric Processing
+heartpy>=1.2.7  # Heart rate analysis
+biosppy>=2.0.0  # Biosignal processing
+wfdb>=4.1.2  # Waveform database
+
+# Machine Learning for Emotional Analysis
+tensorflow>=2.15.0  # Alternative to PyTorch
+opencv-python>=4.8.1.78  # Computer vision for facial emotion detection
+mediapipe>=0.10.7  # Google's ML framework
+
+# Additional Utilities
+pillow>=10.1.0  # Image processing
+matplotlib>=3.8.2  # Data visualization
+seaborn>=0.13.0  # Statistical visualization
+plotly>=5.17.0  # Interactive plots
+
+# Optional: Advanced Audio Processing
+aubio>=0.4.9  # Audio analysis
+madmom>=0.16.1  # Music information retrieval
+essentia>=2.1b6.dev1170  # Audio analysis
+
+# Optional: Computer Vision for Emotion Detection
+dlib>=19.24.2  # Face detection
+face-recognition>=1.3.0  # Face recognition library

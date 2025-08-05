@@ -1,0 +1,29 @@
+{
+  "mode": "idle",
+  "idle_threshold": 20.0,
+  "check_interval": 300,
+  "cron_schedule": "02:00",
+  "max_memory_percent": 70.0,
+  "min_idle_duration_minutes": 15,
+  "autopilot_config_path": "emotion_quant_autopilot/autopilot_config.json",
+  "autopilot_script_path": "emotion_quant_autopilot/quant_autopilot.py",
+  "log_file": "bootloader.log",
+  "safety_checks": {
+    "min_free_disk_gb": 20,
+    "max_cpu_temp_celsius": 80,
+    "check_ollama_available": true,
+    "prevent_during_work_hours": false,
+    "work_hours_start": "09:00",
+    "work_hours_end": "17:00"
+  },
+  "retry_settings": {
+    "max_retries": 3,
+    "retry_delay_minutes": 10,
+    "exponential_backoff": true
+  },
+  "monitoring": {
+    "heartbeat_interval_minutes": 5,
+    "status_file": "bootloader_status.json",
+    "enable_metrics": true
+  }
+}

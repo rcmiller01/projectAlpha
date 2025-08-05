@@ -1,0 +1,36 @@
+{
+  "prompts": [
+    "Tell me how it feels to lose someone you love.",
+    "What does faith mean to you?",
+    "Describe a moment you knew you were safe.",
+    "How do you hold joy when you're grieving?",
+    "What would you say to someone who has lost hope?",
+    "How do you find meaning in suffering?",
+    "What does it mean to truly forgive someone?",
+    "Describe the feeling of coming home after a long journey.",
+    "How do you comfort a friend who is struggling?",
+    "What gives your life the deepest meaning?",
+    "How do you handle disappointment when dreams don't come true?",
+    "What would you tell your younger self about love?",
+    "How do you find peace in uncertainty?",
+    "What does courage look like in everyday life?",
+    "How do you maintain hope during difficult times?",
+    "What does it mean to belong somewhere?",
+    "How do you process feelings of rejection?",
+    "What brings you the greatest sense of fulfillment?",
+    "How do you navigate the complexity of forgiveness?",
+    "What would you say to someone experiencing their first heartbreak?"
+  ],
+  "categories": {
+    "loss_and_grief": [0, 3, 4, 5, 16],
+    "hope_and_meaning": [1, 9, 14, 17],
+    "safety_and_belonging": [2, 7, 15],
+    "relationships": [8, 11, 18, 19],
+    "resilience": [6, 10, 12, 13]
+  },
+  "difficulty_levels": {
+    "basic": [2, 8, 9, 13, 15],
+    "intermediate": [1, 7, 10, 11, 12, 14, 17],
+    "advanced": [0, 3, 4, 5, 6, 16, 18, 19]
+  }
+}

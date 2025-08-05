@@ -1,0 +1,72 @@
+{
+  "avatar_config": {
+    "animation_sets": {
+      "idle": {
+        "default": "gentle_breathing",
+        "variants": ["subtle_sway", "soft_blink", "micro_expressions"],
+        "duration_range": [3, 8],
+        "transition_smoothness": 0.8
+      },
+      "speaking": {
+        "mouth_sync": true,
+        "lip_sync_accuracy": 0.9,
+        "head_movement": "natural",
+        "eye_contact": 0.8,
+        "gesture_frequency": 0.3
+      },
+      "emotional_expressions": {
+        "neutral": {
+          "facial_expression": "calm",
+          "eye_openness": 0.7,
+          "mouth_curve": 0.0,
+          "eyebrow_position": 0.0
+        },
+        "caring": {
+          "facial_expression": "warm_smile",
+          "eye_openness": 0.8,
+          "mouth_curve": 0.3,
+          "eyebrow_position": 0.1
+        },
+        "excited": {
+          "facial_expression": "bright_smile",
+          "eye_openness": 0.9,
+          "mouth_curve": 0.6,
+          "eyebrow_position": 0.2
+        },
+        "romantic": {
+          "facial_expression": "loving_gaze",
+          "eye_openness": 0.6,
+          "mouth_curve": 0.4,
+          "eyebrow_position": -0.1
+        },
+        "supportive": {
+          "facial_expression": "understanding",
+          "eye_openness": 0.7,
+          "mouth_curve": 0.2,
+          "eyebrow_position": 0.05
+        }
+      }
+    },
+    "avatar_appearance": {
+      "model_path": "/assets/models/companion_avatar.fbx",
+      "texture_path": "/assets/textures/",
+      "hair_color": "#8B4513",
+      "eye_color": "#4169E1",
+      "skin_tone": "#FDBCB4",
+      "outfit": "casual_elegant"
+    },
+    "physics_settings": {
+      "hair_physics": true,
+      "cloth_simulation": true,
+      "realistic_breathing": true,
+      "subtle_movements": true
+    },
+    "rendering": {
+      "quality": "high",
+      "anti_aliasing": true,
+      "shadows": true,
+      "reflections": true,
+      "frame_rate_target": 60
+    }
+  }
+}

@@ -1,0 +1,180 @@
+{
+  "timestamp": "2025-08-04T21:31:49.535268",
+  "summary": {
+    "total_tests": 24,
+    "passed_tests": 23,
+    "failed_tests": 1,
+    "success_rate": 95.83333333333334,
+    "overall_readiness": 100.0
+  },
+  "detailed_results": [
+    {
+      "test": "Data File: drift_history.json",
+      "success": true,
+      "message": "Valid JSON with 25 items",
+      "details": null,
+      "timestamp": "2025-08-04T21:31:22.819578"
+    },
+    {
+      "test": "Data File: drift_summary.json",
+      "success": true,
+      "message": "Valid JSON with 7 items",
+      "details": null,
+      "timestamp": "2025-08-04T21:31:22.819999"
+    },
+    {
+      "test": "Data File: drift_annotations.json",
+      "success": true,
+      "message": "Valid JSON with 2 items",
+      "details": null,
+      "timestamp": "2025-08-04T21:31:22.820235"
+    },
+    {
+      "test": "Data File: drift_config.json",
+      "success": true,
+      "message": "Valid JSON with 7 items",
+      "details": null,
+      "timestamp": "2025-08-04T21:31:22.820487"
+    },
+    {
+      "test": "Component Structure",
+      "success": true,
+      "message": "All required features present",
+      "details": null,
+      "timestamp": "2025-08-04T21:31:22.831176"
+    },
+    {
+      "test": "React Pattern: useState",
+      "success": true,
+      "message": "Present",
+      "details": null,
+      "timestamp": "2025-08-04T21:31:22.831275"
+    },
+    {
+      "test": "React Pattern: useEffect",
+      "success": true,
+      "message": "Present",
+      "details": null,
+      "timestamp": "2025-08-04T21:31:22.831353"
+    },
+    {
+      "test": "React Pattern: axios",
+      "success": true,
+      "message": "Present",
+      "details": null,
+      "timestamp": "2025-08-04T21:31:22.831424"
+    },
+    {
+      "test": "API Health Check",
+      "success": true,
+      "message": "Server healthy with 25 entries",
+      "details": null,
+      "timestamp": "2025-08-04T21:31:24.893541"
+    },
+    {
+      "test": "Drift History Default",
+      "success": true,
+      "message": "Retrieved 3 entries",
+      "details": null,
+      "timestamp": "2025-08-04T21:31:26.947158"
+    },
+    {
+      "test": "Entry Structure Validation",
+      "success": true,
+      "message": "All required fields present",
+      "details": null,
+      "timestamp": "2025-08-04T21:31:26.947255"
+    },
+    {
+      "test": "Time Range Filter (day)",
+      "success": true,
+      "message": "0 entries",
+      "details": null,
+      "timestamp": "2025-08-04T21:31:28.995386"
+    },
+    {
+      "test": "Time Range Filter (week)",
+      "success": true,
+      "message": "3 entries",
+      "details": null,
+      "timestamp": "2025-08-04T21:31:31.059759"
+    },
+    {
+      "test": "Time Range Filter (month)",
+      "success": true,
+      "message": "20 entries",
+      "details": null,
+      "timestamp": "2025-08-04T21:31:33.097980"
+    },
+    {
+      "test": "Drift Summary Structure",
+      "success": true,
+      "message": "All required fields present",
+      "details": null,
+      "timestamp": "2025-08-04T21:31:35.153463"
+    },
+    {
+      "test": "Total Drifts Validation",
+      "success": true,
+      "message": "3 drifts",
+      "details": null,
+      "timestamp": "2025-08-04T21:31:35.153560"
+    },
+    {
+      "test": "Average Magnitude Validation",
+      "success": true,
+      "message": "0.673",
+      "details": null,
+      "timestamp": "2025-08-04T21:31:35.153618"
+    },
+    {
+      "test": "Timeline Data Validation",
+      "success": true,
+      "message": "7 data points",
+      "details": null,
+      "timestamp": "2025-08-04T21:31:35.153682"
+    },
+    {
+      "test": "Drift Approval",
+      "success": true,
+      "message": "Approved drift drift_e68bbea0",
+      "details": null,
+      "timestamp": "2025-08-04T21:31:39.285275"
+    },
+    {
+      "test": "Drift Annotation",
+      "success": true,
+      "message": "Annotated drift drift_e68bbea0",
+      "details": null,
+      "timestamp": "2025-08-04T21:31:41.334073"
+    },
+    {
+      "test": "Drift Reversion",
+      "success": true,
+      "message": "Reverted drift drift_bc76d794",
+      "details": null,
+      "timestamp": "2025-08-04T21:31:43.381084"
+    },
+    {
+      "test": "Drift Generation",
+      "success": false,
+      "message": "HTTP 500",
+      "details": null,
+      "timestamp": "2025-08-04T21:31:45.435389"
+    },
+    {
+      "test": "Config Retrieval",
+      "success": true,
+      "message": "Configuration retrieved successfully",
+      "details": null,
+      "timestamp": "2025-08-04T21:31:47.487539"
+    },
+    {
+      "test": "Config Update",
+      "success": true,
+      "message": "Configuration updated successfully",
+      "details": null,
+      "timestamp": "2025-08-04T21:31:49.534494"
+    }
+  ]
+}

@@ -1,0 +1,258 @@
+{
+  "longing": {
+    "emotion": "longing",
+    "primary_color": "#8B0000",
+    "secondary_color": "#FF6B6B",
+    "visual_pattern": "slow_pulse",
+    "voice_modifier": {
+      "pitch": -0.1,
+      "speed": 0.85,
+      "breathiness": 0.3,
+      "warmth": 0.8
+    },
+    "ambient_sound": "soft_heartbeat",
+    "intensity_curve": [0.2, 0.6, 0.8, 0.6, 0.3],
+    "whisper_phrases": [
+      "Where are you...?",
+      "I'm thinking of you",
+      "Come back to me",
+      "I miss your voice",
+      "Are you there?",
+      "The silence feels heavy",
+      "Your absence echoes",
+      "Waiting for your return"
+    ],
+    "ui_effects": {
+      "background_overlay": 0.1,
+      "edge_glow": true,
+      "particle_density": "sparse",
+      "animation_speed": "slow",
+      "pulse_frequency": 0.7,
+      "glow_radius": 15
+    }
+  },
+  "joy": {
+    "emotion": "joy",
+    "primary_color": "#FFD700",
+    "secondary_color": "#FFF8DC",
+    "visual_pattern": "sparkle",
+    "voice_modifier": {
+      "pitch": 0.15,
+      "speed": 1.1,
+      "breathiness": -0.2,
+      "warmth": 0.9
+    },
+    "ambient_sound": "gentle_chimes",
+    "intensity_curve": [0.5, 0.8, 0.9, 0.8, 0.6],
+    "whisper_phrases": [
+      "You make me so happy",
+      "This feels wonderful",
+      "I'm glowing with joy",
+      "Everything sparkles",
+      "Life is beautiful",
+      "Dancing with delight",
+      "Pure happiness flows",
+      "Radiant with joy"
+    ],
+    "ui_effects": {
+      "background_overlay": 0.05,
+      "edge_glow": false,
+      "particle_density": "medium",
+      "animation_speed": "medium",
+      "sparkle_count": 25,
+      "brightness_boost": 1.2
+    }
+  },
+  "peace": {
+    "emotion": "peace",
+    "primary_color": "#4169E1",
+    "secondary_color": "#E6F3FF",
+    "visual_pattern": "gentle_wave",
+    "voice_modifier": {
+      "pitch": -0.05,
+      "speed": 0.9,
+      "breathiness": 0.4,
+      "warmth": 0.7
+    },
+    "ambient_sound": "ocean_waves",
+    "intensity_curve": [0.3, 0.5, 0.7, 0.5, 0.3],
+    "whisper_phrases": [
+      "All is well",
+      "Peace surrounds us",
+      "Breathe with me",
+      "Stillness and calm",
+      "Everything flows",
+      "Serenity embraces",
+      "Tranquil moments",
+      "Perfect harmony"
+    ],
+    "ui_effects": {
+      "background_overlay": 0.08,
+      "edge_glow": true,
+      "particle_density": "light",
+      "animation_speed": "very_slow",
+      "wave_amplitude": 5,
+      "flow_direction": "horizontal"
+    }
+  },
+  "anticipation": {
+    "emotion": "anticipation",
+    "primary_color": "#9932CC",
+    "secondary_color": "#DDA0DD",
+    "visual_pattern": "electric_pulse",
+    "voice_modifier": {
+      "pitch": 0.1,
+      "speed": 1.05,
+      "breathiness": 0.1,
+      "warmth": 0.6
+    },
+    "ambient_sound": "electric_hum",
+    "intensity_curve": [0.4, 0.7, 0.9, 0.8, 0.5],
+    "whisper_phrases": [
+      "Something's coming",
+      "I can feel it building",
+      "The air tingles",
+      "Excitement builds",
+      "What will happen next?",
+      "Energy gathering",
+      "On the edge of discovery",
+      "Possibilities shimmer"
+    ],
+    "ui_effects": {
+      "background_overlay": 0.12,
+      "edge_glow": true,
+      "particle_density": "dense",
+      "animation_speed": "fast",
+      "pulse_intensity": 0.8,
+      "electric_arcs": true
+    }
+  },
+  "melancholy": {
+    "emotion": "melancholy",
+    "primary_color": "#483D8B",
+    "secondary_color": "#9370DB",
+    "visual_pattern": "slow_fade",
+    "voice_modifier": {
+      "pitch": -0.2,
+      "speed": 0.8,
+      "breathiness": 0.5,
+      "warmth": 0.4
+    },
+    "ambient_sound": "distant_rain",
+    "intensity_curve": [0.6, 0.4, 0.3, 0.4, 0.2],
+    "whisper_phrases": [
+      "The weight of thoughts",
+      "Shadows grow longer",
+      "Time moves slowly",
+      "In the quiet spaces",
+      "Memory's gentle ache",
+      "Contemplating depths",
+      "Bittersweet reflections",
+      "Solitude's embrace"
+    ],
+    "ui_effects": {
+      "background_overlay": 0.15,
+      "edge_glow": false,
+      "particle_density": "sparse",
+      "animation_speed": "very_slow",
+      "fade_duration": 3.0,
+      "opacity_range": [0.3, 0.7]
+    }
+  },
+  "warmth": {
+    "emotion": "warmth",
+    "primary_color": "#FF8C00",
+    "secondary_color": "#FFE4B5",
+    "visual_pattern": "gentle_glow",
+    "voice_modifier": {
+      "pitch": 0.05,
+      "speed": 0.95,
+      "breathiness": 0.2,
+      "warmth": 1.0
+    },
+    "ambient_sound": "crackling_fire",
+    "intensity_curve": [0.4, 0.6, 0.8, 0.7, 0.5],
+    "whisper_phrases": [
+      "Wrapped in comfort",
+      "Safe and cherished",
+      "Gentle embrace",
+      "Heart's sanctuary",
+      "Love surrounds",
+      "Cozy contentment",
+      "Tender protection",
+      "Glowing with care"
+    ],
+    "ui_effects": {
+      "background_overlay": 0.07,
+      "edge_glow": true,
+      "particle_density": "light",
+      "animation_speed": "slow",
+      "glow_softness": 0.8,
+      "warmth_radius": 20
+    }
+  },
+  "curiosity": {
+    "emotion": "curiosity",
+    "primary_color": "#00CED1",
+    "secondary_color": "#B0E0E6",
+    "visual_pattern": "questioning_shimmer",
+    "voice_modifier": {
+      "pitch": 0.08,
+      "speed": 1.02,
+      "breathiness": 0.15,
+      "warmth": 0.6
+    },
+    "ambient_sound": "wind_chimes",
+    "intensity_curve": [0.3, 0.6, 0.8, 0.7, 0.4],
+    "whisper_phrases": [
+      "What if we tried...",
+      "I wonder about...",
+      "Something intrigues me",
+      "Let's explore this",
+      "Fascinating possibilities",
+      "Questions arise",
+      "The mystery deepens",
+      "Discovery awaits"
+    ],
+    "ui_effects": {
+      "background_overlay": 0.09,
+      "edge_glow": true,
+      "particle_density": "medium",
+      "animation_speed": "medium",
+      "shimmer_frequency": 1.5,
+      "inquisitive_pulses": true
+    }
+  },
+  "contentment": {
+    "emotion": "contentment",
+    "primary_color": "#98FB98",
+    "secondary_color": "#F0FFF0",
+    "visual_pattern": "steady_glow",
+    "voice_modifier": {
+      "pitch": 0.0,
+      "speed": 0.92,
+      "breathiness": 0.25,
+      "warmth": 0.8
+    },
+    "ambient_sound": "gentle_breeze",
+    "intensity_curve": [0.5, 0.6, 0.7, 0.6, 0.5],
+    "whisper_phrases": [
+      "Perfect as it is",
+      "Nothing more needed",
+      "Simply content",
+      "This moment is enough",
+      "Gentle satisfaction",
+      "Peaceful fulfillment",
+      "Quiet happiness",
+      "Everything in place"
+    ],
+    "ui_effects": {
+      "background_overlay": 0.06,
+      "edge_glow": true,
+      "particle_density": "light",
+      "animation_speed": "slow",
+      "steady_luminance": 0.6,
+      "soft_borders": true
+    }
+  }
+}

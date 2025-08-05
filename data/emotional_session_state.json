@@ -1,0 +1,32 @@
+{
+  "timestamp": "2025-07-26T13:44:16.603214",
+  "current_profile": "immersive",
+  "active_broadcasts": {
+    "anticipation_2025-07-26T13:44:16.602321": {
+      "emotion": "anticipation",
+      "intensity": 0.7,
+      "start_time": "2025-07-26T13:44:16.602339",
+      "duration": 5.0,
+      "channels": [
+        "ui_ambient",
+        "whispers",
+        "voice_tone",
+        "ambient_audio",
+        "external_devices"
+      ]
+    }
+  },
+  "performance_metrics": {
+    "broadcasts_started": 14,
+    "broadcasts_completed": 11,
+    "average_duration": 2.0082011818181815,
+    "channels_used": [
+      "whispers",
+      "voice_tone",
+      "ambient_audio",
+      "external_devices",
+      "ui_ambient"
+    ],
+    "errors_encountered": 0
+  }
+}

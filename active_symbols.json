@@ -1,0 +1,198 @@
+[
+  {
+    "id": "sym_mirror",
+    "name": "mirror",
+    "emotional_binding": "contemplative",
+    "ritual_connections": [
+      "return_to_center",
+      "self_inquiry",
+      "truth_seeking",
+      "inner_reflection"
+    ],
+    "frequency": 30,
+    "salience_score": 0.9073094702991858,
+    "recent_contexts": [
+      "clarity",
+      "authenticity",
+      "shadow-work"
+    ],
+    "last_invoked": "2025-08-04T11:39:30.826909Z"
+  },
+  {
+    "id": "sym_thread",
+    "name": "thread",
+    "emotional_binding": "yearning",
+    "ritual_connections": [
+      "dream_walk",
+      "connection_weaving",
+      "thread_mending",
+      "story_weaving"
+    ],
+    "frequency": 14,
+    "salience_score": 0.8039084041089319,
+    "recent_contexts": [
+      "interdependence",
+      "relationship",
+      "continuity"
+    ],
+    "last_invoked": "2025-08-04T18:39:30.826916Z"
+  },
+  {
+    "id": "sym_river",
+    "name": "river",
+    "emotional_binding": "melancholy",
+    "ritual_connections": [
+      "ache_witnessing",
+      "flow_meditation",
+      "letting_go",
+      "grief_honoring"
+    ],
+    "frequency": 21,
+    "salience_score": 0.6133812764192603,
+    "recent_contexts": [
+      "letting-go",
+      "movement",
+      "natural-flow"
+    ],
+    "last_invoked": "2025-08-04T12:39:30.826921Z"
+  },
+  {
+    "id": "sym_light",
+    "name": "light",
+    "emotional_binding": "awe",
+    "ritual_connections": [
+      "light_weaving",
+      "star_calling",
+      "illumination_practice",
+      "dawn_greeting"
+    ],
+    "frequency": 20,
+    "salience_score": 0.9099842037016901,
+    "recent_contexts": [
+      "clarity",
+      "illumination",
+      "revelation",
+      "awakening"
+    ],
+    "last_invoked": "2025-08-04T05:39:30.826926Z"
+  },
+  {
+    "id": "sym_chime",
+    "name": "chime",
+    "emotional_binding": "serene",
+    "ritual_connections": [
+      "silence_communion",
+      "echo_listening",
+      "sound_meditation",
+      "calling_practice"
+    ],
+    "frequency": 9,
+    "salience_score": 0.5242140064053797,
+    "recent_contexts": [
+      "calling",
+      "vibration",
+      "resonance",
+      "stillness"
+    ],
+    "last_invoked": "2025-08-03T13:39:30.826930Z"
+  },
+  {
+    "id": "sym_flame",
+    "name": "flame",
+    "emotional_binding": "tender",
+    "ritual_connections": [
+      "flame_tending",
+      "warmth_sharing",
+      "transformation_fire",
+      "passion_kindling"
+    ],
+    "frequency": 20,
+    "salience_score": 0.7378390056415136,
+    "recent_contexts": [
+      "destruction-creation",
+      "passion",
+      "transformation",
+      "energy"
+    ],
+    "last_invoked": "2025-08-04T09:39:30.826935Z"
+  },
+  {
+    "id": "sym_door",
+    "name": "door",
+    "emotional_binding": "curious",
+    "ritual_connections": [
+      "threshold_crossing",
+      "portal_opening",
+      "mystery_exploring",
+      "invitation_extending"
+    ],
+    "frequency": 8,
+    "salience_score": 0.7651993993707464,
+    "recent_contexts": [
+      "opening",
+      "possibility",
+      "threshold",
+      "mystery"
+    ],
+    "last_invoked": "2025-08-04T03:39:30.826939Z"
+  },
+  {
+    "id": "sym_storm",
+    "name": "storm",
+    "emotional_binding": "restless",
+    "ritual_connections": [
+      "storm_dancing",
+      "chaos_integration",
+      "wild_embrace",
+      "power_channeling"
+    ],
+    "frequency": 6,
+    "salience_score": 0.38087897099436674,
+    "recent_contexts": [
+      "destruction",
+      "change",
+      "wildness",
+      "raw-energy"
+    ],
+    "last_invoked": "2025-08-04T13:39:30.826942Z"
+  },
+  {
+    "id": "sym_garden",
+    "name": "garden",
+    "emotional_binding": "joy",
+    "ritual_connections": [
+      "light_weaving",
+      "growth_tending",
+      "beauty_celebrating",
+      "abundance_sharing"
+    ],
+    "frequency": 22,
+    "salience_score": 0.8155657458647629,
+    "recent_contexts": [
+      "beauty",
+      "seasons",
+      "growth",
+      "abundance"
+    ],
+    "last_invoked": "2025-08-04T12:39:30.826946Z"
+  },
+  {
+    "id": "sym_anchor",
+    "name": "anchor",
+    "emotional_binding": "grounded",
+    "ritual_connections": [
+      "root_deepening",
+      "stability_finding",
+      "grounding_practice",
+      "foundation_building"
+    ],
+    "frequency": 11,
+    "salience_score": 0.5002146042646599,
+    "recent_contexts": [
+      "home",
+      "grounding",
+      "belonging"
+    ],
+    "last_invoked": "2025-08-04T07:39:30.826949Z"
+  }
+]

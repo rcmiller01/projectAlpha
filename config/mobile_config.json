@@ -1,0 +1,56 @@
+{
+  "mobile_config": {
+    "api_endpoints": {
+      "base_url": "http://localhost:8001/api",
+      "websocket_url": "ws://localhost:8001/ws",
+      "backup_urls": [
+        "http://192.168.1.100:8001/api",
+        "https://your-domain.com/api"
+      ]
+    },
+    "authentication": {
+      "method": "bearer_token",
+      "token_refresh_interval": 3600,
+      "auto_login": true,
+      "biometric_auth": true
+    },
+    "biometric_collection": {
+      "enabled_sensors": [
+        "heart_rate",
+        "accelerometer",
+        "gyroscope",
+        "ambient_light",
+        "proximity"
+      ],
+      "collection_frequency": {
+        "heart_rate": 5,
+        "motion": 10,
+        "environmental": 30
+      },
+      "privacy_settings": {
+        "local_processing": true,
+        "data_encryption": true,
+        "user_consent_required": true
+      }
+    },
+    "real_time_features": {
+      "voice_streaming": true,
+      "video_calling": true,
+      "haptic_feedback": true,
+      "ar_integration": false,
+      "background_sync": true
+    },
+    "offline_capabilities": {
+      "cached_responses": 50,
+      "offline_voice": true,
+      "local_avatar": true,
+      "sync_when_online": true
+    },
+    "notification_settings": {
+      "push_notifications": true,
+      "emotion_alerts": true,
+      "relationship_milestones": true,
+      "system_updates": true
+    }
+  }
+}

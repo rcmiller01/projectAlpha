@@ -1,0 +1,6 @@
+{
+  "base_model": "test-model",
+  "quantization_method": "q4_K_M",
+  "created_at": "2025-07-29T18:48:48.444723",
+  "size_mb": 12800
+}

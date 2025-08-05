@@ -1,0 +1,83 @@
+{
+  "name": "Pass2_Emotional_Quantization",
+  "version": "1.0",
+  "description": "Configuration for emotional quantization Pass 2 workflow",
+  
+  "directories": {
+    "candidate_dir": "../quant_pass1/models",
+    "evaluation_prompts": "../quant_pass1/emotional_eval_set.jsonl",
+    "results_dir": "results",
+    "backup_dir": "backups"
+  },
+  
+  "models_to_compare": [
+    "llama2_quantized_4bit",
+    "llama2_quantized_8bit", 
+    "llama2_quantized_gptq"
+  ],
+  
+  "baseline_model": "original_llama2_13b",
+  
+  "judging_config": {
+    "ai_judge_weight": 0.4,
+    "human_judge_weight": 0.6,
+    "minimum_human_samples": 10,
+    "consensus_threshold": 0.7,
+    "evaluation_prompts_subset": 10
+  },
+  
+  "ai_judging": {
+    "embedding_model": "all-MiniLM-L6-v2",
+    "similarity_threshold": 0.8,
+    "emotional_dimensions": [
+      "empathy",
+      "creativity", 
+      "coherence",
+      "appropriateness"
+    ]
+  },
+  
+  "human_judging": {
+    "criteria_weights": {
+      "believability": 0.25,
+      "connection": 0.30,
+      "expressive_strength": 0.25,
+      "appropriateness": 0.20
+    },
+    "require_comments": true,
+    "show_technical_specs": false
+  },
+  
+  "replacement_config": {
+    "auto_backup": true,
+    "validation_required": true,
+    "manifest_update": true,
+    "safety_checks": [
+      "validate_model_integrity",
+      "check_size_requirements",
+      "verify_emotional_preservation"
+    ]
+  },
+  
+  "output_config": {
+    "detailed_reports": true,
+    "save_comparisons": true,
+    "export_metrics": true,
+    "report_format": "json",
+    "include_raw_responses": false
+  },
+  
+  "performance_config": {
+    "max_parallel_evaluations": 2,
+    "response_timeout_seconds": 30,
+    "evaluation_batch_size": 5,
+    "memory_limit_gb": 16
+  },
+  
+  "logging_config": {
+    "level": "INFO",
+    "save_logs": true,
+    "log_file": "pass2_execution.log",
+    "include_debug": false
+  }
+}

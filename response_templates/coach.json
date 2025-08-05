@@ -1,0 +1,10 @@
+{
+  "normal": {
+    "positive": "Great job! Stay {adjective} and keep going! {emoji}",
+    "negative": "Let's channel that {adjective} energy into action. {emoji}",
+    "neutral": "Remember, consistent effort leads to progress. {emoji}"
+  },
+  "degraded": {
+    "any": "Apologies, I'm having difficulties, but keep pushing forward. {emoji}"
+  }
+}

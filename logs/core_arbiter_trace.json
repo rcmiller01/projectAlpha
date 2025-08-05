@@ -1,0 +1,494 @@
+[
+  {
+    "timestamp": "2025-08-04T21:04:07.644927",
+    "processing_time_seconds": 0.2188732624053955,
+    "weighting_strategy": "harmonic",
+    "resolution_strategy": "weighted_blend",
+    "final_response": {
+      "output": "*supportive conversation with underlying need for connection* Based on logical analysis, the appropriate response involves addressing the user's request systematically.",
+      "tone": "balanced",
+      "priority": "balanced",
+      "confidence": 0.7934511290227435,
+      "emotional_override": false
+    },
+    "source_weights": {
+      "hrm_r": 0.5,
+      "hrm_e": 0.5
+    },
+    "drift_state": {
+      "emotional_drift": 0.0,
+      "logic_drift": 0.0,
+      "fatigue_level": 0.03277039713475492,
+      "stability_score": 0.9901688808595736
+    },
+    "model_outputs": {
+      "hrm_r": {
+        "confidence": 0.886902258045487,
+        "objective_tone": true,
+        "goals_count": 3
+      },
+      "hrm_e": {
+        "ritual_priority": 0.5461732855792487,
+        "symbolic_threshold": 0.6554079426950984,
+        "mood_signals": {
+          "warmth": 0.3268931073023614,
+          "empathy": 0.777104306201066,
+          "curiosity": 0.6055187574855341,
+          "concern": 0.43761305298188424
+        },
+        "symbolic_intentions_count": 3
+      }
+    }
+  },
+  {
+    "timestamp": "2025-08-04T21:04:08.365210",
+    "processing_time_seconds": 0.2155928611755371,
+    "weighting_strategy": "harmonic",
+    "resolution_strategy": "weighted_blend",
+    "final_response": {
+      "output": "*supportive conversation with underlying need for connection* Based on logical analysis, the appropriate response involves addressing the user's request systematically.",
+      "tone": "balanced",
+      "priority": "balanced",
+      "confidence": 0.7064617663885424,
+      "emotional_override": false
+    },
+    "source_weights": {
+      "hrm_r": 0.5,
+      "hrm_e": 0.5
+    },
+    "drift_state": {
+      "emotional_drift": 0.0,
+      "logic_drift": 0.0,
+      "fatigue_level": 0.049038883510935466,
+      "stability_score": 0.9852883349467194
+    },
+    "model_outputs": {
+      "hrm_r": {
+        "confidence": 0.7129235327770848,
+        "objective_tone": true,
+        "goals_count": 3
+      },
+      "hrm_e": {
+        "ritual_priority": 0.2711414396030091,
+        "symbolic_threshold": 0.32536972752361093,
+        "mood_signals": {
+          "warmth": 0.37475899461517104,
+          "empathy": 0.6554811570300053,
+          "curiosity": 0.6997663357832349,
+          "concern": 0.11940254893421108
+        },
+        "symbolic_intentions_count": 3
+      }
+    }
+  },
+  {
+    "timestamp": "2025-08-04T21:04:09.106171",
+    "processing_time_seconds": 0.2174670696258545,
+    "weighting_strategy": "harmonic",
+    "resolution_strategy": "weighted_blend",
+    "final_response": {
+      "output": "*supportive conversation with underlying need for connection* Based on logical analysis, the appropriate response involves addressing the user's request systematically.",
+      "tone": "balanced",
+      "priority": "balanced",
+      "confidence": 0.6985621838224623,
+      "emotional_override": false
+    },
+    "source_weights": {
+      "hrm_r": 0.5,
+      "hrm_e": 0.5
+    },
+    "drift_state": {
+      "emotional_drift": 0.0,
+      "logic_drift": 0.0,
+      "fatigue_level": 0.0770725627246181,
+      "stability_score": 0.9768782311826145
+    },
+    "model_outputs": {
+      "hrm_r": {
+        "confidence": 0.6971243676449246,
+        "objective_tone": true,
+        "goals_count": 3
+      },
+      "hrm_e": {
+        "ritual_priority": 0.4672279868947107,
+        "symbolic_threshold": 0.5606735842736528,
+        "mood_signals": {
+          "warmth": 0.5623244141277144,
+          "empathy": 0.6487969179568659,
+          "curiosity": 0.27699695908826616,
+          "concern": 0.1901850887539998
+        },
+        "symbolic_intentions_count": 3
+      }
+    }
+  },
+  {
+    "timestamp": "2025-08-04T21:04:09.832441",
+    "processing_time_seconds": 0.2159559726715088,
+    "weighting_strategy": "harmonic",
+    "resolution_strategy": "weighted_blend",
+    "final_response": {
+      "output": "*supportive conversation with underlying need for connection* Based on logical analysis, the appropriate response involves addressing the user's request systematically.",
+      "tone": "balanced",
+      "priority": "balanced",
+      "confidence": 0.7702762235623446,
+      "emotional_override": false
+    },
+    "source_weights": {
+      "hrm_r": 0.5,
+      "hrm_e": 0.5
+    },
+    "drift_state": {
+      "emotional_drift": 0.0,
+      "logic_drift": 0.0,
+      "fatigue_level": 0.09875099018152252,
+      "stability_score": 0.9703747029455433
+    },
+    "model_outputs": {
+      "hrm_r": {
+        "confidence": 0.8405524471246892,
+        "objective_tone": true,
+        "goals_count": 3
+      },
+      "hrm_e": {
+        "ritual_priority": 0.36130712428174017,
+        "symbolic_threshold": 0.4335685491380882,
+        "mood_signals": {
+          "warmth": 0.7850487072173712,
+          "empathy": 0.6083619603080888,
+          "curiosity": 0.4280821586955599,
+          "concern": 0.44824618316388476
+        },
+        "symbolic_intentions_count": 3
+      }
+    }
+  },
+  {
+    "timestamp": "2025-08-04T21:04:10.559127",
+    "processing_time_seconds": 0.21692585945129395,
+    "weighting_strategy": "logic_dominant",
+    "resolution_strategy": "weighted_blend",
+    "final_response": {
+      "output": "Based on logical analysis, the appropriate response involves addressing the user's request systematically. *supportive conversation with underlying need for connection*",
+      "tone": "balanced",
+      "priority": "balanced",
+      "confidence": 0.6988452531110978,
+      "emotional_override": false
+    },
+    "source_weights": {
+      "hrm_r": 0.8,
+      "hrm_e": 0.2
+    },
+    "drift_state": {
+      "emotional_drift": 0.0,
+      "logic_drift": 0.0,
+      "fatigue_level": 0.11289293562427227,
+      "stability_score": 0.9661321193127184
+    },
+    "model_outputs": {
+      "hrm_r": {
+        "confidence": 0.6985565663888722,
+        "objective_tone": true,
+        "goals_count": 3
+      },
+      "hrm_e": {
+        "ritual_priority": 0.23569909071249592,
+        "symbolic_threshold": 0.2828389088549951,
+        "mood_signals": {
+          "warmth": 0.7243631737302254,
+          "empathy": 0.7433991388477099,
+          "curiosity": 0.6603596340013631,
+          "concern": 0.2525710068106542
+        },
+        "symbolic_intentions_count": 3
+      }
+    }
+  },
+  {
+    "timestamp": "2025-08-04T21:04:10.776717",
+    "processing_time_seconds": 0.20998477935791016,
+    "weighting_strategy": "emotional_priority",
+    "resolution_strategy": "weighted_blend",
+    "final_response": {
+      "output": "*compassionately* Based on logical analysis, the appropriate response involves addressing the user's request systematically.",
+      "tone": "balanced",
+      "priority": "balanced",
+      "confidence": 0.7252599659371521,
+      "emotional_override": false
+    },
+    "source_weights": {
+      "hrm_r": 0.3,
+      "hrm_e": 0.7
+    },
+    "drift_state": {
+      "emotional_drift": 0.0,
+      "logic_drift": 0.0,
+      "fatigue_level": 0.12959528282542074,
+      "stability_score": 0.9611214151523738
+    },
+    "model_outputs": {
+      "hrm_r": {
+        "confidence": 0.7841998864571739,
+        "objective_tone": true,
+        "goals_count": 3
+      },
+      "hrm_e": {
+        "ritual_priority": 0.2783724533524745,
+        "symbolic_threshold": 0.3340469440229694,
+        "mood_signals": {
+          "warmth": 0.39067095927428164,
+          "empathy": 0.6886121705051116,
+          "curiosity": 0.5017717527872427,
+          "concern": 0.2750591537340933
+        },
+        "symbolic_intentions_count": 3
+      }
+    }
+  },
+  {
+    "timestamp": "2025-08-04T21:04:10.995016",
+    "processing_time_seconds": 0.2112429141998291,
+    "weighting_strategy": "harmonic",
+    "resolution_strategy": "weighted_blend",
+    "final_response": {
+      "output": "*supportive conversation with underlying need for connection* Based on logical analysis, the appropriate response involves addressing the user's request systematically.",
+      "tone": "balanced",
+      "priority": "balanced",
+      "confidence": 0.7015182572918564,
+      "emotional_override": false
+    },
+    "source_weights": {
+      "hrm_r": 0.5,
+      "hrm_e": 0.5
+    },
+    "drift_state": {
+      "emotional_drift": 0.0,
+      "logic_drift": 0.0,
+      "fatigue_level": 0.16761899019719276,
+      "stability_score": 0.9497143029408421
+    },
+    "model_outputs": {
+      "hrm_r": {
+        "confidence": 0.7030365145837127,
+        "objective_tone": true,
+        "goals_count": 3
+      },
+      "hrm_e": {
+        "ritual_priority": 0.6337284561962004,
+        "symbolic_threshold": 0.7604741474354405,
+        "mood_signals": {
+          "warmth": 0.4654388784612318,
+          "empathy": 0.7731105400576354,
+          "curiosity": 0.5594734824989436,
+          "concern": 0.14034419336514375
+        },
+        "symbolic_intentions_count": 3
+      }
+    }
+  },
+  {
+    "timestamp": "2025-08-04T21:04:11.212316",
+    "processing_time_seconds": 0.20964741706848145,
+    "weighting_strategy": "harmonic",
+    "resolution_strategy": "weighted_blend",
+    "final_response": {
+      "output": "*supportive conversation with underlying need for connection* Based on logical analysis, the appropriate response involves addressing the user's request systematically.",
+      "tone": "balanced",
+      "priority": "balanced",
+      "confidence": 0.636973243284805,
+      "emotional_override": false
+    },
+    "source_weights": {
+      "hrm_r": 0.5,
+      "hrm_e": 0.5
+    },
+    "drift_state": {
+      "emotional_drift": 0.0,
+      "logic_drift": 0.0,
+      "fatigue_level": 0.18013852513200623,
+      "stability_score": 0.9459584424603982
+    },
+    "model_outputs": {
+      "hrm_r": {
+        "confidence": 0.5739464865696101,
+        "objective_tone": true,
+        "goals_count": 3
+      },
+      "hrm_e": {
+        "ritual_priority": 0.20865891558022476,
+        "symbolic_threshold": 0.2503906986962697,
+        "mood_signals": {
+          "warmth": 0.3723188538401089,
+          "empathy": 0.5906875967326306,
+          "curiosity": 0.5661218249915702,
+          "concern": 0.44985473083511474
+        },
+        "symbolic_intentions_count": 3
+      }
+    }
+  },
+  {
+    "timestamp": "2025-08-04T21:04:11.428310",
+    "processing_time_seconds": 0.20895171165466309,
+    "weighting_strategy": "harmonic",
+    "resolution_strategy": "weighted_blend",
+    "final_response": {
+      "output": "*supportive conversation with underlying need for connection* Based on logical analysis, the appropriate response involves addressing the user's request systematically.",
+      "tone": "balanced",
+      "priority": "balanced",
+      "confidence": 0.608199273896444,
+      "emotional_override": false
+    },
+    "source_weights": {
+      "hrm_r": 0.5,
+      "hrm_e": 0.5
+    },
+    "drift_state": {
+      "emotional_drift": 0.0,
+      "logic_drift": 0.0,
+      "fatigue_level": 0.2163577300618121,
+      "stability_score": 0.9350926809814564
+    },
+    "model_outputs": {
+      "hrm_r": {
+        "confidence": 0.5163985477928881,
+        "objective_tone": true,
+        "goals_count": 3
+      },
+      "hrm_e": {
+        "ritual_priority": 0.6036534154967647,
+        "symbolic_threshold": 0.7243840985961175,
+        "mood_signals": {
+          "warmth": 0.6485982888902165,
+          "empathy": 0.443211678256209,
+          "curiosity": 0.2469755968268455,
+          "concern": 0.2722891955355883
+        },
+        "symbolic_intentions_count": 3
+      }
+    }
+  },
+  {
+    "timestamp": "2025-08-04T21:04:11.644993",
+    "processing_time_seconds": 0.20955514907836914,
+    "weighting_strategy": "harmonic",
+    "resolution_strategy": "weighted_blend",
+    "final_response": {
+      "output": "*supportive conversation with underlying need for connection* Based on logical analysis, the appropriate response involves addressing the user's request systematically.",
+      "tone": "balanced",
+      "priority": "balanced",
+      "confidence": 0.6083276447190967,
+      "emotional_override": false
+    },
+    "source_weights": {
+      "hrm_r": 0.5,
+      "hrm_e": 0.5
+    },
+    "drift_state": {
+      "emotional_drift": 0.0,
+      "logic_drift": 0.0,
+      "fatigue_level": 0.25119723925287274,
+      "stability_score": 0.9246408282241382
+    },
+    "model_outputs": {
+      "hrm_r": {
+        "confidence": 0.5166552894381935,
+        "objective_tone": true,
+        "goals_count": 3
+      },
+      "hrm_e": {
+        "ritual_priority": 0.5806584865176769,
+        "symbolic_threshold": 0.6967901838212123,
+        "mood_signals": {
+          "warmth": 0.47808038011896115,
+          "empathy": 0.6261199313062257,
+          "curiosity": 0.5934385352708595,
+          "concern": 0.48828996255693224
+        },
+        "symbolic_intentions_count": 3
+      }
+    }
+  },
+  {
+    "timestamp": "2025-08-04T21:04:11.861136",
+    "processing_time_seconds": 0.20835041999816895,
+    "weighting_strategy": "harmonic",
+    "resolution_strategy": "weighted_blend",
+    "final_response": {
+      "output": "*supportive conversation with underlying need for connection* Based on logical analysis, the appropriate response involves addressing the user's request systematically.",
+      "tone": "balanced",
+      "priority": "balanced",
+      "confidence": 0.6797537158847691,
+      "emotional_override": false
+    },
+    "source_weights": {
+      "hrm_r": 0.5,
+      "hrm_e": 0.5
+    },
+    "drift_state": {
+      "emotional_drift": 0.0,
+      "logic_drift": 0.0,
+      "fatigue_level": 0.2904494115652684,
+      "stability_score": 0.9128651765304194
+    },
+    "model_outputs": {
+      "hrm_r": {
+        "confidence": 0.6595074317695381,
+        "objective_tone": true,
+        "goals_count": 3
+      },
+      "hrm_e": {
+        "ritual_priority": 0.6542028718732608,
+        "symbolic_threshold": 0.7850434462479129,
+        "mood_signals": {
+          "warmth": 0.442057292986833,
+          "empathy": 0.4062602210431046,
+          "curiosity": 0.3773542055605912,
+          "concern": 0.3958984203119972
+        },
+        "symbolic_intentions_count": 3
+      }
+    }
+  },
+  {
+    "timestamp": "2025-08-04T21:04:12.091113",
+    "processing_time_seconds": 0.22226905822753906,
+    "weighting_strategy": "harmonic",
+    "resolution_strategy": "weighted_blend",
+    "final_response": {
+      "output": "*supportive conversation with underlying need for connection* Based on logical analysis, the appropriate response involves addressing the user's request systematically.",
+      "tone": "balanced",
+      "priority": "balanced",
+      "confidence": 0.6334678180624244,
+      "emotional_override": false
+    },
+    "source_weights": {
+      "hrm_r": 0.5,
+      "hrm_e": 0.5
+    },
+    "drift_state": {
+      "emotional_drift": 0.0,
+      "logic_drift": 0.0,
+      "fatigue_level": 0.3099339525297932,
+      "stability_score": 0.907019814241062
+    },
+    "model_outputs": {
+      "hrm_r": {
+        "confidence": 0.5669356361248488,
+        "objective_tone": true,
+        "goals_count": 3
+      },
+      "hrm_e": {
+        "ritual_priority": 0.3247423494087471,
+        "symbolic_threshold": 0.3896908192904965,
+        "mood_signals": {
+          "warmth": 0.6583458913507434,
+          "empathy": 0.5403148727798799,
+          "curiosity": 0.3100385447762417,
+          "concern": 0.44366942106374474
+        },
+        "symbolic_intentions_count": 3
+      }
+    }
+  }
+]

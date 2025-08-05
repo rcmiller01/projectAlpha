@@ -1,0 +1,15 @@
+{
+  "type": "emotional_presence",
+  "emotion": "neutral",
+  "primary_color": "#9dcc28",
+  "secondary_color": "#cbe589",
+  "pattern": "gentle_glow",
+  "intensity": 0.6576480865478516,
+  "effects": {
+    "background_overlay": 0.1,
+    "edge_glow": true,
+    "particle_density": "light",
+    "animation_speed": "medium"
+  },
+  "timestamp": 1753551858.2126696
+}

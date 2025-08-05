@@ -1,0 +1,20 @@
+{
+  "collar": {
+    "tap": "collar",
+    "long_press": "anchored",
+    "stroke": "breath"
+  },
+  "heart": {
+    "tap": "breath",
+    "long_press": "soft",
+    "two_finger_hold": "kneel"
+  },
+  "cheek": {
+    "tap": "soft",
+    "stroke": "breath"
+  },
+  "hands": {
+    "tap": "touch",
+    "long_press": "devotion"
+  }
+}

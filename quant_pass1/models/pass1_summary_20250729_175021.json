@@ -1,0 +1,46 @@
+{
+  "success": true,
+  "target_met": true,
+  "total_iterations": 1,
+  "best_result": {
+    "iteration": 1,
+    "quant_level": "q8_0",
+    "model_path": "quant_pass1\\models\\Llama-2-13b-chat-hf_quantized_q8_0_iter1",
+    "model_size_mb": 15386.254974955884,
+    "emotional_metrics": {
+      "response_fluency": 0.824,
+      "emotional_intensity": 0.592,
+      "emotional_match": 0.6628571428571428,
+      "empathy_score": 0.52,
+      "metaphor_usage": 0.688,
+      "sentiment_accuracy": 0.7
+    },
+    "quantization_time": 0.0,
+    "evaluation_time": 0.0007245540618896484,
+    "success": true,
+    "error_message": ""
+  },
+  "baseline_score": 0.6621142857142857,
+  "final_degradation": 0.0,
+  "results": [
+    {
+      "iteration": 2,
+      "quant_level": "q6_K",
+      "model_path": "quant_pass1\\models\\Llama-2-13b-chat-hf_quantized_q6_K_iter2",
+      "model_size_mb": 12867.630980263593,
+      "emotional_metrics": {
+        "response_fluency": 0.824,
+        "emotional_intensity": 0.592,
+        "emotional_match": 0.6628571428571428,
+        "empathy_score": 0.52,
+        "metaphor_usage": 0.688,
+        "sentiment_accuracy": 0.7
+      },
+      "quantization_time": 0.0,
+      "evaluation_time": 0.0006256103515625,
+      "success": true,
+      "error_message": ""
+    }
+  ],
+  "timestamp": "2025-07-29T17:50:21.951531"
+}

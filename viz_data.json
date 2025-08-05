@@ -1,0 +1,28 @@
+{
+  "model_info": {
+    "model_name": "llama2_13b",
+    "quant_level": "8bit",
+    "pass_type": "pass_1",
+    "pass_count": 1
+  },
+  "iterations": [
+    {
+      "iteration": 1,
+      "timestamp": "2025-07-29T17:43:06.842983",
+      "overall_score": 0.8344999999999999,
+      "response_fluency": 0.88,
+      "emotional_intensity": 0.82,
+      "emotional_match": 0.85,
+      "empathy_score": 0.83,
+      "model_size_mb": 15000.0,
+      "notes": "8-bit quantization with better emotional preservation"
+    }
+  ],
+  "summary": {
+    "total_iterations": 1,
+    "best_score": 0.8344999999999999,
+    "latest_score": 0.8344999999999999,
+    "improvement_trend": 0,
+    "avg_model_size": 15000.0
+  }
+}

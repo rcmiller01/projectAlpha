@@ -1,0 +1,13 @@
+{
+  "unified_ai": {
+    "calm": 0.3,
+    "focused": 0.4,
+    "curious": 0.35,
+    "devoted": 0.6,
+    "fiery": 0.7,
+    "playful": 0.6,
+    "distressed": 0.85,
+    "unraveled": 0.9,
+    "adrift": 0.88
+  }
+}

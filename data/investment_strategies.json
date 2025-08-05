@@ -1,0 +1,116 @@
+{
+  "SPY_credit_spread_1753550383": {
+    "strategy_id": "SPY_credit_spread_1753550383",
+    "ticker": "SPY",
+    "strategy_type": "credit_spread",
+    "legs": [
+      {
+        "action": "sell",
+        "option_type": "put",
+        "strike": 455.0,
+        "premium": 3.2,
+        "quantity": 1,
+        "delta": -0.25,
+        "implied_volatility": 0.0
+      },
+      {
+        "action": "buy",
+        "option_type": "put",
+        "strike": 450.0,
+        "premium": 1.6,
+        "quantity": 1,
+        "delta": -0.18,
+        "implied_volatility": 0.0
+      }
+    ],
+    "expiration_date": "2025-08-30T13:19:43.452618",
+    "entry_cost": -160.0,
+    "max_gain": 160.0,
+    "max_loss": 340.0,
+    "breakeven_points": [
+      453.4
+    ],
+    "probability_of_profit": 0.65,
+    "risk_level": "moderate",
+    "plain_english_review": "This credit spread strategy on SPY involves collect premium by selling closer-to-money option and buying further out-of-money option. Your maximum potential gain is $160.00 and maximum risk is $340.00. The probability of profit is 65.0%, which gives you good odds of success. This strategy works best when high iv, neutral to directional bias.",
+    "recommendation": "This strategy has moderate risk - appropriate if you're comfortable with the potential loss amount.",
+    "emotional_context": "There's a balance of opportunity and risk here that could work well for building confidence. The risk is higher than the reward, so this is more about probability than big gains. This could be a good learning experience to build your options trading confidence.",
+    "created_at": 1753550383.452649
+  },
+  "SPY_credit_spread_1753555677": {
+    "strategy_id": "SPY_credit_spread_1753555677",
+    "ticker": "SPY",
+    "strategy_type": "credit_spread",
+    "legs": [
+      {
+        "action": "sell",
+        "option_type": "put",
+        "strike": 455.0,
+        "premium": 3.2,
+        "quantity": 1,
+        "delta": -0.25,
+        "implied_volatility": 0.0
+      },
+      {
+        "action": "buy",
+        "option_type": "put",
+        "strike": 450.0,
+        "premium": 1.6,
+        "quantity": 1,
+        "delta": -0.18,
+        "implied_volatility": 0.0
+      }
+    ],
+    "expiration_date": "2025-08-30T14:47:57.776414",
+    "entry_cost": -160.0,
+    "max_gain": 160.0,
+    "max_loss": 340.0,
+    "breakeven_points": [
+      453.4
+    ],
+    "probability_of_profit": 0.65,
+    "risk_level": "moderate",
+    "plain_english_review": "This credit spread strategy on SPY involves collect premium by selling closer-to-money option and buying further out-of-money option. Your maximum potential gain is $160.00 and maximum risk is $340.00. The probability of profit is 65.0%, which gives you good odds of success. This strategy works best when high iv, neutral to directional bias.",
+    "recommendation": "This strategy has moderate risk - appropriate if you're comfortable with the potential loss amount.",
+    "emotional_context": "There's a balance of opportunity and risk here that could work well for building confidence. The risk is higher than the reward, so this is more about probability than big gains. This could be a good learning experience to build your options trading confidence.",
+    "created_at": 1753555677.776464
+  },
+  "SPY_credit_spread_1753650518": {
+    "strategy_id": "SPY_credit_spread_1753650518",
+    "ticker": "SPY",
+    "strategy_type": "credit_spread",
+    "legs": [
+      {
+        "action": "sell",
+        "option_type": "put",
+        "strike": 550.0,
+        "premium": 2.5,
+        "quantity": 1,
+        "delta": 0.0,
+        "implied_volatility": 0.0
+      },
+      {
+        "action": "buy",
+        "option_type": "put",
+        "strike": 545.0,
+        "premium": 1.2,
+        "quantity": 1,
+        "delta": 0.0,
+        "implied_volatility": 0.0
+      }
+    ],
+    "expiration_date": "2025-08-15T00:00:00",
+    "entry_cost": -130.0,
+    "max_gain": 130.0,
+    "max_loss": 370.0,
+    "breakeven_points": [
+      548.7
+    ],
+    "probability_of_profit": 0.65,
+    "risk_level": "moderate",
+    "plain_english_review": "This credit spread strategy on SPY involves collect premium by selling closer-to-money option and buying further out-of-money option. Your maximum potential gain is $130.00 and maximum risk is $370.00. The probability of profit is 65.0%, which gives you good odds of success. This strategy works best when high iv, neutral to directional bias.",
+    "recommendation": "This strategy has moderate risk - appropriate if you're comfortable with the potential loss amount.",
+    "emotional_context": "There's a balance of opportunity and risk here that could work well for building confidence. The risk is higher than the reward, so this is more about probability than big gains. This could be a good learning experience to build your options trading confidence.",
+    "created_at": 1753650518.9940712
+  }
+}

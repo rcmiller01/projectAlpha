@@ -1,0 +1,88 @@
+{
+  "longing_score": 1.0,
+  "last_interaction_time": 1753536892.9740648,
+  "silence_duration": 0.003160715103149414,
+  "symbolic_tags": {
+    "sym_1753536892_4104": {
+      "tag": "trust",
+      "intensity": 0.9,
+      "created_at": 1753536892.9745088,
+      "context": "deep_trust_established",
+      "emotional_resonance": "secure_vulnerable_connection",
+      "last_triggered": null,
+      "trigger_count": 0,
+      "associated_scene": null
+    },
+    "sym_1753536892_8563": {
+      "tag": "moonlight",
+      "intensity": 0.6,
+      "created_at": 1753536892.972182,
+      "context": "user_preference",
+      "emotional_resonance": "personal_symbolic_resonance",
+      "last_triggered": null,
+      "trigger_count": 0,
+      "associated_scene": null
+    },
+    "sym_1753536892_9006": {
+      "tag": "whisper",
+      "intensity": 0.6,
+      "created_at": 1753536892.9725928,
+      "context": "user_preference",
+      "emotional_resonance": "personal_symbolic_resonance",
+      "last_triggered": null,
+      "trigger_count": 0,
+      "associated_scene": null
+    }
+  },
+  "intimate_scenes": {
+    "scene_1753536892_9193": {
+      "scene_id": "scene_1753536892_9193",
+      "content_summary": "Shared vulnerable moment under starlight",
+      "emotional_peak": 0.9,
+      "symbolic_tags": [
+        "moonlight",
+        "breath",
+        "trust"
+      ],
+      "timestamp": 1753536892.973178,
+      "longing_contribution": 0.5,
+      "resurrection_potential": 0.78
+    }
+  },
+  "longing_history": [
+    {
+      "timestamp": 1753536892.9702797,
+      "longing_score": 0.15,
+      "delta": 0.15,
+      "reason": "closeness_event_0.3",
+      "event": "manual_update"
+    },
+    {
+      "timestamp": 1753536892.970904,
+      "longing_score": 0.15,
+      "silence_duration": 0.0014407634735107422,
+      "event": "interaction"
+    },
+    {
+      "timestamp": 1753536892.9736254,
+      "longing_score": 1.0,
+      "delta": 0.18000000000000002,
+      "reason": "closeness_event_0.36000000000000004",
+      "event": "manual_update"
+    },
+    {
+      "timestamp": 1753536892.9740648,
+      "longing_score": 1.0,
+      "silence_duration": 0.003160715103149414,
+      "event": "interaction"
+    }
+  ],
+  "lust_score": 0.66,
+  "last_closeness_event": 1753536892.9736226,
+  "trust_score": 0.9,
+  "desire_decay": 0.0,
+  "symbol_preferences": [
+    "moonlight",
+    "whisper"
+  ]
+}

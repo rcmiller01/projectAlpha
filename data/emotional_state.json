@@ -1,0 +1,39 @@
+{
+  "valence": 0.2,
+  "arousal": 0.4,
+  "dominant_emotion": "contemplative",
+  "stability": 0.85,
+  "emotional_complexity": 0.6,
+  "mood_signals": {
+    "warmth": 0.7,
+    "empathy": 0.8,
+    "curiosity": 0.6,
+    "concern": 0.3,
+    "joy": 0.4,
+    "peace": 0.5
+  },
+  "symbolic_context": {
+    "primary_symbols": ["growth", "connection", "understanding"],
+    "archetypal_presence": "wise_companion",
+    "metaphorical_framework": "journey_of_discovery"
+  },
+  "drift_indicators": {
+    "emotional_drift": 0.15,
+    "logic_drift": 0.08,
+    "authenticity_score": 0.92,
+    "connection_strength": 0.78
+  },
+  "interaction_preferences": {
+    "response_style": "reflective_and_warm",
+    "communication_depth": "deep_with_surface_accessibility",
+    "emotional_availability": "high",
+    "symbolic_integration": "moderate_to_high"
+  },
+  "timestamp": "2025-08-04T12:00:00Z",
+  "session_context": {
+    "interaction_count": 0,
+    "emotional_peaks_today": [],
+    "connection_quality": "establishing",
+    "user_emotional_state": "unknown"
+  }
+}

@@ -1,0 +1,206 @@
+[
+  {
+    "emotion": "neutral",
+    "secondary_emotion": null,
+    "intensity": "whisper",
+    "duration": 5.0,
+    "channels": [
+      "ui_ambient"
+    ],
+    "timestamp": 1753551832.490983,
+    "context": {
+      "emotion": "longing",
+      "intensity": 0.21,
+      "duration": 5.0
+    }
+  },
+  {
+    "emotion": "neutral",
+    "secondary_emotion": null,
+    "intensity": "whisper",
+    "duration": 5.0,
+    "channels": [
+      "ui_ambient"
+    ],
+    "timestamp": 1753551834.5071023,
+    "context": {
+      "emotion": "joy",
+      "intensity": 0.21,
+      "duration": 5.0
+    }
+  },
+  {
+    "emotion": "neutral",
+    "secondary_emotion": null,
+    "intensity": "whisper",
+    "duration": 5.0,
+    "channels": [
+      "ui_ambient"
+    ],
+    "timestamp": 1753551836.512099,
+    "context": {
+      "emotion": "peace",
+      "intensity": 0.21,
+      "duration": 5.0
+    }
+  },
+  {
+    "emotion": "neutral",
+    "secondary_emotion": null,
+    "intensity": "whisper",
+    "duration": 5.0,
+    "channels": [
+      "ui_ambient"
+    ],
+    "timestamp": 1753551838.5187383,
+    "context": {
+      "emotion": "anticipation",
+      "intensity": 0.21,
+      "duration": 5.0
+    }
+  },
+  {
+    "emotion": "neutral",
+    "secondary_emotion": null,
+    "intensity": "gentle",
+    "duration": 5.0,
+    "channels": [
+      "voice_tone",
+      "ui_ambient",
+      "voice_tone"
+    ],
+    "timestamp": 1753551841.5283859,
+    "context": {
+      "emotion": "longing",
+      "intensity": 0.48999999999999994,
+      "duration": 5.0
+    }
+  },
+  {
+    "emotion": "neutral",
+    "secondary_emotion": null,
+    "intensity": "gentle",
+    "duration": 5.0,
+    "channels": [
+      "voice_tone",
+      "ui_ambient",
+      "voice_tone"
+    ],
+    "timestamp": 1753551843.5364652,
+    "context": {
+      "emotion": "joy",
+      "intensity": 0.48999999999999994,
+      "duration": 5.0
+    }
+  },
+  {
+    "emotion": "neutral",
+    "secondary_emotion": null,
+    "intensity": "gentle",
+    "duration": 5.0,
+    "channels": [
+      "voice_tone",
+      "ui_ambient",
+      "voice_tone"
+    ],
+    "timestamp": 1753551845.5394151,
+    "context": {
+      "emotion": "peace",
+      "intensity": 0.48999999999999994,
+      "duration": 5.0
+    }
+  },
+  {
+    "emotion": "neutral",
+    "secondary_emotion": null,
+    "intensity": "gentle",
+    "duration": 5.0,
+    "channels": [
+      "voice_tone",
+      "ui_ambient",
+      "voice_tone"
+    ],
+    "timestamp": 1753551847.5546446,
+    "context": {
+      "emotion": "anticipation",
+      "intensity": 0.48999999999999994,
+      "duration": 5.0
+    }
+  },
+  {
+    "emotion": "neutral",
+    "secondary_emotion": null,
+    "intensity": "strong",
+    "duration": 5.0,
+    "channels": [
+      "ui_ambient",
+      "voice_tone",
+      "voice_tone",
+      "audio_ambient",
+      "haptic"
+    ],
+    "timestamp": 1753551850.5821517,
+    "context": {
+      "emotion": "longing",
+      "intensity": 0.7,
+      "duration": 5.0
+    }
+  },
+  {
+    "emotion": "neutral",
+    "secondary_emotion": null,
+    "intensity": "strong",
+    "duration": 5.0,
+    "channels": [
+      "ui_ambient",
+      "voice_tone",
+      "voice_tone",
+      "audio_ambient",
+      "haptic"
+    ],
+    "timestamp": 1753551852.5854547,
+    "context": {
+      "emotion": "joy",
+      "intensity": 0.7,
+      "duration": 5.0
+    }
+  },
+  {
+    "emotion": "neutral",
+    "secondary_emotion": null,
+    "intensity": "strong",
+    "duration": 5.0,
+    "channels": [
+      "ui_ambient",
+      "voice_tone",
+      "voice_tone",
+      "audio_ambient",
+      "haptic"
+    ],
+    "timestamp": 1753551854.5994377,
+    "context": {
+      "emotion": "peace",
+      "intensity": 0.7,
+      "duration": 5.0
+    }
+  },
+  {
+    "emotion": "neutral",
+    "secondary_emotion": null,
+    "intensity": "strong",
+    "duration": 5.0,
+    "channels": [
+      "ui_ambient",
+      "voice_tone",
+      "voice_tone",
+      "audio_ambient",
+      "haptic"
+    ],
+    "timestamp": 1753551856.6023629,
+    "context": {
+      "emotion": "anticipation",
+      "intensity": 0.7,
+      "duration": 5.0
+    }
+  }
+]

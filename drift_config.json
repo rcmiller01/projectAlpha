@@ -1,0 +1,9 @@
+{
+  "auto_generate": true,
+  "generation_interval_hours": 3,
+  "require_approval_threshold": 0.65,
+  "max_history_entries": 75,
+  "drift_sensitivity": 0.7,
+  "last_generation": "2025-08-04T21:26:54.309482Z",
+  "last_updated": "2025-08-04T21:31:49.533224Z"
+}

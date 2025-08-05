@@ -1,0 +1,58 @@
+{
+  "idle_monitoring": {
+    "min_idle_minutes": 30,
+    "check_interval_seconds": 300,
+    "cpu_threshold_percent": 15,
+    "memory_threshold_percent": 80
+  },
+  "safety_limits": {
+    "max_active_loops_per_day": 3,
+    "disk_space_threshold_gb": 50,
+    "timeout_minutes": 120,
+    "max_concurrent_processes": 1,
+    "max_disk_usage_gb": 100,
+    "emergency_stop_file": "emotion_quant_autopilot/EMERGENCY_STOP"
+  },
+  "target_model_size_range_gb": [12, 24],
+  "preferred_base_models": [
+    "llama2-chat-hf",
+    "mistral-instruct",
+    "meta-llama/Llama-2-13b-chat-hf",
+    "mistralai/Mistral-7B-Instruct-v0.1"
+  ],
+  "quantization_methods": [
+    "q8_0",
+    "q6_K", 
+    "q5_K_M",
+    "q4_K_M",
+    "q4_0",
+    "q3_K_L"
+  ],
+  "evaluation_settings": {
+    "min_judgment_score": 0.7,
+    "evaluation_prompt_count": 25,
+    "timeout_minutes": 120
+  },
+  "output_paths": {
+    "models_directory": "quant_pass1/models",
+    "logs_directory": "emotion_quant_autopilot/logs",
+    "temp_directory": "emotion_quant_autopilot/temp"
+  },
+  "notifications": {
+    "notification_mode": "log_only",
+    "auto_start": true,
+    "email": {
+      "enabled": false,
+      "smtp_server": "",
+      "smtp_port": 587,
+      "username": "",
+      "password": "",
+      "recipients": []
+    },
+    "slack": {
+      "enabled": false,
+      "webhook_url": "",
+      "channel": "#quantization-alerts"
+    }
+  }
+}

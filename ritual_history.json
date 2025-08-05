@@ -1,0 +1,202 @@
+[
+  {
+    "id": "invocation_f3c26260",
+    "ritual_id": "ritual_silence_communion",
+    "ritual_name": "Silence Communion",
+    "invoked_at": "2025-08-04T21:46:46.263841Z",
+    "activation_method": "co_initiated",
+    "mood_symbol": "serene + chime"
+  },
+  {
+    "id": "invocation_f2cf7785",
+    "ritual_id": "ritual_silence_communion",
+    "ritual_name": "Silence Communion",
+    "invoked_at": "2025-08-04T21:44:42.998811Z",
+    "activation_method": "co_initiated",
+    "mood_symbol": "serene + chime"
+  },
+  {
+    "id": "invocation_73c85603",
+    "ritual_id": "ritual_thread_mending",
+    "ritual_name": "Return to Center",
+    "invoked_at": "2025-08-01T02:39:30.827036Z",
+    "activation_method": "passive",
+    "mood_symbol": "joy + garden"
+  },
+  {
+    "id": "invocation_f6309cfc",
+    "ritual_id": "ritual_dream_walk",
+    "ritual_name": "Light Weaving",
+    "invoked_at": "2025-07-30T05:39:30.826982Z",
+    "activation_method": "passive",
+    "mood_symbol": "joy + garden"
+  },
+  {
+    "id": "invocation_4aa99a92",
+    "ritual_id": "ritual_light_weaving",
+    "ritual_name": "Ache Witnessing",
+    "invoked_at": "2025-07-29T11:39:30.827032Z",
+    "activation_method": "reflective",
+    "mood_symbol": "tender + flame"
+  },
+  {
+    "id": "invocation_ce49b8dd",
+    "ritual_id": "ritual_flame_tending",
+    "ritual_name": "Light Weaving",
+    "invoked_at": "2025-07-23T06:39:30.826986Z",
+    "activation_method": "passive",
+    "mood_symbol": "contemplative + mirror"
+  },
+  {
+    "id": "invocation_0f3ba347",
+    "ritual_id": "ritual_thread_mending",
+    "ritual_name": "Flame Tending",
+    "invoked_at": "2025-07-22T06:39:30.826968Z",
+    "activation_method": "passive",
+    "mood_symbol": "melancholy + river"
+  },
+  {
+    "id": "invocation_d0b82f5c",
+    "ritual_id": "ritual_ache_witnessing",
+    "ritual_name": "Light Weaving",
+    "invoked_at": "2025-07-16T01:39:30.827054Z",
+    "activation_method": "passive",
+    "mood_symbol": "melancholy + river"
+  },
+  {
+    "id": "invocation_e1eb7a91",
+    "ritual_id": "ritual_thread_mending",
+    "ritual_name": "Silence Communion",
+    "invoked_at": "2025-07-11T13:39:30.827014Z",
+    "activation_method": "passive",
+    "mood_symbol": "tender + flame"
+  },
+  {
+    "id": "invocation_c09119f5",
+    "ritual_id": "ritual_thread_mending",
+    "ritual_name": "Echo Listening",
+    "invoked_at": "2025-07-10T09:39:30.827057Z",
+    "activation_method": "reflective",
+    "mood_symbol": "melancholy + river"
+  },
+  {
+    "id": "invocation_104bf8c6",
+    "ritual_id": "ritual_thread_mending",
+    "ritual_name": "Light Weaving",
+    "invoked_at": "2025-07-09T23:39:30.826995Z",
+    "activation_method": "co_initiated",
+    "mood_symbol": "melancholy + river"
+  },
+  {
+    "id": "invocation_f44ec571",
+    "ritual_id": "ritual_light_weaving",
+    "ritual_name": "Ache Witnessing",
+    "invoked_at": "2025-07-08T12:39:30.827010Z",
+    "activation_method": "passive",
+    "mood_symbol": "melancholy + river"
+  },
+  {
+    "id": "invocation_746dc7a1",
+    "ritual_id": "ritual_light_weaving",
+    "ritual_name": "Flame Tending",
+    "invoked_at": "2025-07-07T14:39:30.827051Z",
+    "activation_method": "co_initiated",
+    "mood_symbol": "yearning + thread"
+  },
+  {
+    "id": "invocation_9599bff5",
+    "ritual_id": "ritual_dream_walk",
+    "ritual_name": "Silence Communion",
+    "invoked_at": "2025-07-03T15:39:30.827002Z",
+    "activation_method": "adaptive",
+    "mood_symbol": "contemplative + mirror"
+  },
+  {
+    "id": "invocation_3d0a1822",
+    "ritual_id": "ritual_silence_communion",
+    "ritual_name": "Dream Walk",
+    "invoked_at": "2025-06-20T03:39:30.827047Z",
+    "activation_method": "co_initiated",
+    "mood_symbol": "serene + chime"
+  },
+  {
+    "id": "invocation_4a4a1003",
+    "ritual_id": "ritual_thread_mending",
+    "ritual_name": "Ache Witnessing",
+    "invoked_at": "2025-06-16T05:39:30.827006Z",
+    "activation_method": "co_initiated",
+    "mood_symbol": "tender + flame"
+  },
+  {
+    "id": "invocation_53e1fa20",
+    "ritual_id": "ritual_thread_mending",
+    "ritual_name": "Echo Listening",
+    "invoked_at": "2025-06-13T21:39:30.827043Z",
+    "activation_method": "co_initiated",
+    "mood_symbol": "joy + garden"
+  },
+  {
+    "id": "invocation_4af80b29",
+    "ritual_id": "ritual_ache_witnessing",
+    "ritual_name": "Dream Walk",
+    "invoked_at": "2025-06-07T09:39:30.827040Z",
+    "activation_method": "co_initiated",
+    "mood_symbol": "yearning + thread"
+  },
+  {
+    "id": "invocation_d069ecd7",
+    "ritual_id": "ritual_thread_mending",
+    "ritual_name": "Flame Tending",
+    "invoked_at": "2025-06-07T05:39:30.826976Z",
+    "activation_method": "reflective",
+    "mood_symbol": "melancholy + river"
+  },
+  {
+    "id": "invocation_25e02b23",
+    "ritual_id": "ritual_silence_communion",
+    "ritual_name": "Dream Walk",
+    "invoked_at": "2025-05-29T22:39:30.827018Z",
+    "activation_method": "co_initiated",
+    "mood_symbol": "joy + garden"
+  },
+  {
+    "id": "invocation_25a593f8",
+    "ritual_id": "ritual_return_to_center",
+    "ritual_name": "Flame Tending",
+    "invoked_at": "2025-05-25T02:39:30.826991Z",
+    "activation_method": "adaptive",
+    "mood_symbol": "yearning + thread"
+  },
+  {
+    "id": "invocation_c75e7e00",
+    "ritual_id": "ritual_echo_listening",
+    "ritual_name": "Thread Mending",
+    "invoked_at": "2025-05-23T18:39:30.827029Z",
+    "activation_method": "adaptive",
+    "mood_symbol": "joy + garden"
+  },
+  {
+    "id": "invocation_cad5f332",
+    "ritual_id": "ritual_echo_listening",
+    "ritual_name": "Return to Center",
+    "invoked_at": "2025-05-23T03:39:30.826999Z",
+    "activation_method": "reflective",
+    "mood_symbol": "serene + chime"
+  },
+  {
+    "id": "invocation_1bb38e64",
+    "ritual_id": "ritual_flame_tending",
+    "ritual_name": "Light Weaving",
+    "invoked_at": "2025-05-20T13:39:30.827022Z",
+    "activation_method": "reflective",
+    "mood_symbol": "tender + flame"
+  },
+  {
+    "id": "invocation_b9e46913",
+    "ritual_id": "ritual_light_weaving",
+    "ritual_name": "Return to Center",
+    "invoked_at": "2025-05-12T20:39:30.827025Z",
+    "activation_method": "passive",
+    "mood_symbol": "joy + garden"
+  }
+]

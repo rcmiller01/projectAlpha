@@ -1,0 +1,118 @@
+{
+  "demo_investor": {
+    "primary_motivator": "achievement",
+    "risk_tolerance": "moderate",
+    "celebration_style": "encouraging",
+    "support_style": "analytical",
+    "communication_preference": "direct",
+    "goal_approach": "systematic"
+  },
+  "test_user": {
+    "primary_motivator": "achievement",
+    "risk_tolerance": "moderate",
+    "celebration_style": "encouraging",
+    "support_style": "analytical",
+    "communication_preference": "direct",
+    "goal_approach": "systematic",
+    "responds_to_excitement": true
+  },
+  "verification_user": {
+    "primary_motivator": "achievement",
+    "risk_tolerance": "moderate",
+    "celebration_style": "encouraging",
+    "support_style": "analytical",
+    "communication_preference": "direct",
+    "goal_approach": "systematic",
+    "needs_emotional_security": true
+  },
+  "perf_user_0": {
+    "primary_motivator": "achievement",
+    "risk_tolerance": "moderate",
+    "celebration_style": "encouraging",
+    "support_style": "analytical",
+    "communication_preference": "direct",
+    "goal_approach": "systematic",
+    "needs_emotional_security": true
+  },
+  "perf_user_1": {
+    "primary_motivator": "achievement",
+    "risk_tolerance": "moderate",
+    "celebration_style": "encouraging",
+    "support_style": "analytical",
+    "communication_preference": "direct",
+    "goal_approach": "systematic",
+    "needs_emotional_security": true
+  },
+  "perf_user_2": {
+    "primary_motivator": "achievement",
+    "risk_tolerance": "moderate",
+    "celebration_style": "encouraging",
+    "support_style": "analytical",
+    "communication_preference": "direct",
+    "goal_approach": "systematic",
+    "needs_emotional_security": true
+  },
+  "perf_user_3": {
+    "primary_motivator": "achievement",
+    "risk_tolerance": "moderate",
+    "celebration_style": "encouraging",
+    "support_style": "analytical",
+    "communication_preference": "direct",
+    "goal_approach": "systematic",
+    "needs_emotional_security": true
+  },
+  "perf_user_4": {
+    "primary_motivator": "achievement",
+    "risk_tolerance": "moderate",
+    "celebration_style": "encouraging",
+    "support_style": "analytical",
+    "communication_preference": "direct",
+    "goal_approach": "systematic",
+    "needs_emotional_security": true
+  },
+  "perf_user_5": {
+    "primary_motivator": "achievement",
+    "risk_tolerance": "moderate",
+    "celebration_style": "encouraging",
+    "support_style": "analytical",
+    "communication_preference": "direct",
+    "goal_approach": "systematic",
+    "needs_emotional_security": true
+  },
+  "perf_user_6": {
+    "primary_motivator": "achievement",
+    "risk_tolerance": "moderate",
+    "celebration_style": "encouraging",
+    "support_style": "analytical",
+    "communication_preference": "direct",
+    "goal_approach": "systematic",
+    "needs_emotional_security": true
+  },
+  "perf_user_7": {
+    "primary_motivator": "achievement",
+    "risk_tolerance": "moderate",
+    "celebration_style": "encouraging",
+    "support_style": "analytical",
+    "communication_preference": "direct",
+    "goal_approach": "systematic",
+    "needs_emotional_security": true
+  },
+  "perf_user_8": {
+    "primary_motivator": "achievement",
+    "risk_tolerance": "moderate",
+    "celebration_style": "encouraging",
+    "support_style": "analytical",
+    "communication_preference": "direct",
+    "goal_approach": "systematic",
+    "needs_emotional_security": true
+  },
+  "perf_user_9": {
+    "primary_motivator": "achievement",
+    "risk_tolerance": "moderate",
+    "celebration_style": "encouraging",
+    "support_style": "analytical",
+    "communication_preference": "direct",
+    "goal_approach": "systematic",
+    "needs_emotional_security": true
+  }
+}

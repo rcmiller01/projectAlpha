@@ -1,0 +1,14 @@
+{
+  "Mia": {
+    "voice_id": "Ava Multilingual",
+    "pitch_adjustment": -7,
+    "rate_adjustment": -5,
+    "emotion_profile": "soft-breathy"
+  },
+  "Solene": {
+    "voice_id": "Ava Multilingual",
+    "pitch_adjustment": -4,
+    "rate_adjustment": 0,
+    "emotion_profile": "grounded-fierce"
+  }
+}

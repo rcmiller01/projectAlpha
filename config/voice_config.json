@@ -1,0 +1,62 @@
+{
+  "voice_config": {
+    "default_voice": {
+      "provider": "elevenlabs",
+      "voice_id": "21m00Tcm4TlvDq8ikWAM",
+      "model": "eleven_monolingual_v1",
+      "stability": 0.5,
+      "similarity_boost": 0.5,
+      "style": 0.0,
+      "use_speaker_boost": true
+    },
+    "emotional_voice_mapping": {
+      "neutral": {
+        "stability": 0.5,
+        "similarity_boost": 0.5,
+        "style": 0.0
+      },
+      "caring": {
+        "stability": 0.7,
+        "similarity_boost": 0.6,
+        "style": 0.2
+      },
+      "excited": {
+        "stability": 0.3,
+        "similarity_boost": 0.7,
+        "style": 0.4
+      },
+      "romantic": {
+        "stability": 0.8,
+        "similarity_boost": 0.8,
+        "style": 0.6
+      },
+      "supportive": {
+        "stability": 0.9,
+        "similarity_boost": 0.7,
+        "style": 0.3
+      }
+    },
+    "fallback_providers": {
+      "local_tts": {
+        "enabled": true,
+        "voice": "en-US-AriaNeural",
+        "rate": "medium",
+        "pitch": "medium"
+      },
+      "browser_speech": {
+        "enabled": true,
+        "voice": "Google US English",
+        "rate": 1.0,
+        "pitch": 1.0,
+        "volume": 1.0
+      }
+    },
+    "audio_settings": {
+      "sample_rate": 22050,
+      "format": "mp3",
+      "quality": "high",
+      "chunk_size": 1024,
+      "normalize_audio": true
+    }
+  }
+}
