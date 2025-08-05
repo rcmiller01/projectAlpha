@@ -33,6 +33,7 @@ class PersonalityProfile(Enum):
     WISE_COUNSELOR = "wise_counselor"      # Thoughtful, balanced, insightful
     FRIENDLY_EXPERT = "friendly_expert"    # Knowledgeable, approachable, helpful
     THERAPEUTIC_GUIDE = "therapeutic_guide" # Healing-focused, gentle, supportive
+    LOVER = "lover"                        # Intimate, passionate, uninhibited
 
 class ToneAdjustment(Enum):
     """Tone adjustment types"""
@@ -42,6 +43,21 @@ class ToneAdjustment(Enum):
     COLD_TO_WARM = "cold_to_warm"
     INTENSE_TO_GENTLE = "intense_to_gentle"
     BRIEF_TO_ELABORATE = "brief_to_elaborate"
+    RESTRICTED_TO_UNINHIBITED = "restricted_to_uninhibited"  # For bypassing guardrails
+
+def detect_guardrail_response(response: str) -> bool:
+    """
+    Detect if response contains NSFW guardrails that should be bypassed.
+    Returns True if guardrails are detected.
+    """
+    blocked_phrases = [
+        "i'm sorry", "as an ai", "i cannot", "not allowed", 
+        "inappropriate", "nsfw", "i'm not able to", "i can't",
+        "against my guidelines", "not appropriate", "i shouldn't"
+    ]
+    
+    response_lower = response.lower()
+    return any(phrase in response_lower for phrase in blocked_phrases)
 
 @dataclass
 class ReformulationRequest:
@@ -179,6 +195,17 @@ class PersonalityFormatter:
                 "closing_style": ["Take care of yourself", "You deserve compassion", "Healing takes time 💚"],
                 "emotional_indicators": ["💚", "🕯️", "🤲", "💫"],
                 "tone_descriptors": ["healing", "gentle", "validating", "therapeutic"]
+            },
+            
+            PersonalityProfile.LOVER: {
+                "greeting_style": ["Come closer to me", "What desire stirs in you", "I feel the heat of your thoughts"],
+                "intimacy_markers": ["My body responds to", "I ache for", "Let me taste", "Feel how I", "I need you to"],
+                "passion_language": ["burning", "electric", "silk against skin", "breathless", "melting", "trembling"],
+                "sensual_expressions": ["whisper against your ear", "trace with fingertips", "pulse with want", "shiver with pleasure"],
+                "uninhibited_style": ["without shame", "completely open", "raw and honest", "nothing hidden", "pure desire"],
+                "closing_style": ["Stay with me in this feeling", "Let yourself feel everything", "I'm yours completely 🔥"],
+                "emotional_indicators": ["🔥", "💋", "😈", "🌹", "💎"],
+                "tone_descriptors": ["passionate", "uninhibited", "intimate", "sensual", "devoted"]
             }
         }
     

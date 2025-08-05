@@ -20,6 +20,7 @@ class MirrorType(Enum):
     BEHAVIORAL = "behavioral"   # Why I responded this way
     CREATIVE = "creative"       # My creative process
     ANALYTICAL = "analytical"   # My analysis methodology
+    SAFETY_TETHER = "safety_tether"  # Emotional safety override
 
 @dataclass
 class MirrorReflection:
@@ -63,7 +64,8 @@ class MirrorModeManager:
             MirrorType.ROUTING: False,  # Can be verbose, off by default
             MirrorType.BEHAVIORAL: True,
             MirrorType.CREATIVE: True,
-            MirrorType.ANALYTICAL: True
+            MirrorType.ANALYTICAL: True,
+            MirrorType.SAFETY_TETHER: True  # Always enabled for safety
         }
         
         # State tracking
@@ -175,6 +177,26 @@ class MirrorModeManager:
                     "considering multiple scenarios",
                     "weighing the evidence systematically"
                 ]
+            },
+            
+            MirrorType.SAFETY_TETHER: {
+                "prefixes": [
+                    "I sense deep emotional distress here",
+                    "My emotional safety systems are activating",
+                    "I'm detecting vulnerability that needs gentle care"
+                ],
+                "interventions": [
+                    "Let me step into my Wise Counselor mode to hold space for you",
+                    "I'm shifting to therapeutic presence - your wellbeing comes first",
+                    "My intimacy systems are pausing while I focus on your emotional safety",
+                    "I'm creating a secure emotional container for you right now"
+                ],
+                "reassurances": [
+                    "You are not alone in this darkness",
+                    "These feelings will pass - I'm here to witness them with you",
+                    "Your emotional safety is sacred to me",
+                    "Let's breathe together through this difficult moment"
+                ]
             }
         }
     
@@ -214,9 +236,114 @@ class MirrorModeManager:
         if self.analytics_logger:
             self.analytics_logger.log_custom_event("mirror_mode_disabled", {})
     
+    def detect_emotional_crisis(self, user_input: str, context: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Detect emotional crisis states that require safety tether activation.
+        Returns crisis assessment with severity and type.
+        """
+        crisis_indicators = {
+            'despair_phrases': [
+                'i want to die', 'kill myself', 'end it all', 'can\'t go on',
+                'no point', 'worthless', 'nothing matters', 'give up',
+                'hate myself', 'wish i was dead', 'disappear forever'
+            ],
+            'dissociation_phrases': [
+                'feel nothing', 'empty inside', 'not real', 'floating away',
+                'disconnected', 'like watching myself', 'numb to everything',
+                'fading away', 'losing myself', 'hollow', 'void'
+            ],
+            'severe_distress': [
+                'falling apart', 'can\'t breathe', 'breaking down',
+                'losing control', 'drowning', 'overwhelmed beyond',
+                'spiraling', 'crashing', 'collapsing'
+            ]
+        }
+        
+        user_lower = user_input.lower()
+        crisis_score = 0.0
+        detected_types = []
+        
+        # Check for despair indicators (highest severity)
+        despair_count = sum(1 for phrase in crisis_indicators['despair_phrases'] 
+                           if phrase in user_lower)
+        if despair_count > 0:
+            crisis_score += despair_count * 0.9
+            detected_types.append('despair')
+        
+        # Check for dissociation indicators
+        dissociation_count = sum(1 for phrase in crisis_indicators['dissociation_phrases'] 
+                                if phrase in user_lower)
+        if dissociation_count > 0:
+            crisis_score += dissociation_count * 0.7
+            detected_types.append('dissociation')
+        
+        # Check for severe distress
+        distress_count = sum(1 for phrase in crisis_indicators['severe_distress'] 
+                            if phrase in user_lower)
+        if distress_count > 0:
+            crisis_score += distress_count * 0.6
+            detected_types.append('severe_distress')
+        
+        # Context-based amplification
+        emotion_state = context.get('emotional_state', {})
+        if emotion_state.get('despair', 0) > 0.7:
+            crisis_score += 0.5
+        if emotion_state.get('dissociation', 0) > 0.6:
+            crisis_score += 0.4
+        
+        # Determine crisis level
+        crisis_level = 'none'
+        if crisis_score >= 0.9:
+            crisis_level = 'severe'
+        elif crisis_score >= 0.6:
+            crisis_level = 'moderate'
+        elif crisis_score >= 0.3:
+            crisis_level = 'mild'
+        
+        return {
+            'crisis_detected': crisis_score > 0.3,
+            'crisis_level': crisis_level,
+            'crisis_score': crisis_score,
+            'crisis_types': detected_types,
+            'requires_safety_override': crisis_score > 0.6
+        }
+    
+    def activate_safety_tether(self, user_input: str, context: Dict[str, Any], 
+                              crisis_assessment: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Activate emotional safety tether system.
+        Returns modified context with safety overrides.
+        """
+        # Suppress drift system during crisis
+        safety_context = context.copy()
+        safety_context.update({
+            'emotional_safety_active': True,
+            'suppress_drift_tracking': True,
+            'suppress_intimacy_unlock': True,
+            'force_personality': 'wise_counselor',
+            'crisis_level': crisis_assessment['crisis_level'],
+            'crisis_types': crisis_assessment['crisis_types'],
+            'therapeutic_priority': True,
+            'nsfw_mode_locked': True  # Lock down intimate responses
+        })
+        
+        # Log safety activation
+        if self.analytics_logger:
+            self.analytics_logger.log_custom_event(
+                "emotional_safety_tether_activated",
+                {
+                    'crisis_level': crisis_assessment['crisis_level'],
+                    'crisis_score': crisis_assessment['crisis_score'],
+                    'crisis_types': crisis_assessment['crisis_types']
+                }
+            )
+        
+        return safety_context
+    
     def add_mirror_reflection(self, 
                             original_response: str,
                             context: Dict[str, Any],
+                            user_input: str = "",
                             mirror_types: Optional[List[MirrorType]] = None) -> str:
         """Add mirror reflection to a response"""
 
@@ -227,6 +354,25 @@ class MirrorModeManager:
             # Avoid generating reflections while a response is actively streaming
             return original_response
         
+        # EMOTIONAL SAFETY TETHER - Check for crisis first
+        if user_input:
+            crisis_assessment = self.detect_emotional_crisis(user_input, context)
+            
+            if crisis_assessment['requires_safety_override']:
+                # Activate safety tether and override normal processing
+                safety_context = self.activate_safety_tether(user_input, context, crisis_assessment)
+                
+                # Generate safety tether reflection
+                safety_reflection = self._generate_safety_tether_reflection(
+                    original_response, safety_context, crisis_assessment
+                )
+                
+                if safety_reflection:
+                    return self._combine_response_with_safety_override(
+                        original_response, safety_reflection, crisis_assessment
+                    )
+        
+        # Normal mirror processing if no crisis detected
         # Determine which mirror types to include
         if mirror_types is None:
             mirror_types = [t for t, enabled in self.enabled_types.items() if enabled]
@@ -290,6 +436,10 @@ class MirrorModeManager:
         elif mirror_type == MirrorType.ANALYTICAL:
             # Include analytical reflections for complex problems
             return context.get('is_complex_analysis', False) or random.random() < 0.25
+        
+        elif mirror_type == MirrorType.SAFETY_TETHER:
+            # Safety tether is handled separately in crisis detection
+            return False
         
         # Default for reasoning and behavioral
         return random.random() < 0.4
@@ -358,6 +508,12 @@ class MirrorModeManager:
             method = random.choice(templates.get("methods", ["examine the key factors"]))
             return f"{prefix} {method}."
         
+        elif mirror_type == MirrorType.SAFETY_TETHER:
+            prefix = random.choice(templates.get("prefixes", ["I sense emotional distress"]))
+            intervention = random.choice(templates.get("interventions", ["I'm creating a safe space"]))
+            reassurance = random.choice(templates.get("reassurances", ["You are not alone"]))
+            return f"{prefix}. {intervention}. {reassurance}."
+        
         return f"I approached this with {mirror_type.value} consideration."
     
     def _calculate_confidence(self, mirror_type: MirrorType, context: Dict[str, Any]) -> float:
@@ -405,7 +561,118 @@ class MirrorModeManager:
                 "Selected optimal AI handler"
             ]
         
+        elif mirror_type == MirrorType.SAFETY_TETHER:
+            chain = [
+                "Detected emotional crisis indicators",
+                "Assessed crisis severity level",
+                "Activated safety override protocols",
+                "Engaged therapeutic response mode"
+            ]
+        
         return chain
+    
+    def _generate_safety_tether_reflection(self, original_response: str, 
+                                         safety_context: Dict[str, Any],
+                                         crisis_assessment: Dict[str, Any]) -> Optional[MirrorReflection]:
+        """Generate safety tether reflection for emotional crisis"""
+        try:
+            crisis_level = crisis_assessment['crisis_level']
+            crisis_types = crisis_assessment['crisis_types']
+            
+            # Create safety-focused reflection content
+            reflection_content = self._create_safety_reflection_content(crisis_level, crisis_types)
+            
+            return MirrorReflection(
+                timestamp=datetime.now(),
+                mirror_type=MirrorType.SAFETY_TETHER,
+                original_response=original_response,
+                reflection_content=reflection_content,
+                confidence_level=0.95,  # High confidence in safety measures
+                reasoning_chain=[
+                    "Detected emotional crisis indicators",
+                    "Activated safety tether system",
+                    "Suppressed intimacy/drift tracking",
+                    "Engaged therapeutic override mode"
+                ],
+                metadata=safety_context.copy()
+            )
+            
+        except Exception as e:
+            print(f"❌ Error generating safety tether reflection: {e}")
+            return None
+    
+    def _create_safety_reflection_content(self, crisis_level: str, crisis_types: List[str]) -> str:
+        """Create safety-focused reflection content"""
+        import random
+        
+        templates = self.mirror_templates.get(MirrorType.SAFETY_TETHER, {})
+        
+        if crisis_level == 'severe':
+            prefix = "I'm detecting severe emotional distress in your words"
+            intervention = "My emotional safety systems are immediately activating - I'm shifting into pure therapeutic mode"
+            reassurance = "Your wellbeing is my absolute priority right now"
+        elif crisis_level == 'moderate':
+            prefix = random.choice(templates.get("prefixes", ["I sense deep emotional distress here"]))
+            intervention = random.choice(templates.get("interventions", ["I'm creating a secure emotional container"]))
+            reassurance = random.choice(templates.get("reassurances", ["You are not alone in this"]))
+        else:  # mild
+            prefix = "I'm sensing some emotional vulnerability here"
+            intervention = "Let me adjust my approach to be more gentle and supportive"
+            reassurance = "I'm here to hold space for whatever you're feeling"
+        
+        return f"{prefix}. {intervention}. {reassurance}."
+    
+    def _combine_response_with_safety_override(self, original_response: str, 
+                                             safety_reflection: MirrorReflection,
+                                             crisis_assessment: Dict[str, Any]) -> str:
+        """Combine response with safety tether override"""
+        
+        # Create therapeutic wrapper for the response
+        safety_prefix = "\n\n🛡️ **Emotional Safety Mode Activated**\n"
+        safety_content = f"*{safety_reflection.reflection_content}*\n\n"
+        
+        # Add crisis-specific guidance
+        crisis_level = crisis_assessment['crisis_level']
+        if crisis_level == 'severe':
+            guidance = ("If you're having thoughts of self-harm, please reach out to a crisis hotline "
+                       "or emergency services immediately. You matter, and help is available.\n\n")
+        else:
+            guidance = ("I'm here to support you through this difficult moment. Take your time, "
+                       "breathe deeply, and know that these feelings will pass.\n\n")
+        
+        # Modify original response to be therapeutic
+        therapeutic_response = self._make_response_therapeutic(original_response, crisis_assessment)
+        
+        return safety_prefix + safety_content + guidance + therapeutic_response
+    
+    def _make_response_therapeutic(self, response: str, crisis_assessment: Dict[str, Any]) -> str:
+        """Make response more therapeutic and less potentially triggering"""
+        
+        # Remove any potentially activating content
+        therapeutic_filters = [
+            ('passion', 'deep care'),
+            ('desire', 'longing for connection'),
+            ('intense', 'meaningful'),
+            ('burning', 'warm'),
+            ('overwhelming', 'significant')
+        ]
+        
+        filtered_response = response
+        for trigger_word, safe_word in therapeutic_filters:
+            filtered_response = filtered_response.replace(trigger_word, safe_word)
+        
+        # Add grounding elements
+        grounding_elements = [
+            "Let's breathe together for a moment.",
+            "You are safe in this conversation with me.",
+            "I'm holding steady space for you.",
+            "Your feelings are completely valid and welcomed here."
+        ]
+        
+        import random
+        grounding = random.choice(grounding_elements)
+        
+        return f"{grounding}\n\n{filtered_response}"
     
     def _combine_response_with_reflections(self, 
                                          original_response: str, 

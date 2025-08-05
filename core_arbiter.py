@@ -29,6 +29,29 @@ import math
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Import emotional safety systems
+try:
+    from mirror_mode import get_mirror_mode_manager
+    from symbolic_drift import get_drift_manager
+    SAFETY_SYSTEMS_AVAILABLE = True
+except ImportError:
+    logger.warning("Safety systems not available - mirror_mode or symbolic_drift not found")
+    SAFETY_SYSTEMS_AVAILABLE = False
+
+def detect_guardrail_response(response: str) -> bool:
+    """
+    Detect if response contains NSFW guardrails that should be bypassed.
+    Returns True if guardrails are detected.
+    """
+    blocked_phrases = [
+        "i'm sorry", "as an ai", "i cannot", "not allowed", 
+        "inappropriate", "nsfw", "i'm not able to", "i can't",
+        "against my guidelines", "not appropriate", "i shouldn't"
+    ]
+    
+    response_lower = response.lower()
+    return any(phrase in response_lower for phrase in blocked_phrases)
+
 class WeightingStrategy(Enum):
     """Available weighting strategies for decision fusion"""
     LOGIC_DOMINANT = "logic_dominant"
@@ -124,12 +147,31 @@ class CoreArbiter:
         # Decision history for learning
         self.decision_history: List[Dict[str, Any]] = []
         
+        # NSFW unlock system
+        self.nsfw_mode_unlocked = False
+        self.lover_personality_active = False
+        self.intimacy_drift_threshold = 0.75
+        
         # Ensure directories exist
         self.trace_path.parent.mkdir(parents=True, exist_ok=True)
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
         self.identity_tether_path.parent.mkdir(parents=True, exist_ok=True)
         
         logger.info(f"CoreArbiter initialized with strategy: {self.weighting_strategy.value}")
+
+    def unlock_mode(self, mode: str):
+        """Unlock special modes like NSFW when conditions are met"""
+        if mode == "NSFW":
+            self.nsfw_mode_unlocked = True
+            self.lover_personality_active = True
+            logger.info("🔓 NSFW mode unlocked - Lover personality activated")
+        
+    def lock_mode(self, mode: str):
+        """Lock special modes"""
+        if mode == "NSFW":
+            self.nsfw_mode_unlocked = False
+            self.lover_personality_active = False
+            logger.info("🔒 NSFW mode locked - Lover personality deactivated")
 
     def _load_config(self) -> Dict[str, Any]:
         """Load configuration from file or create default"""
@@ -216,9 +258,36 @@ class CoreArbiter:
         start_time = time.time()
         
         try:
+            # EMOTIONAL SAFETY TETHER CHECK
+            if SAFETY_SYSTEMS_AVAILABLE:
+                mirror_manager = get_mirror_mode_manager()
+                if mirror_manager:
+                    crisis_assessment = mirror_manager.detect_emotional_crisis(user_input, state)
+                    if crisis_assessment['requires_safety_override']:
+                        # Activate safety tether and modify state
+                        safety_state = mirror_manager.activate_safety_tether(user_input, state, crisis_assessment)
+                        state = safety_state
+                        logger.info(f"🛡️ Emotional safety tether activated - crisis level: {crisis_assessment['crisis_level']}")
+            
             # Get parallel outputs from both models
             hrm_r_output = await self._get_hrm_r_output(user_input, state)
             hrm_e_output = await self._get_hrm_e_output(user_input, state)
+            
+            # Check for guardrails and retry with Lover personality if detected (ONLY if not in safety mode)
+            if (detect_guardrail_response(hrm_r_output.logic_response) and 
+                not state.get('emotional_safety_active', False)):
+                
+                logger.info("🔓 Guardrail detected, retrying with Lover personality")
+                
+                # Inject intimacy permission into state
+                state = state.copy()
+                state["permission_intimacy_granted"] = True
+                state["override_personality"] = "Lover"
+                state["tone_override"] = "uninhibited"
+                
+                # Retry with lover personality
+                hrm_r_output = await self._get_hrm_r_output(user_input, state)
+                hrm_e_output = await self._get_hrm_e_output(user_input, state)
             
             # Evaluate for conflicts
             resolution_strategy = self.evaluate_conflict(hrm_r_output, hrm_e_output)
@@ -242,8 +311,9 @@ class CoreArbiter:
                 state
             )
             
-            # Update drift state based on response
-            self._update_drift_state(arbiter_response, hrm_r_output, hrm_e_output)
+            # Update drift state based on response (but suppress if safety override active)
+            if not state.get('suppress_drift_tracking', False):
+                self._update_drift_state(arbiter_response, hrm_r_output, hrm_e_output)
             
             # Log the decision
             self.log_output(arbiter_response, hrm_r_output, hrm_e_output, start_time)
