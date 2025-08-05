@@ -1,0 +1,19 @@
+{
+  "default_mode": "balanced",
+  "enable_mirror_mode": true,
+  "mirror_intensity": 0.7,
+  "memory_budget": {
+    "hrm_r_limit": 10.0,
+    "hrm_e_limit": 10.0,
+    "arbiter_limit": 24.0
+  },
+  "processing_timeouts": {
+    "reasoning": 30.0,
+    "emotional": 25.0,
+    "fusion": 15.0
+  },
+  "quality_thresholds": {
+    "min_confidence": 0.6,
+    "retry_threshold": 0.4
+  }
+}

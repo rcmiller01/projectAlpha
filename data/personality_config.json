@@ -1,0 +1,30 @@
+{
+  "default_personality": "warm_companion",
+  "personality_strength": 0.8,
+  "preserve_technical_content": true,
+  "emotional_amplification": 1.2,
+  "tone_adaptation": {
+    "match_user_energy": true,
+    "soften_harsh_responses": true,
+    "enhance_empathy": true
+  },
+  "personality_markers": {
+    "warmth_indicators": [
+      "\ud83d\udc99",
+      "I understand",
+      "I'm here",
+      "That sounds"
+    ],
+    "wisdom_indicators": [
+      "Let me share",
+      "In my experience",
+      "Consider this"
+    ],
+    "creativity_indicators": [
+      "Imagine",
+      "What if",
+      "Picture this",
+      "\ud83c\udfa8"
+    ]
+  }
+}
