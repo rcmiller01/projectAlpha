@@ -31,8 +31,8 @@ logger = logging.getLogger(__name__)
 
 # Import emotional safety systems
 try:
-    from mirror_mode import get_mirror_mode_manager
-    from symbolic_drift import get_drift_manager
+    from .mirror_mode import get_mirror_mode_manager
+    from .symbolic_drift import get_drift_manager
     SAFETY_SYSTEMS_AVAILABLE = True
 except ImportError:
     logger.warning("Safety systems not available - mirror_mode or symbolic_drift not found")
