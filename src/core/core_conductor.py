@@ -24,8 +24,10 @@ from dataclasses import dataclass
 # Import the HRM Router integration
 try:
     from .hrm_router import HRMRouter
+    from .init_models import load_conductor_models, ModelInterface
 except ImportError:
     from hrm_router import HRMRouter
+    from init_models import load_conductor_models, ModelInterface
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -61,7 +63,8 @@ class CoreConductor:
     def __init__(self, 
                  memory_file: Optional[str] = None,
                  tool_log_file: Optional[str] = None,
-                 conductor_id: Optional[str] = None):
+                 conductor_id: Optional[str] = None,
+                 load_models: bool = True):
         """
         Initialize Enhanced Core Conductor.
         
@@ -69,6 +72,7 @@ class CoreConductor:
             memory_file: Path to GraphRAG memory file
             tool_log_file: Path to tool request log
             conductor_id: Unique identifier for this conductor instance
+            load_models: Whether to load AI models on initialization
         """
         self.conductor_id = conductor_id or f"conductor_{str(uuid.uuid4())[:8]}"
         self.hrm_router = HRMRouter(memory_file, tool_log_file)
@@ -78,10 +82,144 @@ class CoreConductor:
         self.current_objectives: List[str] = []
         self.active_contexts: Dict[str, Any] = {}
         
+        # Model management
+        self.models: Dict[str, ModelInterface] = {}
+        if load_models:
+            self.init_models()
+        
         # Register conductor-specific tools
         self._register_conductor_tools()
         
         logger.info(f"Core Conductor {self.conductor_id} initialized with GraphRAG integration")
+    
+    def init_models(self) -> None:
+        """
+        Initialize and load all AI models for the conductor.
+        
+        Loads models for different reasoning roles:
+        - conductor: Strategic decision making and orchestration
+        - logic: Analytical and logical reasoning
+        - emotion: Emotional intelligence and empathy
+        - creative: Creative problem solving and innovation
+        """
+        logger.info(f"Initializing models for Core Conductor {self.conductor_id}")
+        
+        try:
+            # Load the complete conductor model suite
+            self.models = load_conductor_models()
+            
+            # Log loaded models
+            for role, model in self.models.items():
+                model_type = type(model).__name__
+                model_name = getattr(model, 'model_name', 'unknown')
+                logger.info(f"  {role}: {model_type} ({model_name})")
+            
+            logger.info(f"Successfully loaded {len(self.models)} models")
+            
+        except Exception as e:
+            logger.error(f"Error initializing models: {e}")
+            # Ensure we have at least mock models
+            from .init_models import MockModel
+            self.models = {
+                "conductor": MockModel("fallback-conductor"),
+                "logic": MockModel("fallback-logic"),
+                "emotion": MockModel("fallback-emotion"),
+                "creative": MockModel("fallback-creative")
+            }
+            logger.warning("Loaded fallback mock models due to initialization error")
+    
+    def generate(self, role: str, prompt: str, context: Optional[str] = None, **kwargs) -> str:
+        """
+        Generate a response using the specified model role.
+        
+        Args:
+            role: Model role to use ("conductor", "logic", "emotion", "creative")
+            prompt: The prompt to send to the model
+            context: Optional context to include with the prompt
+            **kwargs: Additional arguments to pass to the model
+            
+        Returns:
+            Generated response string
+            
+        Raises:
+            ValueError: If the specified role is not available
+        """
+        if role not in self.models:
+            available_roles = list(self.models.keys())
+            raise ValueError(f"Role '{role}' not available. Available roles: {available_roles}")
+        
+        try:
+            # Get the model for this role
+            model = self.models[role]
+            
+            # Generate response
+            response = model.generate(prompt, context=context, **kwargs)
+            
+            logger.debug(f"Generated response using {role} model: {len(response)} characters")
+            
+            return response
+            
+        except Exception as e:
+            logger.error(f"Error generating response with {role} model: {e}")
+            # Fallback response
+            return f"[ERROR: Failed to generate response with {role} model: {str(e)}]"
+    
+    def get_model_status(self) -> Dict[str, Any]:
+        """Get status information about loaded models"""
+        from .init_models import get_model_info
+        
+        status = {
+            "total_models": len(self.models),
+            "loaded_roles": list(self.models.keys()),
+            "models": {}
+        }
+        
+        for role, model in self.models.items():
+            status["models"][role] = get_model_info(model)
+        
+        return status
+    
+    def reload_model(self, role: str) -> bool:
+        """
+        Reload a specific model role.
+        
+        Args:
+            role: Model role to reload
+            
+        Returns:
+            Success status
+        """
+        try:
+            from .init_models import load_model
+            
+            # Default model mappings for each role
+            role_defaults = {
+                "conductor": "llama3.1:8b",
+                "logic": "deepseek-coder:1.3b", 
+                "emotion": "mistral:7b",
+                "creative": "mixtral:8x7b"
+            }
+            
+            if role not in role_defaults:
+                logger.error(f"Unknown role '{role}' for model reload")
+                return False
+            
+            # Load the model
+            env_var = f"{role.upper()}_MODEL"
+            default_model = role_defaults[role]
+            
+            new_model = load_model(env_var, default_model)
+            
+            # Replace the model
+            with self._lock:
+                self.models[role] = new_model
+            
+            logger.info(f"Successfully reloaded {role} model")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error reloading {role} model: {e}")
+            return False
     
     def _register_conductor_tools(self):
         """Register tools specific to conductor-level operations"""
@@ -260,6 +398,39 @@ class CoreConductor:
                 confidence += 0.1  # Boost for clear objectives
             
             confidence = min(confidence, 1.0)  # Cap at 1.0
+            
+            # Enhanced reasoning with AI models if available
+            if self.models:
+                try:
+                    # Use conductor model for strategic synthesis
+                    synthesis_prompt = f"""
+                    Situation: {situation}
+                    Objectives: {objectives or 'None specified'}
+                    Constraints: {constraints or 'None specified'}
+                    Memory Context: {len(memory_related)} related concepts found
+                    
+                    Provide strategic synthesis and key insights for this decision.
+                    """
+                    
+                    strategic_synthesis = self.generate("conductor", synthesis_prompt, context=str(memory_related[:3]))
+                    if strategic_synthesis and not strategic_synthesis.startswith("[ERROR"):
+                        action_plan.append(f"Strategic insight: {strategic_synthesis[:100]}...")
+                        reasoning_path.append("AI strategic synthesis completed")
+                        confidence += 0.05  # Small boost for AI insights
+                    
+                    # Use logic model for constraint analysis if constraints exist
+                    if constraints:
+                        logic_prompt = f"Analyze the logical implications and potential conflicts of these constraints: {constraints}"
+                        logic_analysis = self.generate("logic", logic_prompt)
+                        if logic_analysis and not logic_analysis.startswith("[ERROR"):
+                            action_plan.append(f"Constraint analysis: {logic_analysis[:100]}...")
+                            reasoning_path.append("Logical constraint analysis completed")
+                    
+                except Exception as e:
+                    logger.warning(f"Error in AI model reasoning: {e}")
+                    reasoning_path.append("AI reasoning attempted but failed")
+            
+            confidence = min(confidence, 1.0)  # Re-cap after AI boost
             
             # Create decision object
             decision = ConductorDecision(
