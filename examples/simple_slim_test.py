@@ -83,10 +83,16 @@ def test_basic_functionality():
         print("\nTesting agent responses...")
         
         deduction_response = deduction_agent.run("What is 2 + 2?")
+        assert deduction_response.strip() == "4", "DeductionAgent failed to calculate correctly"
         print(f"✅ DeductionAgent response: {deduction_response[:100]}...")
         
         metaphor_response = metaphor_agent.run("Give me a metaphor for learning")
+        assert "learning" in metaphor_response.lower(), "MetaphorAgent failed to generate a relevant metaphor"
         print(f"✅ MetaphorAgent response: {metaphor_response[:100]}...")
+        
+        # Valence output (mocked for demonstration)
+        valence_score = deduction_agent.get_valence("What is 2 + 2?")
+        print(f"✅ DeductionAgent valence score: {valence_score}")
         
         return True
         

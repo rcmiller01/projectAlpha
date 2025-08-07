@@ -40,10 +40,10 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./config:/app/config
-      - ./concept:/app/concept
-      - ./personas:/app/personas
-      - ./modules:/app/modules
+      - ./config:/app/config:ro
+      - ./concept:/app/concept:ro
+      - ./personas:/app/personas:ro
+      - ./modules:/app/modules:ro
       - ./backend:/app/backend
       - ./frontend:/app/frontend
     networks:
@@ -74,10 +74,10 @@ services:
     ports:
       - "8001:8001"
     volumes:
-      - ./config:/app/config
-      - ./concept:/app/concept
-      - ./personas:/app/personas
-      - ./modules:/app/modules
+      - ./config:/app/config:ro
+      - ./concept:/app/concept:ro
+      - ./personas:/app/personas:ro
+      - ./modules:/app/modules:ro
       - ./backend:/app/backend
       - ./frontend:/app/frontend
     networks:
@@ -189,4 +189,4 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.20.0.0/16 
+        - subnet: 172.20.0.0/16

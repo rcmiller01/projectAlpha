@@ -13,9 +13,18 @@ from pathlib import Path
 from typing import Dict, Any, List
 import random
 import uuid
+import logging
 
+# Initialize Flask app
 app = Flask(__name__)
 CORS(app)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+# Token for authentication
+API_TOKEN = "secure_token_12345"
 
 # Data storage paths
 MEMORY_TRACE_PATH = Path("data/emotional_memory_trace.json")
@@ -183,7 +192,7 @@ class MemorySymbolAPI:
             with open(file_path, 'r') as f:
                 return json.load(f)
         except Exception as e:
-            print(f"Error loading {file_path}: {e}")
+            logger.error(f"Error loading {file_path}: {e}")
             return {}
 
     def save_json_file(self, file_path: Path, data: Dict[str, Any]):
@@ -192,14 +201,30 @@ class MemorySymbolAPI:
             with open(file_path, 'w') as f:
                 json.dump(data, f, indent=2)
         except Exception as e:
-            print(f"Error saving {file_path}: {e}")
+            logger.error(f"Error saving {file_path}: {e}")
 
 # Initialize API instance
 memory_api = MemorySymbolAPI()
 
+def authenticate_request():
+    """Authenticate incoming API requests using a token."""
+    token = request.headers.get("Authorization")
+    if not token or token != f"Bearer {API_TOKEN}":
+        logger.warning("Unauthorized access attempt.")
+        return jsonify({"error": "Unauthorized"}), 401
+
+@app.before_request
+def log_request_info():
+    """Log details of incoming requests."""
+    logger.info(f"Incoming request: {request.method} {request.url} - Headers: {dict(request.headers)}")
+
 @app.route('/api/memory/emotional_trace', methods=['GET'])
 def get_emotional_trace():
     """Get emotional memory trace"""
+    auth_response = authenticate_request()
+    if auth_response:
+        return auth_response
+
     try:
         data = memory_api.load_json_file(MEMORY_TRACE_PATH)
         
@@ -218,6 +243,10 @@ def get_emotional_trace():
 @app.route('/api/memory/add_entry', methods=['POST'])
 def add_memory_entry():
     """Add new emotional memory entry"""
+    auth_response = authenticate_request()
+    if auth_response:
+        return auth_response
+
     try:
         entry_data = request.json
         
@@ -229,13 +258,13 @@ def add_memory_entry():
         new_entry = {
             'id': str(uuid.uuid4()),
             'timestamp': datetime.now().isoformat(),
-            'dominant_mood': entry_data.get('dominant_mood', 'contemplative'),
-            'memory_phrase': entry_data.get('memory_phrase', ''),
-            'tags': entry_data.get('tags', []),
-            'drift_score': entry_data.get('drift_score', 0.0),
-            'intensity': entry_data.get('intensity', 0.5),
-            'context': entry_data.get('context', ''),
-            'symbolic_connections': entry_data.get('symbolic_connections', [])
+            'dominant_mood': entry_data.get('dominant_mood', 'contemplative') if entry_data else 'contemplative',
+            'memory_phrase': entry_data.get('memory_phrase', '') if entry_data else '',
+            'tags': entry_data.get('tags', []) if entry_data else [],
+            'drift_score': entry_data.get('drift_score', 0.0) if entry_data else 0.0,
+            'intensity': entry_data.get('intensity', 0.5) if entry_data else 0.5,
+            'context': entry_data.get('context', '') if entry_data else '',
+            'symbolic_connections': entry_data.get('symbolic_connections', []) if entry_data else []
         }
         
         # Add to trace
@@ -257,6 +286,10 @@ def add_memory_entry():
 @app.route('/api/symbols/active', methods=['GET'])
 def get_symbolic_map():
     """Get active symbolic map"""
+    auth_response = authenticate_request()
+    if auth_response:
+        return auth_response
+
     try:
         data = memory_api.load_json_file(SYMBOLIC_MAP_PATH)
         
@@ -275,6 +308,10 @@ def get_symbolic_map():
 @app.route('/api/symbols/invoke', methods=['POST'])
 def invoke_symbol():
     """Record symbol invocation"""
+    auth_response = authenticate_request()
+    if auth_response:
+        return auth_response
+
     try:
         symbol_data = request.json
         symbol_name = symbol_data.get('name')
@@ -323,6 +360,10 @@ def invoke_symbol():
 @app.route('/api/anchor/state', methods=['GET'])
 def get_anchor_state():
     """Get current anchor/identity state"""
+    auth_response = authenticate_request()
+    if auth_response:
+        return auth_response
+
     try:
         data = memory_api.load_json_file(ANCHOR_STATE_PATH)
         return jsonify(data)
@@ -332,6 +373,10 @@ def get_anchor_state():
 @app.route('/api/anchor/adjust', methods=['POST'])
 def adjust_anchor_baseline():
     """Adjust anchor baseline values"""
+    auth_response = authenticate_request()
+    if auth_response:
+        return auth_response
+
     try:
         adjustment_data = request.json
         vector_name = adjustment_data.get('vector')
@@ -403,6 +448,10 @@ def adjust_anchor_baseline():
 @app.route('/api/anchor/simulate_drift', methods=['POST'])
 def simulate_drift():
     """Simulate natural drift for demonstration purposes"""
+    auth_response = authenticate_request()
+    if auth_response:
+        return auth_response
+
     try:
         data = memory_api.load_json_file(ANCHOR_STATE_PATH)
         
@@ -444,6 +493,40 @@ def simulate_drift():
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/memory/query', methods=['POST'])
+def query_memory():
+    """Endpoint to query memory with context window smoothing."""
+    auth_response = authenticate_request()
+    if auth_response:
+        return auth_response
+
+    query_data = request.get_json()
+    if not query_data or "query" not in query_data:
+        return jsonify({"error": "Invalid query data"}), 400
+
+    query = query_data["query"]
+    logger.info(f"Memory query received: {query}")
+
+    # Simulate memory query and context window smoothing
+    results = memory_api.load_json_file(MEMORY_TRACE_PATH).get("trace", [])
+    smoothed_results = smooth_context_window(results, query)
+
+    return jsonify({"query": query, "results": smoothed_results})
+
+def smooth_context_window(results, query, window_size=5):
+    """Smooth memory query results over a context window.
+
+    Args:
+        results (list): List of memory trace entries.
+        query (str): Query string to filter results.
+        window_size (int): Number of entries to include in the context window.
+
+    Returns:
+        list: Smoothed memory query results.
+    """
+    filtered_results = [r for r in results if query.lower() in r.get("context", "").lower()]
+    return filtered_results[:window_size]
 
 @app.route('/api/health', methods=['GET'])
 def health_check():

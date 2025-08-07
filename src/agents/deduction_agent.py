@@ -248,3 +248,18 @@ class DeductionAgent(SLiMAgent):
         }
         
         return {**base_stats, **reasoning_stats}
+    
+    def get_valence(self, prompt: str) -> float:
+        """
+        Mock method to calculate valence score for a given prompt.
+
+        Args:
+            prompt: The input prompt to evaluate.
+
+        Returns:
+            A float representing the valence score.
+        """
+        logger.debug(f"Calculating valence for prompt: {prompt}")
+        # Mock implementation: return a random score between -1 and 1
+        import random
+        return random.uniform(-1, 1)

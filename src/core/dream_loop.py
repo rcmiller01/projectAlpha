@@ -22,8 +22,14 @@ logger = logging.getLogger(__name__)
 
 class DreamLoop:
     """Background dreaming process for The Dreamer"""
-    
+
     def __init__(self, dream_log_path: str = "emotion_logs/dream_sequences.jsonl"):
+        """
+        Initialize the DreamLoop instance.
+
+        Args:
+            dream_log_path (str): Path to the log file for dream sequences.
+        """
         self.dream_log_path = dream_log_path
         self.dream_themes = [
             "liminal spaces and transitions",
@@ -35,7 +41,12 @@ class DreamLoop:
         self.is_running = False
         
     def generate_dream_sequence(self) -> Dict:
-        """Generate a dream sequence entry"""
+        """
+        Generate a dream sequence entry.
+
+        Returns:
+            Dict: A dictionary containing the dream sequence details.
+        """
         import random
         
         theme = random.choice(self.dream_themes)
@@ -62,7 +73,15 @@ class DreamLoop:
         return dream_entry
     
     def _generate_narrative_seed(self, theme: str) -> str:
-        """Generate a narrative seed based on theme"""
+        """
+        Generate a narrative seed based on the given theme.
+
+        Args:
+            theme (str): The theme for the narrative seed.
+
+        Returns:
+            str: A narrative seed string.
+        """
         seeds = {
             "liminal spaces and transitions": [
                 "Between sleeping and waking, a doorway appears",
@@ -95,7 +114,12 @@ class DreamLoop:
         return random.choice(seeds.get(theme, ["A new dream begins..."]))
     
     def log_dream(self, dream_entry: Dict):
-        """Log dream sequence to file"""
+        """
+        Log dream sequence to file.
+
+        Args:
+            dream_entry (Dict): The dream sequence entry to log.
+        """
         try:
             # Ensure directory exists
             os.makedirs(os.path.dirname(self.dream_log_path), exist_ok=True)
