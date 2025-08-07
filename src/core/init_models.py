@@ -11,9 +11,10 @@ Key Features:
 - Support for multiple model backends
 - Standardized model interface
 - Comprehensive logging and error handling
+- Mixture-of-Experts (MoE) registry and configuration
 
 Author: ProjectAlpha Team
-Compatible with: CoreConductor, SLiM agents, HRM stack
+Compatible with: CoreConductor, SLiM agents, HRM stack, MoELoader
 """
 
 import os
@@ -24,6 +25,106 @@ from abc import ABC, abstractmethod
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# MoE Expert Registry - Define available expert models
+MOE_EXPERT_REGISTRY = {
+    "logic_high": {
+        "path": os.getenv("LOGIC_HIGH_MODEL_PATH", "models/logic_high.gguf"),
+        "size_gb": float(os.getenv("LOGIC_HIGH_SIZE_GB", "2.1")),
+        "domain": "logical_reasoning",
+        "description": "High-level logical reasoning and deduction",
+        "priority": 1,
+        "dependencies": []
+    },
+    "logic_code": {
+        "path": os.getenv("LOGIC_CODE_MODEL_PATH", "models/logic_code.gguf"),
+        "size_gb": float(os.getenv("LOGIC_CODE_SIZE_GB", "1.8")),
+        "domain": "code_analysis",
+        "description": "Code analysis, debugging, and programming logic",
+        "priority": 1,
+        "dependencies": []
+    },
+    "logic_proof": {
+        "path": os.getenv("LOGIC_PROOF_MODEL_PATH", "models/logic_proof.gguf"),
+        "size_gb": float(os.getenv("LOGIC_PROOF_SIZE_GB", "2.3")),
+        "domain": "mathematical_proof",
+        "description": "Mathematical proofs and formal verification",
+        "priority": 2,
+        "dependencies": []
+    },
+    "logic_fallback": {
+        "path": os.getenv("LOGIC_FALLBACK_MODEL_PATH", "models/logic_fallback.gguf"),
+        "size_gb": float(os.getenv("LOGIC_FALLBACK_SIZE_GB", "1.5")),
+        "domain": "general_reasoning",
+        "description": "General purpose logical reasoning fallback",
+        "priority": 0,
+        "dependencies": []
+    },
+    "emote_valence": {
+        "path": os.getenv("EMOTE_VALENCE_MODEL_PATH", "models/emote_valence.gguf"),
+        "size_gb": float(os.getenv("EMOTE_VALENCE_SIZE_GB", "1.7")),
+        "domain": "emotional_valence",
+        "description": "Emotional valence detection and generation",
+        "priority": 1,
+        "dependencies": []
+    },
+    "emote_arousal": {
+        "path": os.getenv("EMOTE_AROUSAL_MODEL_PATH", "models/emote_arousal.gguf"),
+        "size_gb": float(os.getenv("EMOTE_AROUSAL_SIZE_GB", "1.6")),
+        "domain": "emotional_arousal",
+        "description": "Emotional arousal and intensity modulation",
+        "priority": 1,
+        "dependencies": []
+    },
+    "creative_metaphor": {
+        "path": os.getenv("CREATIVE_METAPHOR_MODEL_PATH", "models/creative_metaphor.gguf"),
+        "size_gb": float(os.getenv("CREATIVE_METAPHOR_SIZE_GB", "2.0")),
+        "domain": "creative_metaphor",
+        "description": "Metaphorical and creative expression",
+        "priority": 1,
+        "dependencies": []
+    },
+    "creative_write": {
+        "path": os.getenv("CREATIVE_WRITE_MODEL_PATH", "models/creative_write.gguf"),
+        "size_gb": float(os.getenv("CREATIVE_WRITE_SIZE_GB", "2.2")),
+        "domain": "creative_writing",
+        "description": "Creative writing and narrative generation",
+        "priority": 2,
+        "dependencies": []
+    },
+    "planning_temporal": {
+        "path": os.getenv("PLANNING_TEMPORAL_MODEL_PATH", "models/planning_temporal.gguf"),
+        "size_gb": float(os.getenv("PLANNING_TEMPORAL_SIZE_GB", "1.9")),
+        "domain": "temporal_planning",
+        "description": "Temporal reasoning and scheduling",
+        "priority": 1,
+        "dependencies": []
+    },
+    "planning_strategic": {
+        "path": os.getenv("PLANNING_STRATEGIC_MODEL_PATH", "models/planning_strategic.gguf"),
+        "size_gb": float(os.getenv("PLANNING_STRATEGIC_SIZE_GB", "2.1")),
+        "domain": "strategic_planning",
+        "description": "Strategic planning and decision making",
+        "priority": 1,
+        "dependencies": []
+    },
+    "ritual_symbolic": {
+        "path": os.getenv("RITUAL_SYMBOLIC_MODEL_PATH", "models/ritual_symbolic.gguf"),
+        "size_gb": float(os.getenv("RITUAL_SYMBOLIC_SIZE_GB", "1.8")),
+        "domain": "symbolic_ritual",
+        "description": "Symbolic ritual and ceremonial logic",
+        "priority": 2,
+        "dependencies": []
+    },
+    "memory_recall": {
+        "path": os.getenv("MEMORY_RECALL_MODEL_PATH", "models/memory_recall.gguf"),
+        "size_gb": float(os.getenv("MEMORY_RECALL_SIZE_GB", "2.0")),
+        "domain": "memory_recall",
+        "description": "Memory recall and historical context",
+        "priority": 1,
+        "dependencies": []
+    }
+}
 
 class ModelInterface(Protocol):
     """Protocol defining the standard model interface"""
@@ -243,21 +344,139 @@ def load_model(env_var: str, default_model: str, backend: str = "auto") -> Model
         logger.warning(f"Unknown backend '{backend_override}', falling back to mock")
         return MockModel(model_name)
 
-def load_conductor_models() -> Dict[str, ModelInterface]:
+class MoEModelAdapter:
+    """Adapter to make MoELoader compatible with ModelInterface protocol"""
+    
+    def __init__(self, moe_loader):
+        self.moe_loader = moe_loader
+        self.model_name = "MoE-Expert-Router"
+    
+    def generate(self, prompt: str, context: Optional[str] = None, **kwargs) -> str:
+        """
+        Generate response using MoE expert routing.
+        
+        Args:
+            prompt: Input prompt
+            context: Optional context for expert selection
+            **kwargs: Additional parameters
+            
+        Returns:
+            Generated response from appropriate expert(s)
+        """
+        try:
+            # Use MoE system to score intent and run experts
+            expert_weights = self.moe_loader.intent_classifier.score_intent(prompt)
+            
+            # Convert context string to dict if provided
+            context_dict = {"context": context} if context else None
+            
+            # Execute experts based on weights
+            responses = self.moe_loader.run_experts(prompt, context_dict)
+            
+            if responses:
+                # Return summary of responses
+                expert_count = len(responses)
+                best_response = list(responses.values())[0] if responses else "No response"
+                return f"[MoE Response from {expert_count} expert(s)] {best_response}"
+            else:
+                return f"[MoE Fallback] No suitable experts available for: {prompt[:50]}..."
+                
+        except Exception as e:
+            logger.error(f"MoE adapter error: {e}")
+            return f"[MoE Error] Failed to process request: {str(e)}"
+
+
+def initialize_moe_system(max_ram_gb: float = 8.0):
     """
-    Load all standard conductor models with role-specific defaults.
+    Initialize the Mixture-of-Experts system with expert registry.
+    
+    Args:
+        max_ram_gb: Maximum RAM allocation for experts in GB
+        
+    Returns:
+        MoELoader instance if successful, None otherwise
+    """
+    try:
+        from .moe_loader import MoELoader, ExpertInfo
+        
+        # Convert registry to ExpertInfo objects
+        model_registry = {}
+        for expert_id, config in MOE_EXPERT_REGISTRY.items():
+            model_registry[expert_id] = ExpertInfo(
+                key=expert_id,
+                path=config["path"],
+                size_gb=config["size_gb"],
+                domain=config["domain"],
+                description=config["description"],
+                priority=config["priority"],
+                dependencies=config["dependencies"]
+            )
+        
+        # Initialize MoE system
+        moe_loader = MoELoader(
+            model_registry=model_registry,
+            ram_limit_gb=max_ram_gb
+        )
+        
+        logger.info(f"MoE system initialized with {len(model_registry)} experts, max RAM: {max_ram_gb}GB")
+        return moe_loader
+        
+    except ImportError as e:
+        logger.warning(f"MoE system not available: {e}")
+        return None
+    except Exception as e:
+        logger.error(f"Failed to initialize MoE system: {e}")
+        return None
+
+
+def get_moe_configuration() -> Dict[str, Any]:
+    """
+    Get MoE system configuration from environment variables.
     
     Returns:
-        Dictionary mapping role names to model instances
+        Configuration dictionary with MoE settings
+    """
+    return {
+        "max_ram_gb": float(os.getenv("MOE_MAX_RAM_GB", "8.0")),
+        "cache_strategy": os.getenv("MOE_CACHE_STRATEGY", "lru"),
+        "parallel_experts": int(os.getenv("MOE_PARALLEL_EXPERTS", "2")),
+        "classification_threshold": float(os.getenv("MOE_CLASSIFICATION_THRESHOLD", "0.7")),
+        "fallback_enabled": os.getenv("MOE_FALLBACK_ENABLED", "true").lower() == "true",
+        "expert_timeout": int(os.getenv("MOE_EXPERT_TIMEOUT", "30")),
+        "load_async": os.getenv("MOE_LOAD_ASYNC", "true").lower() == "true"
+    }
+
+
+def load_conductor_models(use_moe: bool = True) -> Dict[str, Any]:
+    """
+    Load all standard conductor models with role-specific defaults.
+    Optionally initializes MoE system for dynamic expert loading.
+    
+    Args:
+        use_moe: Whether to use Mixture-of-Experts system
+    
+    Returns:
+        Dictionary with model instances and MoE system if enabled
     """
     logger.info("Loading conductor model suite...")
     
+    # Standard models
     models = {
         "conductor": load_model("CONDUCTOR_MODEL", "gpt-oss-20b"),
         "logic": load_model("LOGIC_MODEL", "deepseek-coder:1.3b"),
         "emotion": load_model("EMOTION_MODEL", "mistral:7b"),
         "creative": load_model("CREATIVE_MODEL", "mixtral:8x7b")
     }
+    
+    # Initialize MoE system if requested
+    if use_moe:
+        moe_config = get_moe_configuration()
+        moe_system = initialize_moe_system(moe_config["max_ram_gb"])
+        if moe_system:
+            models["moe_loader"] = MoEModelAdapter(moe_system)
+            logger.info("MoE system integrated with conductor suite")
+        else:
+            logger.warning("MoE system initialization failed, using standard models only")
     
     logger.info(f"Conductor model suite loaded: {list(models.keys())}")
     return models
