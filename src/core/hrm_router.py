@@ -81,6 +81,10 @@ class HRMRouter:
         # Request tracking
         self._active_requests: Dict[str, Dict[str, Any]] = {}
         
+        # SLiM Agent Registry
+        self.agent_registry: Dict[str, Any] = {}
+        self._initialize_agent_registry()
+        
         # Register default tools
         self._register_default_tools()
         
@@ -406,6 +410,143 @@ class HRMRouter:
         except Exception as e:
             logger.error(f"Error saving HRM Router data: {e}")
             return False
+    
+    def _initialize_agent_registry(self):
+        """
+        Initialize the SLiM agent registry with lazy loading.
+        
+        Agents are registered but not instantiated until first use
+        to avoid circular imports and improve startup performance.
+        """
+        self.agent_registry = {
+            "deduction": {
+                "class": "DeductionAgent",
+                "module": "src.agents.deduction_agent", 
+                "role": "logic_high",
+                "specialization": "logical_reasoning",
+                "instance": None
+            },
+            "metaphor": {
+                "class": "MetaphorAgent", 
+                "module": "src.agents.metaphor_agent",
+                "role": "emotion_creative",
+                "specialization": "creative_expression",
+                "instance": None
+            }
+            # Additional agents can be registered here
+        }
+        
+        logger.info(f"Agent registry initialized with {len(self.agent_registry)} agent types")
+    
+    def register_agent(self, agent_key: str, agent_class: str, module_path: str, 
+                      role: str, specialization: str):
+        """
+        Register a new SLiM agent type.
+        
+        Args:
+            agent_key: Unique key for the agent
+            agent_class: Class name of the agent
+            module_path: Module path for importing
+            role: AI model role the agent uses
+            specialization: Description of agent's specialization
+        """
+        self.agent_registry[agent_key] = {
+            "class": agent_class,
+            "module": module_path,
+            "role": role,
+            "specialization": specialization,
+            "instance": None
+        }
+        
+        logger.info(f"Registered agent '{agent_key}' with specialization: {specialization}")
+    
+    def get_agent(self, agent_key: str):
+        """
+        Get or create an agent instance.
+        
+        Args:
+            agent_key: Key of the agent to retrieve
+            
+        Returns:
+            Agent instance or None if not found
+        """
+        if agent_key not in self.agent_registry:
+            logger.warning(f"Agent '{agent_key}' not found in registry")
+            return None
+        
+        agent_config = self.agent_registry[agent_key]
+        
+        # Lazy instantiation
+        if agent_config["instance"] is None:
+            try:
+                # Import the agent class
+                module = __import__(agent_config["module"], fromlist=[agent_config["class"]])
+                agent_class = getattr(module, agent_config["class"])
+                
+                # Create instance with conductor
+                from .core_conductor import CoreConductor
+                conductor = CoreConductor()
+                
+                agent_config["instance"] = agent_class(
+                    conductor=conductor,
+                    memory=self.memory,
+                    router=self.tool_router
+                )
+                
+                logger.info(f"Instantiated agent '{agent_key}' of type {agent_config['class']}")
+                
+            except Exception as e:
+                logger.error(f"Failed to instantiate agent '{agent_key}': {e}")
+                return None
+        
+        return agent_config["instance"]
+    
+    def dispatch_to_agent(self, agent_key: str, prompt: str, **kwargs) -> Optional[str]:
+        """
+        Dispatch a request to a specific SLiM agent.
+        
+        Args:
+            agent_key: Key of the agent to use
+            prompt: Prompt to send to the agent
+            **kwargs: Additional arguments for the agent
+            
+        Returns:
+            Agent response or None if agent not available
+        """
+        agent = self.get_agent(agent_key)
+        if agent is None:
+            return None
+        
+        try:
+            # Set default arguments
+            kwargs.setdefault("depth", 2)
+            kwargs.setdefault("use_tools", True)
+            
+            response = agent.run(prompt, **kwargs)
+            logger.debug(f"Agent '{agent_key}' processed request successfully")
+            return response
+            
+        except Exception as e:
+            logger.error(f"Error dispatching to agent '{agent_key}': {e}")
+            return f"Agent '{agent_key}' error: {str(e)}"
+    
+    def list_agents(self) -> Dict[str, Dict[str, str]]:
+        """
+        List all registered agents and their specializations.
+        
+        Returns:
+            Dictionary of agent information
+        """
+        agent_info = {}
+        for key, config in self.agent_registry.items():
+            agent_info[key] = {
+                "class": config["class"],
+                "role": config["role"], 
+                "specialization": config["specialization"],
+                "instantiated": config["instance"] is not None
+            }
+        
+        return agent_info
 
 
 # Example integration with existing HRM stack

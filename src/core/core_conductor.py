@@ -96,17 +96,31 @@ class CoreConductor:
         """
         Initialize and load all AI models for the conductor.
         
-        Loads models for different reasoning roles:
-        - conductor: Strategic decision making and orchestration
-        - logic: Analytical and logical reasoning
-        - emotion: Emotional intelligence and empathy
-        - creative: Creative problem solving and innovation
+        Automatically detects and loads either:
+        - Standard conductor models (conductor, logic, emotion, creative)
+        - Full SLiM agent suite (conductor + 8 SLiM agents) if configured
+        
+        SLiM Agent Roles:
+        Left Brain (Logic): logic_high, logic_code, logic_proof, logic_fallback
+        Right Brain (Emotion): emotion_valence, emotion_narrative, emotion_uncensored, emotion_creative
         """
         logger.info(f"Initializing models for Core Conductor {self.conductor_id}")
         
         try:
-            # Load the complete conductor model suite
-            self.models = load_conductor_models()
+            # Check if SLiM environment variables are configured
+            import os
+            has_slim_config = any(os.getenv(var) for var in [
+                "LOGIC_HIGH_MODEL", "LOGIC_CODE_MODEL", "LOGIC_PROOF_MODEL", "LOGIC_FALLBACK_MODEL",
+                "EMOTION_VALENCE_MODEL", "EMOTION_NARRATIVE_MODEL", "EMOTION_UNCENSORED_MODEL", "EMOTION_CREATIVE_MODEL"
+            ])
+            
+            if has_slim_config:
+                from .init_models import load_all_models
+                self.models = load_all_models()
+                logger.info("Loaded SLiM agent model suite (Conductor + 8 SLiMs + legacy roles)")
+            else:
+                self.models = load_conductor_models()
+                logger.info("Loaded standard conductor model suite")
             
             # Log loaded models
             for role, model in self.models.items():
@@ -118,6 +132,9 @@ class CoreConductor:
             
         except Exception as e:
             logger.error(f"Error initializing models: {e}")
+            # Fallback to empty dict to prevent crashes
+            self.models = {}
+            raise
             # Ensure we have at least mock models
             from .init_models import MockModel
             self.models = {
@@ -133,7 +150,9 @@ class CoreConductor:
         Generate a response using the specified model role.
         
         Args:
-            role: Model role to use ("conductor", "logic", "emotion", "creative")
+            role: Model role to use. Standard roles: "conductor", "logic", "emotion", "creative"
+                  SLiM agent roles: "logic_high", "logic_code", "logic_proof", "logic_fallback",
+                                   "emotion_valence", "emotion_narrative", "emotion_uncensored", "emotion_creative"
             prompt: The prompt to send to the model
             context: Optional context to include with the prompt
             **kwargs: Additional arguments to pass to the model
@@ -584,4 +603,55 @@ def example_conductor_usage():
 
 
 if __name__ == "__main__":
-    example_conductor_usage()
+    import sys
+    
+    if len(sys.argv) > 1 and sys.argv[1] == "--list-models":
+        # List all loaded models
+        print("Loading CoreConductor models...")
+        conductor = CoreConductor()
+        
+        print(f"\n✅ Successfully loaded {len(conductor.models)} models:")
+        print("-" * 60)
+        
+        # Group models by type
+        standard_models = {}
+        slim_models = {}
+        
+        for role, model in conductor.models.items():
+            model_type = type(model).__name__
+            model_name = getattr(model, 'model_name', 'unknown')
+            
+            if role in ["conductor", "logic", "emotion", "creative"]:
+                standard_models[role] = (model_type, model_name)
+            else:
+                slim_models[role] = (model_type, model_name)
+        
+        # Display standard models
+        if standard_models:
+            print("📋 Standard Models:")
+            for role, (model_type, model_name) in standard_models.items():
+                print(f"  {role:<12}: {model_type:<12} ({model_name})")
+        
+        # Display SLiM models  
+        if slim_models:
+            print("\n🧠 SLiM Agent Models:")
+            
+            # Left brain (logic) models
+            left_brain = {k: v for k, v in slim_models.items() if k.startswith('logic_')}
+            if left_brain:
+                print("  🧮 Left Brain (Logic):")
+                for role, (model_type, model_name) in left_brain.items():
+                    print(f"    {role:<16}: {model_type:<12} ({model_name})")
+            
+            # Right brain (emotion/creativity) models
+            right_brain = {k: v for k, v in slim_models.items() if k.startswith('emotion_')}
+            if right_brain:
+                print("  🎨 Right Brain (Emotion/Creativity):")
+                for role, (model_type, model_name) in right_brain.items():
+                    print(f"    {role:<16}: {model_type:<12} ({model_name})")
+        
+        print("-" * 60)
+        print(f"Total models loaded: {len(conductor.models)}")
+        
+    else:
+        example_conductor_usage()

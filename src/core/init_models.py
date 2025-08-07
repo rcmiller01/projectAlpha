@@ -253,13 +253,76 @@ def load_conductor_models() -> Dict[str, ModelInterface]:
     logger.info("Loading conductor model suite...")
     
     models = {
-        "conductor": load_model("CONDUCTOR_MODEL", "llama3.1:8b"),
+        "conductor": load_model("CONDUCTOR_MODEL", "gpt-oss-20b"),
         "logic": load_model("LOGIC_MODEL", "deepseek-coder:1.3b"),
         "emotion": load_model("EMOTION_MODEL", "mistral:7b"),
         "creative": load_model("CREATIVE_MODEL", "mixtral:8x7b")
     }
     
     logger.info(f"Conductor model suite loaded: {list(models.keys())}")
+    return models
+
+def load_slim_models() -> Dict[str, ModelInterface]:
+    """
+    Load all SLiM agent models for hemispheric processing.
+    
+    Returns:
+        Dictionary mapping SLiM role names to model instances
+    """
+    logger.info("Loading SLiM agent model suite...")
+    
+    models = {
+        # Main conductor
+        "conductor": load_model("CONDUCTOR_MODEL", "gpt-oss-20b"),
+        
+        # Left Brain (Logic) SLiMs - 4 agents
+        "logic_high": load_model("LOGIC_HIGH_MODEL", "phi4-mini-reasoning:3.8b"),
+        "logic_code": load_model("LOGIC_CODE_MODEL", "qwen2.5-coder:3b"),
+        "logic_proof": load_model("LOGIC_PROOF_MODEL", "deepseek-r1:1.5b"),
+        "logic_fallback": load_model("LOGIC_FALLBACK_MODEL", "granite3.3:2b"),
+        
+        # Right Brain (Emotion & Creativity) SLiMs - 4 agents
+        "emotion_valence": load_model("EMOTION_VALENCE_MODEL", "gemma3:1b"),
+        "emotion_narrative": load_model("EMOTION_NARRATIVE_MODEL", "phi3:3.8b"),
+        "emotion_uncensored": load_model("EMOTION_UNCENSORED_MODEL", "artifish/llama3.2-uncensored:latest"),
+        "emotion_creative": load_model("EMOTION_CREATIVE_MODEL", "dolphin-phi:latest")
+    }
+    
+    logger.info(f"SLiM agent model suite loaded: {list(models.keys())}")
+    return models
+
+def load_all_models() -> Dict[str, ModelInterface]:
+    """
+    Load complete model suite including conductor and all SLiM agents.
+    
+    Returns:
+        Dictionary mapping all role names to model instances
+    """
+    logger.info("Loading complete model suite (Conductor + SLiMs)...")
+    
+    models = {
+        # Main conductor
+        "conductor": load_model("CONDUCTOR_MODEL", "gpt-oss-20b"),
+        
+        # Legacy role mappings for backward compatibility
+        "logic": load_model("LOGIC_MODEL", "deepseek-coder:1.3b"),
+        "emotion": load_model("EMOTION_MODEL", "mistral:7b"),
+        "creative": load_model("CREATIVE_MODEL", "mixtral:8x7b"),
+        
+        # Left Brain (Logic) SLiMs - 4 agents
+        "logic_high": load_model("LOGIC_HIGH_MODEL", "phi4-mini-reasoning:3.8b"),
+        "logic_code": load_model("LOGIC_CODE_MODEL", "qwen2.5-coder:3b"),
+        "logic_proof": load_model("LOGIC_PROOF_MODEL", "deepseek-r1:1.5b"),
+        "logic_fallback": load_model("LOGIC_FALLBACK_MODEL", "granite3.3:2b"),
+        
+        # Right Brain (Emotion & Creativity) SLiMs - 4 agents
+        "emotion_valence": load_model("EMOTION_VALENCE_MODEL", "gemma3:1b"),
+        "emotion_narrative": load_model("EMOTION_NARRATIVE_MODEL", "phi3:3.8b"),
+        "emotion_uncensored": load_model("EMOTION_UNCENSORED_MODEL", "artifish/llama3.2-uncensored:latest"),
+        "emotion_creative": load_model("EMOTION_CREATIVE_MODEL", "dolphin-phi:latest")
+    }
+    
+    logger.info(f"Complete model suite loaded: {list(models.keys())}")
     return models
 
 def get_model_info(model: ModelInterface) -> Dict[str, Any]:

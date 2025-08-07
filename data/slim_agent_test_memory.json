@@ -1,0 +1,91 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "node_type": "concept",
+      "created_at": "2025-08-06T21:15:12.926599",
+      "access_count": 4,
+      "id": "mathematics"
+    },
+    {
+      "node_type": "concept",
+      "created_at": "2025-08-06T21:15:12.926599",
+      "access_count": 4,
+      "id": "algebra"
+    },
+    {
+      "node_type": "concept",
+      "created_at": "2025-08-06T21:15:12.926696",
+      "access_count": 4,
+      "id": "equations"
+    },
+    {
+      "node_type": "concept",
+      "created_at": "2025-08-06T21:15:12.926773",
+      "access_count": 2,
+      "id": "linear_or_quadratic"
+    },
+    {
+      "node_type": "concept",
+      "created_at": "2025-08-06T21:15:12.927116",
+      "access_count": 2,
+      "id": "agent_deduction_agent"
+    },
+    {
+      "node_type": "concept",
+      "created_at": "2025-08-06T21:15:12.927116",
+      "access_count": 3,
+      "id": "Explain the relationship between mathematics and solving equations"
+    }
+  ],
+  "links": [
+    {
+      "confidence": 1.0,
+      "timestamp": "2025-08-06T21:17:55.943935",
+      "relation_type": "includes_field",
+      "context": "",
+      "request_id": "2f55fd76-97e3-41c2-82c3-7d232a6c0cf8",
+      "source": "mathematics",
+      "target": "algebra"
+    },
+    {
+      "confidence": 0.9,
+      "timestamp": "2025-08-06T21:17:55.944029",
+      "relation_type": "involves",
+      "context": "",
+      "request_id": "2f7b54a7-7780-4fec-8c3b-e66a233759ca",
+      "source": "algebra",
+      "target": "equations"
+    },
+    {
+      "confidence": 0.8,
+      "timestamp": "2025-08-06T21:17:55.944109",
+      "relation_type": "can_be",
+      "context": "",
+      "request_id": "b1efb42f-8c60-4116-9f69-3a69dfe966d4",
+      "source": "equations",
+      "target": "linear_or_quadratic"
+    },
+    {
+      "confidence": {
+        "role": "logic_high",
+        "timestamp": "2025-08-06T21:17:55.944342",
+        "response_length": 132
+      },
+      "timestamp": "2025-08-06T21:17:55.944540",
+      "relation_type": "processed_request",
+      "context": "",
+      "request_id": "dbf66105-b85d-4f30-8f0a-d87540ef1f11",
+      "source": "agent_deduction_agent",
+      "target": "Explain the relationship between mathematics and solving equations"
+    }
+  ],
+  "metadata": {
+    "saved_at": "2025-08-06T21:17:55.944763",
+    "total_nodes": 6,
+    "total_edges": 4,
+    "version": "1.0"
+  }
+}
