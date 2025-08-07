@@ -600,3 +600,11 @@ if (typeof require !== 'undefined' && require.main === module) {
     
     console.log('\n🎯 Voice cadence modulation testing complete!');
 }
+
+// Export for ES6 modules
+export default VoiceCadenceModulator;
+
+// Also make available globally for browser compatibility
+if (typeof window !== 'undefined') {
+    window.VoiceCadenceModulator = VoiceCadenceModulator;
+}

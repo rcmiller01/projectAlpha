@@ -21,7 +21,14 @@ export const useAppStore = create(
       autoSave: true,
       notifications: true,
       streamingResponses: true,
-      defaultAgent: 'general'
+      defaultAgent: 'general',
+      voiceSettings: {
+        enabled: true,
+        mood: 'balanced',
+        energy: 0.6,
+        intimacy: 0.6,
+        agentSpecific: true
+      }
     },
 
     // Actions
