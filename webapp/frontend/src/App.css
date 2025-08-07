@@ -1,0 +1,178 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Animation classes */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Message animation */
+.message-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.message-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms ease-out, transform 300ms ease-out;
+}
+
+/* Loading dots animation */
+.loading-dots {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.loading-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #94a3b8;
+  animation: loadingDots 1.4s infinite both;
+}
+
+.loading-dots span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes loadingDots {
+  0%, 80%, 100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Syntax highlighting for code blocks */
+.code-block {
+  background: #0f172a !important;
+  border: 1px solid #334155 !important;
+  border-radius: 8px !important;
+  overflow-x: auto;
+}
+
+.code-block pre {
+  margin: 0 !important;
+  padding: 16px !important;
+}
+
+/* Thread list animations */
+.thread-item {
+  transition: all 0.2s ease-in-out;
+}
+
+.thread-item:hover {
+  transform: translateX(4px);
+}
+
+/* Agent status indicators */
+.agent-status {
+  position: relative;
+}
+
+.agent-status::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  border: 2px solid #1e293b;
+}
+
+.agent-status.busy::after {
+  background: #f59e0b;
+  animation: pulse 2s infinite;
+}
+
+.agent-status.error::after {
+  background: #ef4444;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .mobile-hide {
+    display: none !important;
+  }
+  
+  .mobile-full {
+    width: 100% !important;
+  }
+}
