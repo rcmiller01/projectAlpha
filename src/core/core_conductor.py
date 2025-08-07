@@ -26,7 +26,7 @@ try:
     from .hrm_router import HRMRouter
     from .init_models import load_conductor_models, ModelInterface
 except ImportError:
-    from hrm_router import HRMRouter
+    from backend.hrm_router import HRMRouter
     from init_models import load_conductor_models, ModelInterface
 
 # Configure logging

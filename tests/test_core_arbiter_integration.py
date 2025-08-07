@@ -15,7 +15,7 @@ from pathlib import Path
 # Add the parent directory to path for imports
 sys.path.append(str(Path(__file__).parent))
 
-from core_arbiter import CoreArbiter, WeightingStrategy
+from core.core_arbiter import CoreArbiter, WeightingStrategy
 from emotion_engine import EmotionEngine  # If available
 from emotion_training_tracker import EmotionalMetrics  # If available
 

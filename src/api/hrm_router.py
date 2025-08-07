@@ -29,8 +29,8 @@ from enum import Enum
 from pathlib import Path
 
 # Import existing components
-from core_arbiter import CoreArbiter, ArbiterResponse
-from mirror_mode import MirrorModeManager, MirrorType
+from core.core_arbiter import CoreArbiter, ArbiterResponse
+from core.mirror_mode import MirrorModeManager, MirrorType
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

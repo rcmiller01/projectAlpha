@@ -19,14 +19,14 @@ def test_basic_imports():
     
     try:
         # Core components
-        from core_arbiter import CoreArbiter, ArbiterResponse
+        from core.core_arbiter import CoreArbiter, ArbiterResponse
         print("   ✅ CoreArbiter imported")
         
-        from mirror_mode import MirrorModeManager, MirrorType
+        from core.mirror_mode import MirrorModeManager, MirrorType
         print("   ✅ MirrorMode imported")
         
         # HRM components
-        from hrm_router import HRMRouter, HRMMode, RequestType
+        from backend.hrm_router import HRMRouter, HRMMode, RequestType
         print("   ✅ HRM Router imported")
         
         # Backend components
@@ -55,15 +55,15 @@ def test_component_initialization():
     
     try:
         # Initialize core components
-        from core_arbiter import CoreArbiter
+        from core.core_arbiter import CoreArbiter
         arbiter = CoreArbiter()
         print("   ✅ CoreArbiter initialized")
         
-        from mirror_mode import MirrorModeManager
+        from core.mirror_mode import MirrorModeManager
         mirror = MirrorModeManager()
         print("   ✅ MirrorMode initialized")
         
-        from hrm_router import HRMRouter
+        from backend.hrm_router import HRMRouter
         router = HRMRouter()
         print("   ✅ HRM Router initialized")
         
@@ -83,7 +83,7 @@ async def test_core_arbiter_integration():
     print("\n⚖️  Testing Core Arbiter Integration...")
     
     try:
-        from core_arbiter import CoreArbiter
+        from core.core_arbiter import CoreArbiter
         
         arbiter = CoreArbiter()
         
@@ -110,7 +110,7 @@ async def test_hrm_router_processing():
     print("\n🧠 Testing HRM Router Processing...")
     
     try:
-        from hrm_router import HRMRouter
+        from backend.hrm_router import HRMRouter
         
         router = HRMRouter()
         
@@ -142,7 +142,7 @@ def test_mirror_mode_integration():
     print("\n🪩 Testing Mirror Mode Integration...")
     
     try:
-        from mirror_mode import MirrorModeManager, MirrorType
+        from core.mirror_mode import MirrorModeManager, MirrorType
         
         mirror = MirrorModeManager()
         
@@ -176,7 +176,7 @@ def test_configuration_system():
     print("\n⚙️  Testing Configuration System...")
     
     try:
-        from hrm_router import HRMRouter
+        from backend.hrm_router import HRMRouter
         
         router = HRMRouter()
         

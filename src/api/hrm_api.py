@@ -28,10 +28,10 @@ from datetime import datetime
 from pathlib import Path
 
 # Import HRM components
-from hrm_router import HRMRouter, HRMMode, RequestType, HRMResponse
+from backend.hrm_router import HRMRouter, HRMMode, RequestType, HRMResponse
 from backend.subagent_router import SubAgentRouter, AgentType
 from backend.ai_reformulator import PersonalityFormatter, PersonalityProfile
-from core_arbiter import CoreArbiter
+from core.core_arbiter import CoreArbiter
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

@@ -11,9 +11,9 @@ from pathlib import Path
 # Add the project root to the path
 sys.path.append(str(Path(__file__).parent))
 
-from core_arbiter import CoreArbiter, detect_guardrail_response
-from mirror_mode import MirrorModeManager, initialize_mirror_mode_manager
-from symbolic_drift import SymbolicDriftManager
+from core.core_arbiter import CoreArbiter, detect_guardrail_response
+from core.mirror_mode import MirrorModeManager, initialize_mirror_mode_manager
+from core.symbolic_drift import SymbolicDriftManager
 
 async def test_emotional_safety_system():
     """Test the complete emotional safety system"""

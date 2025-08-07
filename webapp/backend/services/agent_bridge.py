@@ -30,7 +30,7 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 try:
-    from src.core.hrm_router import HRMRouter
+    from backend.hrm_router import HRMRouter
     from src.core.core_conductor import CoreConductor
     from memory.graphrag_memory import GraphRAGMemory
     from src.tools.tool_request_router import ToolRequestRouter

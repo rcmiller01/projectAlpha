@@ -7,7 +7,7 @@ with the existing Dolphin AI chat system.
 import asyncio
 import json
 from pathlib import Path
-from core_arbiter import CoreArbiter, WeightingStrategy
+from core.core_arbiter import CoreArbiter, WeightingStrategy
 
 class SimpleEAIDemo:
     """Simple Emotional AI demonstration using CoreArbiter"""

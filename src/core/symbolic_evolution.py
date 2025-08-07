@@ -11,7 +11,7 @@ from datetime import datetime
 from utils.emotion_tools import calculate_resonance_score
 from symbol_memory_engine import SymbolMemoryEngine
 from drift_journal_api import log_symbolic_shift
-from core_arbiter import register_evolution_vector
+from core.core_arbiter import register_evolution_vector
 
 class SymbolicEvolution:
     def __init__(self, memory_engine: SymbolMemoryEngine):

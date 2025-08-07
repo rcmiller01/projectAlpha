@@ -10,7 +10,7 @@ import asyncio
 import json
 import time
 from pathlib import Path
-from core_arbiter import CoreArbiter, WeightingStrategy
+from core.core_arbiter import CoreArbiter, WeightingStrategy
 
 async def demo_complete_system():
     """Demonstrate the complete CoreArbiter system"""

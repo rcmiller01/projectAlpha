@@ -25,11 +25,11 @@ from typing import Dict, Any, List, Optional
 from pathlib import Path
 
 # Import HRM components
-from hrm_router import HRMRouter, HRMMode, RequestType
+from backend.hrm_router import HRMRouter, HRMMode, RequestType
 from backend.subagent_router import SubAgentRouter, AgentType
 from backend.ai_reformulator import PersonalityFormatter, ReformulationRequest
-from core_arbiter import CoreArbiter
-from mirror_mode import MirrorModeManager, MirrorType
+from core.core_arbiter import CoreArbiter
+from core.mirror_mode import MirrorModeManager, MirrorType
 
 class HRMSystemDemo:
     """

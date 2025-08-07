@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 
 import psutil
 
-from mirror_mode import get_mirror_mode_manager
+from core.mirror_mode import get_mirror_mode_manager
 from trigger_self_train import trigger_self_training
 
 logging.basicConfig(level=logging.INFO)

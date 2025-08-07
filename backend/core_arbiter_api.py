@@ -15,7 +15,7 @@ from datetime import datetime
 from pathlib import Path
 import traceback
 
-from core_arbiter import CoreArbiter, WeightingStrategy
+from core.core_arbiter import CoreArbiter, WeightingStrategy
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)

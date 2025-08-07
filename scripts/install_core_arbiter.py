@@ -107,7 +107,7 @@ def run_tests():
         print("🧪 Running basic tests...")
         
         # Test CoreArbiter import
-        from core_arbiter import CoreArbiter
+        from core.core_arbiter import CoreArbiter
         arbiter = CoreArbiter()
         print("✅ CoreArbiter import and initialization successful")
         
