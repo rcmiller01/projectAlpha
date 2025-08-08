@@ -5,25 +5,29 @@ Manages persistent state for autonomous operation continuity
 """
 
 import json
-import time
 import signal
-import threading
-import psutil
 import sys
-from pathlib import Path
-from typing import Dict, Any, Optional
+import threading
+import time
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from dataclasses import dataclass, asdict
+from pathlib import Path
+from typing import Any, Dict, Optional
+
+import psutil
 
 # Fix Windows console encoding for Unicode characters
-if sys.platform == 'win32':
+if sys.platform == "win32":
     import codecs
-    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
-    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+
+    sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer, "strict")
+    sys.stderr = codecs.getwriter("utf-8")(sys.stderr.buffer, "strict")
+
 
 @dataclass
 class AutopilotState:
     """Current autopilot operational state"""
+
     is_running: bool = False
     current_job_id: Optional[str] = None
     current_run_id: Optional[str] = None
@@ -35,13 +39,16 @@ class AutopilotState:
     pause_until: Optional[str] = None
     last_checkpoint: Optional[str] = None
 
+
 class AutopilotStateManager:
     """
     Manages autopilot state persistence and recovery
     Handles graceful shutdown, crash recovery, and resource monitoring
     """
 
-    def __init__(self, state_file: str = "autopilot_state.json", config: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self, state_file: str = "autopilot_state.json", config: Optional[dict[str, Any]] = None
+    ):
         self.state_file = Path(state_file)
         self.config = config or {}
 
@@ -65,7 +72,7 @@ class AutopilotStateManager:
         # Setup signal handlers for graceful shutdown
         self._setup_signal_handlers()
 
-        print(f"🔄 AutopilotStateManager initialized")
+        print("🔄 AutopilotStateManager initialized")
         print(f"   State file: {self.state_file}")
         print(f"   Watchdog enabled: {self.enable_watchdog}")
 
@@ -73,7 +80,7 @@ class AutopilotStateManager:
         """Load state from persistent storage"""
         try:
             if self.state_file.exists():
-                with open(self.state_file, 'r') as f:
+                with open(self.state_file) as f:
                     state_data = json.load(f)
 
                 # Update state object
@@ -101,11 +108,11 @@ class AutopilotStateManager:
         try:
             with self.state_lock:
                 state_dict = asdict(self.state)
-                state_dict['last_checkpoint'] = datetime.now().isoformat()
+                state_dict["last_checkpoint"] = datetime.now().isoformat()
 
                 # Atomic write
-                temp_file = self.state_file.with_suffix('.tmp')
-                with open(temp_file, 'w') as f:
+                temp_file = self.state_file.with_suffix(".tmp")
+                with open(temp_file, "w") as f:
                     json.dump(state_dict, f, indent=2)
 
                 temp_file.replace(self.state_file)
@@ -115,12 +122,13 @@ class AutopilotStateManager:
 
     def _setup_signal_handlers(self) -> None:
         """Setup signal handlers for graceful shutdown"""
+
         def signal_handler(signum, frame):
             print(f"\n🛑 Received signal {signum} - initiating graceful shutdown")
             self.initiate_shutdown()
 
         try:
-            signal.signal(signal.SIGINT, signal_handler)   # Ctrl+C
+            signal.signal(signal.SIGINT, signal_handler)  # Ctrl+C
             signal.signal(signal.SIGTERM, signal_handler)  # Termination request
             print("📡 Signal handlers registered")
         except Exception as e:
@@ -209,7 +217,9 @@ class AutopilotStateManager:
 
             # Resume if conditions are good and we were paused due to resources
             elif not should_pause and self.is_paused() and not self.state.emergency_stop_triggered:
-                if self.state.pause_until and datetime.now() > datetime.fromisoformat(self.state.pause_until):
+                if self.state.pause_until and datetime.now() > datetime.fromisoformat(
+                    self.state.pause_until
+                ):
                     self.resume_operations("Resource conditions normalized")
 
         except Exception as e:
@@ -290,11 +300,13 @@ class AutopilotStateManager:
 
     def can_start_new_job(self, daily_limit: int = 3) -> bool:
         """Check if we can start a new job based on daily limits"""
-        return (not self.is_paused() and
-                self.state.jobs_completed_today < daily_limit and
-                not self.state.emergency_stop_triggered)
+        return (
+            not self.is_paused()
+            and self.state.jobs_completed_today < daily_limit
+            and not self.state.emergency_stop_triggered
+        )
 
-    def get_recovery_info(self) -> Dict[str, Any]:
+    def get_recovery_info(self) -> dict[str, Any]:
         """Get information needed for crash recovery"""
         return {
             "was_running": self.state.is_running,
@@ -303,7 +315,7 @@ class AutopilotStateManager:
             "last_activity": self.state.last_activity,
             "jobs_completed_today": self.state.jobs_completed_today,
             "is_paused": self.is_paused(),
-            "pause_reason": "Resource limits" if self.is_paused() else None
+            "pause_reason": "Resource limits" if self.is_paused() else None,
         }
 
     def reset_daily_counters(self) -> None:
@@ -332,7 +344,7 @@ class AutopilotStateManager:
 
         print("✅ Graceful shutdown complete")
 
-    def get_status_summary(self) -> Dict[str, Any]:
+    def get_status_summary(self) -> dict[str, Any]:
         """Get comprehensive status summary"""
         return {
             "is_running": self.is_running(),
@@ -343,12 +355,13 @@ class AutopilotStateManager:
             "last_activity": self.state.last_activity,
             "system_metrics": {
                 "cpu_percent": self.state.system_load_average,
-                "memory_percent": self.state.memory_usage_percent
+                "memory_percent": self.state.memory_usage_percent,
             },
             "emergency_stop": self.state.emergency_stop_triggered,
             "pause_until": self.state.pause_until,
-            "watchdog_active": self.watchdog_thread.is_alive() if self.watchdog_thread else False
+            "watchdog_active": self.watchdog_thread.is_alive() if self.watchdog_thread else False,
         }
+
 
 if __name__ == "__main__":
     # Test the state manager
@@ -358,7 +371,7 @@ if __name__ == "__main__":
         "cpu_threshold_percent": 70,
         "memory_threshold_percent": 80,
         "monitoring_interval_seconds": 5,
-        "emergency_stop_file": "test_emergency_stop.flag"
+        "emergency_stop_file": "test_emergency_stop.flag",
     }
 
     manager = AutopilotStateManager("test_state.json", config)

@@ -3,16 +3,17 @@
 # Comprehensive test simulator for all advanced features without requiring live backend
 
 import json
-import time
-import random
-from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional
-from unittest.mock import Mock, patch
-import sys
 import os
+import random
+import sys
+import time
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+from unittest.mock import Mock, patch
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 
 class BackendSimulator:
     """Simulates backend responses for testing without requiring live server"""
@@ -21,50 +22,66 @@ class BackendSimulator:
         self.test_data = self._initialize_test_data()
         self.request_count = 0
 
-    def _initialize_test_data(self) -> Dict[str, Any]:
+    def _initialize_test_data(self) -> dict[str, Any]:
         """Initialize test data for all features"""
         return {
             "emotions": {
                 "romantic": ["love", "passion", "tenderness", "desire", "affection"],
                 "mystical": ["curiosity", "wonder", "mystery", "enchantment", "transcendence"],
                 "technical": ["focus", "clarity", "precision", "logic", "analysis"],
-                "sophisticated": ["elegance", "refinement", "wisdom", "depth", "grace"]
+                "sophisticated": ["elegance", "refinement", "wisdom", "depth", "grace"],
             },
             "personas": {
                 "mia": {"mood": "romantic", "intensity": 0.8, "gesture": "gentle_touch"},
                 "solene": {"mood": "sophisticated", "intensity": 0.7, "gesture": "elegant_pose"},
                 "lyra": {"mood": "mystical", "intensity": 0.9, "gesture": "mystical_dance"},
-                "doc": {"mood": "technical", "intensity": 0.6, "gesture": "precise_movement"}
+                "doc": {"mood": "technical", "intensity": 0.6, "gesture": "precise_movement"},
             },
             "symbolic_fusion": {
-                "symbols": ["fire", "water", "earth", "air", "light", "shadow", "mirror", "crystal"],
+                "symbols": [
+                    "fire",
+                    "water",
+                    "earth",
+                    "air",
+                    "light",
+                    "shadow",
+                    "mirror",
+                    "crystal",
+                ],
                 "fusions": {
                     "fire_water": {"result": "steam", "mood": "transformation", "intensity": 0.8},
                     "light_shadow": {"result": "twilight", "mood": "mystery", "intensity": 0.7},
-                    "mirror_crystal": {"result": "reflection", "mood": "clarity", "intensity": 0.9}
-                }
+                    "mirror_crystal": {"result": "reflection", "mood": "clarity", "intensity": 0.9},
+                },
             },
             "scenes": {
                 "romantic": ["sunset_beach", "moonlit_garden", "cozy_fireplace", "starry_balcony"],
                 "mystical": ["ancient_forest", "crystal_cave", "floating_islands", "aurora_sky"],
                 "technical": ["modern_lab", "digital_workspace", "code_matrix", "neural_network"],
-                "sophisticated": ["elegant_library", "art_gallery", "philosophy_garden", "wisdom_temple"]
+                "sophisticated": [
+                    "elegant_library",
+                    "art_gallery",
+                    "philosophy_garden",
+                    "wisdom_temple",
+                ],
             },
             "biometrics": {
                 "heart_rate": {"min": 60, "max": 120, "current": 75},
                 "hrv": {"min": 20, "max": 100, "current": 45},
                 "skin_conductance": {"min": 0.1, "max": 10.0, "current": 2.5},
-                "temperature": {"min": 36.0, "max": 37.5, "current": 36.8}
+                "temperature": {"min": 36.0, "max": 37.5, "current": 36.8},
             },
             "ritual_states": {
                 "preparation": {"progress": 0.2, "mirror_state": "clear"},
                 "reflection": {"progress": 0.5, "mirror_state": "clouded"},
                 "transformation": {"progress": 0.8, "mirror_state": "healing"},
-                "integration": {"progress": 0.9, "mirror_state": "whole"}
-            }
+                "integration": {"progress": 0.9, "mirror_state": "whole"},
+            },
         }
 
-    def simulate_request(self, endpoint: str, method: str = "GET", data: Dict = None) -> Dict[str, Any]:
+    def simulate_request(
+        self, endpoint: str, method: str = "GET", data: dict = None
+    ) -> dict[str, Any]:
         """Simulate a backend request and return appropriate response"""
         self.request_count += 1
 
@@ -152,7 +169,7 @@ class BackendSimulator:
         else:
             return {"error": f"Unknown endpoint: {endpoint}", "status_code": 404}
 
-    def _simulate_emotion_detection(self, text: str) -> Dict[str, Any]:
+    def _simulate_emotion_detection(self, text: str) -> dict[str, Any]:
         """Simulate emotion detection from text"""
         emotions = self.test_data["emotions"]["romantic"]
         primary_mood = random.choice(emotions)
@@ -164,10 +181,10 @@ class BackendSimulator:
             "romantic_context": True,
             "confidence": random.uniform(0.8, 0.95),
             "secondary_emotions": random.sample(emotions, 2),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
-    def _simulate_romantic_interaction(self, data: Dict) -> Dict[str, Any]:
+    def _simulate_romantic_interaction(self, data: dict) -> dict[str, Any]:
         """Simulate romantic interaction response"""
         message = data.get("message", "")
         interaction_type = data.get("interaction_type", "conversation")
@@ -178,31 +195,33 @@ class BackendSimulator:
                 "I love you too, with all my heart",
                 "You make me feel so special",
                 "I'm so happy to be with you",
-                "Your words touch my soul"
+                "Your words touch my soul",
             ],
             "touch": [
                 "Your touch is magical",
                 "I feel so safe in your arms",
                 "This moment is perfect",
-                "I never want this to end"
-            ]
+                "I never want this to end",
+            ],
         }
 
         return {
-            "mia_response": random.choice(responses.get(interaction_type, responses["conversation"])),
+            "mia_response": random.choice(
+                responses.get(interaction_type, responses["conversation"])
+            ),
             "relationship_stage": "deep_connection",
             "emotional_impact": intensity * 1.2,
             "memory_created": True,
-            "next_interaction_suggestion": "gentle_caress"
+            "next_interaction_suggestion": "gentle_caress",
         }
 
-    def _simulate_mia_thoughts(self) -> Dict[str, Any]:
+    def _simulate_mia_thoughts(self) -> dict[str, Any]:
         """Simulate Mia's internal thoughts"""
         thoughts = [
             "I wonder if he knows how much I care about him",
             "His smile makes my heart skip a beat",
             "I feel so safe and loved when we're together",
-            "I hope he feels the same way about me"
+            "I hope he feels the same way about me",
         ]
 
         return {
@@ -210,13 +229,13 @@ class BackendSimulator:
                 "thought": random.choice(thoughts),
                 "emotion": "love",
                 "delivery_mode": "whisper",
-                "intensity": random.uniform(0.7, 1.0)
+                "intensity": random.uniform(0.7, 1.0),
             },
             "memory": "Remembering our first kiss under the stars",
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
-    def _simulate_relationship_status(self) -> Dict[str, Any]:
+    def _simulate_relationship_status(self) -> dict[str, Any]:
         """Simulate relationship status"""
         return {
             "relationship_stage": "deep_connection",
@@ -226,25 +245,29 @@ class BackendSimulator:
             "milestones_count": random.randint(10, 25),
             "shared_memories_count": random.randint(30, 80),
             "trust_level": random.uniform(0.9, 1.0),
-            "intimacy_level": random.uniform(0.8, 1.0)
+            "intimacy_level": random.uniform(0.8, 1.0),
         }
 
-    def _simulate_memories(self) -> Dict[str, Any]:
+    def _simulate_memories(self) -> dict[str, Any]:
         """Simulate memory system"""
         memories = [
             {"description": "Our first romantic dinner", "emotion": "love", "intensity": 0.9},
-            {"description": "Walking hand in hand at sunset", "emotion": "tenderness", "intensity": 0.8},
+            {
+                "description": "Walking hand in hand at sunset",
+                "emotion": "tenderness",
+                "intensity": 0.8,
+            },
             {"description": "Sharing our deepest dreams", "emotion": "intimacy", "intensity": 0.9},
-            {"description": "Dancing under the moonlight", "emotion": "romance", "intensity": 0.95}
+            {"description": "Dancing under the moonlight", "emotion": "romance", "intensity": 0.95},
         ]
 
         return {
             "memories": random.sample(memories, random.randint(2, 4)),
             "total_count": len(memories),
-            "recent_activity": "Added new memory: 'Gentle morning cuddles'"
+            "recent_activity": "Added new memory: 'Gentle morning cuddles'",
         }
 
-    def _simulate_avatar_state(self) -> Dict[str, Any]:
+    def _simulate_avatar_state(self) -> dict[str, Any]:
         """Simulate avatar visual state"""
         return {
             "visual_state": {
@@ -253,16 +276,16 @@ class BackendSimulator:
                 "blush_intensity": random.uniform(0.6, 1.0),
                 "eye_contact": True,
                 "smile_intensity": random.uniform(0.7, 1.0),
-                "body_language": "open_and_welcoming"
+                "body_language": "open_and_welcoming",
             },
             "emotional_state": {
                 "primary_emotion": "love",
                 "intensity": random.uniform(0.8, 1.0),
-                "secondary_emotions": ["tenderness", "desire"]
-            }
+                "secondary_emotions": ["tenderness", "desire"],
+            },
         }
 
-    def _simulate_avatar_update(self, data: Dict) -> Dict[str, Any]:
+    def _simulate_avatar_update(self, data: dict) -> dict[str, Any]:
         """Simulate avatar update response"""
         emotion = data.get("emotion", "love")
         intensity = data.get("intensity", 0.8)
@@ -274,13 +297,13 @@ class BackendSimulator:
                 "blush_intensity": intensity,
                 "eye_contact": True,
                 "smile_intensity": intensity * 0.9,
-                "body_language": "intimate_and_close"
+                "body_language": "intimate_and_close",
             },
             "update_successful": True,
-            "animation_triggered": "gentle_blush"
+            "animation_triggered": "gentle_blush",
         }
 
-    def _simulate_voice_synthesis(self, data: Dict) -> Dict[str, Any]:
+    def _simulate_voice_synthesis(self, data: dict) -> dict[str, Any]:
         """Simulate voice synthesis"""
         text = data.get("text", "I love you")
         emotion = data.get("emotion", "loving")
@@ -293,25 +316,49 @@ class BackendSimulator:
                 "warmth": random.uniform(0.7, 1.0),
                 "volume": 0.3 if whisper_mode else random.uniform(0.6, 0.9),
                 "pace": random.uniform(0.8, 1.1),
-                "breathiness": random.uniform(0.1, 0.3)
+                "breathiness": random.uniform(0.1, 0.3),
             },
             "audio_url": f"/generated/voice_{random.randint(1000, 9999)}.wav",
             "duration_seconds": len(text.split()) * 0.5,
-            "synthesis_quality": random.uniform(0.85, 0.98)
+            "synthesis_quality": random.uniform(0.85, 0.98),
         }
 
-    def _simulate_activities_list(self) -> Dict[str, Any]:
+    def _simulate_activities_list(self) -> dict[str, Any]:
         """Simulate activities list"""
         activities = [
-            {"id": "sunset_walk", "name": "Sunset Walk", "type": "romantic", "duration_minutes": 30, "romantic_intensity": 0.8},
-            {"id": "candlelit_dinner", "name": "Candlelit Dinner", "type": "romantic", "duration_minutes": 60, "romantic_intensity": 0.9},
-            {"id": "stargazing", "name": "Stargazing", "type": "romantic", "duration_minutes": 45, "romantic_intensity": 0.85},
-            {"id": "dance_together", "name": "Dance Together", "type": "romantic", "duration_minutes": 20, "romantic_intensity": 0.9}
+            {
+                "id": "sunset_walk",
+                "name": "Sunset Walk",
+                "type": "romantic",
+                "duration_minutes": 30,
+                "romantic_intensity": 0.8,
+            },
+            {
+                "id": "candlelit_dinner",
+                "name": "Candlelit Dinner",
+                "type": "romantic",
+                "duration_minutes": 60,
+                "romantic_intensity": 0.9,
+            },
+            {
+                "id": "stargazing",
+                "name": "Stargazing",
+                "type": "romantic",
+                "duration_minutes": 45,
+                "romantic_intensity": 0.85,
+            },
+            {
+                "id": "dance_together",
+                "name": "Dance Together",
+                "type": "romantic",
+                "duration_minutes": 20,
+                "romantic_intensity": 0.9,
+            },
         ]
 
         return {"activities": activities}
 
-    def _simulate_activity_suggestion(self, data: Dict) -> Dict[str, Any]:
+    def _simulate_activity_suggestion(self, data: dict) -> dict[str, Any]:
         """Simulate activity suggestion"""
         mood = data.get("mood", "romantic")
         min_intensity = data.get("romantic_intensity_min", 0.7)
@@ -326,11 +373,11 @@ class BackendSimulator:
                 "type": "romantic",
                 "duration_minutes": random.randint(20, 60),
                 "romantic_intensity": random.uniform(min_intensity, 1.0),
-                "description": f"A beautiful {suggested_activity} experience"
+                "description": f"A beautiful {suggested_activity} experience",
             }
         }
 
-    def _simulate_symbolic_fusion(self, data: Dict) -> Dict[str, Any]:
+    def _simulate_symbolic_fusion(self, data: dict) -> dict[str, Any]:
         """Simulate symbolic fusion"""
         symbols = data.get("symbols", ["fire", "water"])
         symbol1, symbol2 = symbols[0], symbols[1]
@@ -338,7 +385,7 @@ class BackendSimulator:
         fusion_key = f"{symbol1}_{symbol2}"
         fusion_result = self.test_data["symbolic_fusion"]["fusions"].get(
             fusion_key,
-            {"result": f"{symbol1}_{symbol2}_fusion", "mood": "mystery", "intensity": 0.7}
+            {"result": f"{symbol1}_{symbol2}_fusion", "mood": "mystery", "intensity": 0.7},
         )
 
         return {
@@ -347,12 +394,10 @@ class BackendSimulator:
             "intensity": fusion_result["intensity"],
             "symbols_used": symbols,
             "fusion_successful": True,
-            "persona_effects": {
-                "lyra": {"mystical_affinity": 0.8, "symbolic_understanding": 0.9}
-            }
+            "persona_effects": {"lyra": {"mystical_affinity": 0.8, "symbolic_understanding": 0.9}},
         }
 
-    def _simulate_symbol_activation(self, data: Dict) -> Dict[str, Any]:
+    def _simulate_symbol_activation(self, data: dict) -> dict[str, Any]:
         """Simulate symbol activation"""
         symbol = data.get("symbol", "mirror")
         context = data.get("context", "reflection")
@@ -364,12 +409,12 @@ class BackendSimulator:
             "effects": {
                 "emotional_resonance": random.uniform(0.7, 1.0),
                 "persona_modification": f"{symbol}_affinity",
-                "memory_trigger": f"Memory of {symbol} and {context}"
+                "memory_trigger": f"Memory of {symbol} and {context}",
             },
-            "duration_minutes": random.randint(5, 30)
+            "duration_minutes": random.randint(5, 30),
         }
 
-    def _simulate_compound_mood(self, data: Dict) -> Dict[str, Any]:
+    def _simulate_compound_mood(self, data: dict) -> dict[str, Any]:
         """Simulate compound mood creation"""
         base_mood = data.get("base_mood", "love")
         modifier = data.get("modifier", "mystical")
@@ -382,12 +427,12 @@ class BackendSimulator:
             "components": [base_mood, modifier],
             "persona_effects": {
                 "lyra": {"mystical_understanding": 0.8},
-                "mia": {"romantic_depth": 0.9}
+                "mia": {"romantic_depth": 0.9},
             },
-            "duration_minutes": random.randint(10, 45)
+            "duration_minutes": random.randint(10, 45),
         }
 
-    def _simulate_scene_initiation(self, data: Dict) -> Dict[str, Any]:
+    def _simulate_scene_initiation(self, data: dict) -> dict[str, Any]:
         """Simulate scene initiation"""
         text = data.get("text", "I feel so romantic")
         scene_type = data.get("scene_type", "romantic")
@@ -403,20 +448,35 @@ class BackendSimulator:
             "audio_elements": ["gentle_music", "soft_breathing", "heartbeat"],
             "haptic_elements": ["gentle_touch", "warm_embrace"],
             "memory_integration": True,
-            "generation_status": "initiated"
+            "generation_status": "initiated",
         }
 
-    def _simulate_scene_templates(self) -> Dict[str, Any]:
+    def _simulate_scene_templates(self) -> dict[str, Any]:
         """Simulate scene templates"""
         templates = [
-            {"id": "romantic_sunset", "name": "Romantic Sunset", "type": "romantic", "complexity": "medium"},
-            {"id": "mystical_forest", "name": "Mystical Forest", "type": "mystical", "complexity": "high"},
-            {"id": "intimate_fireplace", "name": "Intimate Fireplace", "type": "romantic", "complexity": "low"}
+            {
+                "id": "romantic_sunset",
+                "name": "Romantic Sunset",
+                "type": "romantic",
+                "complexity": "medium",
+            },
+            {
+                "id": "mystical_forest",
+                "name": "Mystical Forest",
+                "type": "mystical",
+                "complexity": "high",
+            },
+            {
+                "id": "intimate_fireplace",
+                "name": "Intimate Fireplace",
+                "type": "romantic",
+                "complexity": "low",
+            },
         ]
 
         return {"templates": templates}
 
-    def _simulate_scene_generation(self, data: Dict) -> Dict[str, Any]:
+    def _simulate_scene_generation(self, data: dict) -> dict[str, Any]:
         """Simulate scene generation"""
         template_id = data.get("template_id", "romantic_sunset")
 
@@ -427,10 +487,10 @@ class BackendSimulator:
             "video_url": f"/generated/scene_{random.randint(1000, 9999)}.mp4",
             "duration_seconds": random.randint(30, 120),
             "quality_score": random.uniform(0.8, 0.95),
-            "memory_created": True
+            "memory_created": True,
         }
 
-    def _simulate_touch_recording(self, data: Dict) -> Dict[str, Any]:
+    def _simulate_touch_recording(self, data: dict) -> dict[str, Any]:
         """Simulate touch recording"""
         touch_type = data.get("touch_type", "gentle")
         location = data.get("location", "cheek")
@@ -442,29 +502,39 @@ class BackendSimulator:
             "emotional_significance": random.uniform(0.6, 1.0),
             "journal_entry_created": True,
             "memory_stored": True,
-            "symbolic_meaning": f"Gentle affection on {location}"
+            "symbolic_meaning": f"Gentle affection on {location}",
         }
 
-    def _simulate_touch_patterns(self) -> Dict[str, Any]:
+    def _simulate_touch_patterns(self) -> dict[str, Any]:
         """Simulate touch patterns"""
         patterns = [
             {"pattern": "gentle_caress", "frequency": 15, "emotional_weight": 0.8},
             {"pattern": "tender_embrace", "frequency": 8, "emotional_weight": 0.9},
-            {"pattern": "playful_touch", "frequency": 12, "emotional_weight": 0.7}
+            {"pattern": "playful_touch", "frequency": 12, "emotional_weight": 0.7},
         ]
 
         return {"patterns": patterns}
 
-    def _simulate_touch_journal(self) -> Dict[str, Any]:
+    def _simulate_touch_journal(self) -> dict[str, Any]:
         """Simulate touch journal"""
         entries = [
-            {"timestamp": "2024-01-15T20:30:00", "pattern": "gentle_caress", "emotion": "love", "description": "Gentle caress on cheek during sunset"},
-            {"timestamp": "2024-01-15T21:15:00", "pattern": "tender_embrace", "emotion": "tenderness", "description": "Warm embrace while stargazing"}
+            {
+                "timestamp": "2024-01-15T20:30:00",
+                "pattern": "gentle_caress",
+                "emotion": "love",
+                "description": "Gentle caress on cheek during sunset",
+            },
+            {
+                "timestamp": "2024-01-15T21:15:00",
+                "pattern": "tender_embrace",
+                "emotion": "tenderness",
+                "description": "Warm embrace while stargazing",
+            },
         ]
 
         return {"entries": entries, "total_entries": len(entries)}
 
-    def _simulate_wakeword_analysis(self, data: Dict) -> Dict[str, Any]:
+    def _simulate_wakeword_analysis(self, data: dict) -> dict[str, Any]:
         """Simulate wake word analysis"""
         context = data.get("context", {})
 
@@ -475,21 +545,29 @@ class BackendSimulator:
             "mood_context": "romantic",
             "privacy_context": "private",
             "noise_context": "low",
-            "recommended_mode": "whisper_romantic"
+            "recommended_mode": "whisper_romantic",
         }
 
-    def _simulate_wakeword_modes(self) -> Dict[str, Any]:
+    def _simulate_wakeword_modes(self) -> dict[str, Any]:
         """Simulate wake word modes"""
         modes = [
-            {"mode": "whisper_romantic", "description": "Soft romantic whisper", "context": "intimate"},
+            {
+                "mode": "whisper_romantic",
+                "description": "Soft romantic whisper",
+                "context": "intimate",
+            },
             {"mode": "gentle_caring", "description": "Gentle caring voice", "context": "comfort"},
             {"mode": "mystical_whisper", "description": "Mystical whisper", "context": "mystical"},
-            {"mode": "technical_clarity", "description": "Clear technical voice", "context": "technical"}
+            {
+                "mode": "technical_clarity",
+                "description": "Clear technical voice",
+                "context": "technical",
+            },
         ]
 
         return {"modes": modes}
 
-    def _simulate_wakeword_selection(self, data: Dict) -> Dict[str, Any]:
+    def _simulate_wakeword_selection(self, data: dict) -> dict[str, Any]:
         """Simulate wake word selection"""
         context = data.get("context", {})
 
@@ -498,10 +576,10 @@ class BackendSimulator:
             "mode": "whisper_romantic",
             "persona": "lyra",
             "response_behavior": "gentle_whisper",
-            "context_appropriate": True
+            "context_appropriate": True,
         }
 
-    def _simulate_ritual_initiation(self, data: Dict) -> Dict[str, Any]:
+    def _simulate_ritual_initiation(self, data: dict) -> dict[str, Any]:
         """Simulate ritual initiation"""
         transformation_path = data.get("transformation_path", "self_acceptance")
 
@@ -514,10 +592,10 @@ class BackendSimulator:
             "reflection_depth": 0.3,
             "transformation_progress": 0.1,
             "trust_level": 0.5,
-            "ritual_initiated": True
+            "ritual_initiated": True,
         }
 
-    def _simulate_ritual_progress(self, data: Dict) -> Dict[str, Any]:
+    def _simulate_ritual_progress(self, data: dict) -> dict[str, Any]:
         """Simulate ritual progress"""
         ritual_id = data.get("ritual_id", "ritual_1234")
         user_input = data.get("user_input", "I am ready to reflect")
@@ -532,11 +610,11 @@ class BackendSimulator:
             "trust_level": 0.7,
             "phase_effects": {
                 "emotional_insight": "Deeper self-awareness emerging",
-                "persona_modification": "increased_vulnerability"
-            }
+                "persona_modification": "increased_vulnerability",
+            },
         }
 
-    def _simulate_ritual_status(self) -> Dict[str, Any]:
+    def _simulate_ritual_status(self) -> dict[str, Any]:
         """Simulate ritual status"""
         return {
             "active_rituals": 1,
@@ -544,10 +622,10 @@ class BackendSimulator:
             "mirror_state": "clouded",
             "transformation_progress": 0.3,
             "trust_level": 0.7,
-            "completion_estimate": "2 more phases remaining"
+            "completion_estimate": "2 more phases remaining",
         }
 
-    def _simulate_privacy_create(self, data: Dict) -> Dict[str, Any]:
+    def _simulate_privacy_create(self, data: dict) -> dict[str, Any]:
         """Simulate privacy content creation"""
         content_type = data.get("content_type", "scene")
         privacy_level = data.get("privacy_level", "trusted")
@@ -560,10 +638,10 @@ class BackendSimulator:
             "unlock_conditions": ["trust_level_0.8", "emotional_connection"],
             "preview_available": True,
             "created_at": datetime.now().isoformat(),
-            "access_granted": False
+            "access_granted": False,
         }
 
-    def _simulate_privacy_access(self, data: Dict) -> Dict[str, Any]:
+    def _simulate_privacy_access(self, data: dict) -> dict[str, Any]:
         """Simulate privacy access"""
         content_id = data.get("content_id", "private_1234")
         trust_level = data.get("trust_level", 0.9)
@@ -574,19 +652,31 @@ class BackendSimulator:
             "trust_level": trust_level,
             "unlock_conditions_met": trust_level >= 0.8,
             "content_preview": "A deeply personal moment shared in trust...",
-            "full_content": "This is the full private content that requires trust to access." if trust_level >= 0.8 else None
+            "full_content": "This is the full private content that requires trust to access."
+            if trust_level >= 0.8
+            else None,
         }
 
-    def _simulate_privacy_list(self) -> Dict[str, Any]:
+    def _simulate_privacy_list(self) -> dict[str, Any]:
         """Simulate privacy content list"""
         contents = [
-            {"id": "private_1234", "type": "scene", "privacy_level": "trusted", "created": "2024-01-15T20:00:00"},
-            {"id": "private_5678", "type": "journal", "privacy_level": "intimate", "created": "2024-01-15T21:00:00"}
+            {
+                "id": "private_1234",
+                "type": "scene",
+                "privacy_level": "trusted",
+                "created": "2024-01-15T20:00:00",
+            },
+            {
+                "id": "private_5678",
+                "type": "journal",
+                "privacy_level": "intimate",
+                "created": "2024-01-15T21:00:00",
+            },
         ]
 
         return {"contents": contents, "total_count": len(contents)}
 
-    def _simulate_biometric_processing(self, data: Dict) -> Dict[str, Any]:
+    def _simulate_biometric_processing(self, data: dict) -> dict[str, Any]:
         """Simulate biometric processing"""
         biometric_data = data.get("biometric_data", {})
 
@@ -598,10 +688,10 @@ class BackendSimulator:
             "temperature": random.uniform(36.0, 37.5),
             "emotional_inference": "calm_romantic",
             "confidence": random.uniform(0.7, 0.95),
-            "processing_successful": True
+            "processing_successful": True,
         }
 
-    def _simulate_biometric_session(self, data: Dict) -> Dict[str, Any]:
+    def _simulate_biometric_session(self, data: dict) -> dict[str, Any]:
         """Simulate biometric session"""
         session_id = data.get("session_id", "bio_1234")
 
@@ -611,10 +701,10 @@ class BackendSimulator:
             "duration_minutes": random.randint(5, 30),
             "readings_count": random.randint(10, 50),
             "emotional_trend": "increasing_romantic_arousal",
-            "session_active": True
+            "session_active": True,
         }
 
-    def _simulate_emotional_biometrics(self, data: Dict) -> Dict[str, Any]:
+    def _simulate_emotional_biometrics(self, data: dict) -> dict[str, Any]:
         """Simulate emotional biometrics"""
         return {
             "emotional_state": "romantic_arousal",
@@ -623,12 +713,14 @@ class BackendSimulator:
             "memory_created": True,
             "persona_effects": {
                 "mia": {"romantic_responsiveness": 0.9},
-                "lyra": {"mystical_sensitivity": 0.8}
-            }
+                "lyra": {"mystical_sensitivity": 0.8},
+            },
         }
+
 
 # Global simulator instance
 simulator = BackendSimulator()
+
 
 def test_phase1_features():
     """Test Phase 1 romantic features with simulator"""
@@ -637,16 +729,22 @@ def test_phase1_features():
 
     # Test emotion detection
     print("\n1. Testing Emotion Detection...")
-    response = simulator.simulate_request("/emotion/from_text", "POST", {"text": "I love you so much"})
+    response = simulator.simulate_request(
+        "/emotion/from_text", "POST", {"text": "I love you so much"}
+    )
     print(f"✅ Emotion: {response['primary_mood']} (intensity: {response['intensity']:.2f})")
 
     # Test romantic interaction
     print("\n2. Testing Romantic Interaction...")
-    response = simulator.simulate_request("/api/romantic/interact", "POST", {
-        "message": "I love you with all my heart",
-        "interaction_type": "conversation",
-        "intensity": 0.9
-    })
+    response = simulator.simulate_request(
+        "/api/romantic/interact",
+        "POST",
+        {
+            "message": "I love you with all my heart",
+            "interaction_type": "conversation",
+            "intensity": 0.9,
+        },
+    )
     print(f"✅ Mia's response: {response['mia_response']}")
     print(f"   Relationship stage: {response['relationship_stage']}")
 
@@ -667,8 +765,9 @@ def test_phase1_features():
     print("\n5. Testing Memory System...")
     response = simulator.simulate_request("/api/romantic/memories", "GET")
     print(f"✅ Retrieved {len(response['memories'])} memories")
-    for memory in response['memories'][:2]:
+    for memory in response["memories"][:2]:
         print(f"   - {memory['description']}")
+
 
 def test_phase2_features():
     """Test Phase 2 intimacy features with simulator"""
@@ -683,10 +782,9 @@ def test_phase2_features():
 
     # Test voice synthesis
     print("\n2. Testing Voice System...")
-    response = simulator.simulate_request("/api/phase2/voice/synthesize", "POST", {
-        "text": "I love you so much",
-        "emotion": "loving"
-    })
+    response = simulator.simulate_request(
+        "/api/phase2/voice/synthesize", "POST", {"text": "I love you so much", "emotion": "loving"}
+    )
     print(f"✅ Voice emotion: {response['voice_params']['emotion']}")
     print(f"   Warmth: {response['voice_params']['warmth']:.2f}")
 
@@ -695,11 +793,13 @@ def test_phase2_features():
     response = simulator.simulate_request("/api/phase2/activities/list", "GET")
     print(f"✅ Found {len(response['activities'])} activities")
 
-    response = simulator.simulate_request("/api/phase2/activities/suggest", "POST", {
-        "mood": "romantic",
-        "romantic_intensity_min": 0.7
-    })
+    response = simulator.simulate_request(
+        "/api/phase2/activities/suggest",
+        "POST",
+        {"mood": "romantic", "romantic_intensity_min": 0.7},
+    )
     print(f"✅ Suggested activity: {response['activity']['name']}")
+
 
 def test_advanced_features():
     """Test advanced features with simulator"""
@@ -708,61 +808,68 @@ def test_advanced_features():
 
     # Test Symbolic Fusion
     print("\n1. Testing Symbolic Fusion...")
-    response = simulator.simulate_request("/api/advanced/symbolic/fuse", "POST", {
-        "symbols": ["fire", "water"]
-    })
+    response = simulator.simulate_request(
+        "/api/advanced/symbolic/fuse", "POST", {"symbols": ["fire", "water"]}
+    )
     print(f"✅ Fusion result: {response['fusion_result']}")
     print(f"   Compound mood: {response['compound_mood']}")
 
     # Test Scene Initiation
     print("\n2. Testing Scene Initiation...")
-    response = simulator.simulate_request("/api/advanced/scenes/initiate", "POST", {
-        "text": "I feel so romantic",
-        "scene_type": "romantic"
-    })
+    response = simulator.simulate_request(
+        "/api/advanced/scenes/initiate",
+        "POST",
+        {"text": "I feel so romantic", "scene_type": "romantic"},
+    )
     print(f"✅ Scene prompt: {response['scene_prompt']}")
     print(f"   Emotional intensity: {response['emotional_intensity']:.2f}")
 
     # Test Touch Journal
     print("\n3. Testing Touch Journal...")
-    response = simulator.simulate_request("/api/advanced/touch/record", "POST", {
-        "touch_type": "gentle",
-        "location": "cheek",
-        "intensity": 0.8
-    })
+    response = simulator.simulate_request(
+        "/api/advanced/touch/record",
+        "POST",
+        {"touch_type": "gentle", "location": "cheek", "intensity": 0.8},
+    )
     print(f"✅ Touch pattern: {response['pattern_recognized']}")
     print(f"   Journal entry created: {response['journal_entry_created']}")
 
     # Test Dynamic Wake Word
     print("\n4. Testing Dynamic Wake Word...")
-    response = simulator.simulate_request("/api/advanced/wakeword/analyze", "POST", {
-        "context": {"time": "evening", "mood": "romantic"}
-    })
+    response = simulator.simulate_request(
+        "/api/advanced/wakeword/analyze",
+        "POST",
+        {"context": {"time": "evening", "mood": "romantic"}},
+    )
     print(f"✅ Recommended mode: {response['recommended_mode']}")
 
     # Test Mirror Ritual
     print("\n5. Testing Mirror Ritual...")
-    response = simulator.simulate_request("/api/advanced/ritual/initiate", "POST", {
-        "transformation_path": "self_acceptance"
-    })
+    response = simulator.simulate_request(
+        "/api/advanced/ritual/initiate", "POST", {"transformation_path": "self_acceptance"}
+    )
     print(f"✅ Ritual initiated: {response['ritual_id']}")
     print(f"   Phase: {response['phase']}")
 
     # Test Private Scenes
     print("\n6. Testing Private Scenes...")
-    response = simulator.simulate_request("/api/advanced/privacy/create", "POST", {
-        "content_type": "scene",
-        "privacy_level": "trusted"
-    })
+    response = simulator.simulate_request(
+        "/api/advanced/privacy/create",
+        "POST",
+        {"content_type": "scene", "privacy_level": "trusted"},
+    )
     print(f"✅ Private content created: {response['content_id']}")
 
     # Test Biometric Integration
     print("\n7. Testing Biometric Integration...")
-    response = simulator.simulate_request("/api/advanced/biometrics/process", "POST", {
-        "biometric_data": {"heart_rate": 75, "hrv": 45}
-    })
+    response = simulator.simulate_request(
+        "/api/advanced/biometrics/process",
+        "POST",
+        {"biometric_data": {"heart_rate": 75, "hrv": 45}},
+    )
     print(f"✅ Biometric processing: {response['emotional_inference']}")
     print(f"   Confidence: {response['confidence']:.2f}")
+
 
 def test_integration_features():
     """Test integration between features"""
@@ -771,39 +878,47 @@ def test_integration_features():
 
     # Test symbolic fusion affecting scene generation
     print("\n1. Testing Symbolic Fusion → Scene Generation...")
-    fusion_response = simulator.simulate_request("/api/advanced/symbolic/fuse", "POST", {
-        "symbols": ["mirror", "crystal"]
-    })
+    fusion_response = simulator.simulate_request(
+        "/api/advanced/symbolic/fuse", "POST", {"symbols": ["mirror", "crystal"]}
+    )
 
-    scene_response = simulator.simulate_request("/api/advanced/scenes/initiate", "POST", {
-        "text": f"Feeling {fusion_response['compound_mood']}",
-        "scene_type": "mystical"
-    })
+    scene_response = simulator.simulate_request(
+        "/api/advanced/scenes/initiate",
+        "POST",
+        {"text": f"Feeling {fusion_response['compound_mood']}", "scene_type": "mystical"},
+    )
     print(f"✅ Symbolic fusion influenced scene: {scene_response['scene_prompt']}")
 
     # Test biometrics affecting wake word selection
     print("\n2. Testing Biometrics → Wake Word Selection...")
-    bio_response = simulator.simulate_request("/api/advanced/biometrics/process", "POST", {
-        "biometric_data": {"heart_rate": 85, "hrv": 35}
-    })
+    bio_response = simulator.simulate_request(
+        "/api/advanced/biometrics/process",
+        "POST",
+        {"biometric_data": {"heart_rate": 85, "hrv": 35}},
+    )
 
-    wake_response = simulator.simulate_request("/api/advanced/wakeword/select", "POST", {
-        "context": {"emotional_state": bio_response['emotional_inference']}
-    })
+    wake_response = simulator.simulate_request(
+        "/api/advanced/wakeword/select",
+        "POST",
+        {"context": {"emotional_state": bio_response["emotional_inference"]}},
+    )
     print(f"✅ Biometrics influenced wake word: {wake_response['selected_wake_word']}")
 
     # Test ritual affecting privacy access
     print("\n3. Testing Ritual → Privacy Access...")
-    ritual_response = simulator.simulate_request("/api/advanced/ritual/progress", "POST", {
-        "ritual_id": "ritual_1234",
-        "user_input": "I am ready to share my deepest self"
-    })
+    ritual_response = simulator.simulate_request(
+        "/api/advanced/ritual/progress",
+        "POST",
+        {"ritual_id": "ritual_1234", "user_input": "I am ready to share my deepest self"},
+    )
 
-    privacy_response = simulator.simulate_request("/api/advanced/privacy/access", "POST", {
-        "content_id": "private_1234",
-        "trust_level": ritual_response['trust_level']
-    })
+    privacy_response = simulator.simulate_request(
+        "/api/advanced/privacy/access",
+        "POST",
+        {"content_id": "private_1234", "trust_level": ritual_response["trust_level"]},
+    )
     print(f"✅ Ritual progress affects privacy: {privacy_response['access_granted']}")
+
 
 def main():
     """Run all simulated tests"""
@@ -827,7 +942,9 @@ def main():
     except Exception as e:
         print(f"\n❌ Test failed with error: {e}")
         import traceback
+
         traceback.print_exc()
+
 
 if __name__ == "__main__":
     main()

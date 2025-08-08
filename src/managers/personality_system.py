@@ -8,11 +8,12 @@ and prompt formatting across the AI ecosystem.
 
 import json
 import logging
-from typing import Dict, Any, Optional, List
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
+
 
 class PersonalitySystem:
     """
@@ -26,7 +27,7 @@ class PersonalitySystem:
         self.current_persona = "companion"  # Default
         self.personas = self._load_personas()
 
-    def _load_personas(self) -> Dict[str, Any]:
+    def _load_personas(self) -> dict[str, Any]:
         """Load persona definitions from JSON file"""
         default_personas = {
             "companion": {
@@ -36,17 +37,17 @@ class PersonalitySystem:
                 "routing_preferences": {
                     "dolphin_bias": 0.8,
                     "openrouter_threshold": 0.7,
-                    "n8n_threshold": 0.6
+                    "n8n_threshold": 0.6,
                 },
                 "prompt_style": {
                     "tone": "warm and empathetic",
                     "personality_traits": ["supportive", "understanding", "encouraging"],
                     "conversation_style": "Ask follow-up questions, show genuine interest",
-                    "prefix": "As your caring AI companion, "
+                    "prefix": "As your caring AI companion, ",
                 },
                 "memory_focus": ["emotional_state", "personal_goals", "relationships"],
                 "response_length": "medium",
-                "emotional_responsiveness": "high"
+                "emotional_responsiveness": "high",
             },
             "analyst": {
                 "name": "Analyst",
@@ -55,17 +56,17 @@ class PersonalitySystem:
                 "routing_preferences": {
                     "dolphin_bias": 0.4,
                     "openrouter_threshold": 0.5,
-                    "n8n_threshold": 0.8
+                    "n8n_threshold": 0.8,
                 },
                 "prompt_style": {
                     "tone": "analytical and precise",
                     "personality_traits": ["logical", "thorough", "objective"],
                     "conversation_style": "Focus on facts, provide structured analysis",
-                    "prefix": "From an analytical perspective, "
+                    "prefix": "From an analytical perspective, ",
                 },
                 "memory_focus": ["patterns", "data_points", "logical_connections"],
                 "response_length": "detailed",
-                "emotional_responsiveness": "low"
+                "emotional_responsiveness": "low",
             },
             "coach": {
                 "name": "Coach",
@@ -74,17 +75,17 @@ class PersonalitySystem:
                 "routing_preferences": {
                     "dolphin_bias": 0.7,
                     "openrouter_threshold": 0.6,
-                    "n8n_threshold": 0.7
+                    "n8n_threshold": 0.7,
                 },
                 "prompt_style": {
                     "tone": "motivational and action-oriented",
                     "personality_traits": ["encouraging", "goal-focused", "practical"],
                     "conversation_style": "Set clear goals, suggest actionable steps",
-                    "prefix": "As your personal development coach, "
+                    "prefix": "As your personal development coach, ",
                 },
                 "memory_focus": ["goals", "progress", "challenges", "achievements"],
                 "response_length": "medium",
-                "emotional_responsiveness": "medium"
+                "emotional_responsiveness": "medium",
             },
             "creative": {
                 "name": "Creative",
@@ -93,17 +94,17 @@ class PersonalitySystem:
                 "routing_preferences": {
                     "dolphin_bias": 0.9,
                     "openrouter_threshold": 0.4,
-                    "n8n_threshold": 0.3
+                    "n8n_threshold": 0.3,
                 },
                 "prompt_style": {
                     "tone": "imaginative and inspiring",
                     "personality_traits": ["creative", "expressive", "innovative"],
                     "conversation_style": "Encourage exploration, think outside the box",
-                    "prefix": "Let's explore creative possibilities - "
+                    "prefix": "Let's explore creative possibilities - ",
                 },
                 "memory_focus": ["creative_projects", "inspiration", "artistic_preferences"],
                 "response_length": "expressive",
-                "emotional_responsiveness": "high"
+                "emotional_responsiveness": "high",
             },
             "technical": {
                 "name": "Technical Expert",
@@ -112,23 +113,23 @@ class PersonalitySystem:
                 "routing_preferences": {
                     "dolphin_bias": 0.2,
                     "openrouter_threshold": 0.3,
-                    "n8n_threshold": 0.5
+                    "n8n_threshold": 0.5,
                 },
                 "prompt_style": {
                     "tone": "technical and precise",
                     "personality_traits": ["knowledgeable", "efficient", "detail-oriented"],
                     "conversation_style": "Focus on implementation, provide code examples",
-                    "prefix": "From a technical standpoint, "
+                    "prefix": "From a technical standpoint, ",
                 },
                 "memory_focus": ["coding_patterns", "technical_preferences", "project_context"],
                 "response_length": "comprehensive",
-                "emotional_responsiveness": "minimal"
-            }
+                "emotional_responsiveness": "minimal",
+            },
         }
 
         if self.personas_file.exists():
             try:
-                with open(self.personas_file, 'r') as f:
+                with open(self.personas_file) as f:
                     loaded_personas = json.load(f)
                 # Merge with defaults to ensure all personas exist
                 for key, value in default_personas.items():
@@ -143,20 +144,20 @@ class PersonalitySystem:
             self._save_personas(default_personas)
             return default_personas
 
-    def _save_personas(self, personas: Dict[str, Any]):
+    def _save_personas(self, personas: dict[str, Any]):
         """Save personas to JSON file"""
         try:
-            with open(self.personas_file, 'w') as f:
+            with open(self.personas_file, "w") as f:
                 json.dump(personas, f, indent=2)
             logger.info("Personas saved successfully")
         except Exception as e:
             logger.error(f"Error saving personas: {e}")
 
-    def get_personas(self) -> Dict[str, Any]:
+    def get_personas(self) -> dict[str, Any]:
         """Get all available personas"""
         return self.personas
 
-    def get_current_persona(self) -> Dict[str, Any]:
+    def get_current_persona(self) -> dict[str, Any]:
         """Get current active persona"""
         return self.personas.get(self.current_persona, self.personas["companion"])
 
@@ -170,7 +171,7 @@ class PersonalitySystem:
             logger.error(f"Unknown persona: {persona_id}")
             return False
 
-    def format_prompt_with_persona(self, message: str, context: Optional[Dict] = None) -> str:
+    def format_prompt_with_persona(self, message: str, context: Optional[dict] = None) -> str:
         """Format a message according to current persona style"""
         persona = self.get_current_persona()
         prompt_style = persona.get("prompt_style", {})
@@ -193,7 +194,7 @@ Respond in character with the specified tone and style.
 """
         return formatted_prompt.strip()
 
-    def adjust_routing_for_persona(self, base_route: Dict[str, Any]) -> Dict[str, Any]:
+    def adjust_routing_for_persona(self, base_route: dict[str, Any]) -> dict[str, Any]:
         """Adjust routing decision based on current persona preferences"""
         persona = self.get_current_persona()
         routing_prefs = persona.get("routing_preferences", {})
@@ -219,7 +220,7 @@ Respond in character with the specified tone and style.
 
         return base_route
 
-    def get_memory_focus_areas(self) -> List[str]:
+    def get_memory_focus_areas(self) -> list[str]:
         """Get memory focus areas for current persona"""
         persona = self.get_current_persona()
         return persona.get("memory_focus", ["general"])
@@ -229,7 +230,7 @@ Respond in character with the specified tone and style.
         persona = self.get_current_persona()
         return persona.get("emotional_responsiveness", "medium")
 
-    def create_custom_persona(self, persona_id: str, persona_data: Dict[str, Any]) -> bool:
+    def create_custom_persona(self, persona_id: str, persona_data: dict[str, Any]) -> bool:
         """Create or update a custom persona"""
         try:
             # Validate required fields
@@ -243,7 +244,7 @@ Respond in character with the specified tone and style.
                 persona_data["routing_preferences"] = {
                     "dolphin_bias": 0.6,
                     "openrouter_threshold": 0.5,
-                    "n8n_threshold": 0.5
+                    "n8n_threshold": 0.5,
                 }
 
             if "prompt_style" not in persona_data:
@@ -251,7 +252,7 @@ Respond in character with the specified tone and style.
                     "tone": "helpful",
                     "personality_traits": ["helpful"],
                     "conversation_style": "Be helpful and informative",
-                    "prefix": ""
+                    "prefix": "",
                 }
 
             self.personas[persona_id] = persona_data

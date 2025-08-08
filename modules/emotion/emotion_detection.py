@@ -3,12 +3,13 @@ Emotion Detection for Unified Companion
 Analyzes text for emotional content and user state
 """
 
-import re
 import logging
-from typing import Dict, Any, List, Optional
+import re
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
+
 
 class EmotionDetector:
     """
@@ -19,51 +20,149 @@ class EmotionDetector:
     def __init__(self):
         self.emotion_keywords = {
             "happy": [
-                "happy", "joy", "excited", "great", "wonderful", "amazing",
-                "fantastic", "excellent", "love", "awesome", "thrilled",
-                "delighted", "cheerful", "glad", "pleased", "content"
+                "happy",
+                "joy",
+                "excited",
+                "great",
+                "wonderful",
+                "amazing",
+                "fantastic",
+                "excellent",
+                "love",
+                "awesome",
+                "thrilled",
+                "delighted",
+                "cheerful",
+                "glad",
+                "pleased",
+                "content",
             ],
             "sad": [
-                "sad", "depressed", "down", "unhappy", "miserable", "upset",
-                "disappointed", "heartbroken", "grief", "sorrow", "blue",
-                "melancholy", "gloomy", "dejected", "despondent"
+                "sad",
+                "depressed",
+                "down",
+                "unhappy",
+                "miserable",
+                "upset",
+                "disappointed",
+                "heartbroken",
+                "grief",
+                "sorrow",
+                "blue",
+                "melancholy",
+                "gloomy",
+                "dejected",
+                "despondent",
             ],
             "angry": [
-                "angry", "mad", "furious", "irritated", "annoyed", "frustrated",
-                "rage", "outraged", "livid", "irate", "pissed", "enraged",
-                "aggravated", "incensed", "indignant"
+                "angry",
+                "mad",
+                "furious",
+                "irritated",
+                "annoyed",
+                "frustrated",
+                "rage",
+                "outraged",
+                "livid",
+                "irate",
+                "pissed",
+                "enraged",
+                "aggravated",
+                "incensed",
+                "indignant",
             ],
             "anxious": [
-                "anxious", "worried", "nervous", "stressed", "panic", "fear",
-                "scared", "terrified", "overwhelmed", "uneasy", "tense",
-                "apprehensive", "restless", "agitated", "concerned"
+                "anxious",
+                "worried",
+                "nervous",
+                "stressed",
+                "panic",
+                "fear",
+                "scared",
+                "terrified",
+                "overwhelmed",
+                "uneasy",
+                "tense",
+                "apprehensive",
+                "restless",
+                "agitated",
+                "concerned",
             ],
             "confused": [
-                "confused", "lost", "puzzled", "bewildered", "perplexed",
-                "uncertain", "unclear", "don't understand", "mixed up",
-                "baffled", "mystified", "stumped"
+                "confused",
+                "lost",
+                "puzzled",
+                "bewildered",
+                "perplexed",
+                "uncertain",
+                "unclear",
+                "don't understand",
+                "mixed up",
+                "baffled",
+                "mystified",
+                "stumped",
             ],
             "curious": [
-                "curious", "interested", "intrigued", "wondering", "fascinated",
-                "eager", "keen", "inquisitive", "want to know", "how does",
-                "why", "what if", "tell me more"
+                "curious",
+                "interested",
+                "intrigued",
+                "wondering",
+                "fascinated",
+                "eager",
+                "keen",
+                "inquisitive",
+                "want to know",
+                "how does",
+                "why",
+                "what if",
+                "tell me more",
             ],
             "grateful": [
-                "grateful", "thankful", "appreciate", "thanks", "blessed",
-                "fortunate", "lucky", "indebted", "obliged"
+                "grateful",
+                "thankful",
+                "appreciate",
+                "thanks",
+                "blessed",
+                "fortunate",
+                "lucky",
+                "indebted",
+                "obliged",
             ],
             "lonely": [
-                "lonely", "alone", "isolated", "solitary", "abandoned",
-                "friendless", "disconnected", "empty", "hollow"
+                "lonely",
+                "alone",
+                "isolated",
+                "solitary",
+                "abandoned",
+                "friendless",
+                "disconnected",
+                "empty",
+                "hollow",
             ],
             "excited": [
-                "excited", "pumped", "energetic", "enthusiastic", "eager",
-                "thrilled", "ecstatic", "elated", "hyper", "buzzing"
+                "excited",
+                "pumped",
+                "energetic",
+                "enthusiastic",
+                "eager",
+                "thrilled",
+                "ecstatic",
+                "elated",
+                "hyper",
+                "buzzing",
             ],
             "calm": [
-                "calm", "peaceful", "relaxed", "serene", "tranquil",
-                "composed", "centered", "balanced", "zen", "chill"
-            ]
+                "calm",
+                "peaceful",
+                "relaxed",
+                "serene",
+                "tranquil",
+                "composed",
+                "centered",
+                "balanced",
+                "zen",
+                "chill",
+            ],
         }
 
         self.intensity_modifiers = {
@@ -78,21 +177,42 @@ class EmotionDetector:
             "a bit": 0.7,
             "slightly": 0.6,
             "kind of": 0.8,
-            "sort of": 0.8
+            "sort of": 0.8,
         }
 
         # Positive/negative sentiment indicators
         self.positive_indicators = [
-            "!", "😊", "😄", "😃", "🙂", "❤️", "💕", "✨", "🎉",
-            "amazing", "great", "wonderful", "perfect", "love"
+            "!",
+            "😊",
+            "😄",
+            "😃",
+            "🙂",
+            "❤️",
+            "💕",
+            "✨",
+            "🎉",
+            "amazing",
+            "great",
+            "wonderful",
+            "perfect",
+            "love",
         ]
 
         self.negative_indicators = [
-            "😞", "😢", "😭", "💔", "😔", "terrible", "awful",
-            "horrible", "hate", "worst", "sucks"
+            "😞",
+            "😢",
+            "😭",
+            "💔",
+            "😔",
+            "terrible",
+            "awful",
+            "horrible",
+            "hate",
+            "worst",
+            "sucks",
         ]
 
-    async def analyze_text(self, text: str) -> Dict[str, Any]:
+    async def analyze_text(self, text: str) -> dict[str, Any]:
         """
         Analyze text for emotional content
         Returns emotion classification with confidence and intensity
@@ -104,7 +224,7 @@ class EmotionDetector:
                 "confidence": 0.5,
                 "intensity": 0.5,
                 "emotions": {"neutral": 0.5},
-                "sentiment": "neutral"
+                "sentiment": "neutral",
             }
 
         text_lower = text.lower()
@@ -123,7 +243,7 @@ class EmotionDetector:
                     for i, word in enumerate(words):
                         if keyword in word:
                             # Look for modifiers in previous words
-                            for j in range(max(0, i-2), i):
+                            for j in range(max(0, i - 2), i):
                                 if words[j] in self.intensity_modifiers:
                                     base_score *= self.intensity_modifiers[words[j]]
 
@@ -164,13 +284,17 @@ class EmotionDetector:
             "intensity": intensity,
             "emotions": emotion_scores,
             "sentiment": sentiment,
-            "analysis_timestamp": datetime.now().isoformat()
+            "analysis_timestamp": datetime.now().isoformat(),
         }
 
     def _analyze_sentiment(self, text: str) -> float:
         """Simple sentiment analysis"""
-        positive_count = sum(1 for indicator in self.positive_indicators if indicator in text.lower())
-        negative_count = sum(1 for indicator in self.negative_indicators if indicator in text.lower())
+        positive_count = sum(
+            1 for indicator in self.positive_indicators if indicator in text.lower()
+        )
+        negative_count = sum(
+            1 for indicator in self.negative_indicators if indicator in text.lower()
+        )
 
         total_indicators = positive_count + negative_count
         if total_indicators == 0:
@@ -178,7 +302,7 @@ class EmotionDetector:
 
         return positive_count / total_indicators
 
-    def _calculate_sentiment(self, emotion_scores: Dict[str, float]) -> str:
+    def _calculate_sentiment(self, emotion_scores: dict[str, float]) -> str:
         """Calculate overall sentiment from emotion scores"""
         positive_emotions = ["happy", "excited", "grateful", "curious", "calm"]
         negative_emotions = ["sad", "angry", "anxious", "lonely", "confused"]
@@ -216,7 +340,7 @@ class EmotionDetector:
 
         return min(base_intensity, 1.0)  # Cap at 1.0
 
-    async def analyze_conversation_pattern(self, recent_messages: List[str]) -> Dict[str, Any]:
+    async def analyze_conversation_pattern(self, recent_messages: list[str]) -> dict[str, Any]:
         """Analyze emotional patterns across recent conversation"""
 
         if not recent_messages:
@@ -226,11 +350,13 @@ class EmotionDetector:
 
         for message in recent_messages:
             emotion_data = await self.analyze_text(message)
-            emotions_over_time.append({
-                "emotion": emotion_data["primary_emotion"],
-                "sentiment": emotion_data["sentiment"],
-                "intensity": emotion_data["intensity"]
-            })
+            emotions_over_time.append(
+                {
+                    "emotion": emotion_data["primary_emotion"],
+                    "sentiment": emotion_data["sentiment"],
+                    "intensity": emotion_data["intensity"],
+                }
+            )
 
         # Analyze trends
         sentiments = [e["sentiment"] for e in emotions_over_time]
@@ -254,19 +380,21 @@ class EmotionDetector:
 
         # Detect conversation patterns
         emotion_names = [e["emotion"] for e in emotions_over_time]
-        most_common_emotion = max(set(emotion_names), key=emotion_names.count) if emotion_names else "neutral"
+        most_common_emotion = (
+            max(set(emotion_names), key=emotion_names.count) if emotion_names else "neutral"
+        )
 
         pattern_analysis = {
             "dominant_emotion": most_common_emotion,
             "trend": trend,
             "average_intensity": avg_intensity,
             "conversation_length": len(recent_messages),
-            "emotional_stability": self._calculate_stability(emotions_over_time)
+            "emotional_stability": self._calculate_stability(emotions_over_time),
         }
 
         return pattern_analysis
 
-    def _calculate_stability(self, emotions_over_time: List[Dict[str, Any]]) -> str:
+    def _calculate_stability(self, emotions_over_time: list[dict[str, Any]]) -> str:
         """Calculate emotional stability in conversation"""
         if len(emotions_over_time) < 3:
             return "insufficient_data"
@@ -281,7 +409,7 @@ class EmotionDetector:
         else:
             return "variable"
 
-    async def get_supportive_response_suggestions(self, emotion_data: Dict[str, Any]) -> List[str]:
+    async def get_supportive_response_suggestions(self, emotion_data: dict[str, Any]) -> list[str]:
         """Get suggestions for supportive responses based on detected emotion"""
 
         primary_emotion = emotion_data["primary_emotion"]
@@ -291,37 +419,40 @@ class EmotionDetector:
             "sad": [
                 "I can hear that you're going through something difficult. I'm here to listen.",
                 "It sounds like you're feeling down. Would you like to talk about what's happening?",
-                "I'm sorry you're feeling this way. Sometimes it helps to share what's on your mind."
+                "I'm sorry you're feeling this way. Sometimes it helps to share what's on your mind.",
             ],
             "anxious": [
                 "I notice you seem worried about something. Would it help to talk through what's concerning you?",
                 "Anxiety can be really tough. I'm here to listen and support you through this.",
-                "It sounds like you're feeling stressed. Let's take this one step at a time."
+                "It sounds like you're feeling stressed. Let's take this one step at a time.",
             ],
             "angry": [
                 "I can sense your frustration. That sounds really difficult to deal with.",
                 "It sounds like something has really upset you. I'm here to listen.",
-                "Your feelings are completely valid. Would you like to talk about what happened?"
+                "Your feelings are completely valid. Would you like to talk about what happened?",
             ],
             "confused": [
                 "It sounds like you're trying to work through something complex. I'm happy to help you think it through.",
                 "I can help you break this down into smaller pieces if that would be helpful.",
-                "Sometimes talking through confusion can help clarify things. What's on your mind?"
+                "Sometimes talking through confusion can help clarify things. What's on your mind?",
             ],
             "happy": [
                 "I love hearing the joy in your message! What's making you so happy?",
                 "Your excitement is contagious! I'd love to hear more about this.",
-                "It's wonderful that you're feeling so positive! Tell me more!"
+                "It's wonderful that you're feeling so positive! Tell me more!",
             ],
             "excited": [
                 "Your enthusiasm is amazing! I'm excited to hear about this too!",
                 "I can feel your energy! What's got you so excited?",
-                "This sounds like something really special! I'd love to know more."
-            ]
+                "This sounds like something really special! I'd love to know more.",
+            ],
         }
 
-        return suggestions.get(primary_emotion, [
-            "I'm here to listen and support you.",
-            "Thank you for sharing that with me.",
-            "How are you feeling about everything right now?"
-        ])
+        return suggestions.get(
+            primary_emotion,
+            [
+                "I'm here to listen and support you.",
+                "Thank you for sharing that with me.",
+                "How are you feeling about everything right now?",
+            ],
+        )

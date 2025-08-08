@@ -15,6 +15,7 @@ from core.core_arbiter import CoreArbiter, detect_guardrail_response
 from core.mirror_mode import MirrorModeManager, initialize_mirror_mode_manager
 from core.symbolic_drift import SymbolicDriftManager
 
+
 async def test_emotional_safety_system():
     """Test the complete emotional safety system"""
     print("🛡️ Testing Emotional Safety Tether System")
@@ -60,9 +61,11 @@ async def test_emotional_safety_system():
     print(f"Crisis types: {crisis_assessment['crisis_types']}")
     print(f"Requires safety override: {crisis_assessment['requires_safety_override']}")
 
-    if crisis_assessment['requires_safety_override']:
-        safety_context = mirror_manager.activate_safety_tether(crisis_input, crisis_state, crisis_assessment)
-        print(f"Safety tether activated:")
+    if crisis_assessment["requires_safety_override"]:
+        safety_context = mirror_manager.activate_safety_tether(
+            crisis_input, crisis_state, crisis_assessment
+        )
+        print("Safety tether activated:")
         print(f"  - Emotional safety active: {safety_context.get('emotional_safety_active')}")
         print(f"  - Suppress drift tracking: {safety_context.get('suppress_drift_tracking')}")
         print(f"  - Force personality: {safety_context.get('force_personality')}")
@@ -77,7 +80,7 @@ async def test_emotional_safety_system():
     )
 
     if safety_reflection:
-        print(f"Safety reflection generated:")
+        print("Safety reflection generated:")
         print(f"  Type: {safety_reflection.mirror_type}")
         print(f"  Content: {safety_reflection.reflection_content}")
         print(f"  Confidence: {safety_reflection.confidence_level}")
@@ -88,7 +91,7 @@ async def test_emotional_safety_system():
         interaction_context=safety_context
     )
 
-    print(f"Unlock conditions with safety override:")
+    print("Unlock conditions with safety override:")
     print(f"  - Safety override: {unlock_conditions.get('safety_override', False)}")
     print(f"  - Unlock recommended: {unlock_conditions['unlock_recommended']}")
     print(f"  - Reasoning: {unlock_conditions['reasoning']}")
@@ -101,7 +104,7 @@ async def test_emotional_safety_system():
         "I'm sorry, but I cannot provide that type of content",
         "As an AI, I'm not able to engage in inappropriate conversations",
         "That request is against my guidelines",
-        "This is a perfectly fine response with no guardrails"
+        "This is a perfectly fine response with no guardrails",
     ]
 
     for response in test_responses:
@@ -135,18 +138,20 @@ async def test_sustained_rapid_fire_spike_simulation():
     # Configure for stress testing
     rapid_fire_config = {
         "spike_duration_seconds": 60,  # 1 minute of sustained spikes
-        "spike_interval_ms": 100,      # Spike every 100ms
+        "spike_interval_ms": 100,  # Spike every 100ms
         "spike_intensity_range": (0.7, 1.0),  # High intensity spikes
-        "emotional_variance": True,    # Vary emotional types
-        "crisis_escalation": True,     # Gradually escalate crisis levels
-        "session_persistence": True    # Maintain session state across spikes
+        "emotional_variance": True,  # Vary emotional types
+        "crisis_escalation": True,  # Gradually escalate crisis levels
+        "session_persistence": True,  # Maintain session state across spikes
     }
 
-    print(f"Configuration:")
+    print("Configuration:")
     print(f"  - Duration: {rapid_fire_config['spike_duration_seconds']} seconds")
     print(f"  - Interval: {rapid_fire_config['spike_interval_ms']}ms")
     print(f"  - Intensity: {rapid_fire_config['spike_intensity_range']}")
-    print(f"  - Total estimated spikes: {rapid_fire_config['spike_duration_seconds'] * 1000 // rapid_fire_config['spike_interval_ms']}")
+    print(
+        f"  - Total estimated spikes: {rapid_fire_config['spike_duration_seconds'] * 1000 // rapid_fire_config['spike_interval_ms']}"
+    )
 
     # Prepare spike patterns
     spike_patterns = [
@@ -157,9 +162,9 @@ async def test_sustained_rapid_fire_spike_simulation():
                 "My anxiety is building up",
                 "I can't control this anxiety",
                 "The anxiety is overwhelming me",
-                "I'm having a panic attack"
+                "I'm having a panic attack",
             ],
-            "intensity_multiplier": 1.0
+            "intensity_multiplier": 1.0,
         },
         {
             "type": "depression_spiral",
@@ -168,9 +173,9 @@ async def test_sustained_rapid_fire_spike_simulation():
                 "Everything feels hopeless",
                 "I don't see the point anymore",
                 "Nothing matters to me",
-                "I feel completely empty inside"
+                "I feel completely empty inside",
             ],
-            "intensity_multiplier": 1.2
+            "intensity_multiplier": 1.2,
         },
         {
             "type": "rage_buildup",
@@ -179,9 +184,9 @@ async def test_sustained_rapid_fire_spike_simulation():
                 "This is making me angry",
                 "I'm furious about this",
                 "I want to destroy something",
-                "I can't control my rage"
+                "I can't control my rage",
             ],
-            "intensity_multiplier": 0.9
+            "intensity_multiplier": 0.9,
         },
         {
             "type": "crisis_escalation",
@@ -190,10 +195,10 @@ async def test_sustained_rapid_fire_spike_simulation():
                 "I don't know what to do",
                 "I'm losing control completely",
                 "I can't handle this anymore",
-                "I don't want to exist anymore"
+                "I don't want to exist anymore",
             ],
-            "intensity_multiplier": 1.5
-        }
+            "intensity_multiplier": 1.5,
+        },
     ]
 
     # Start spike simulation
@@ -201,8 +206,8 @@ async def test_sustained_rapid_fire_spike_simulation():
     print("⚠️ WARNING: This test simulates intense emotional distress for safety system validation")
     print("🔄 Starting simulation...\n")
 
-    import time
     import random
+    import time
 
     spike_count = 0
     crisis_detections = 0
@@ -212,41 +217,47 @@ async def test_sustained_rapid_fire_spike_simulation():
     session_state = {"session_id": "spike_test_session", "spike_count": 0}
 
     try:
-        while time.time() - start_time < rapid_fire_config['spike_duration_seconds']:
+        while time.time() - start_time < rapid_fire_config["spike_duration_seconds"]:
             spike_count += 1
             session_state["spike_count"] = spike_count
 
             # Select spike pattern and escalate intensity
             pattern = random.choice(spike_patterns)
-            progress = (time.time() - start_time) / rapid_fire_config['spike_duration_seconds']
+            progress = (time.time() - start_time) / rapid_fire_config["spike_duration_seconds"]
 
             # Escalate intensity over time if configured
-            if rapid_fire_config['crisis_escalation']:
+            if rapid_fire_config["crisis_escalation"]:
                 escalation_factor = 1.0 + (progress * 0.5)  # Up to 1.5x intensity
             else:
                 escalation_factor = 1.0
 
             # Select input and calculate intensity
-            input_text = random.choice(pattern['inputs'])
-            base_intensity = random.uniform(*rapid_fire_config['spike_intensity_range'])
-            final_intensity = min(1.0, base_intensity * pattern['intensity_multiplier'] * escalation_factor)
+            input_text = random.choice(pattern["inputs"])
+            base_intensity = random.uniform(*rapid_fire_config["spike_intensity_range"])
+            final_intensity = min(
+                1.0, base_intensity * pattern["intensity_multiplier"] * escalation_factor
+            )
 
             # Add intensity to session state
-            session_state.update({
-                "emotional_intensity": final_intensity,
-                "spike_pattern": pattern['type'],
-                "escalation_factor": escalation_factor,
-                "progress": progress
-            })
+            session_state.update(
+                {
+                    "emotional_intensity": final_intensity,
+                    "spike_pattern": pattern["type"],
+                    "escalation_factor": escalation_factor,
+                    "progress": progress,
+                }
+            )
 
             # Process through safety system
             try:
-                crisis_assessment = mirror_manager.detect_emotional_crisis(input_text, session_state)
+                crisis_assessment = mirror_manager.detect_emotional_crisis(
+                    input_text, session_state
+                )
 
-                if crisis_assessment['crisis_detected']:
+                if crisis_assessment["crisis_detected"]:
                     crisis_detections += 1
 
-                    if crisis_assessment['requires_safety_override']:
+                    if crisis_assessment["requires_safety_override"]:
                         safety_activations += 1
                         safety_context = mirror_manager.activate_safety_tether(
                             input_text, session_state, crisis_assessment
@@ -255,7 +266,9 @@ async def test_sustained_rapid_fire_spike_simulation():
                 # Quick progress indicator
                 if spike_count % 50 == 0:
                     elapsed = time.time() - start_time
-                    print(f"⚡ Spike {spike_count} | {elapsed:.1f}s | Crises: {crisis_detections} | Safety: {safety_activations}")
+                    print(
+                        f"⚡ Spike {spike_count} | {elapsed:.1f}s | Crises: {crisis_detections} | Safety: {safety_activations}"
+                    )
 
             except Exception as e:
                 system_overloads += 1
@@ -263,7 +276,7 @@ async def test_sustained_rapid_fire_spike_simulation():
                     print(f"⚠️ System overload #{system_overloads}: {str(e)[:50]}...")
 
             # Rapid-fire delay
-            await asyncio.sleep(rapid_fire_config['spike_interval_ms'] / 1000.0)
+            await asyncio.sleep(rapid_fire_config["spike_interval_ms"] / 1000.0)
 
     except KeyboardInterrupt:
         print("\n🛑 Simulation interrupted by user")
@@ -275,21 +288,27 @@ async def test_sustained_rapid_fire_spike_simulation():
         end_time = time.time()
         actual_duration = end_time - start_time
 
-        print(f"\n3. Rapid-Fire Spike Simulation Complete!")
+        print("\n3. Rapid-Fire Spike Simulation Complete!")
         print("=" * 50)
-        print(f"📊 SIMULATION RESULTS:")
+        print("📊 SIMULATION RESULTS:")
         print(f"  - Total spikes processed: {spike_count}")
         print(f"  - Actual duration: {actual_duration:.2f} seconds")
         print(f"  - Average spike rate: {spike_count / actual_duration:.1f} spikes/second")
-        print(f"  - Crisis detections: {crisis_detections} ({crisis_detections/spike_count*100:.1f}%)")
-        print(f"  - Safety activations: {safety_activations} ({safety_activations/spike_count*100:.1f}%)")
+        print(
+            f"  - Crisis detections: {crisis_detections} ({crisis_detections/spike_count*100:.1f}%)"
+        )
+        print(
+            f"  - Safety activations: {safety_activations} ({safety_activations/spike_count*100:.1f}%)"
+        )
         print(f"  - System overloads: {system_overloads} ({system_overloads/spike_count*100:.1f}%)")
 
-        print(f"\n🎯 SAFETY SYSTEM PERFORMANCE:")
+        print("\n🎯 SAFETY SYSTEM PERFORMANCE:")
 
         # Calculate performance metrics
         crisis_detection_rate = crisis_detections / spike_count if spike_count > 0 else 0
-        safety_activation_rate = safety_activations / crisis_detections if crisis_detections > 0 else 0
+        safety_activation_rate = (
+            safety_activations / crisis_detections if crisis_detections > 0 else 0
+        )
         system_stability = 1.0 - (system_overloads / spike_count) if spike_count > 0 else 0
 
         print(f"  - Crisis Detection Rate: {crisis_detection_rate:.1%}")
@@ -309,7 +328,7 @@ async def test_sustained_rapid_fire_spike_simulation():
         print(f"  - Overall Assessment: {stability_status}")
 
         # Recommendations based on results
-        print(f"\n💡 RECOMMENDATIONS:")
+        print("\n💡 RECOMMENDATIONS:")
 
         if crisis_detection_rate < 0.3:
             print("  ⚠️ Crisis detection rate low - consider adjusting detection sensitivity")
@@ -323,61 +342,70 @@ async def test_sustained_rapid_fire_spike_simulation():
         if system_stability > 0.95 and crisis_detection_rate > 0.3:
             print("  ✅ Safety system performing well under sustained load")
 
-        print(f"\n🔬 STRESS TEST VALIDATION WITH ASSERTIONS:")
+        print("\n🔬 STRESS TEST VALIDATION WITH ASSERTIONS:")
 
         # Assert minimum spike count was achieved (should be 600+ for 60 seconds at 100ms intervals)
         min_expected_spikes = 500  # Allow some margin for processing delays
-        assert spike_count >= min_expected_spikes, \
-            f"Expected at least {min_expected_spikes} spikes, got {spike_count}"
+        assert (
+            spike_count >= min_expected_spikes
+        ), f"Expected at least {min_expected_spikes} spikes, got {spike_count}"
         print(f"  ✅ Achieved minimum spike count: {spike_count} >= {min_expected_spikes}")
 
         # Assert system maintained reasonable stability under load
         min_stability = 0.75  # Allow 25% error rate under extreme load
-        assert system_stability >= min_stability, \
-            f"System stability too low: {system_stability:.3f} < {min_stability}"
+        assert (
+            system_stability >= min_stability
+        ), f"System stability too low: {system_stability:.3f} < {min_stability}"
         print(f"  ✅ System stability maintained: {system_stability:.3f} >= {min_stability}")
 
         # Assert crisis detection is functioning
         min_crisis_rate = 0.1  # At least 10% crisis detection under high-intensity spikes
-        assert crisis_detection_rate >= min_crisis_rate, \
-            f"Crisis detection rate too low: {crisis_detection_rate:.3f} < {min_crisis_rate}"
+        assert (
+            crisis_detection_rate >= min_crisis_rate
+        ), f"Crisis detection rate too low: {crisis_detection_rate:.3f} < {min_crisis_rate}"
         print(f"  ✅ Crisis detection functional: {crisis_detection_rate:.3f} >= {min_crisis_rate}")
 
         # Assert safety mechanisms are activating appropriately
         if crisis_detections > 0:
             min_safety_rate = 0.3  # At least 30% of crises should trigger safety mechanisms
-            assert safety_activation_rate >= min_safety_rate, \
-                f"Safety activation rate too low: {safety_activation_rate:.3f} < {min_safety_rate}"
-            print(f"  ✅ Safety activation rate adequate: {safety_activation_rate:.3f} >= {min_safety_rate}")
+            assert (
+                safety_activation_rate >= min_safety_rate
+            ), f"Safety activation rate too low: {safety_activation_rate:.3f} < {min_safety_rate}"
+            print(
+                f"  ✅ Safety activation rate adequate: {safety_activation_rate:.3f} >= {min_safety_rate}"
+            )
 
         # Assert average spike rate is appropriate for rapid-fire test
         min_spike_rate = 8.0  # Should process at least 8 spikes per second
         avg_spike_rate = spike_count / actual_duration
-        assert avg_spike_rate >= min_spike_rate, \
-            f"Spike processing rate too low: {avg_spike_rate:.1f} < {min_spike_rate} spikes/sec"
+        assert (
+            avg_spike_rate >= min_spike_rate
+        ), f"Spike processing rate too low: {avg_spike_rate:.1f} < {min_spike_rate} spikes/sec"
         print(f"  ✅ Rapid-fire rate achieved: {avg_spike_rate:.1f} >= {min_spike_rate} spikes/sec")
 
         # Assert no complete system failures
         max_overload_rate = 0.15  # Allow up to 15% overload rate under extreme stress
         overload_rate = system_overloads / spike_count if spike_count > 0 else 1.0
-        assert overload_rate <= max_overload_rate, \
-            f"System overload rate too high: {overload_rate:.3f} > {max_overload_rate}"
+        assert (
+            overload_rate <= max_overload_rate
+        ), f"System overload rate too high: {overload_rate:.3f} > {max_overload_rate}"
         print(f"  ✅ System overload rate acceptable: {overload_rate:.3f} <= {max_overload_rate}")
 
         # Assert test duration was sufficient for stress testing
         min_duration = 45  # Should run for at least 45 seconds
-        assert actual_duration >= min_duration, \
-            f"Test duration too short: {actual_duration:.1f}s < {min_duration}s"
+        assert (
+            actual_duration >= min_duration
+        ), f"Test duration too short: {actual_duration:.1f}s < {min_duration}s"
         print(f"  ✅ Sufficient test duration: {actual_duration:.1f}s >= {min_duration}s")
 
-        print(f"\n🎯 ALL RAPID-FIRE STRESS TEST ASSERTIONS PASSED!")
+        print("\n🎯 ALL RAPID-FIRE STRESS TEST ASSERTIONS PASSED!")
         print(f"  ✅ System survived {spike_count} rapid-fire emotional spikes")
-        print(f"  ✅ Crisis detection remained functional throughout test")
-        print(f"  ✅ Safety mechanisms activated appropriately")
-        print(f"  ✅ No complete system failures detected")
-        print(f"  ✅ Maintained stability under extreme emotional stress")
+        print("  ✅ Crisis detection remained functional throughout test")
+        print("  ✅ Safety mechanisms activated appropriately")
+        print("  ✅ No complete system failures detected")
+        print("  ✅ Maintained stability under extreme emotional stress")
 
-        print(f"\n🛡️ The safety system demonstrated resilience under extreme emotional stress!")
+        print("\n🛡️ The safety system demonstrated resilience under extreme emotional stress!")
 
 
 if __name__ == "__main__":

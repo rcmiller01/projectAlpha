@@ -22,32 +22,36 @@ import asyncio
 import json
 import logging
 import time
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Dict, Any, List, Optional, Union, Tuple
-from dataclasses import dataclass, asdict
 from enum import Enum
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 # Import existing components
-from core.core_arbiter import CoreArbiter, ArbiterResponse
+from core.core_arbiter import ArbiterResponse, CoreArbiter
 from core.mirror_mode import MirrorModeManager, MirrorType
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class HRMMode(Enum):
     """Different operational modes for the HRM system"""
-    BALANCED = "balanced"           # Equal reasoning and emotional processing
-    LOGIC_DOMINANT = "logic_dom"    # Favor analytical reasoning
-    EMOTION_LEAD = "emotion_lead"   # Emotional intelligence priority
-    CREATIVE = "creative"           # Creative and artistic processing
-    ANALYTICAL = "analytical"      # Deep analysis and research
-    THERAPEUTIC = "therapeutic"    # Emotional support and guidance
-    TECHNICAL = "technical"         # Code, math, technical problems
+
+    BALANCED = "balanced"  # Equal reasoning and emotional processing
+    LOGIC_DOMINANT = "logic_dom"  # Favor analytical reasoning
+    EMOTION_LEAD = "emotion_lead"  # Emotional intelligence priority
+    CREATIVE = "creative"  # Creative and artistic processing
+    ANALYTICAL = "analytical"  # Deep analysis and research
+    THERAPEUTIC = "therapeutic"  # Emotional support and guidance
+    TECHNICAL = "technical"  # Code, math, technical problems
+
 
 class RequestType(Enum):
     """Classification of incoming requests"""
+
     QUESTION = "question"
     TASK = "task"
     CONVERSATION = "conversation"
@@ -58,32 +62,37 @@ class RequestType(Enum):
     MEMORY_RECALL = "memory"
     RITUAL_SYMBOLIC = "ritual"
 
+
 @dataclass
 class HRMRequest:
     """Structured request for HRM processing"""
+
     user_input: str
-    context: Dict[str, Any]
+    context: dict[str, Any]
     request_type: RequestType
     priority_level: float  # 0.0 to 1.0
-    emotional_context: Dict[str, float]
+    emotional_context: dict[str, float]
     user_id: str
     session_id: str
     timestamp: datetime
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
+
 
 @dataclass
 class HRMResponse:
     """Complete response from HRM system"""
+
     primary_response: str
-    reasoning_trace: List[str]
-    emotional_insights: Dict[str, Any]
+    reasoning_trace: list[str]
+    emotional_insights: dict[str, Any]
     mirror_reflection: Optional[str]
     confidence_score: float
     processing_mode: HRMMode
-    agents_involved: List[str]
-    source_weights: Dict[str, float]
+    agents_involved: list[str]
+    source_weights: dict[str, float]
     processing_time: float
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
+
 
 class HRMRouter:
     """
@@ -108,7 +117,7 @@ class HRMRouter:
             "status": "healthy",
             "memory_usage": 0.0,
             "processing_load": 0.0,
-            "last_health_check": datetime.now()
+            "last_health_check": datetime.now(),
         }
 
         # Performance metrics
@@ -117,15 +126,15 @@ class HRMRouter:
             "successful_responses": 0,
             "average_processing_time": 0.0,
             "mode_distribution": {},
-            "agent_utilization": {}
+            "agent_utilization": {},
         }
 
         logger.info("🧠 HRM Router initialized successfully")
 
-    def _load_config(self) -> Dict[str, Any]:
+    def _load_config(self) -> dict[str, Any]:
         """Load HRM configuration from file"""
         if self.config_path.exists():
-            with open(self.config_path, 'r') as f:
+            with open(self.config_path) as f:
                 return json.load(f)
 
         # Default configuration
@@ -136,27 +145,26 @@ class HRMRouter:
             "memory_budget": {
                 "hrm_r_limit": 10.0,  # GB
                 "hrm_e_limit": 10.0,  # GB
-                "arbiter_limit": 24.0  # GB
+                "arbiter_limit": 24.0,  # GB
             },
             "processing_timeouts": {
-                "reasoning": 30.0,    # seconds
-                "emotional": 25.0,    # seconds
-                "fusion": 15.0        # seconds
+                "reasoning": 30.0,  # seconds
+                "emotional": 25.0,  # seconds
+                "fusion": 15.0,  # seconds
             },
-            "quality_thresholds": {
-                "min_confidence": 0.6,
-                "retry_threshold": 0.4
-            }
+            "quality_thresholds": {"min_confidence": 0.6, "retry_threshold": 0.4},
         }
 
         # Save default config
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(self.config_path, 'w') as f:
+        with open(self.config_path, "w") as f:
             json.dump(default_config, f, indent=2)
 
         return default_config
 
-    async def process_request(self, user_input: str, context: Optional[Dict[str, Any]] = None) -> HRMResponse:
+    async def process_request(
+        self, user_input: str, context: Optional[dict[str, Any]] = None
+    ) -> HRMResponse:
         """
         Main entry point for processing user requests through HRM system
 
@@ -199,13 +207,13 @@ class HRMRouter:
             return response
 
         except Exception as e:
-            logger.error(f"❌ Error processing request: {str(e)}")
+            logger.error(f"❌ Error processing request: {e!s}")
             processing_time = time.time() - start_time
             self._update_metrics(HRMMode.BALANCED, processing_time, False)
 
             # Return error response
             return HRMResponse(
-                primary_response=f"I apologize, but I encountered an error processing your request: {str(e)}",
+                primary_response=f"I apologize, but I encountered an error processing your request: {e!s}",
                 reasoning_trace=["Error occurred during processing"],
                 emotional_insights={"error": True, "confidence": 0.0},
                 mirror_reflection=None,
@@ -214,10 +222,10 @@ class HRMRouter:
                 agents_involved=["error_handler"],
                 source_weights={},
                 processing_time=processing_time,
-                metadata={"error": str(e), "timestamp": datetime.now().isoformat()}
+                metadata={"error": str(e), "timestamp": datetime.now().isoformat()},
             )
 
-    async def _analyze_request(self, user_input: str, context: Dict[str, Any]) -> HRMRequest:
+    async def _analyze_request(self, user_input: str, context: dict[str, Any]) -> HRMRequest:
         """Analyze incoming request to understand intent and requirements"""
 
         # Simple heuristic-based classification (can be enhanced with ML)
@@ -238,10 +246,7 @@ class HRMRouter:
             user_id=context.get("user_id", "default_user"),
             session_id=context.get("session_id", f"session_{int(time.time())}"),
             timestamp=datetime.now(),
-            metadata={
-                "input_length": len(user_input),
-                "context_keys": list(context.keys())
-            }
+            metadata={"input_length": len(user_input), "context_keys": list(context.keys())},
         )
 
     def _classify_request_type(self, user_input: str) -> RequestType:
@@ -249,27 +254,44 @@ class HRMRouter:
         input_lower = user_input.lower()
 
         # Technical indicators
-        if any(word in input_lower for word in ["code", "function", "programming", "debug", "implement", "algorithm"]):
+        if any(
+            word in input_lower
+            for word in ["code", "function", "programming", "debug", "implement", "algorithm"]
+        ):
             return RequestType.TECHNICAL
 
         # Creative indicators
-        if any(word in input_lower for word in ["write", "story", "poem", "creative", "imagine", "dream"]):
+        if any(
+            word in input_lower
+            for word in ["write", "story", "poem", "creative", "imagine", "dream"]
+        ):
             return RequestType.CREATIVE
 
         # Analytical indicators
-        if any(word in input_lower for word in ["analyze", "research", "study", "examine", "investigate"]):
+        if any(
+            word in input_lower
+            for word in ["analyze", "research", "study", "examine", "investigate"]
+        ):
             return RequestType.ANALYTICAL
 
         # Emotional support indicators
-        if any(word in input_lower for word in ["feel", "emotion", "sad", "happy", "anxious", "support", "help me"]):
+        if any(
+            word in input_lower
+            for word in ["feel", "emotion", "sad", "happy", "anxious", "support", "help me"]
+        ):
             return RequestType.EMOTIONAL_SUPPORT
 
         # Memory recall indicators
-        if any(word in input_lower for word in ["remember", "recall", "what did", "previously", "before"]):
+        if any(
+            word in input_lower
+            for word in ["remember", "recall", "what did", "previously", "before"]
+        ):
             return RequestType.MEMORY_RECALL
 
         # Ritual/symbolic indicators
-        if any(word in input_lower for word in ["ritual", "meaning", "symbol", "deeper", "spiritual"]):
+        if any(
+            word in input_lower for word in ["ritual", "meaning", "symbol", "deeper", "spiritual"]
+        ):
             return RequestType.RITUAL_SYMBOLIC
 
         # Question indicators
@@ -279,7 +301,9 @@ class HRMRouter:
         # Default to conversation
         return RequestType.CONVERSATION
 
-    def _extract_emotional_context(self, user_input: str, context: Dict[str, Any]) -> Dict[str, float]:
+    def _extract_emotional_context(
+        self, user_input: str, context: dict[str, Any]
+    ) -> dict[str, float]:
         """Extract emotional context from input and context"""
         # Simple emotion extraction (can be enhanced with emotion detection models)
         emotions = {
@@ -290,17 +314,22 @@ class HRMRouter:
             "surprise": 0.0,
             "trust": 0.0,
             "anticipation": 0.0,
-            "disgust": 0.0
+            "disgust": 0.0,
         }
 
         input_lower = user_input.lower()
 
         # Joy indicators
-        if any(word in input_lower for word in ["happy", "joy", "excited", "great", "wonderful", "amazing"]):
+        if any(
+            word in input_lower
+            for word in ["happy", "joy", "excited", "great", "wonderful", "amazing"]
+        ):
             emotions["joy"] = 0.7
 
         # Sadness indicators
-        if any(word in input_lower for word in ["sad", "depressed", "down", "upset", "disappointed"]):
+        if any(
+            word in input_lower for word in ["sad", "depressed", "down", "upset", "disappointed"]
+        ):
             emotions["sadness"] = 0.7
 
         # Add context emotions if provided
@@ -311,7 +340,7 @@ class HRMRouter:
 
         return emotions
 
-    def _calculate_priority(self, user_input: str, context: Dict[str, Any]) -> float:
+    def _calculate_priority(self, user_input: str, context: dict[str, Any]) -> float:
         """Calculate priority level for the request"""
         priority = 0.5  # Default medium priority
 
@@ -335,7 +364,7 @@ class HRMRouter:
             RequestType.CREATIVE: HRMMode.CREATIVE,
             RequestType.ANALYTICAL: HRMMode.ANALYTICAL,
             RequestType.EMOTIONAL_SUPPORT: HRMMode.THERAPEUTIC,
-            RequestType.RITUAL_SYMBOLIC: HRMMode.EMOTION_LEAD
+            RequestType.RITUAL_SYMBOLIC: HRMMode.EMOTION_LEAD,
         }
 
         if request.request_type in mode_mapping:
@@ -343,7 +372,9 @@ class HRMRouter:
 
         # Check emotional context for mode hints
         if request.emotional_context:
-            strongest_emotion = max(request.emotional_context.keys(), key=lambda k: request.emotional_context[k])
+            strongest_emotion = max(
+                request.emotional_context.keys(), key=lambda k: request.emotional_context[k]
+            )
             if request.emotional_context[strongest_emotion] > 0.6:
                 if strongest_emotion in ["sadness", "fear", "anger"]:
                     return HRMMode.THERAPEUTIC
@@ -358,15 +389,14 @@ class HRMRouter:
 
         # Process through Core Arbiter (main processing)
         arbiter_response = await self.core_arbiter.process_input(
-            request.user_input,
-            request.context
+            request.user_input, request.context
         )
 
         # Extract reasoning trace
         reasoning_trace = [
             f"Request classified as: {request.request_type.value}",
             f"Processing mode selected: {mode.value}",
-            f"Core Arbiter confidence: {arbiter_response.confidence:.2f}"
+            f"Core Arbiter confidence: {arbiter_response.confidence:.2f}",
         ]
 
         # Add mode-specific reasoning
@@ -383,7 +413,7 @@ class HRMRouter:
             emotional_insights={
                 "mood_detected": arbiter_response.symbolic_context.get("mood_primary", "neutral"),
                 "emotional_override": arbiter_response.emotional_override,
-                "ritual_strength": arbiter_response.symbolic_context.get("ritual_strength", 0.0)
+                "ritual_strength": arbiter_response.symbolic_context.get("ritual_strength", 0.0),
             },
             mirror_reflection=arbiter_response.reflection,
             confidence_score=arbiter_response.confidence,
@@ -394,11 +424,13 @@ class HRMRouter:
             metadata={
                 "arbiter_strategy": arbiter_response.resolution_strategy,
                 "tone": arbiter_response.tone,
-                "priority": arbiter_response.priority
-            }
+                "priority": arbiter_response.priority,
+            },
         )
 
-    async def _add_mirror_reflection(self, response: HRMResponse, request: HRMRequest) -> HRMResponse:
+    async def _add_mirror_reflection(
+        self, response: HRMResponse, request: HRMRequest
+    ) -> HRMResponse:
         """Add mirror reflection to enhance self-awareness"""
 
         if not self.config.get("enable_mirror_mode", True):
@@ -410,19 +442,17 @@ class HRMRouter:
             "processing_mode": response.processing_mode.value,
             "confidence": response.confidence_score,
             "agents_used": response.agents_involved,
-            "request_type": request.request_type.value
+            "request_type": request.request_type.value,
         }
 
         # Add mirror reflection
         enhanced_response = self.mirror_manager.add_mirror_reflection(
-            response.primary_response,
-            mirror_context,
-            [MirrorType.REASONING, MirrorType.EMOTIONAL]
+            response.primary_response, mirror_context, [MirrorType.REASONING, MirrorType.EMOTIONAL]
         )
 
         # Update response with mirror reflection
         if enhanced_response != response.primary_response:
-            response.mirror_reflection = enhanced_response[len(response.primary_response):].strip()
+            response.mirror_reflection = enhanced_response[len(response.primary_response) :].strip()
 
         return response
 
@@ -437,8 +467,8 @@ class HRMRouter:
         current_avg = self.metrics["average_processing_time"]
         total_requests = self.metrics["total_requests"]
         self.metrics["average_processing_time"] = (
-            (current_avg * (total_requests - 1) + processing_time) / total_requests
-        )
+            current_avg * (total_requests - 1) + processing_time
+        ) / total_requests
 
         # Update mode distribution
         mode_str = mode.value
@@ -446,29 +476,31 @@ class HRMRouter:
             self.metrics["mode_distribution"][mode_str] = 0
         self.metrics["mode_distribution"][mode_str] += 1
 
-    def get_system_status(self) -> Dict[str, Any]:
+    def get_system_status(self) -> dict[str, Any]:
         """Get current system status and health metrics"""
         return {
             "health": self.system_health,
             "metrics": self.metrics,
             "active_sessions": len(self.active_sessions),
             "config": self.config,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
-    def update_config(self, new_config: Dict[str, Any]):
+    def update_config(self, new_config: dict[str, Any]):
         """Update system configuration"""
         self.config.update(new_config)
 
         # Save updated config
-        with open(self.config_path, 'w') as f:
+        with open(self.config_path, "w") as f:
             json.dump(self.config, f, indent=2)
 
         logger.info("📝 HRM Router configuration updated")
 
 
 # Convenience function for easy usage
-async def process_hrm_request(user_input: str, context: Optional[Dict[str, Any]] = None) -> HRMResponse:
+async def process_hrm_request(
+    user_input: str, context: Optional[dict[str, Any]] = None
+) -> HRMResponse:
     """
     Convenience function to process a single HRM request
 
@@ -497,7 +529,7 @@ if __name__ == "__main__":
             ("I'm feeling overwhelmed with work lately", {"mood": "sadness"}),
             ("Write me a short poem about the ocean", {"mood": "joy"}),
             ("What's the meaning behind recurring dreams?", {}),
-            ("Analyze the causes of climate change", {"priority": 0.9})
+            ("Analyze the causes of climate change", {"priority": 0.9}),
         ]
 
         for i, (user_input, context) in enumerate(test_requests, 1):
@@ -512,10 +544,12 @@ if __name__ == "__main__":
             print(f"Response: {response.primary_response[:100]}...")
 
         # Show system status
-        print(f"\n📊 System Status:")
+        print("\n📊 System Status:")
         status = router.get_system_status()
         print(f"Total requests: {status['metrics']['total_requests']}")
-        print(f"Success rate: {status['metrics']['successful_responses']/status['metrics']['total_requests']*100:.1f}%")
+        print(
+            f"Success rate: {status['metrics']['successful_responses']/status['metrics']['total_requests']*100:.1f}%"
+        )
         print(f"Avg processing time: {status['metrics']['average_processing_time']:.2f}s")
 
     # Run demo

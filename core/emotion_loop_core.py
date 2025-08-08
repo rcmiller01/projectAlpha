@@ -14,21 +14,21 @@ Enhanced with security features:
 - Input validation and sanitization
 """
 import json
-import time
 import logging
-from pathlib import Path
-from copy import deepcopy
-from collections import Counter, deque
 import math
-import threading
-from datetime import datetime, timedelta
-from typing import List, Dict, Any, Optional
 import re
+import threading
+import time
+from collections import Counter, deque
+from copy import deepcopy
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 # Configure logging with more detailed format
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -39,9 +39,26 @@ AFFECTIVE_DELTA_THRESHOLD = 0.8  # Alert if single emotion change exceeds this
 BATCH_UPDATE_SIZE = 10  # Maximum emotions to update in single batch
 MAX_CONTEXT_LENGTH = 1000  # Maximum length for emotion context strings
 VALID_EMOTION_NAMES = {
-    'joy', 'sadness', 'anger', 'fear', 'surprise', 'disgust', 'trust', 'anticipation',
-    'contemplative', 'vibrant', 'serene', 'tender', 'passionate', 'mystical',
-    'melancholic', 'euphoric', 'anxious', 'content', 'nostalgic', 'hopeful'
+    "joy",
+    "sadness",
+    "anger",
+    "fear",
+    "surprise",
+    "disgust",
+    "trust",
+    "anticipation",
+    "contemplative",
+    "vibrant",
+    "serene",
+    "tender",
+    "passionate",
+    "mystical",
+    "melancholic",
+    "euphoric",
+    "anxious",
+    "content",
+    "nostalgic",
+    "hopeful",
 }
 
 # Thread lock for emotion state modifications
@@ -50,7 +67,8 @@ emotion_lock = threading.Lock()
 # Loop execution logging
 loop_execution_log = deque(maxlen=1000)  # Keep last 1000 loop executions
 
-def validate_emotion_input(emotion_data: Dict[str, Any]) -> tuple[bool, str]:
+
+def validate_emotion_input(emotion_data: dict[str, Any]) -> tuple[bool, str]:
     """Validate emotion input data for security and integrity"""
     try:
         # Check if input is dictionary
@@ -58,32 +76,35 @@ def validate_emotion_input(emotion_data: Dict[str, Any]) -> tuple[bool, str]:
             return False, "Emotion data must be a dictionary"
 
         # Validate name
-        if 'name' not in emotion_data:
+        if "name" not in emotion_data:
             return False, "Missing required field: name"
 
-        name = emotion_data['name']
+        name = emotion_data["name"]
         if not isinstance(name, str):
             return False, "Emotion name must be a string"
 
         # Sanitize name - only allow alphanumeric and valid emotion names
-        if not re.match(r'^[a-zA-Z0-9_-]+$', name):
+        if not re.match(r"^[a-zA-Z0-9_-]+$", name):
             return False, "Emotion name contains invalid characters"
 
         if name.lower() not in VALID_EMOTION_NAMES:
             logger.warning(f"Unknown emotion name: {name}")
 
         # Validate intensity
-        if 'intensity' in emotion_data:
-            intensity = emotion_data['intensity']
+        if "intensity" in emotion_data:
+            intensity = emotion_data["intensity"]
             if not isinstance(intensity, (int, float)):
                 return False, "Intensity must be a number"
 
             if intensity < MIN_EMOTION_INTENSITY or intensity > MAX_EMOTION_INTENSITY:
-                return False, f"Intensity must be between {MIN_EMOTION_INTENSITY} and {MAX_EMOTION_INTENSITY}"
+                return (
+                    False,
+                    f"Intensity must be between {MIN_EMOTION_INTENSITY} and {MAX_EMOTION_INTENSITY}",
+                )
 
         # Validate context length
-        if 'context' in emotion_data:
-            context = emotion_data['context']
+        if "context" in emotion_data:
+            context = emotion_data["context"]
             if not isinstance(context, str):
                 return False, "Context must be a string"
 
@@ -91,8 +112,8 @@ def validate_emotion_input(emotion_data: Dict[str, Any]) -> tuple[bool, str]:
                 return False, f"Context length exceeds maximum of {MAX_CONTEXT_LENGTH} characters"
 
         # Validate priority
-        if 'priority' in emotion_data:
-            priority = emotion_data['priority']
+        if "priority" in emotion_data:
+            priority = emotion_data["priority"]
             if not isinstance(priority, (int, float)):
                 return False, "Priority must be a number"
 
@@ -102,22 +123,30 @@ def validate_emotion_input(emotion_data: Dict[str, Any]) -> tuple[bool, str]:
         return True, "Valid"
 
     except Exception as e:
-        logger.error(f"Error validating emotion input: {str(e)}")
-        return False, f"Validation error: {str(e)}"
+        logger.error(f"Error validating emotion input: {e!s}")
+        return False, f"Validation error: {e!s}"
 
-def log_loop_execution(loop_type: str, duration: float, emotions_processed: int,
-                      affective_deltas: List[float], status: str = "success"):
+
+def log_loop_execution(
+    loop_type: str,
+    duration: float,
+    emotions_processed: int,
+    affective_deltas: list[float],
+    status: str = "success",
+):
     """Log emotion loop execution details"""
     try:
         execution_entry = {
-            'timestamp': datetime.now().isoformat(),
-            'loop_type': loop_type,
-            'duration_ms': round(duration * 1000, 2),
-            'emotions_processed': emotions_processed,
-            'max_affective_delta': max(affective_deltas) if affective_deltas else 0,
-            'avg_affective_delta': sum(affective_deltas) / len(affective_deltas) if affective_deltas else 0,
-            'status': status,
-            'thread_id': threading.get_ident()
+            "timestamp": datetime.now().isoformat(),
+            "loop_type": loop_type,
+            "duration_ms": round(duration * 1000, 2),
+            "emotions_processed": emotions_processed,
+            "max_affective_delta": max(affective_deltas) if affective_deltas else 0,
+            "avg_affective_delta": sum(affective_deltas) / len(affective_deltas)
+            if affective_deltas
+            else 0,
+            "status": status,
+            "thread_id": threading.get_ident(),
         }
 
         loop_execution_log.append(execution_entry)
@@ -127,10 +156,13 @@ def log_loop_execution(loop_type: str, duration: float, emotions_processed: int,
         if max_delta > AFFECTIVE_DELTA_THRESHOLD:
             logger.warning(f"High affective delta detected: {max_delta:.3f} in {loop_type} loop")
 
-        logger.info(f"Loop execution logged: {loop_type} - {emotions_processed} emotions in {duration*1000:.1f}ms")
+        logger.info(
+            f"Loop execution logged: {loop_type} - {emotions_processed} emotions in {duration*1000:.1f}ms"
+        )
 
     except Exception as e:
-        logger.error(f"Error logging loop execution: {str(e)}")
+        logger.error(f"Error logging loop execution: {e!s}")
+
 
 def sanitize_context_string(context: str) -> str:
     """Sanitize emotion context strings"""
@@ -138,7 +170,7 @@ def sanitize_context_string(context: str) -> str:
         return ""
 
     # Remove potential injection patterns
-    context = re.sub(r'[<>"\']', '', context)
+    context = re.sub(r'[<>"\']', "", context)
 
     # Limit length
     if len(context) > MAX_CONTEXT_LENGTH:
@@ -146,16 +178,15 @@ def sanitize_context_string(context: str) -> str:
 
     return context.strip()
 
+
 class EmotionState:
     """Explicit struct for representing an emotion with security enhancements."""
+
     def __init__(self, name, intensity, context, priority=1.0, original_valence=None):
         # Validate and sanitize inputs
-        validation_result, validation_message = validate_emotion_input({
-            'name': name,
-            'intensity': intensity,
-            'context': context,
-            'priority': priority
-        })
+        validation_result, validation_message = validate_emotion_input(
+            {"name": name, "intensity": intensity, "context": context, "priority": priority}
+        )
 
         if not validation_result:
             raise ValueError(f"Invalid emotion state: {validation_message}")
@@ -238,24 +269,25 @@ class EmotionState:
             return False
         return abs(self.intensity - self.original_valence) > drift_threshold
 
-    def get_recent_deltas(self) -> List[float]:
+    def get_recent_deltas(self) -> list[float]:
         """Get recent affective deltas for monitoring."""
         return self.affective_deltas.copy()
 
-    def get_modification_stats(self) -> Dict[str, Any]:
+    def get_modification_stats(self) -> dict[str, Any]:
         """Get modification statistics for security monitoring."""
         return {
-            'creation_time': self.creation_time.isoformat(),
-            'last_modified': self.last_modified.isoformat(),
-            'modification_count': self.modification_count,
-            'recent_deltas': self.get_recent_deltas(),
-            'max_recent_delta': max(self.affective_deltas) if self.affective_deltas else 0
+            "creation_time": self.creation_time.isoformat(),
+            "last_modified": self.last_modified.isoformat(),
+            "modification_count": self.modification_count,
+            "recent_deltas": self.get_recent_deltas(),
+            "max_recent_delta": max(self.affective_deltas) if self.affective_deltas else 0,
         }
 
     def _update_modification_tracking(self):
         """Update modification tracking for security monitoring."""
         self.last_modified = datetime.now()
         self.modification_count += 1
+
 
 class PhantomMemory(EmotionState):
     """A revived emotion with reduced clarity and increased priority."""
@@ -273,6 +305,7 @@ class PhantomMemory(EmotionState):
 
             self._update_modification_tracking()
             logger.info(f"Memory revived as phantom: {self.name} (new intensity: {self.intensity})")
+
 
 def revive_forgotten_memories(emotions, forgotten_memories, trigger_context):
     """
@@ -292,8 +325,10 @@ def revive_forgotten_memories(emotions, forgotten_memories, trigger_context):
             emotions.append(memory)
     return emotions
 
+
 # Emotion queue for throttling
 emotion_queue = []
+
 
 def queue_emotion_for_later(emotion):
     """
@@ -305,6 +340,7 @@ def queue_emotion_for_later(emotion):
     global emotion_queue
     emotion_queue.append(emotion)
     logger.info(f"Queued emotion '{emotion.name}' for later processing")
+
 
 def process_queued_emotions(emotions, max_process=3):
     """
@@ -325,6 +361,7 @@ def process_queued_emotions(emotions, max_process=3):
         logger.info(f"Processed {len(to_process)} queued emotions")
     return emotions
 
+
 def throttle_emotions(emotions, affective_score_delta, threshold=0.5):
     """
     Throttle emotions by queuing them if the affective score delta exceeds the threshold.
@@ -338,7 +375,9 @@ def throttle_emotions(emotions, affective_score_delta, threshold=0.5):
         list: Updated list of EmotionState objects.
     """
     if affective_score_delta > threshold:
-        logger.warning(f"Affective score delta {affective_score_delta} exceeds threshold {threshold}. Queuing high-intensity emotions.")
+        logger.warning(
+            f"Affective score delta {affective_score_delta} exceeds threshold {threshold}. Queuing high-intensity emotions."
+        )
         # Queue emotions with intensity above threshold
         high_intensity_emotions = [e for e in emotions if e.intensity > threshold]
         for emotion in high_intensity_emotions:
@@ -346,6 +385,7 @@ def throttle_emotions(emotions, affective_score_delta, threshold=0.5):
         # Return emotions below threshold
         return [e for e in emotions if e.intensity <= threshold]
     return emotions
+
 
 def load_state(config_path):
     """
@@ -360,6 +400,7 @@ def load_state(config_path):
     with open(config_path) as f:
         raw_emotions = json.load(f)["emotions"]
     return [EmotionState(e["name"], e["intensity"], e["context"]) for e in raw_emotions]
+
 
 def validate_and_prune_emotions(emotions, max_emotions=100):
     """
@@ -382,6 +423,7 @@ def validate_and_prune_emotions(emotions, max_emotions=100):
 
     return pruned_emotions, forgotten_memories
 
+
 def evaluate_context(emotions):
     """
     Process the loaded emotions to extract relevant data.
@@ -399,6 +441,7 @@ def evaluate_context(emotions):
             emotion.inhibit(other_emotion)
     return emotions
 
+
 def apply_response(processed_emotions):
     """
     Generate a response or summary based on processed emotions.
@@ -415,8 +458,9 @@ def apply_response(processed_emotions):
             {"name": e.name, "intensity": e.intensity, "context": e.context, "priority": e.priority}
             for e in processed_emotions
         ],
-        "summary": "Cycle complete"
+        "summary": "Cycle complete",
     }
+
 
 def record_trace(result, log_path, insights_path):
     """
@@ -431,6 +475,7 @@ def record_trace(result, log_path, insights_path):
         f.write(json.dumps(result) + "\n")
     with open(insights_path, "w") as f:
         f.write(json.dumps({"last_summary": result["summary"]}, indent=2))
+
 
 def process_emotional_loop(emotions, forgotten_memories, trigger_context):
     """
@@ -454,13 +499,17 @@ def process_emotional_loop(emotions, forgotten_memories, trigger_context):
     processed_emotions = evaluate_context(local_emotions)
 
     # Revive forgotten memories if triggered
-    processed_emotions = revive_forgotten_memories(processed_emotions, forgotten_memories, trigger_context)
+    processed_emotions = revive_forgotten_memories(
+        processed_emotions, forgotten_memories, trigger_context
+    )
 
     # Validate and prune emotions
     pruned_emotions, forgotten_memories = validate_and_prune_emotions(processed_emotions)
 
     # Throttle emotions if affective score delta is high
-    affective_score_delta = sum(e.intensity for e in pruned_emotions) - sum(e.intensity for e in emotions)
+    affective_score_delta = sum(e.intensity for e in pruned_emotions) - sum(
+        e.intensity for e in emotions
+    )
     pruned_emotions = throttle_emotions(pruned_emotions, affective_score_delta)
 
     result = apply_response(pruned_emotions)
@@ -469,6 +518,7 @@ def process_emotional_loop(emotions, forgotten_memories, trigger_context):
     logger.info("Processed emotional state: %s", result["processed_emotions"])
 
     return result, forgotten_memories
+
 
 def main():
     """
@@ -486,8 +536,11 @@ def main():
     forgotten_memories = []
     trigger_context = "example trigger"  # Replace with dynamic context
 
-    result, forgotten_memories = process_emotional_loop(emotions, forgotten_memories, trigger_context)
+    result, forgotten_memories = process_emotional_loop(
+        emotions, forgotten_memories, trigger_context
+    )
     record_trace(result, log_path, insights_path)
+
 
 if __name__ == "__main__":
     main()

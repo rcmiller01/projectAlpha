@@ -5,18 +5,20 @@ Provides non-invasive support while maintaining emotional tone
 
 import json
 import logging
-import time
 import os
-from typing import Dict, Any, List, Optional, Tuple
-from datetime import datetime, timedelta
-from dataclasses import dataclass
 import re
+import time
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class CalendarEvent:
     """A calendar event with emotional context"""
+
     title: str
     start_time: datetime
     end_time: datetime
@@ -27,9 +29,11 @@ class CalendarEvent:
     reminder_sent: bool = False
     created_at: float = 0.0
 
+
 @dataclass
 class Task:
     """A task with emotional awareness"""
+
     id: str
     title: str
     description: str = ""
@@ -41,7 +45,7 @@ class Task:
     emotional_weight: float = 0.0  # How emotionally significant this task is
     difficulty_level: str = "medium"  # easy, medium, hard
     estimated_duration: int = 30  # minutes
-    context_tags: List[str] = None  # type: ignore
+    context_tags: list[str] = None  # type: ignore
 
     def __post_init__(self):
         if self.context_tags is None:
@@ -49,15 +53,18 @@ class Task:
         if self.created_at == 0.0:
             self.created_at = time.time()
 
+
 @dataclass
 class GentleReminder:
     """A emotionally-aware reminder"""
+
     content: str
     related_item: str  # task_id or event_title
     urgency: float  # 0.0 to 1.0
     tone: str  # gentle, encouraging, urgent, supportive
     suggested_response: str = ""
     created_at: float = 0.0
+
 
 class UtilityAssistant:
     """
@@ -70,10 +77,10 @@ class UtilityAssistant:
         self.logger = logging.getLogger(f"{__name__}")
 
         # Data storage
-        self.calendar_events: List[CalendarEvent] = []
-        self.tasks: Dict[str, Task] = {}
-        self.personal_preferences: Dict[str, Any] = {}
-        self.reminder_history: List[GentleReminder] = []
+        self.calendar_events: list[CalendarEvent] = []
+        self.tasks: dict[str, Task] = {}
+        self.personal_preferences: dict[str, Any] = {}
+        self.reminder_history: list[GentleReminder] = []
 
         # Settings
         self.reminder_style = "gentle"  # gentle, direct, encouraging
@@ -87,7 +94,7 @@ class UtilityAssistant:
         # Load existing data
         self.load_data()
 
-    def read_calendar(self, source: str, source_type: str = "file") -> List[CalendarEvent]:
+    def read_calendar(self, source: str, source_type: str = "file") -> list[CalendarEvent]:
         """
         Read calendar from various sources with emotional context analysis
         """
@@ -116,7 +123,7 @@ class UtilityAssistant:
 
         return events
 
-    def read_task_list(self, source: str, source_type: str = "txt") -> List[Task]:
+    def read_task_list(self, source: str, source_type: str = "txt") -> list[Task]:
         """
         Read tasks from various sources (txt, markdown, Notion-style JSON)
         """
@@ -147,8 +154,9 @@ class UtilityAssistant:
 
         return tasks
 
-    def generate_gentle_reminders(self, user_mood: str = "neutral",
-                                 current_context: str = "") -> List[GentleReminder]:
+    def generate_gentle_reminders(
+        self, user_mood: str = "neutral", current_context: str = ""
+    ) -> list[GentleReminder]:
         """
         Generate gentle, emotionally-aware reminders
         """
@@ -180,7 +188,9 @@ class UtilityAssistant:
 
         return reminders
 
-    def check_time_focus(self, user_mood: str, time_since_last_activity: float) -> Optional[GentleReminder]:
+    def check_time_focus(
+        self, user_mood: str, time_since_last_activity: float
+    ) -> Optional[GentleReminder]:
         """
         Check if user might be distracted and offer gentle guidance
         """
@@ -193,24 +203,24 @@ class UtilityAssistant:
 
         return None
 
-    def _read_calendar_file(self, filepath: str) -> List[CalendarEvent]:
+    def _read_calendar_file(self, filepath: str) -> list[CalendarEvent]:
         """Read simple calendar file format"""
         events = []
 
         if not os.path.exists(filepath):
             return events
 
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding="utf-8") as f:
             for line_num, line in enumerate(f, 1):
                 line = line.strip()
-                if not line or line.startswith('#'):
+                if not line or line.startswith("#"):
                     continue
 
                 try:
                     # Simple format: "YYYY-MM-DD HH:MM | Title | Description"
-                    parts = line.split('|')
+                    parts = line.split("|")
                     if len(parts) >= 2:
-                        date_time = datetime.strptime(parts[0].strip(), '%Y-%m-%d %H:%M')
+                        date_time = datetime.strptime(parts[0].strip(), "%Y-%m-%d %H:%M")
                         title = parts[1].strip()
                         description = parts[2].strip() if len(parts) > 2 else ""
 
@@ -218,7 +228,7 @@ class UtilityAssistant:
                             title=title,
                             start_time=date_time,
                             end_time=date_time + timedelta(hours=1),  # Default 1 hour
-                            description=description
+                            description=description,
                         )
                         events.append(event)
 
@@ -227,7 +237,7 @@ class UtilityAssistant:
 
         return events
 
-    def _read_json_calendar(self, filepath: str) -> List[CalendarEvent]:
+    def _read_json_calendar(self, filepath: str) -> list[CalendarEvent]:
         """Read JSON calendar format"""
         events = []
 
@@ -235,21 +245,25 @@ class UtilityAssistant:
             return events
 
         try:
-            with open(filepath, 'r', encoding='utf-8') as f:
+            with open(filepath, encoding="utf-8") as f:
                 data = json.load(f)
 
             if isinstance(data, list):
                 for event_data in data:
-                    start_time = datetime.fromisoformat(event_data.get('start_time', datetime.now().isoformat()))
-                    end_time = datetime.fromisoformat(event_data.get('end_time', (start_time + timedelta(hours=1)).isoformat()))
+                    start_time = datetime.fromisoformat(
+                        event_data.get("start_time", datetime.now().isoformat())
+                    )
+                    end_time = datetime.fromisoformat(
+                        event_data.get("end_time", (start_time + timedelta(hours=1)).isoformat())
+                    )
 
                     event = CalendarEvent(
-                        title=event_data.get('title', 'Untitled Event'),
+                        title=event_data.get("title", "Untitled Event"),
                         start_time=start_time,
                         end_time=end_time,
-                        description=event_data.get('description', ''),
-                        location=event_data.get('location', ''),
-                        priority=event_data.get('priority', 'normal')
+                        description=event_data.get("description", ""),
+                        location=event_data.get("location", ""),
+                        priority=event_data.get("priority", "normal"),
                     )
                     events.append(event)
 
@@ -258,17 +272,17 @@ class UtilityAssistant:
 
         return events
 
-    def _read_txt_tasks(self, filepath: str) -> List[Task]:
+    def _read_txt_tasks(self, filepath: str) -> list[Task]:
         """Read simple text task format"""
         tasks = []
 
         if not os.path.exists(filepath):
             return tasks
 
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding="utf-8") as f:
             for line_num, line in enumerate(f, 1):
                 line = line.strip()
-                if not line or line.startswith('#'):
+                if not line or line.startswith("#"):
                     continue
 
                 # Parse priority indicators
@@ -293,33 +307,28 @@ class UtilityAssistant:
 
                 # Create task
                 task_id = f"txt_{line_num}_{hash(line) % 10000}"
-                task = Task(
-                    id=task_id,
-                    title=line,
-                    priority=priority,
-                    status=status
-                )
+                task = Task(id=task_id, title=line, priority=priority, status=status)
 
                 tasks.append(task)
 
         return tasks
 
-    def _read_markdown_tasks(self, filepath: str) -> List[Task]:
+    def _read_markdown_tasks(self, filepath: str) -> list[Task]:
         """Read markdown-style tasks"""
         tasks = []
 
         if not os.path.exists(filepath):
             return tasks
 
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding="utf-8") as f:
             content = f.read()
 
         # Find task patterns in markdown
         task_patterns = [
-            r'- \[ \] (.+)',  # - [ ] Task
-            r'- \[x\] (.+)',  # - [x] Completed task
-            r'\* \[ \] (.+)', # * [ ] Task
-            r'\* \[x\] (.+)', # * [x] Completed task
+            r"- \[ \] (.+)",  # - [ ] Task
+            r"- \[x\] (.+)",  # - [x] Completed task
+            r"\* \[ \] (.+)",  # * [ ] Task
+            r"\* \[x\] (.+)",  # * [x] Completed task
         ]
 
         for pattern in task_patterns:
@@ -329,17 +338,13 @@ class UtilityAssistant:
                 status = "completed" if "[x]" in match.group(0).lower() else "pending"
 
                 task_id = f"md_{hash(task_text) % 10000}"
-                task = Task(
-                    id=task_id,
-                    title=task_text,
-                    status=status
-                )
+                task = Task(id=task_id, title=task_text, status=status)
 
                 tasks.append(task)
 
         return tasks
 
-    def _read_json_tasks(self, filepath: str) -> List[Task]:
+    def _read_json_tasks(self, filepath: str) -> list[Task]:
         """Read JSON task format"""
         tasks = []
 
@@ -347,24 +352,24 @@ class UtilityAssistant:
             return tasks
 
         try:
-            with open(filepath, 'r', encoding='utf-8') as f:
+            with open(filepath, encoding="utf-8") as f:
                 data = json.load(f)
 
             if isinstance(data, list):
                 for task_data in data:
                     task = Task(
-                        id=task_data.get('id', f"json_{hash(str(task_data)) % 10000}"),
-                        title=task_data.get('title', 'Untitled Task'),
-                        description=task_data.get('description', ''),
-                        priority=task_data.get('priority', 'normal'),
-                        status=task_data.get('status', 'pending'),
-                        context_tags=task_data.get('tags', [])
+                        id=task_data.get("id", f"json_{hash(str(task_data)) % 10000}"),
+                        title=task_data.get("title", "Untitled Task"),
+                        description=task_data.get("description", ""),
+                        priority=task_data.get("priority", "normal"),
+                        status=task_data.get("status", "pending"),
+                        context_tags=task_data.get("tags", []),
                     )
 
                     # Parse due date if present
-                    if 'due_date' in task_data:
+                    if "due_date" in task_data:
                         try:
-                            task.due_date = datetime.fromisoformat(task_data['due_date'])
+                            task.due_date = datetime.fromisoformat(task_data["due_date"])
                         except ValueError:
                             pass
 
@@ -381,9 +386,9 @@ class UtilityAssistant:
         description_lower = event.description.lower()
 
         # Keywords for different emotional tones
-        excited_keywords = ['party', 'celebration', 'vacation', 'date', 'fun', 'exciting']
-        anxious_keywords = ['exam', 'interview', 'presentation', 'deadline', 'urgent', 'important']
-        relaxed_keywords = ['massage', 'spa', 'meditation', 'yoga', 'walk', 'leisure']
+        excited_keywords = ["party", "celebration", "vacation", "date", "fun", "exciting"]
+        anxious_keywords = ["exam", "interview", "presentation", "deadline", "urgent", "important"]
+        relaxed_keywords = ["massage", "spa", "meditation", "yoga", "walk", "leisure"]
 
         text = title_lower + " " + description_lower
 
@@ -401,17 +406,12 @@ class UtilityAssistant:
         weight = 0.0
 
         # Priority affects emotional weight
-        priority_weights = {
-            "low": 0.1,
-            "normal": 0.3,
-            "high": 0.6,
-            "urgent": 0.9
-        }
+        priority_weights = {"low": 0.1, "normal": 0.3, "high": 0.6, "urgent": 0.9}
         weight += priority_weights.get(task.priority, 0.3)
 
         # Keywords that increase emotional weight
-        stress_keywords = ['deadline', 'urgent', 'important', 'critical', 'asap']
-        positive_keywords = ['fun', 'easy', 'simple', 'enjoy']
+        stress_keywords = ["deadline", "urgent", "important", "critical", "asap"]
+        positive_keywords = ["fun", "easy", "simple", "enjoy"]
 
         text = (task.title + " " + task.description).lower()
 
@@ -422,8 +422,9 @@ class UtilityAssistant:
 
         return max(0.0, min(1.0, weight))
 
-    def _create_event_reminder(self, event: CalendarEvent, user_mood: str,
-                              time_until: float) -> Optional[GentleReminder]:
+    def _create_event_reminder(
+        self, event: CalendarEvent, user_mood: str, time_until: float
+    ) -> Optional[GentleReminder]:
         """Create emotionally-aware event reminder"""
         if time_until <= 0:
             return None
@@ -436,7 +437,9 @@ class UtilityAssistant:
             content = f"I wanted to gently remind you that '{event.title}' is coming up in {minutes_until} minutes. You've got this."
         elif user_mood == "relaxed" or event.emotional_tone == "relaxed":
             tone = "gentle"
-            content = f"Just a soft reminder that '{event.title}' is in {minutes_until} minutes. No rush."
+            content = (
+                f"Just a soft reminder that '{event.title}' is in {minutes_until} minutes. No rush."
+            )
         elif event.emotional_tone == "excited":
             tone = "encouraging"
             content = f"Something lovely is coming up—'{event.title}' in {minutes_until} minutes!"
@@ -449,15 +452,19 @@ class UtilityAssistant:
             related_item=event.title,
             urgency=min(1.0, 60.0 / max(1, minutes_until)),  # More urgent as time approaches
             tone=tone,
-            created_at=time.time()
+            created_at=time.time(),
         )
 
-    def _create_task_reminder(self, task: Task, user_mood: str,
-                             current_context: str) -> Optional[GentleReminder]:
+    def _create_task_reminder(
+        self, task: Task, user_mood: str, current_context: str
+    ) -> Optional[GentleReminder]:
         """Create gentle task reminder if appropriate"""
         # Don't overwhelm with reminders
-        recent_reminders = [r for r in self.reminder_history
-                          if r.related_item == task.id and (time.time() - r.created_at) < 3600]
+        recent_reminders = [
+            r
+            for r in self.reminder_history
+            if r.related_item == task.id and (time.time() - r.created_at) < 3600
+        ]
         if recent_reminders:
             return None
 
@@ -498,7 +505,7 @@ class UtilityAssistant:
             urgency=urgency,
             tone=tone,
             suggested_response="Would you like help breaking this down?",
-            created_at=time.time()
+            created_at=time.time(),
         )
 
     def _find_current_context_task(self) -> Optional[Task]:
@@ -509,10 +516,14 @@ class UtilityAssistant:
             return None
 
         # Sort by priority and emotional weight
-        sorted_tasks = sorted(pending_tasks,
-                            key=lambda t: (t.emotional_weight,
-                                         {"urgent": 4, "high": 3, "normal": 2, "low": 1}.get(t.priority, 1)),
-                            reverse=True)
+        sorted_tasks = sorted(
+            pending_tasks,
+            key=lambda t: (
+                t.emotional_weight,
+                {"urgent": 4, "high": 3, "normal": 2, "low": 1}.get(t.priority, 1),
+            ),
+            reverse=True,
+        )
 
         return sorted_tasks[0]
 
@@ -528,7 +539,7 @@ class UtilityAssistant:
             urgency=0.4,  # Gentle, not urgent
             tone="gentle",
             suggested_response="I'm here if you need help refocusing.",
-            created_at=time.time()
+            created_at=time.time(),
         )
 
     def load_data(self):
@@ -537,7 +548,7 @@ class UtilityAssistant:
             # Load tasks
             tasks_file = os.path.join(self.data_path, "tasks.json")
             if os.path.exists(tasks_file):
-                with open(tasks_file, 'r') as f:
+                with open(tasks_file) as f:
                     tasks_data = json.load(f)
                     for task_data in tasks_data:
                         task = Task(**task_data)
@@ -546,7 +557,7 @@ class UtilityAssistant:
             # Load preferences
             prefs_file = os.path.join(self.data_path, "preferences.json")
             if os.path.exists(prefs_file):
-                with open(prefs_file, 'r') as f:
+                with open(prefs_file) as f:
                     self.personal_preferences = json.load(f)
 
         except Exception as e:
@@ -560,43 +571,48 @@ class UtilityAssistant:
             tasks_data = []
             for task in self.tasks.values():
                 task_dict = {
-                    'id': task.id,
-                    'title': task.title,
-                    'description': task.description,
-                    'priority': task.priority,
-                    'status': task.status,
-                    'created_at': task.created_at,
-                    'emotional_weight': task.emotional_weight,
-                    'difficulty_level': task.difficulty_level,
-                    'estimated_duration': task.estimated_duration,
-                    'context_tags': task.context_tags
+                    "id": task.id,
+                    "title": task.title,
+                    "description": task.description,
+                    "priority": task.priority,
+                    "status": task.status,
+                    "created_at": task.created_at,
+                    "emotional_weight": task.emotional_weight,
+                    "difficulty_level": task.difficulty_level,
+                    "estimated_duration": task.estimated_duration,
+                    "context_tags": task.context_tags,
                 }
                 if task.due_date:
-                    task_dict['due_date'] = task.due_date.isoformat()
+                    task_dict["due_date"] = task.due_date.isoformat()
                 if task.completed_at:
-                    task_dict['completed_at'] = task.completed_at
+                    task_dict["completed_at"] = task.completed_at
 
                 tasks_data.append(task_dict)
 
-            with open(tasks_file, 'w') as f:
+            with open(tasks_file, "w") as f:
                 json.dump(tasks_data, f, indent=2)
 
             # Save preferences
             prefs_file = os.path.join(self.data_path, "preferences.json")
-            with open(prefs_file, 'w') as f:
+            with open(prefs_file, "w") as f:
                 json.dump(self.personal_preferences, f, indent=2)
 
         except Exception as e:
             self.logger.error(f"Error saving utility data: {e}")
 
-    def get_utility_analytics(self) -> Dict[str, Any]:
+    def get_utility_analytics(self) -> dict[str, Any]:
         """Get analytics about utility usage"""
         total_tasks = len(self.tasks)
         completed_tasks = len([t for t in self.tasks.values() if t.status == "completed"])
         pending_tasks = len([t for t in self.tasks.values() if t.status == "pending"])
 
-        high_priority_tasks = len([t for t in self.tasks.values()
-                                 if t.priority in ["high", "urgent"] and t.status == "pending"])
+        high_priority_tasks = len(
+            [
+                t
+                for t in self.tasks.values()
+                if t.priority in ["high", "urgent"] and t.status == "pending"
+            ]
+        )
 
         return {
             "total_tasks": total_tasks,
@@ -606,14 +622,17 @@ class UtilityAssistant:
             "high_priority_pending": high_priority_tasks,
             "calendar_events": len(self.calendar_events),
             "reminders_sent": len(self.reminder_history),
-            "average_task_emotional_weight": sum(t.emotional_weight for t in self.tasks.values()) / max(1, total_tasks)
+            "average_task_emotional_weight": sum(t.emotional_weight for t in self.tasks.values())
+            / max(1, total_tasks),
         }
+
 
 # Global utility assistant instance
 utility_assistant = UtilityAssistant()
 
 # Example usage and testing
 if __name__ == "__main__":
+
     def test_utility_assistant():
         """Test the utility assistant system"""
         print("=== Testing Utility Assistant ===")
@@ -623,10 +642,14 @@ if __name__ == "__main__":
         # Test adding some sample tasks
         print("\n1. Adding Sample Tasks:")
         sample_tasks = [
-            Task(id="test1", title="Finish project report", priority="high",
-                 description="Complete the quarterly analysis"),
+            Task(
+                id="test1",
+                title="Finish project report",
+                priority="high",
+                description="Complete the quarterly analysis",
+            ),
             Task(id="test2", title="Call dentist", priority="normal"),
-            Task(id="test3", title="!!! Pay rent", priority="urgent")
+            Task(id="test3", title="!!! Pay rent", priority="urgent"),
         ]
 
         for task in sample_tasks:

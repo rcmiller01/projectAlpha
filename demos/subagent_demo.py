@@ -6,16 +6,18 @@ Demonstrates practical usage of the multi-LLM orchestration system
 
 import asyncio
 import json
-import time
-from typing import Dict, Any, Optional
+import os
 
 # Add project root to path
 import sys
-import os
+import time
+from typing import Any, Dict, Optional
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from backend.subagent_router import SubAgentRouter
 from backend.ai_reformulator import PersonalityFormatter, ReformulationRequest
+from backend.subagent_router import SubAgentRouter
+
 
 class SubAgentDemo:
     """Demo class showing SubAgent Router usage"""
@@ -24,7 +26,9 @@ class SubAgentDemo:
         self.router = SubAgentRouter()
         self.formatter = PersonalityFormatter()
 
-    async def process_message(self, message: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def process_message(
+        self, message: str, context: Optional[dict[str, Any]] = None
+    ) -> dict[str, Any]:
         """
         Process a message through the complete SubAgent pipeline
 
@@ -49,13 +53,13 @@ class SubAgentDemo:
         print(f"   → Confidence: {agent_response.confidence:.2f}")
 
         # Step 2: Format for personality consistency
-        print(f"🎭 Formatting for personality consistency...")
+        print("🎭 Formatting for personality consistency...")
         format_request = ReformulationRequest(
             original_response=agent_response.content,
             agent_type=agent_response.agent_type,
             intent_detected=agent_response.intent_detected.value,
             user_context=context,
-            personality_context={}
+            personality_context={},
         )
 
         formatted_response = await self.formatter.format(format_request)
@@ -76,8 +80,8 @@ class SubAgentDemo:
             "metadata": {
                 "original_response": agent_response.content,
                 "personality_adjustments": formatted_response.personality_adjustments,
-                "agent_metadata": agent_response.metadata
-            }
+                "agent_metadata": agent_response.metadata,
+            },
         }
 
     async def demo_conversation(self):
@@ -92,49 +96,46 @@ class SubAgentDemo:
             {
                 "message": "Help me implement a function to calculate fibonacci numbers in Python",
                 "context": {"mood": "focused", "project_type": "python"},
-                "description": "🔧 Technical/Code Request"
+                "description": "🔧 Technical/Code Request",
             },
             {
                 "message": "Write me a short story about a lighthouse keeper who finds meaning in solitude",
                 "context": {"mood": "contemplative", "conversation_depth": 0.7},
-                "description": "🎨 Creative/Artistic Request"
+                "description": "🎨 Creative/Artistic Request",
             },
             {
                 "message": "Do you remember what we discussed about personal growth in our last conversation?",
                 "context": {
                     "conversation_history": ["We talked about overcoming challenges"],
                     "total_interactions": 8,
-                    "mood": "reflective"
+                    "mood": "reflective",
                 },
-                "description": "🧠 Memory/Recall Request"
+                "description": "🧠 Memory/Recall Request",
             },
             {
                 "message": "I'm feeling overwhelmed with all the changes happening in my life",
                 "context": {"mood": "anxious", "conversation_depth": 0.6},
-                "description": "💭 Emotional Support Request"
+                "description": "💭 Emotional Support Request",
             },
             {
                 "message": "Create a meaningful ritual for starting fresh after a difficult period",
                 "context": {"mood": "hopeful", "conversation_depth": 0.8},
-                "description": "🕯️ Ritual/Symbolic Request"
-            }
+                "description": "🕯️ Ritual/Symbolic Request",
+            },
         ]
 
         for i, scenario in enumerate(scenarios, 1):
             print(f"{scenario['description']}")
             print("-" * 40)
 
-            result = await self.process_message(
-                scenario["message"],
-                scenario["context"]
-            )
+            result = await self.process_message(scenario["message"], scenario["context"])
 
-            print(f"\n💬 Final Response:")
+            print("\n💬 Final Response:")
             print(f"{result['final_response'][:200]}...")
-            if len(result['final_response']) > 200:
+            if len(result["final_response"]) > 200:
                 print("   [Response truncated for demo]")
 
-            print(f"\n📊 Processing Stats:")
+            print("\n📊 Processing Stats:")
             print(f"   Processing time: {result['processing_time']:.2f}s")
             print(f"   Agent: {result['agent_used']}")
             print(f"   Emotional tone: {result['emotional_tone']}")
@@ -150,6 +151,7 @@ class SubAgentDemo:
         print(f"Intent distribution: {json.dumps(analytics['intent_distribution'], indent=2)}")
         print(f"Available agents: {', '.join(analytics['available_agents'])}")
 
+
 async def interactive_demo():
     """Interactive demo where user can input messages"""
 
@@ -164,10 +166,10 @@ async def interactive_demo():
         try:
             message = input("👤 You: ").strip()
 
-            if message.lower() == 'quit':
+            if message.lower() == "quit":
                 print("👋 Goodbye!")
                 break
-            elif message.lower() == 'help':
+            elif message.lower() == "help":
                 print("\n💡 Example messages to try:")
                 print("  • 'Debug this Python error: NameError'")
                 print("  • 'Tell me a story about courage'")
@@ -179,26 +181,35 @@ async def interactive_demo():
                 continue
 
             # Determine context based on message content
-            context: Dict[str, Any] = {"mood": "neutral"}
-            if any(word in message.lower() for word in ["sad", "overwhelmed", "anxious", "difficult"]):
+            context: dict[str, Any] = {"mood": "neutral"}
+            if any(
+                word in message.lower() for word in ["sad", "overwhelmed", "anxious", "difficult"]
+            ):
                 context["mood"] = "anxious"
-            elif any(word in message.lower() for word in ["creative", "story", "beautiful", "imagine"]):
+            elif any(
+                word in message.lower() for word in ["creative", "story", "beautiful", "imagine"]
+            ):
                 context["mood"] = "creative"
-            elif any(word in message.lower() for word in ["remember", "recall", "previous", "before"]):
+            elif any(
+                word in message.lower() for word in ["remember", "recall", "previous", "before"]
+            ):
                 context["conversation_history"] = ["Previous conversations"]
                 context["total_interactions"] = 5
 
-            print(f"\n🤖 AI: Processing...")
+            print("\n🤖 AI: Processing...")
             result = await demo.process_message(message, context)
 
             print(f"🤖 AI ({result['agent_used']}): {result['final_response']}\n")
-            print(f"   [Intent: {result['intent_detected']}, Tone: {result['emotional_tone']}, Time: {result['processing_time']:.2f}s]\n")
+            print(
+                f"   [Intent: {result['intent_detected']}, Tone: {result['emotional_tone']}, Time: {result['processing_time']:.2f}s]\n"
+            )
 
         except KeyboardInterrupt:
             print("\n👋 Goodbye!")
             break
         except Exception as e:
             print(f"❌ Error: {e}")
+
 
 def main():
     """Main demo runner"""
@@ -215,15 +226,16 @@ def main():
     async def run_demos():
         demo = SubAgentDemo()
 
-        if choice in ['1', '3']:
+        if choice in ["1", "3"]:
             await demo.demo_conversation()
 
-        if choice in ['2', '3']:
-            if choice == '3':
+        if choice in ["2", "3"]:
+            if choice == "3":
                 input("\nPress Enter to start interactive demo...")
             await interactive_demo()
 
     asyncio.run(run_demos())
+
 
 if __name__ == "__main__":
     main()

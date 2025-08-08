@@ -3,41 +3,45 @@ Symbol Memory - Symbol tracking and decay analysis
 Manages symbolic memory persistence and determines symbol dormancy levels
 """
 
-import time
-import math
 import json
-from typing import Dict, List, Optional, Tuple, Any
-from dataclasses import dataclass, asdict
+import math
+import time
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple
+
 
 @dataclass
 class SymbolMetadata:
     """Metadata for symbolic memory tracking"""
+
     symbol: str
     last_used: float
     usage_frequency: int
     creation_time: float
     emotional_weight: float
-    context_tags: List[str]
+    context_tags: list[str]
     decay_resistance: float = 1.0  # Higher = more resistant to decay
+
 
 class SymbolMemory:
     """Manages symbolic memory with decay tracking"""
 
     def __init__(self, memory_path: str = "memory/symbol_memory.json"):
         self.memory_path = memory_path
-        self.symbols: Dict[str, SymbolMetadata] = {}
+        self.symbols: dict[str, SymbolMetadata] = {}
         self.decay_constants = {
-            "base_decay_rate": 1.0,        # Base decay per day
-            "frequency_protection": 0.5,   # How much frequency protects from decay
-            "emotional_protection": 0.3,   # How much emotional weight protects
-            "recency_boost": 2.0,          # Boost for recently used symbols
-            "dormancy_threshold": 0.7      # Above this score = dormant
+            "base_decay_rate": 1.0,  # Base decay per day
+            "frequency_protection": 0.5,  # How much frequency protects from decay
+            "emotional_protection": 0.3,  # How much emotional weight protects
+            "recency_boost": 2.0,  # Boost for recently used symbols
+            "dormancy_threshold": 0.7,  # Above this score = dormant
         }
         self.load_from_memory()
 
-    def symbol_decay_score(self, symbol: str, last_used: Optional[float] = None,
-                          usage_frequency: Optional[int] = None) -> float:
+    def symbol_decay_score(
+        self, symbol: str, last_used: Optional[float] = None, usage_frequency: Optional[int] = None
+    ) -> float:
         """
         Determine how dormant a symbol is based on last-used and context frequency.
 
@@ -54,7 +58,9 @@ class SymbolMemory:
         if symbol in self.symbols:
             metadata = self.symbols[symbol]
             actual_last_used = last_used if last_used is not None else metadata.last_used
-            actual_frequency = usage_frequency if usage_frequency is not None else metadata.usage_frequency
+            actual_frequency = (
+                usage_frequency if usage_frequency is not None else metadata.usage_frequency
+            )
             emotional_weight = metadata.emotional_weight
             decay_resistance = metadata.decay_resistance
         else:
@@ -108,8 +114,9 @@ class SymbolMemory:
         offset = 2.0  # Midpoint
         return 1 / (1 + math.exp(-k * (raw_score - offset)))
 
-    def track_symbol_usage(self, symbol: str, context_tags: Optional[List[str]] = None,
-                          emotional_weight: float = 0.5):
+    def track_symbol_usage(
+        self, symbol: str, context_tags: Optional[list[str]] = None, emotional_weight: float = 0.5
+    ):
         """Track symbol usage for decay calculation"""
         current_time = time.time()
 
@@ -131,12 +138,12 @@ class SymbolMemory:
                 creation_time=current_time,
                 emotional_weight=emotional_weight,
                 context_tags=context_tags or [],
-                decay_resistance=1.0
+                decay_resistance=1.0,
             )
 
         self.save_to_memory()
 
-    def get_dormant_symbols(self, threshold: Optional[float] = None) -> List[Tuple[str, float]]:
+    def get_dormant_symbols(self, threshold: Optional[float] = None) -> list[tuple[str, float]]:
         """Get list of symbols that have decayed past dormancy threshold"""
         threshold = threshold or self.decay_constants["dormancy_threshold"]
 
@@ -150,7 +157,7 @@ class SymbolMemory:
         dormant.sort(key=lambda x: x[1], reverse=True)
         return dormant
 
-    def get_resurrection_candidates(self, max_candidates: int = 5) -> List[Tuple[str, float]]:
+    def get_resurrection_candidates(self, max_candidates: int = 5) -> list[tuple[str, float]]:
         """Get symbols ready for resurrection (moderately dormant but still valuable)"""
         candidates = []
 
@@ -163,10 +170,11 @@ class SymbolMemory:
             # - Not too old
             age_days = (time.time() - metadata.creation_time) / 86400
 
-            if (0.4 <= decay_score <= 0.8 and
-                (metadata.emotional_weight > 0.6 or metadata.usage_frequency > 3) and
-                age_days < 90):  # Not older than 3 months
-
+            if (
+                0.4 <= decay_score <= 0.8
+                and (metadata.emotional_weight > 0.6 or metadata.usage_frequency > 3)
+                and age_days < 90
+            ):  # Not older than 3 months
                 resurrection_score = self._calculate_resurrection_value(metadata, decay_score)
                 candidates.append((symbol, resurrection_score))
 
@@ -189,8 +197,9 @@ class SymbolMemory:
         age_days = (time.time() - metadata.last_used) / 86400
         recency_value = max(0.1, 1.0 - (age_days / 60))  # Linear decay over 60 days
 
-        return (emotional_value * 0.4 + frequency_value * 0.3 +
-                decay_value * 0.2 + recency_value * 0.1)
+        return (
+            emotional_value * 0.4 + frequency_value * 0.3 + decay_value * 0.2 + recency_value * 0.1
+        )
 
     def boost_symbol_resistance(self, symbol: str, resistance_boost: float = 0.2):
         """Increase a symbol's resistance to decay"""
@@ -199,7 +208,7 @@ class SymbolMemory:
             self.symbols[symbol].decay_resistance = min(3.0, self.symbols[symbol].decay_resistance)
             self.save_to_memory()
 
-    def get_symbol_stats(self) -> Dict[str, Any]:
+    def get_symbol_stats(self) -> dict[str, Any]:
         """Get statistics about symbol memory"""
         if not self.symbols:
             return {"total_symbols": 0}
@@ -212,21 +221,22 @@ class SymbolMemory:
             "active_symbols": len([s for s in decay_scores if s < 0.3]),
             "average_decay": sum(decay_scores) / len(decay_scores),
             "most_decayed": max(decay_scores) if decay_scores else 0,
-            "freshest": min(decay_scores) if decay_scores else 0
+            "freshest": min(decay_scores) if decay_scores else 0,
         }
 
     def save_to_memory(self):
         """Save symbol memory to persistent storage"""
         try:
             import os
+
             os.makedirs(os.path.dirname(self.memory_path), exist_ok=True)
 
             data = {
                 "symbols": {k: asdict(v) for k, v in self.symbols.items()},
-                "decay_constants": self.decay_constants
+                "decay_constants": self.decay_constants,
             }
 
-            with open(self.memory_path, 'w') as f:
+            with open(self.memory_path, "w") as f:
                 json.dump(data, f, indent=2)
         except Exception as e:
             print(f"Warning: Could not save symbol memory: {e}")
@@ -234,7 +244,7 @@ class SymbolMemory:
     def load_from_memory(self):
         """Load symbol memory from persistent storage"""
         try:
-            with open(self.memory_path, 'r') as f:
+            with open(self.memory_path) as f:
                 data = json.load(f)
 
             if "symbols" in data:
@@ -249,6 +259,7 @@ class SymbolMemory:
         except Exception as e:
             print(f"Warning: Could not load symbol memory: {e}")
 
+
 # Convenience function for easy importing
 def symbol_decay_score(symbol: str, last_used: float, usage_frequency: int) -> float:
     """
@@ -258,6 +269,7 @@ def symbol_decay_score(symbol: str, last_used: float, usage_frequency: int) -> f
     memory = SymbolMemory()
     return memory.symbol_decay_score(symbol, last_used, usage_frequency)
 
+
 # Example usage
 if __name__ == "__main__":
     memory = SymbolMemory()
@@ -266,10 +278,10 @@ if __name__ == "__main__":
     current_time = time.time()
 
     test_cases = [
-        ("moon", current_time - 86400, 5),        # Used yesterday, freq 5
-        ("shadow", current_time - 604800, 2),     # Used week ago, freq 2
-        ("whisper", current_time - 2592000, 1),   # Used month ago, freq 1
-        ("flame", current_time - 300, 10),        # Used 5 min ago, freq 10
+        ("moon", current_time - 86400, 5),  # Used yesterday, freq 5
+        ("shadow", current_time - 604800, 2),  # Used week ago, freq 2
+        ("whisper", current_time - 2592000, 1),  # Used month ago, freq 1
+        ("flame", current_time - 300, 10),  # Used 5 min ago, freq 10
     ]
 
     for symbol, last_used, frequency in test_cases:

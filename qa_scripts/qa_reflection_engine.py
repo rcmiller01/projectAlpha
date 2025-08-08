@@ -5,10 +5,12 @@ Tests reflection engine context building, insight generation, and tone influence
 """
 
 import asyncio
-import aiohttp
 import json
 import time
 from datetime import datetime
+
+import aiohttp
+
 
 class ReflectionEngineQA:
     """Targeted testing for the Reflection Engine"""
@@ -33,7 +35,7 @@ class ReflectionEngineQA:
             async with self.session.get(f"{self.base_url}/api/reflection/summary") as response:
                 if response.status == 200:
                     data = await response.json()
-                    initial_count = data.get('total_reflections', 0)
+                    initial_count = data.get("total_reflections", 0)
                     print(f"✅ Initial reflection count: {initial_count}")
                     return initial_count
                 else:
@@ -68,24 +70,24 @@ class ReflectionEngineQA:
         conversation_flow = [
             {
                 "message": "I've been feeling really stressed about my work lately. I'm working on a big project but I'm not sure if I'm making the right decisions.",
-                "expected_sentiment": "negative"
+                "expected_sentiment": "negative",
             },
             {
                 "message": "The project is about implementing an AI system for our company. It's exciting but also overwhelming.",
-                "expected_sentiment": "mixed"
+                "expected_sentiment": "mixed",
             },
             {
                 "message": "I think what I really need is a structured approach. Maybe I should break it down into smaller tasks?",
-                "expected_sentiment": "neutral"
+                "expected_sentiment": "neutral",
             },
             {
                 "message": "Actually, talking about this is helping me think more clearly. I feel like I have a better direction now.",
-                "expected_sentiment": "positive"
+                "expected_sentiment": "positive",
             },
             {
                 "message": "You know what, I'm actually getting excited about this project again. Thanks for listening!",
-                "expected_sentiment": "positive"
-            }
+                "expected_sentiment": "positive",
+            },
         ]
 
         responses = []
@@ -94,19 +96,23 @@ class ReflectionEngineQA:
                 chat_data = {
                     "message": turn["message"],
                     "session_id": self.session_id,
-                    "persona": "companion"
+                    "persona": "companion",
                 }
 
-                async with self.session.post(f"{self.base_url}/api/chat", json=chat_data) as response:
+                async with self.session.post(
+                    f"{self.base_url}/api/chat", json=chat_data
+                ) as response:
                     if response.status == 200:
                         data = await response.json()
-                        response_text = data.get('response', '')
+                        response_text = data.get("response", "")
                         print(f"  Turn {i+1}: ✅ Response received ({len(response_text)} chars)")
-                        responses.append({
-                            "user_message": turn["message"],
-                            "ai_response": response_text,
-                            "expected_sentiment": turn["expected_sentiment"]
-                        })
+                        responses.append(
+                            {
+                                "user_message": turn["message"],
+                                "ai_response": response_text,
+                                "expected_sentiment": turn["expected_sentiment"],
+                            }
+                        )
 
                         # Small delay to allow processing
                         await asyncio.sleep(1)
@@ -124,13 +130,11 @@ class ReflectionEngineQA:
         print("🎯 Triggering manual reflection analysis...")
 
         try:
-            trigger_data = {
-                "session_id": self.session_id,
-                "force_analysis": True
-            }
+            trigger_data = {"session_id": self.session_id, "force_analysis": True}
 
-            async with self.session.post(f"{self.base_url}/api/reflection/manual-trigger",
-                                       json=trigger_data) as response:
+            async with self.session.post(
+                f"{self.base_url}/api/reflection/manual-trigger", json=trigger_data
+            ) as response:
                 if response.status == 200:
                     data = await response.json()
                     print(f"✅ Manual reflection triggered: {data.get('message')}")
@@ -154,10 +158,12 @@ class ReflectionEngineQA:
                     if insights:
                         print(f"✅ Generated {len(insights)} reflection insights:")
                         for i, insight in enumerate(insights[:3]):  # Show first 3
-                            insight_type = insight.get('type', 'unknown')
-                            content = insight.get('content', '')[:100] + "..."
-                            confidence = insight.get('confidence', 0)
-                            print(f"  {i+1}. {insight_type}: {content} (confidence: {confidence:.2f})")
+                            insight_type = insight.get("type", "unknown")
+                            content = insight.get("content", "")[:100] + "..."
+                            confidence = insight.get("confidence", 0)
+                            print(
+                                f"  {i+1}. {insight_type}: {content} (confidence: {confidence:.2f})"
+                            )
                         return insights
                     else:
                         print("⚠️ No reflection insights generated yet")
@@ -177,14 +183,16 @@ class ReflectionEngineQA:
         follow_up_data = {
             "message": "I'm starting a new project now. Any advice?",
             "session_id": self.session_id,
-            "persona": "companion"
+            "persona": "companion",
         }
 
         try:
-            async with self.session.post(f"{self.base_url}/api/chat", json=follow_up_data) as response:
+            async with self.session.post(
+                f"{self.base_url}/api/chat", json=follow_up_data
+            ) as response:
                 if response.status == 200:
                     data = await response.json()
-                    response_text = data.get('response', '')
+                    response_text = data.get("response", "")
 
                     # Check for reflection influence indicators
                     influence_indicators = [
@@ -192,11 +200,14 @@ class ReflectionEngineQA:
                         "considering what you mentioned earlier",
                         "given your recent experience",
                         "building on what you shared",
-                        "reflecting on our discussion"
+                        "reflecting on our discussion",
                     ]
 
-                    found_indicators = [indicator for indicator in influence_indicators
-                                      if indicator.lower() in response_text.lower()]
+                    found_indicators = [
+                        indicator
+                        for indicator in influence_indicators
+                        if indicator.lower() in response_text.lower()
+                    ]
 
                     if found_indicators:
                         print(f"✅ Reflection influence detected: {found_indicators}")
@@ -222,11 +233,11 @@ class ReflectionEngineQA:
                 if response.status == 200:
                     data = await response.json()
 
-                    total_reflections = data.get('total_reflections', 0)
-                    active_sessions = data.get('active_sessions', 0)
-                    reflection_types = data.get('reflection_types', {})
+                    total_reflections = data.get("total_reflections", 0)
+                    active_sessions = data.get("active_sessions", 0)
+                    reflection_types = data.get("reflection_types", {})
 
-                    print(f"✅ Reflection Summary:")
+                    print("✅ Reflection Summary:")
                     print(f"   Total Reflections: {total_reflections}")
                     print(f"   Active Sessions: {active_sessions}")
                     print(f"   Reflection Types: {reflection_types}")
@@ -275,7 +286,9 @@ class ReflectionEngineQA:
         print("🎯 REFLECTION ENGINE QA RESULTS:")
         print(f"✅ Context Built: {len(conversation_data)} conversation turns")
         print(f"✅ Insights Generated: {len(insights)} reflection insights")
-        print(f"{'✅' if tone_influenced else '⚠️'} Tone Influence: {'Detected' if tone_influenced else 'Not clearly detected'}")
+        print(
+            f"{'✅' if tone_influenced else '⚠️'} Tone Influence: {'Detected' if tone_influenced else 'Not clearly detected'}"
+        )
         print(f"✅ Summary Available: {summary is not None}")
 
         if insights and summary:
@@ -285,6 +298,7 @@ class ReflectionEngineQA:
             print("\n❌ Reflection Engine QA: PARTIAL - Some features may need attention")
             return False
 
+
 async def main():
     """Main QA execution"""
     print("Starting Reflection Engine QA...")
@@ -293,6 +307,7 @@ async def main():
     async with ReflectionEngineQA() as qa:
         success = await qa.run_reflection_qa_suite()
         return success
+
 
 if __name__ == "__main__":
     result = asyncio.run(main())

@@ -6,14 +6,15 @@ It handles the relationships between events and provides efficient retrieval mec
 """
 
 import asyncio
-import logging
 import json
-from typing import Dict, Any, List, Optional, Set, Tuple
-from datetime import datetime, timedelta
-from dataclasses import asdict
+import logging
 import re
+from dataclasses import asdict
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 logger = logging.getLogger(__name__)
+
 
 class MemoryGraph:
     """
@@ -26,8 +27,8 @@ class MemoryGraph:
     def __init__(self, memory_store):
         """Initialize the memory graph."""
         self.memory_store = memory_store
-        self.event_cache: Dict[str, Any] = {}  # LRU cache for recent events
-        self.relationship_cache: Dict[str, List[str]] = {}  # Cache for relationships
+        self.event_cache: dict[str, Any] = {}  # LRU cache for recent events
+        self.relationship_cache: dict[str, list[str]] = {}  # Cache for relationships
         self.max_cache_size = 1000
 
         logger.info("🕸️ Memory Graph initialized")
@@ -85,14 +86,16 @@ class MemoryGraph:
             logger.error(f"❌ Failed to get event {event_id}: {e}")
             return None
 
-    async def search_events(self,
-                           query: Optional[str] = None,
-                           actor: Optional[str] = None,
-                           event_type: Optional[str] = None,
-                           emotion_tags: Optional[List[str]] = None,
-                           time_range: Optional[Tuple[datetime, datetime]] = None,
-                           min_salience: float = 0.0,
-                           limit: int = 20) -> List[Any]:
+    async def search_events(
+        self,
+        query: Optional[str] = None,
+        actor: Optional[str] = None,
+        event_type: Optional[str] = None,
+        emotion_tags: Optional[list[str]] = None,
+        time_range: Optional[tuple[datetime, datetime]] = None,
+        min_salience: float = 0.0,
+        limit: int = 20,
+    ) -> list[Any]:
         """
         Search for events based on various criteria.
 
@@ -111,16 +114,16 @@ class MemoryGraph:
         try:
             # Build search criteria
             criteria = {
-                'actor': actor,
-                'event_type': event_type,
-                'emotion_tags': emotion_tags,
-                'min_salience': min_salience,
-                'limit': limit
+                "actor": actor,
+                "event_type": event_type,
+                "emotion_tags": emotion_tags,
+                "min_salience": min_salience,
+                "limit": limit,
             }
 
             if time_range:
-                criteria['start_time'] = time_range[0].isoformat()
-                criteria['end_time'] = time_range[1].isoformat()
+                criteria["start_time"] = time_range[0].isoformat()
+                criteria["end_time"] = time_range[1].isoformat()
 
             # Perform search in storage
             event_dicts = await self.memory_store.retrieve_events(
@@ -129,7 +132,7 @@ class MemoryGraph:
                 event_type=event_type,
                 min_salience=min_salience,
                 emotion_tags=emotion_tags,
-                limit=limit
+                limit=limit,
             )
 
             # Convert to MemoryEvent objects
@@ -151,10 +154,9 @@ class MemoryGraph:
             logger.error(f"❌ Failed to search events: {e}")
             return []
 
-    async def find_related_events(self,
-                                 content: str,
-                                 context_ids: List[str],
-                                 limit: int = 5) -> List[Any]:
+    async def find_related_events(
+        self, content: str, context_ids: list[str], limit: int = 5
+    ) -> list[Any]:
         """
         Find events related to given content and context.
 
@@ -176,10 +178,7 @@ class MemoryGraph:
             # Search by keywords
             if keywords:
                 keyword_query = " ".join(keywords[:5])  # Top 5 keywords
-                keyword_events = await self.search_events(
-                    query=keyword_query,
-                    limit=limit * 2
-                )
+                keyword_events = await self.search_events(query=keyword_query, limit=limit * 2)
                 related_events.extend(keyword_events)
 
             # Get events from context IDs
@@ -205,11 +204,9 @@ class MemoryGraph:
             logger.error(f"❌ Failed to find related events: {e}")
             return []
 
-    async def get_temporal_context(self,
-                                  reference_event,
-                                  start_time: datetime,
-                                  end_time: datetime,
-                                  context_window: int = 5) -> List[Any]:
+    async def get_temporal_context(
+        self, reference_event, start_time: datetime, end_time: datetime, context_window: int = 5
+    ) -> list[Any]:
         """
         Get temporal context events around a reference event.
 
@@ -226,7 +223,7 @@ class MemoryGraph:
             # Get events in time range
             context_events = await self.search_events(
                 time_range=(start_time, end_time),
-                limit=context_window * 3  # Get more to filter
+                limit=context_window * 3,  # Get more to filter
             )
 
             # Remove the reference event itself
@@ -244,7 +241,7 @@ class MemoryGraph:
             logger.error(f"❌ Failed to get temporal context: {e}")
             return []
 
-    async def get_related_events(self, event_id: str, depth: int = 1) -> List[Any]:
+    async def get_related_events(self, event_id: str, depth: int = 1) -> list[Any]:
         """
         Get events related to a specific event ID.
 
@@ -281,7 +278,7 @@ class MemoryGraph:
             logger.error(f"❌ Failed to get related events: {e}")
             return []
 
-    async def get_event_chain(self, start_event_id: str, max_length: int = 10) -> List[Any]:
+    async def get_event_chain(self, start_event_id: str, max_length: int = 10) -> list[Any]:
         """
         Get a chain of events starting from a specific event.
 
@@ -312,7 +309,9 @@ class MemoryGraph:
                 for event in related_events:
                     event_time = datetime.fromisoformat(event.timestamp)
                     if event_time > current_time:
-                        if next_event is None or event_time < datetime.fromisoformat(next_event.timestamp):
+                        if next_event is None or event_time < datetime.fromisoformat(
+                            next_event.timestamp
+                        ):
                             next_event = event
 
                 if next_event and next_event.id not in [e.id for e in chain]:
@@ -328,7 +327,7 @@ class MemoryGraph:
             logger.error(f"❌ Failed to build event chain: {e}")
             return []
 
-    async def get_graph_stats(self) -> Dict[str, Any]:
+    async def get_graph_stats(self) -> dict[str, Any]:
         """Get statistics about the memory graph."""
         try:
             total_events = await self.memory_store.get_event_count()
@@ -336,8 +335,7 @@ class MemoryGraph:
             # Get recent events for analysis
             recent_time = datetime.now() - timedelta(days=7)
             recent_events = await self.search_events(
-                time_range=(recent_time, datetime.now()),
-                limit=1000
+                time_range=(recent_time, datetime.now()), limit=1000
             )
 
             # Analyze relationship density
@@ -345,40 +343,40 @@ class MemoryGraph:
             avg_relationships = total_relationships / len(recent_events) if recent_events else 0
 
             return {
-                'total_events': total_events,
-                'cache_size': len(self.event_cache),
-                'recent_events': len(recent_events),
-                'average_relationships': round(avg_relationships, 2),
-                'relationship_cache_size': len(self.relationship_cache)
+                "total_events": total_events,
+                "cache_size": len(self.event_cache),
+                "recent_events": len(recent_events),
+                "average_relationships": round(avg_relationships, 2),
+                "relationship_cache_size": len(self.relationship_cache),
             }
 
         except Exception as e:
             logger.error(f"❌ Failed to get graph stats: {e}")
             return {}
 
-    def _dict_to_memory_event(self, event_dict: Dict[str, Any]):
+    def _dict_to_memory_event(self, event_dict: dict[str, Any]):
         """Convert dictionary to MemoryEvent object."""
         try:
             # Import here to avoid circular imports
             from .recall_engine import MemoryEvent
 
             return MemoryEvent(
-                id=event_dict['id'],
-                timestamp=event_dict['timestamp'],
-                actor=event_dict['actor'],
-                event_type=event_dict['event_type'],
-                content=event_dict['content'],
-                tone=event_dict['tone'],
-                emotion_tags=event_dict['emotion_tags'],
-                salience=event_dict['salience'],
-                related_ids=event_dict['related_ids'],
-                metadata=event_dict.get('metadata', {})
+                id=event_dict["id"],
+                timestamp=event_dict["timestamp"],
+                actor=event_dict["actor"],
+                event_type=event_dict["event_type"],
+                content=event_dict["content"],
+                tone=event_dict["tone"],
+                emotion_tags=event_dict["emotion_tags"],
+                salience=event_dict["salience"],
+                related_ids=event_dict["related_ids"],
+                metadata=event_dict.get("metadata", {}),
             )
         except Exception as e:
             logger.error(f"❌ Failed to convert dict to MemoryEvent: {e}")
             return None
 
-    def _add_to_cache(self, event_id: str, event_dict: Dict[str, Any]):
+    def _add_to_cache(self, event_id: str, event_dict: dict[str, Any]):
         """Add event to LRU cache."""
         # Remove oldest if cache is full
         if len(self.event_cache) >= self.max_cache_size:
@@ -405,7 +403,7 @@ class MemoryGraph:
         except Exception as e:
             logger.error(f"❌ Failed to update relationships: {e}")
 
-    async def _build_relationship_map(self, event_id: str) -> List[str]:
+    async def _build_relationship_map(self, event_id: str) -> list[str]:
         """Build relationship map for an event."""
         try:
             event = await self.get_event(event_id)
@@ -428,7 +426,7 @@ class MemoryGraph:
             logger.error(f"❌ Failed to build relationship map: {e}")
             return []
 
-    async def _find_content_related(self, event, max_results: int = 5) -> List[Any]:
+    async def _find_content_related(self, event, max_results: int = 5) -> list[Any]:
         """Find events related by content similarity."""
         try:
             keywords = self._extract_keywords(event.content)
@@ -440,14 +438,11 @@ class MemoryGraph:
             similar_events = await self.search_events(
                 query=query,
                 actor=event.actor,  # Prefer same actor
-                limit=max_results * 2
+                limit=max_results * 2,
             )
 
             # Filter out the current event and low-salience events
-            related_events = [
-                e for e in similar_events
-                if e.id != event.id and e.salience > 0.3
-            ]
+            related_events = [e for e in similar_events if e.id != event.id and e.salience > 0.3]
 
             return related_events[:max_results]
 
@@ -455,25 +450,72 @@ class MemoryGraph:
             logger.error(f"❌ Failed to find content-related events: {e}")
             return []
 
-    def _extract_keywords(self, content: str) -> List[str]:
+    def _extract_keywords(self, content: str) -> list[str]:
         """Extract keywords from content for relationship finding."""
         try:
             # Simple keyword extraction
             # Remove common stop words
             stop_words = {
-                'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
-                'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
-                'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
-                'should', 'may', 'might', 'can', 'this', 'that', 'these', 'those',
-                'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them'
+                "the",
+                "a",
+                "an",
+                "and",
+                "or",
+                "but",
+                "in",
+                "on",
+                "at",
+                "to",
+                "for",
+                "of",
+                "with",
+                "by",
+                "is",
+                "are",
+                "was",
+                "were",
+                "be",
+                "been",
+                "being",
+                "have",
+                "has",
+                "had",
+                "do",
+                "does",
+                "did",
+                "will",
+                "would",
+                "could",
+                "should",
+                "may",
+                "might",
+                "can",
+                "this",
+                "that",
+                "these",
+                "those",
+                "i",
+                "you",
+                "he",
+                "she",
+                "it",
+                "we",
+                "they",
+                "me",
+                "him",
+                "her",
+                "us",
+                "them",
             }
 
             # Extract words, remove punctuation, filter stop words
-            words = re.findall(r'\b\w+\b', content.lower())
+            words = re.findall(r"\b\w+\b", content.lower())
             keywords = [word for word in words if len(word) > 3 and word not in stop_words]
 
             # Return unique keywords, prioritizing by length (longer words often more meaningful)
-            unique_keywords = list(dict.fromkeys(keywords))  # Preserve order while removing duplicates
+            unique_keywords = list(
+                dict.fromkeys(keywords)
+            )  # Preserve order while removing duplicates
             unique_keywords.sort(key=len, reverse=True)
 
             return unique_keywords[:10]  # Top 10 keywords
@@ -482,7 +524,7 @@ class MemoryGraph:
             logger.error(f"❌ Failed to extract keywords: {e}")
             return []
 
-    async def export_graph_structure(self) -> Dict[str, Any]:
+    async def export_graph_structure(self) -> dict[str, Any]:
         """Export the graph structure for analysis or backup."""
         try:
             # Get all events
@@ -493,34 +535,34 @@ class MemoryGraph:
             node_data = {}
 
             for event_dict in all_events:
-                event_id = event_dict['id']
-                adjacency_list[event_id] = event_dict.get('related_ids', [])
+                event_id = event_dict["id"]
+                adjacency_list[event_id] = event_dict.get("related_ids", [])
                 node_data[event_id] = {
-                    'timestamp': event_dict['timestamp'],
-                    'actor': event_dict['actor'],
-                    'event_type': event_dict['event_type'],
-                    'salience': event_dict['salience'],
-                    'emotion_tags': event_dict['emotion_tags']
+                    "timestamp": event_dict["timestamp"],
+                    "actor": event_dict["actor"],
+                    "event_type": event_dict["event_type"],
+                    "salience": event_dict["salience"],
+                    "emotion_tags": event_dict["emotion_tags"],
                 }
 
             return {
-                'graph_type': 'memory_graph',
-                'export_timestamp': datetime.now().isoformat(),
-                'node_count': len(node_data),
-                'edge_count': sum(len(edges) for edges in adjacency_list.values()),
-                'adjacency_list': adjacency_list,
-                'node_data': node_data
+                "graph_type": "memory_graph",
+                "export_timestamp": datetime.now().isoformat(),
+                "node_count": len(node_data),
+                "edge_count": sum(len(edges) for edges in adjacency_list.values()),
+                "adjacency_list": adjacency_list,
+                "node_data": node_data,
             }
 
         except Exception as e:
             logger.error(f"❌ Failed to export graph structure: {e}")
             return {}
 
-    async def analyze_graph_properties(self) -> Dict[str, Any]:
+    async def analyze_graph_properties(self) -> dict[str, Any]:
         """Analyze mathematical properties of the memory graph."""
         try:
             graph_data = await self.export_graph_structure()
-            adjacency_list = graph_data.get('adjacency_list', {})
+            adjacency_list = graph_data.get("adjacency_list", {})
 
             if not adjacency_list:
                 return {}
@@ -563,7 +605,7 @@ class MemoryGraph:
                 # Count triangles
                 triangles = 0
                 for i, neighbor1 in enumerate(neighbors):
-                    for j, neighbor2 in enumerate(neighbors[i+1:], i+1):
+                    for j, neighbor2 in enumerate(neighbors[i + 1 :], i + 1):
                         if neighbor2 in adjacency_list.get(neighbor1, []):
                             triangles += 1
 
@@ -571,17 +613,23 @@ class MemoryGraph:
                 clustering = triangles / possible_triangles if possible_triangles > 0 else 0
                 clustering_coeffs.append(clustering)
 
-            avg_clustering = sum(clustering_coeffs) / len(clustering_coeffs) if clustering_coeffs else 0
+            avg_clustering = (
+                sum(clustering_coeffs) / len(clustering_coeffs) if clustering_coeffs else 0
+            )
 
             return {
-                'node_count': node_count,
-                'edge_count': edge_count,
-                'average_degree': round(avg_degree, 2),
-                'max_degree': max_degree,
-                'connected_components': len(components),
-                'largest_component_size': max(len(comp) for comp in components) if components else 0,
-                'average_clustering_coefficient': round(avg_clustering, 3),
-                'density': round(edge_count / (node_count * (node_count - 1)) if node_count > 1 else 0, 4)
+                "node_count": node_count,
+                "edge_count": edge_count,
+                "average_degree": round(avg_degree, 2),
+                "max_degree": max_degree,
+                "connected_components": len(components),
+                "largest_component_size": max(len(comp) for comp in components)
+                if components
+                else 0,
+                "average_clustering_coefficient": round(avg_clustering, 3),
+                "density": round(
+                    edge_count / (node_count * (node_count - 1)) if node_count > 1 else 0, 4
+                ),
             }
 
         except Exception as e:

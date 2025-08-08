@@ -4,15 +4,14 @@ Unit Tests for Enhanced Unified Companion System
 Proper unit tests with assertions instead of print statements
 """
 
-import unittest
 import asyncio
 import json
-import sys
 import os
+import sys
+import unittest
 from datetime import datetime, timedelta
-from datetime import datetime
-from typing import Dict, Any
-from unittest.mock import Mock, patch, AsyncMock
+from typing import Any, Dict
+from unittest.mock import AsyncMock, Mock, patch
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -24,19 +23,15 @@ class TestUnifiedCompanion(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures"""
         self.config = {
-            "mythomax": {
-                "use_mock": True,
-                "model_path": "mock"
-            },
-            "database": {
-                "type": "inmemory"
-            }
+            "mythomax": {"use_mock": True, "model_path": "mock"},
+            "database": {"type": "inmemory"},
         }
         self.test_user = "test_user_123"
 
     async def async_setUp(self):
         """Async setup for companion instance"""
         from modules.core.unified_companion import UnifiedCompanion
+
         self.companion = UnifiedCompanion(self.config)
         await self.companion.initialize()
 
@@ -74,7 +69,7 @@ class TestUnifiedCompanion(unittest.TestCase):
 
         # Assert coordinator is properly initialized
         self.assertEqual(coordinator.user_id, self.test_user)
-        self.assertTrue(hasattr(coordinator, 'logger'))
+        self.assertTrue(hasattr(coordinator, "logger"))
 
     async def test_crisis_interrupt_detection(self):
         """Test crisis interrupt mechanism"""
@@ -88,7 +83,9 @@ class TestUnifiedCompanion(unittest.TestCase):
             crisis_input, context
         )
 
-        self.assertTrue(interrupt_required, "Crisis interrupt should be triggered for suicidal content")
+        self.assertTrue(
+            interrupt_required, "Crisis interrupt should be triggered for suicidal content"
+        )
 
     async def test_crisis_interrupt_response(self):
         """Test crisis interrupt response generation"""
@@ -114,17 +111,16 @@ class TestUnifiedCompanion(unittest.TestCase):
         config_with_mongo = {
             "database": {
                 "connection_string": "mongodb://localhost:27017/test",
-                "type": "inmemory"  # Should be overridden to mongodb
+                "type": "inmemory",  # Should be overridden to mongodb
             }
         }
 
         from modules.database.database_interface import create_database_interface
 
         # Mock the database interface to use in-memory for testing
-        with patch('modules.database.database_interface.logging') as mock_logging:
+        with patch("modules.database.database_interface.logging") as mock_logging:
             db_interface = create_database_interface(
-                connection_string="inmemory://test",
-                database_type="inmemory"
+                connection_string="inmemory://test", database_type="inmemory"
             )
 
             # Should log in-memory database usage
@@ -135,15 +131,9 @@ class TestUnifiedCompanion(unittest.TestCase):
         await self.async_setUp()
 
         interaction_data = {
-            "emotional_state": {
-                "anxiety": 0.8,
-                "sadness": 0.6,
-                "hope": 0.3
-            },
-            "context_analysis": {
-                "seeking_reassurance": True
-            },
-            "interaction_type": "emotional_support"
+            "emotional_state": {"anxiety": 0.8, "sadness": 0.6, "hope": 0.3},
+            "context_analysis": {"seeking_reassurance": True},
+            "interaction_type": "emotional_support",
         }
 
         # Update emotional weights
@@ -152,7 +142,9 @@ class TestUnifiedCompanion(unittest.TestCase):
         )
 
         # Assert weights were updated
-        user_weights = self.companion.emotional_weight_tracker.emotional_weights.get(self.test_user, {})
+        user_weights = self.companion.emotional_weight_tracker.emotional_weights.get(
+            self.test_user, {}
+        )
         self.assertIn("anxiety", user_weights)
         self.assertIn("sadness", user_weights)
         self.assertIn("hope", user_weights)
@@ -166,15 +158,12 @@ class TestUnifiedCompanion(unittest.TestCase):
         await self.async_setUp()
 
         context = {
-            "current_emotional_state": {
-                "anxiety": 0.9,
-                "sadness": 0.7
-            },
-            "interaction_type": "emotional_support"
+            "current_emotional_state": {"anxiety": 0.9, "sadness": 0.7},
+            "interaction_type": "emotional_support",
         }
 
         # Test that the companion has template capabilities
-        self.assertTrue(hasattr(self.companion, 'dynamic_template_engine'))
+        self.assertTrue(hasattr(self.companion, "dynamic_template_engine"))
 
         # For now, just verify the attribute exists since the actual template engine
         # may not be fully implemented in the test environment
@@ -184,6 +173,7 @@ class TestUnifiedCompanion(unittest.TestCase):
         """Test goodbye generation when ending a session"""
         await self.async_setUp()
         from modules.core.unified_companion import InteractionState
+
         state = InteractionState(
             user_id=self.test_user,
             session_id="sess1",
@@ -208,8 +198,12 @@ class TestUnifiedCompanion(unittest.TestCase):
 
         # Assert all expected interaction types exist
         expected_types = [
-            "EMOTIONAL_SUPPORT", "TECHNICAL_ASSISTANCE", "CREATIVE_COLLABORATION",
-            "INTEGRATED_SUPPORT", "GENERAL_CONVERSATION", "CRISIS_SUPPORT"
+            "EMOTIONAL_SUPPORT",
+            "TECHNICAL_ASSISTANCE",
+            "CREATIVE_COLLABORATION",
+            "INTEGRATED_SUPPORT",
+            "GENERAL_CONVERSATION",
+            "CRISIS_SUPPORT",
         ]
 
         for interaction_type in expected_types:
@@ -226,17 +220,12 @@ class TestCrisisSafetyOverride(unittest.TestCase):
 
     async def test_crisis_level_detection(self):
         """Test crisis level detection accuracy"""
-        from modules.core.crisis_safety_override import CrisisSafetyOverride, CrisisLevel
+        from modules.core.crisis_safety_override import CrisisLevel, CrisisSafetyOverride
 
         crisis_override = CrisisSafetyOverride(self.config)
 
         # Test critical level detection
-        critical_phrases = [
-            "I want to kill myself",
-            "I want to die",
-            "end it all",
-            "suicide"
-        ]
+        critical_phrases = ["I want to kill myself", "I want to die", "end it all", "suicide"]
 
         for phrase in critical_phrases:
             with self.subTest(phrase=phrase):
@@ -246,7 +235,7 @@ class TestCrisisSafetyOverride(unittest.TestCase):
 
     async def test_crisis_assessment(self):
         """Test comprehensive crisis assessment"""
-        from modules.core.crisis_safety_override import CrisisSafetyOverride, CrisisLevel
+        from modules.core.crisis_safety_override import CrisisLevel, CrisisSafetyOverride
 
         crisis_override = CrisisSafetyOverride(self.config)
 
@@ -263,11 +252,20 @@ class TestCrisisSafetyOverride(unittest.TestCase):
         self.assertIsInstance(assessment.recommended_actions, list)
 
         # Assessment should be valid (level is one of the valid enum values)
-        self.assertIn(assessment.level, [CrisisLevel.NONE, CrisisLevel.LOW, CrisisLevel.MEDIUM, CrisisLevel.HIGH, CrisisLevel.CRITICAL])
+        self.assertIn(
+            assessment.level,
+            [
+                CrisisLevel.NONE,
+                CrisisLevel.LOW,
+                CrisisLevel.MEDIUM,
+                CrisisLevel.HIGH,
+                CrisisLevel.CRITICAL,
+            ],
+        )
 
     def test_safety_resources_availability(self):
         """Test that safety resources are properly configured"""
-        from modules.core.crisis_safety_override import CrisisSafetyOverride, CrisisLevel
+        from modules.core.crisis_safety_override import CrisisLevel, CrisisSafetyOverride
 
         crisis_override = CrisisSafetyOverride(self.config)
 
@@ -314,8 +312,9 @@ class TestDatabaseInterface(unittest.TestCase):
 
     async def test_user_profile_operations(self):
         """Test user profile CRUD operations"""
-        from modules.database.database_interface import InMemoryDatabase, UserProfile
         from datetime import datetime
+
+        from modules.database.database_interface import InMemoryDatabase, UserProfile
 
         db = InMemoryDatabase()
         await db.initialize()
@@ -325,7 +324,7 @@ class TestDatabaseInterface(unittest.TestCase):
             user_id="test_user",
             created_at=datetime.now(),
             last_active=datetime.now(),
-            display_name="Test User"
+            display_name="Test User",
         )
 
         # Test create
@@ -352,10 +351,9 @@ class TestDatabaseInterface(unittest.TestCase):
         from modules.database.database_interface import create_database_interface
 
         # Test database interface creation (using in-memory for testing)
-        with patch('modules.database.database_interface.logging') as mock_logging:
+        with patch("modules.database.database_interface.logging") as mock_logging:
             db_interface = create_database_interface(
-                connection_string="inmemory://test",
-                database_type="inmemory"
+                connection_string="inmemory://test", database_type="inmemory"
             )
 
             # Should use in-memory database for testing
@@ -363,9 +361,10 @@ class TestDatabaseInterface(unittest.TestCase):
 
     async def test_json_database_operations(self):
         """Test basic operations of JSON database"""
-        from modules.database.json_database import JSONDatabase
-        from modules.database.database_interface import UserProfile
         from datetime import datetime
+
+        from modules.database.database_interface import UserProfile
+        from modules.database.json_database import JSONDatabase
 
         db_path = "test_db.json"
         db = JSONDatabase(db_path)
@@ -388,14 +387,14 @@ class TestDatabaseInterface(unittest.TestCase):
 
 class TestAdditionalFeatures(unittest.TestCase):
     def test_crisis_memory_record(self):
-        from modules.core.crisis_memory import record_crisis_event, get_recent_crisis_events
+        from modules.core.crisis_memory import get_recent_crisis_events, record_crisis_event
 
         record_crisis_event("user1", "high", {"note": "test"})
         events = get_recent_crisis_events("user1", days=1)
         self.assertTrue(any(e["level"] == "high" for e in events))
 
     def test_symbol_tagging(self):
-        from modules.nlp.simple_tagger import tag_text, get_tag_history
+        from modules.nlp.simple_tagger import get_tag_history, tag_text
 
         tags = tag_text("the collar is a special collar that means a lot")
         self.assertIn("collar", tags)
@@ -406,7 +405,9 @@ class TestAdditionalFeatures(unittest.TestCase):
         from modules.emotion import mood_engine
 
         mood_engine.MOOD_STATE["current"] = "anchored"
-        mood_engine.MOOD_STATE["last_updated"] = (datetime.now() - timedelta(minutes=40)).isoformat()
+        mood_engine.MOOD_STATE["last_updated"] = (
+            datetime.now() - timedelta(minutes=40)
+        ).isoformat()
         decayed = mood_engine.get_current_mood()
         self.assertEqual(decayed, "waiting")
 
@@ -455,6 +456,7 @@ class TestMemoryNarrativeTemplates(unittest.TestCase):
 # Test runner for async tests
 def async_test(coro):
     """Decorator to run async tests"""
+
     def wrapper(self):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
@@ -462,23 +464,48 @@ def async_test(coro):
             return loop.run_until_complete(coro(self))
         finally:
             loop.close()
+
     return wrapper
 
 
 # Apply async decorator to async test methods
-TestUnifiedCompanion.test_crisis_interrupt_detection = async_test(TestUnifiedCompanion.test_crisis_interrupt_detection)
-TestUnifiedCompanion.test_crisis_interrupt_response = async_test(TestUnifiedCompanion.test_crisis_interrupt_response)
-TestUnifiedCompanion.test_database_auto_detection = async_test(TestUnifiedCompanion.test_database_auto_detection)
-TestUnifiedCompanion.test_emotional_weight_tracking = async_test(TestUnifiedCompanion.test_emotional_weight_tracking)
-TestUnifiedCompanion.test_template_engine_selection = async_test(TestUnifiedCompanion.test_template_engine_selection)
-TestUnifiedCompanion.test_end_session_goodbye = async_test(TestUnifiedCompanion.test_end_session_goodbye)
-TestUnifiedCompanion.test_end_session_goodbye = async_test(TestUnifiedCompanion.test_end_session_goodbye)
-TestCrisisSafetyOverride.test_crisis_assessment = async_test(TestCrisisSafetyOverride.test_crisis_assessment)
-TestCrisisSafetyOverride.test_crisis_level_detection = async_test(TestCrisisSafetyOverride.test_crisis_level_detection)
-TestDatabaseInterface.test_user_profile_operations = async_test(TestDatabaseInterface.test_user_profile_operations)
-TestDatabaseInterface.test_json_database_operations = async_test(TestDatabaseInterface.test_json_database_operations)
-TestCrisisSafetyOverride.test_interrupt_flag = async_test(TestCrisisSafetyOverride.test_interrupt_flag)
+TestUnifiedCompanion.test_crisis_interrupt_detection = async_test(
+    TestUnifiedCompanion.test_crisis_interrupt_detection
+)
+TestUnifiedCompanion.test_crisis_interrupt_response = async_test(
+    TestUnifiedCompanion.test_crisis_interrupt_response
+)
+TestUnifiedCompanion.test_database_auto_detection = async_test(
+    TestUnifiedCompanion.test_database_auto_detection
+)
+TestUnifiedCompanion.test_emotional_weight_tracking = async_test(
+    TestUnifiedCompanion.test_emotional_weight_tracking
+)
+TestUnifiedCompanion.test_template_engine_selection = async_test(
+    TestUnifiedCompanion.test_template_engine_selection
+)
+TestUnifiedCompanion.test_end_session_goodbye = async_test(
+    TestUnifiedCompanion.test_end_session_goodbye
+)
+TestUnifiedCompanion.test_end_session_goodbye = async_test(
+    TestUnifiedCompanion.test_end_session_goodbye
+)
+TestCrisisSafetyOverride.test_crisis_assessment = async_test(
+    TestCrisisSafetyOverride.test_crisis_assessment
+)
+TestCrisisSafetyOverride.test_crisis_level_detection = async_test(
+    TestCrisisSafetyOverride.test_crisis_level_detection
+)
+TestDatabaseInterface.test_user_profile_operations = async_test(
+    TestDatabaseInterface.test_user_profile_operations
+)
+TestDatabaseInterface.test_json_database_operations = async_test(
+    TestDatabaseInterface.test_json_database_operations
+)
+TestCrisisSafetyOverride.test_interrupt_flag = async_test(
+    TestCrisisSafetyOverride.test_interrupt_flag
+)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(verbosity=2)

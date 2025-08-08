@@ -2,10 +2,12 @@
 # start_phase1.py
 # Startup script for Phase 1 Romantic AI System
 
-import uvicorn
 import os
 import sys
 from pathlib import Path
+
+import uvicorn
+
 
 def check_dependencies():
     """Check if all required files exist"""
@@ -15,7 +17,7 @@ def check_dependencies():
         "modules/memory/mia_memory_response.py",
         "backend/main.py",
         "backend/romantic_routes.py",
-        "config/mia_romantic.json"
+        "config/mia_romantic.json",
     ]
 
     missing_files = []
@@ -31,6 +33,7 @@ def check_dependencies():
 
     print("✅ All required files found")
     return True
+
 
 def main():
     """Start the Phase 1 Romantic AI System"""
@@ -56,18 +59,13 @@ def main():
 
     try:
         # Start the server
-        uvicorn.run(
-            "backend.main:app",
-            host="0.0.0.0",
-            port=8000,
-            reload=True,
-            log_level="info"
-        )
+        uvicorn.run("backend.main:app", host="0.0.0.0", port=8000, reload=True, log_level="info")
     except KeyboardInterrupt:
         print("\n👋 Shutting down Phase 1 system...")
     except Exception as e:
         print(f"\n❌ Failed to start server: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

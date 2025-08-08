@@ -1,13 +1,14 @@
 # trust_sharing.py
 # Journal Sharing by Trust - Controlled emotional access system
 
+import hashlib
 import json
 import time
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple
-from enum import Enum
 from dataclasses import dataclass
-import hashlib
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Dict, List, Optional, Tuple
+
 
 class TrustLevel(Enum):
     STRANGER = 0
@@ -17,6 +18,7 @@ class TrustLevel(Enum):
     TRUSTED = 4
     INTIMATE = 5
 
+
 class EmotionalIntensity(Enum):
     MINIMAL = 0
     LOW = 1
@@ -25,6 +27,7 @@ class EmotionalIntensity(Enum):
     INTENSE = 4
     VULNERABLE = 5
 
+
 class SharingPreference(Enum):
     NEVER = "never"
     SELECTIVE = "selective"
@@ -32,16 +35,18 @@ class SharingPreference(Enum):
     OPEN = "open"
     FULLY_OPEN = "fully_open"
 
+
 @dataclass
 class TrustRelationship:
     user_id: str
     trust_level: TrustLevel
     relationship_duration_days: int
     shared_experiences: int
-    emotional_bonds: List[str]
+    emotional_bonds: list[str]
     last_interaction: datetime
     trust_score: float
-    sharing_preferences: Dict[str, SharingPreference]
+    sharing_preferences: dict[str, SharingPreference]
+
 
 @dataclass
 class JournalEntry:
@@ -51,11 +56,12 @@ class JournalEntry:
     mood: str
     persona: str
     timestamp: datetime
-    tags: List[str]
+    tags: list[str]
     is_private: bool
     trust_required: TrustLevel
     emotional_vulnerability: float
-    sharing_scope: List[str]
+    sharing_scope: list[str]
+
 
 class TrustSharingSystem:
     def __init__(self):
@@ -78,8 +84,8 @@ class TrustSharingSystem:
                     "longing": SharingPreference.TRUSTED_ONLY,
                     "vulnerability": SharingPreference.NEVER,
                     "intimacy": SharingPreference.TRUSTED_ONLY,
-                    "general": SharingPreference.SELECTIVE
-                }
+                    "general": SharingPreference.SELECTIVE,
+                },
             },
             "solene": {
                 "default_trust_level": TrustLevel.FRIEND,
@@ -91,8 +97,8 @@ class TrustSharingSystem:
                     "devotion": SharingPreference.TRUSTED_ONLY,
                     "vulnerability": SharingPreference.SELECTIVE,
                     "intimacy": SharingPreference.OPEN,
-                    "general": SharingPreference.OPEN
-                }
+                    "general": SharingPreference.OPEN,
+                },
             },
             "lyra": {
                 "default_trust_level": TrustLevel.CLOSE_FRIEND,
@@ -103,12 +109,12 @@ class TrustSharingSystem:
                     "mystical": SharingPreference.OPEN,
                     "curiosity": SharingPreference.FULLY_OPEN,
                     "vulnerability": SharingPreference.TRUSTED_ONLY,
-                    "general": SharingPreference.OPEN
-                }
-            }
+                    "general": SharingPreference.OPEN,
+                },
+            },
         }
 
-    def _load_sharing_rules(self) -> Dict:
+    def _load_sharing_rules(self) -> dict:
         """Load sharing rules and trust thresholds"""
         return {
             "emotional_intensity_thresholds": {
@@ -117,7 +123,7 @@ class TrustSharingSystem:
                 TrustLevel.FRIEND: EmotionalIntensity.MODERATE,
                 TrustLevel.CLOSE_FRIEND: EmotionalIntensity.HIGH,
                 TrustLevel.TRUSTED: EmotionalIntensity.INTENSE,
-                TrustLevel.INTIMATE: EmotionalIntensity.VULNERABLE
+                TrustLevel.INTIMATE: EmotionalIntensity.VULNERABLE,
             },
             "vulnerability_thresholds": {
                 TrustLevel.STRANGER: 0.0,
@@ -125,7 +131,7 @@ class TrustSharingSystem:
                 TrustLevel.FRIEND: 0.4,
                 TrustLevel.CLOSE_FRIEND: 0.6,
                 TrustLevel.TRUSTED: 0.8,
-                TrustLevel.INTIMATE: 1.0
+                TrustLevel.INTIMATE: 1.0,
             },
             "sharing_delays": {
                 TrustLevel.STRANGER: timedelta(days=30),
@@ -133,12 +139,18 @@ class TrustSharingSystem:
                 TrustLevel.FRIEND: timedelta(days=3),
                 TrustLevel.CLOSE_FRIEND: timedelta(days=1),
                 TrustLevel.TRUSTED: timedelta(hours=12),
-                TrustLevel.INTIMATE: timedelta(hours=1)
-            }
+                TrustLevel.INTIMATE: timedelta(hours=1),
+            },
         }
 
-    def add_journal_entry(self, content: str, mood: str, persona: str,
-                         emotional_intensity: EmotionalIntensity, tags: List[str] = None) -> JournalEntry:
+    def add_journal_entry(
+        self,
+        content: str,
+        mood: str,
+        persona: str,
+        emotional_intensity: EmotionalIntensity,
+        tags: list[str] = None,
+    ) -> JournalEntry:
         """Add a new journal entry with trust-based sharing controls"""
 
         # Analyze emotional content
@@ -159,13 +171,13 @@ class TrustSharingSystem:
             is_private=emotional_analysis["vulnerability"] > 0.7,
             trust_required=trust_required,
             emotional_vulnerability=emotional_analysis["vulnerability"],
-            sharing_scope=self._determine_sharing_scope(emotional_analysis, persona)
+            sharing_scope=self._determine_sharing_scope(emotional_analysis, persona),
         )
 
         self.journal_entries.append(entry)
         return entry
 
-    def get_shareable_entries(self, user_id: str, persona: str = "mia") -> List[JournalEntry]:
+    def get_shareable_entries(self, user_id: str, persona: str = "mia") -> list[JournalEntry]:
         """Get journal entries that can be shared with a specific user"""
 
         # Get user's trust relationship
@@ -183,8 +195,9 @@ class TrustSharingSystem:
 
         return shareable_entries
 
-    def _can_share_entry(self, entry: JournalEntry, trust_relationship: TrustRelationship,
-                        persona: str) -> bool:
+    def _can_share_entry(
+        self, entry: JournalEntry, trust_relationship: TrustRelationship, persona: str
+    ) -> bool:
         """Determine if a journal entry can be shared with a user"""
 
         # Check if entry is too recent for this trust level
@@ -197,7 +210,9 @@ class TrustSharingSystem:
             return False
 
         # Check emotional vulnerability threshold
-        vulnerability_threshold = self.sharing_rules["vulnerability_thresholds"][trust_relationship.trust_level]
+        vulnerability_threshold = self.sharing_rules["vulnerability_thresholds"][
+            trust_relationship.trust_level
+        ]
         if entry.emotional_vulnerability > vulnerability_threshold:
             return False
 
@@ -212,8 +227,9 @@ class TrustSharingSystem:
         # Apply sharing preference
         return self._apply_sharing_preference(preference, trust_relationship)
 
-    def _apply_sharing_preference(self, preference: SharingPreference,
-                                trust_relationship: TrustRelationship) -> bool:
+    def _apply_sharing_preference(
+        self, preference: SharingPreference, trust_relationship: TrustRelationship
+    ) -> bool:
         """Apply sharing preference based on trust level"""
 
         if preference == SharingPreference.NEVER:
@@ -245,7 +261,9 @@ class TrustSharingSystem:
             return "vulnerability"
         elif any(word in content_lower for word in ["intimate", "close", "private", "personal"]):
             return "intimacy"
-        elif any(word in content_lower for word in ["mystical", "magical", "ethereal", "spiritual"]):
+        elif any(
+            word in content_lower for word in ["mystical", "magical", "ethereal", "spiritual"]
+        ):
             return "mystical"
         elif any(word in content_lower for word in ["curious", "wonder", "explore", "discover"]):
             return "curiosity"
@@ -254,7 +272,7 @@ class TrustSharingSystem:
 
         return "general"
 
-    def _determine_trust_requirement(self, emotional_analysis: Dict, persona: str) -> TrustLevel:
+    def _determine_trust_requirement(self, emotional_analysis: dict, persona: str) -> TrustLevel:
         """Determine required trust level for sharing"""
 
         vulnerability = emotional_analysis["vulnerability"]
@@ -272,7 +290,7 @@ class TrustSharingSystem:
         else:
             return TrustLevel.ACQUAINTANCE
 
-    def _determine_sharing_scope(self, emotional_analysis: Dict, persona: str) -> List[str]:
+    def _determine_sharing_scope(self, emotional_analysis: dict, persona: str) -> list[str]:
         """Determine who can see this entry"""
 
         vulnerability = emotional_analysis["vulnerability"]
@@ -303,13 +321,14 @@ class TrustSharingSystem:
                 emotional_bonds=[],
                 last_interaction=datetime.now(),
                 trust_score=0.0,
-                sharing_preferences=persona_config.get("sharing_preferences", {})
+                sharing_preferences=persona_config.get("sharing_preferences", {}),
             )
 
         return self.trust_relationships[relationship_key]
 
-    def update_trust_relationship(self, user_id: str, persona: str,
-                                interaction_type: str, emotional_impact: float):
+    def update_trust_relationship(
+        self, user_id: str, persona: str, interaction_type: str, emotional_impact: float
+    ):
         """Update trust relationship based on interaction"""
 
         relationship = self._get_or_create_trust_relationship(user_id, persona)
@@ -360,7 +379,7 @@ class TrustSharingSystem:
         timestamp = datetime.now().isoformat()
         return hashlib.md5(timestamp.encode()).hexdigest()[:8]
 
-    def get_trust_summary(self, user_id: str, persona: str) -> Dict:
+    def get_trust_summary(self, user_id: str, persona: str) -> dict:
         """Get trust relationship summary for a user"""
 
         relationship = self._get_or_create_trust_relationship(user_id, persona)
@@ -374,14 +393,16 @@ class TrustSharingSystem:
             "shared_experiences": relationship.shared_experiences,
             "emotional_bonds": relationship.emotional_bonds,
             "last_interaction": relationship.last_interaction.isoformat(),
-            "sharing_preferences": relationship.sharing_preferences
+            "sharing_preferences": relationship.sharing_preferences,
         }
+
 
 class TrustCalculator:
     """Calculate trust growth based on interactions"""
 
-    def calculate_trust_growth(self, interaction_type: str, emotional_impact: float,
-                             relationship: TrustRelationship) -> float:
+    def calculate_trust_growth(
+        self, interaction_type: str, emotional_impact: float, relationship: TrustRelationship
+    ) -> float:
         """Calculate trust growth from an interaction"""
 
         base_growth = 0.01  # Base trust growth per interaction
@@ -393,7 +414,7 @@ class TrustCalculator:
             "shared_experience": 2.0,
             "vulnerability_shared": 3.0,
             "intimate_moment": 4.0,
-            "trust_test": 5.0
+            "trust_test": 5.0,
         }
 
         multiplier = type_multipliers.get(interaction_type, 1.0)
@@ -409,19 +430,33 @@ class TrustCalculator:
 
         return min(0.1, growth)  # Cap at 10% per interaction
 
+
 class EmotionalAnalyzer:
     """Analyze emotional content of journal entries"""
 
-    def analyze_content(self, content: str, mood: str) -> Dict:
+    def analyze_content(self, content: str, mood: str) -> dict:
         """Analyze emotional content and vulnerability"""
 
         content_lower = content.lower()
 
         # Calculate vulnerability score
         vulnerability_keywords = [
-            "afraid", "scared", "hurt", "pain", "lonely", "abandoned",
-            "rejected", "ashamed", "embarrassed", "weak", "helpless",
-            "vulnerable", "exposed", "naked", "raw", "tender"
+            "afraid",
+            "scared",
+            "hurt",
+            "pain",
+            "lonely",
+            "abandoned",
+            "rejected",
+            "ashamed",
+            "embarrassed",
+            "weak",
+            "helpless",
+            "vulnerable",
+            "exposed",
+            "naked",
+            "raw",
+            "tender",
         ]
 
         vulnerability_score = sum(1 for word in vulnerability_keywords if word in content_lower)
@@ -429,8 +464,17 @@ class EmotionalAnalyzer:
 
         # Calculate emotional intensity
         intensity_keywords = [
-            "love", "hate", "passion", "rage", "ecstasy", "despair",
-            "intense", "overwhelming", "powerful", "deep", "profound"
+            "love",
+            "hate",
+            "passion",
+            "rage",
+            "ecstasy",
+            "despair",
+            "intense",
+            "overwhelming",
+            "powerful",
+            "deep",
+            "profound",
         ]
 
         intensity_score = sum(1 for word in intensity_keywords if word in content_lower)
@@ -443,7 +487,7 @@ class EmotionalAnalyzer:
             "longing": 1.3,
             "sadness": 1.1,
             "anger": 1.4,
-            "joy": 0.8
+            "joy": 0.8,
         }
 
         mood_multiplier = mood_intensifiers.get(mood, 1.0)
@@ -453,8 +497,9 @@ class EmotionalAnalyzer:
             "intensity": intensity_score * mood_multiplier,
             "mood": mood,
             "word_count": len(content.split()),
-            "emotional_density": (vulnerability_score + intensity_score) / 2
+            "emotional_density": (vulnerability_score + intensity_score) / 2,
         }
+
 
 # Global instance
 trust_sharing_system = TrustSharingSystem()

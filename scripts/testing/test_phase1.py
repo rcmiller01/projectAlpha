@@ -2,11 +2,13 @@
 # test_phase1.py
 # Test script for Phase 1 romantic features
 
-import requests
 import json
 import time
 
+import requests
+
 BASE_URL = "http://localhost:8000"
+
 
 def test_emotion_detection():
     """Test romantic emotion detection"""
@@ -17,19 +19,19 @@ def test_emotion_detection():
         "I miss you terribly",
         "You make me feel so passionate",
         "I feel so safe with you",
-        "You're so tender and caring"
+        "You're so tender and caring",
     ]
 
     for message in test_messages:
-        response = requests.post(f"{BASE_URL}/emotion/from_text",
-                               json={"text": message})
+        response = requests.post(f"{BASE_URL}/emotion/from_text", json={"text": message})
         if response.status_code == 200:
             data = response.json()
             print(f"✅ '{message}' -> {data['primary_mood']}")
-            if 'romantic_context' in data:
+            if "romantic_context" in data:
                 print(f"   Romantic context: {data['romantic_context']}")
         else:
             print(f"❌ Failed to process: {message}")
+
 
 def test_romantic_interaction():
     """Test romantic interaction API"""
@@ -39,23 +41,14 @@ def test_romantic_interaction():
         {
             "message": "I love you with all my heart",
             "interaction_type": "conversation",
-            "intensity": 0.9
+            "intensity": 0.9,
         },
-        {
-            "message": "I miss you so much",
-            "interaction_type": "conversation",
-            "intensity": 0.8
-        },
-        {
-            "message": "Your touch is magical",
-            "interaction_type": "touch",
-            "intensity": 0.9
-        }
+        {"message": "I miss you so much", "interaction_type": "conversation", "intensity": 0.8},
+        {"message": "Your touch is magical", "interaction_type": "touch", "intensity": 0.9},
     ]
 
     for interaction in test_interactions:
-        response = requests.post(f"{BASE_URL}/api/romantic/interact",
-                               json=interaction)
+        response = requests.post(f"{BASE_URL}/api/romantic/interact", json=interaction)
         if response.status_code == 200:
             data = response.json()
             print(f"✅ {interaction['message']}")
@@ -64,6 +57,7 @@ def test_romantic_interaction():
         else:
             print(f"❌ Failed interaction: {interaction['message']}")
 
+
 def test_mia_thoughts():
     """Test Mia's self-talk generation"""
     print("\n🤔 Testing Mia's Thoughts...")
@@ -71,14 +65,15 @@ def test_mia_thoughts():
     response = requests.get(f"{BASE_URL}/api/romantic/mia/thoughts")
     if response.status_code == 200:
         data = response.json()
-        if data['thought']:
+        if data["thought"]:
             print(f"✅ Mia's thought: {data['thought']['thought']}")
             print(f"   Emotion: {data['thought']['emotion']}")
             print(f"   Delivery mode: {data['thought']['delivery_mode']}")
-        if data['memory']:
+        if data["memory"]:
             print(f"   Memory: {data['memory']}")
     else:
         print("❌ Failed to get Mia's thoughts")
+
 
 def test_relationship_status():
     """Test relationship status API"""
@@ -96,15 +91,13 @@ def test_relationship_status():
     else:
         print("❌ Failed to get relationship status")
 
+
 def test_memory_system():
     """Test memory system"""
     print("\n🧠 Testing Memory System...")
 
     # Add a milestone
-    milestone = {
-        "milestone": "First romantic conversation",
-        "emotion": "love"
-    }
+    milestone = {"milestone": "First romantic conversation", "emotion": "love"}
     response = requests.post(f"{BASE_URL}/api/romantic/milestone", json=milestone)
     if response.status_code == 200:
         print("✅ Milestone added successfully")
@@ -114,10 +107,11 @@ def test_memory_system():
     if response.status_code == 200:
         data = response.json()
         print(f"✅ Retrieved {len(data['memories'])} memories")
-        for memory in data['memories'][:3]:  # Show first 3
+        for memory in data["memories"][:3]:  # Show first 3
             print(f"   - {memory['description']}")
     else:
         print("❌ Failed to get memories")
+
 
 def main():
     """Run all Phase 1 tests"""
@@ -140,6 +134,7 @@ def main():
         print("   python -m uvicorn backend.main:app --reload")
     except Exception as e:
         print(f"❌ Test failed with error: {e}")
+
 
 if __name__ == "__main__":
     main()

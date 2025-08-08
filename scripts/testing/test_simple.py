@@ -2,10 +2,11 @@
 # test_simple.py
 # Simple test script to verify all files can be imported and have correct structure
 
+import importlib.util
 import os
 import sys
-import importlib.util
 from pathlib import Path
+
 
 def test_file_import(file_path: str, expected_classes: list = None) -> dict:
     """Test if a Python file can be imported and has expected classes"""
@@ -26,17 +27,14 @@ def test_file_import(file_path: str, expected_classes: list = None) -> dict:
                     missing_classes.append(class_name)
                     print(f"   ❌ Missing class: {class_name}")
 
-            return {
-                "success": True,
-                "missing_classes": missing_classes,
-                "module": module
-            }
+            return {"success": True, "missing_classes": missing_classes, "module": module}
         else:
             return {"success": True, "module": module}
 
     except Exception as e:
         print(f"❌ Failed to import {file_path}: {e}")
         return {"success": False, "error": str(e)}
+
 
 def main():
     """Run simple tests on all advanced feature files"""
@@ -50,32 +48,48 @@ def main():
     test_files = [
         {
             "path": backend_dir / "symbolic" / "symbolic_fusion.py",
-            "expected_classes": ["SymbolicFusion", "Symbol", "SymbolType"]
+            "expected_classes": ["SymbolicFusion", "Symbol", "SymbolType"],
         },
         {
             "path": backend_dir / "scenes" / "scene_initiation.py",
-            "expected_classes": ["SceneInitiationEngine", "ScenePrompt", "SceneType"]
+            "expected_classes": ["SceneInitiationEngine", "ScenePrompt", "SceneType"],
         },
         {
             "path": backend_dir / "input" / "touch_journal.py",
-            "expected_classes": ["TouchJournalEngine", "TouchEvent", "TouchLocation"]
+            "expected_classes": ["TouchJournalEngine", "TouchEvent", "TouchLocation"],
         },
         {
             "path": backend_dir / "input" / "dynamic_wake_word.py",
-            "expected_classes": ["DynamicWakeWordEngine", "WakeContext", "WakeMode"]
+            "expected_classes": ["DynamicWakeWordEngine", "WakeContext", "WakeMode"],
         },
         {
             "path": backend_dir / "ritual" / "mirror_ritual.py",
-            "expected_classes": ["MirrorRitualEngine", "MirrorRitual", "RitualPhase", "MirrorState", "IdentityAspect"]
+            "expected_classes": [
+                "MirrorRitualEngine",
+                "MirrorRitual",
+                "RitualPhase",
+                "MirrorState",
+                "IdentityAspect",
+            ],
         },
         {
             "path": backend_dir / "privacy" / "private_scenes.py",
-            "expected_classes": ["PrivateScenesEngine", "PrivacyLevel", "TrustRequirement", "ContentType"]
+            "expected_classes": [
+                "PrivateScenesEngine",
+                "PrivacyLevel",
+                "TrustRequirement",
+                "ContentType",
+            ],
         },
         {
             "path": backend_dir / "biometrics" / "biometric_integration.py",
-            "expected_classes": ["BiometricIntegrationEngine", "BiometricReading", "MotionData", "EmotionalBiometricState"]
-        }
+            "expected_classes": [
+                "BiometricIntegrationEngine",
+                "BiometricReading",
+                "MotionData",
+                "EmotionalBiometricState",
+            ],
+        },
     ]
 
     success_count = 0
@@ -93,7 +107,7 @@ def main():
         else:
             print(f"\n❌ File not found: {file_path}")
 
-    print(f"\n" + "=" * 50)
+    print("\n" + "=" * 50)
     print(f"📊 Test Results: {success_count}/{total_count} files passed")
 
     if success_count == total_count:
@@ -103,7 +117,7 @@ def main():
         print(f"❌ {total_count - success_count} files have issues")
 
     # Test __init__.py files
-    print(f"\n🧪 Testing Package Structure")
+    print("\n🧪 Testing Package Structure")
     print("=" * 50)
 
     init_files = [
@@ -112,7 +126,7 @@ def main():
         backend_dir / "input" / "__init__.py",
         backend_dir / "ritual" / "__init__.py",
         backend_dir / "privacy" / "__init__.py",
-        backend_dir / "biometrics" / "__init__.py"
+        backend_dir / "biometrics" / "__init__.py",
     ]
 
     init_success = 0
@@ -124,6 +138,7 @@ def main():
             print(f"❌ {init_file.name} missing")
 
     print(f"\n📊 Package Structure: {init_success}/{len(init_files)} __init__.py files present")
+
 
 if __name__ == "__main__":
     main()

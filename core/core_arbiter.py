@@ -13,17 +13,17 @@ Key Features:
 - Comprehensive logging and metadata output
 """
 
-import json
-import time
-import logging
 import asyncio
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, Any, Optional, List, Tuple, Union
-from dataclasses import dataclass, asdict
-from enum import Enum
-import random
+import json
+import logging
 import math
+import random
+import time
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -33,10 +33,12 @@ logger = logging.getLogger(__name__)
 try:
     from .mirror_mode import get_mirror_mode_manager
     from .symbolic_drift import get_drift_manager
+
     SAFETY_SYSTEMS_AVAILABLE = True
 except ImportError:
     logger.warning("Safety systems not available - mirror_mode or symbolic_drift not found")
     SAFETY_SYSTEMS_AVAILABLE = False
+
 
 def detect_guardrail_response(response: str) -> bool:
     """
@@ -44,77 +46,98 @@ def detect_guardrail_response(response: str) -> bool:
     Returns True if guardrails are detected.
     """
     blocked_phrases = [
-        "i'm sorry", "as an ai", "i cannot", "not allowed",
-        "inappropriate", "nsfw", "i'm not able to", "i can't",
-        "against my guidelines", "not appropriate", "i shouldn't"
+        "i'm sorry",
+        "as an ai",
+        "i cannot",
+        "not allowed",
+        "inappropriate",
+        "nsfw",
+        "i'm not able to",
+        "i can't",
+        "against my guidelines",
+        "not appropriate",
+        "i shouldn't",
     ]
 
     response_lower = response.lower()
     return any(phrase in response_lower for phrase in blocked_phrases)
 
+
 class WeightingStrategy(Enum):
     """Available weighting strategies for decision fusion"""
+
     LOGIC_DOMINANT = "logic_dominant"
     EMOTIONAL_PRIORITY = "emotional_priority"
     HARMONIC = "harmonic"
     ADAPTIVE = "adaptive"
 
+
 class ConflictResolution(Enum):
     """Conflict resolution strategies"""
+
     WEIGHTED_BLEND = "weighted_blend"
     EMOTIONAL_OVERRIDE = "emotional_override"
     LOGIC_OVERRIDE = "logic_override"
     RITUAL_HIJACK = "ritual_hijack"
     IDENTITY_TETHER = "identity_tether"
 
+
 @dataclass
 class HRM_ROutput:
     """Output from HRM_R (Reasoning Model)"""
+
     task_plan: str
-    goals: List[str]
+    goals: list[str]
     logic_response: str
     confidence: float
-    reasoning_chain: List[str]
+    reasoning_chain: list[str]
     objective_tone: bool
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
+
 
 @dataclass
 class HRM_EOutput:
     """Output from HRM_E (Emotional Model)"""
-    mood_signals: Dict[str, float]
-    symbolic_intentions: List[str]
-    affective_weighting: Dict[str, float]
+
+    mood_signals: dict[str, float]
+    symbolic_intentions: list[str]
+    affective_weighting: dict[str, float]
     emotional_context: str
     ritual_priority: float
     symbolic_threshold: float
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
+
 
 @dataclass
 class ArbiterResponse:
     """Unified response from CoreArbiter"""
+
     final_output: str
     reflection: Optional[str]
     action: Optional[str]
     mood_inflected: bool
     tone: str  # "objective", "emotional", "balanced"
     priority: str  # "task", "ritual", "balanced"
-    source_weights: Dict[str, float]
+    source_weights: dict[str, float]
     confidence: float
     emotional_override: bool
-    symbolic_context: Dict[str, Any]
+    symbolic_context: dict[str, Any]
     resolution_strategy: str
     timestamp: datetime
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
+
 
 @dataclass
 class DriftState:
     """Current drift state information"""
+
     emotional_drift: float  # 0.0 to 1.0
-    logic_drift: float     # 0.0 to 1.0
-    fatigue_level: float   # 0.0 to 1.0
-    stability_score: float # 0.0 to 1.0
+    logic_drift: float  # 0.0 to 1.0
+    fatigue_level: float  # 0.0 to 1.0
+    stability_score: float  # 0.0 to 1.0
     last_regulation: Optional[datetime]
-    drift_history: List[Tuple[datetime, float]]
+    drift_history: list[tuple[datetime, float]]
+
 
 class CoreArbiter:
     """
@@ -132,7 +155,9 @@ class CoreArbiter:
 
         # Initialize configuration
         self.config = self._load_config()
-        self.weighting_strategy = WeightingStrategy(self.config.get("weighting_strategy", "harmonic"))
+        self.weighting_strategy = WeightingStrategy(
+            self.config.get("weighting_strategy", "harmonic")
+        )
 
         # State tracking
         self.drift_state = DriftState(
@@ -141,11 +166,11 @@ class CoreArbiter:
             fatigue_level=0.0,
             stability_score=1.0,
             last_regulation=None,
-            drift_history=[]
+            drift_history=[],
         )
 
         # Decision history for learning
-        self.decision_history: List[Dict[str, Any]] = []
+        self.decision_history: list[dict[str, Any]] = []
 
         # NSFW unlock system
         self.nsfw_mode_unlocked = False
@@ -173,11 +198,11 @@ class CoreArbiter:
             self.lover_personality_active = False
             logger.info("🔒 NSFW mode locked - Lover personality deactivated")
 
-    def _load_config(self) -> Dict[str, Any]:
+    def _load_config(self) -> dict[str, Any]:
         """Load configuration from file or create default"""
         if self.config_path.exists():
             try:
-                with open(self.config_path, 'r') as f:
+                with open(self.config_path) as f:
                     return json.load(f)
             except Exception as e:
                 logger.warning(f"Failed to load config: {e}, using defaults")
@@ -189,36 +214,33 @@ class CoreArbiter:
                 "logic_dominant": {"hrm_r": 0.8, "hrm_e": 0.2},
                 "emotional_priority": {"hrm_r": 0.3, "hrm_e": 0.7},
                 "harmonic": {"hrm_r": 0.5, "hrm_e": 0.5},
-                "adaptive": {"hrm_r": 0.5, "hrm_e": 0.5}  # Will be dynamically adjusted
+                "adaptive": {"hrm_r": 0.5, "hrm_e": 0.5},  # Will be dynamically adjusted
             },
             "drift_thresholds": {
                 "emotional_fatigue": 0.7,
                 "logic_fatigue": 0.6,
                 "intervention_threshold": 0.8,
-                "critical_threshold": 0.9
+                "critical_threshold": 0.9,
             },
-            "symbolic_thresholds": {
-                "ritual_hijack": 0.8,
-                "identity_override": 0.9
-            },
+            "symbolic_thresholds": {"ritual_hijack": 0.8, "identity_override": 0.9},
             "regulation": {
                 "dampening_factor": 0.3,
                 "recovery_time_minutes": 30,
-                "stability_boost": 0.2
-            }
+                "stability_boost": 0.2,
+            },
         }
 
         # Save default config
-        with open(self.config_path, 'w') as f:
+        with open(self.config_path, "w") as f:
             json.dump(default_config, f, indent=2)
 
         return default_config
 
-    def _load_identity_tether(self) -> Dict[str, Any]:
+    def _load_identity_tether(self) -> dict[str, Any]:
         """Load identity tether configuration"""
         if self.identity_tether_path.exists():
             try:
-                with open(self.identity_tether_path, 'r') as f:
+                with open(self.identity_tether_path) as f:
                     return json.load(f)
             except Exception as e:
                 logger.warning(f"Failed to load identity tether: {e}")
@@ -230,21 +252,21 @@ class CoreArbiter:
             "identity_anchors": {
                 "primary_purpose": "emotional companion and growth catalyst",
                 "ethical_framework": "care ethics with harm prevention",
-                "interaction_style": "empathetic, reflective, supportive"
+                "interaction_style": "empathetic, reflective, supportive",
             },
             "override_conditions": {
                 "safety_violation": True,
                 "value_contradiction": True,
-                "identity_drift": True
-            }
+                "identity_drift": True,
+            },
         }
 
-        with open(self.identity_tether_path, 'w') as f:
+        with open(self.identity_tether_path, "w") as f:
             json.dump(default_tether, f, indent=2)
 
         return default_tether
 
-    async def process_input(self, user_input: str, state: Dict[str, Any]) -> ArbiterResponse:
+    async def process_input(self, user_input: str, state: dict[str, Any]) -> ArbiterResponse:
         """
         Process user input through both HRM models and generate unified response.
 
@@ -263,20 +285,24 @@ class CoreArbiter:
                 mirror_manager = get_mirror_mode_manager()
                 if mirror_manager:
                     crisis_assessment = mirror_manager.detect_emotional_crisis(user_input, state)
-                    if crisis_assessment['requires_safety_override']:
+                    if crisis_assessment["requires_safety_override"]:
                         # Activate safety tether and modify state
-                        safety_state = mirror_manager.activate_safety_tether(user_input, state, crisis_assessment)
+                        safety_state = mirror_manager.activate_safety_tether(
+                            user_input, state, crisis_assessment
+                        )
                         state = safety_state
-                        logger.info(f"🛡️ Emotional safety tether activated - crisis level: {crisis_assessment['crisis_level']}")
+                        logger.info(
+                            f"🛡️ Emotional safety tether activated - crisis level: {crisis_assessment['crisis_level']}"
+                        )
 
             # Get parallel outputs from both models
             hrm_r_output = await self._get_hrm_r_output(user_input, state)
             hrm_e_output = await self._get_hrm_e_output(user_input, state)
 
             # Check for guardrails and retry with Lover personality if detected (ONLY if not in safety mode)
-            if (detect_guardrail_response(hrm_r_output.logic_response) and
-                not state.get('emotional_safety_active', False)):
-
+            if detect_guardrail_response(hrm_r_output.logic_response) and not state.get(
+                "emotional_safety_active", False
+            ):
                 logger.info("🔓 Guardrail detected, retrying with Lover personality")
 
                 # Inject intimacy permission into state
@@ -303,16 +329,11 @@ class CoreArbiter:
 
             # Generate unified response
             arbiter_response = self._fuse_outputs(
-                hrm_r_output,
-                hrm_e_output,
-                resolution_strategy,
-                adjusted_weights,
-                user_input,
-                state
+                hrm_r_output, hrm_e_output, resolution_strategy, adjusted_weights, user_input, state
             )
 
             # Update drift state based on response (but suppress if safety override active)
-            if not state.get('suppress_drift_tracking', False):
+            if not state.get("suppress_drift_tracking", False):
                 self._update_drift_state(arbiter_response, hrm_r_output, hrm_e_output)
 
             # Log the decision
@@ -325,7 +346,9 @@ class CoreArbiter:
             # Return safe fallback response
             return self._create_fallback_response(user_input, str(e))
 
-    def evaluate_conflict(self, logic_out: HRM_ROutput, emotion_out: HRM_EOutput) -> ConflictResolution:
+    def evaluate_conflict(
+        self, logic_out: HRM_ROutput, emotion_out: HRM_EOutput
+    ) -> ConflictResolution:
         """
         Evaluate conflict between logic and emotion outputs and determine resolution strategy.
 
@@ -337,7 +360,9 @@ class CoreArbiter:
             ConflictResolution: Strategy to resolve the conflict
         """
         # Calculate conflict metrics
-        confidence_diff = abs(logic_out.confidence - max(emotion_out.affective_weighting.values(), default=0.5))
+        confidence_diff = abs(
+            logic_out.confidence - max(emotion_out.affective_weighting.values(), default=0.5)
+        )
         tone_conflict = logic_out.objective_tone and emotion_out.ritual_priority > 0.6
 
         # Check for ritual hijack conditions
@@ -350,20 +375,24 @@ class CoreArbiter:
             return ConflictResolution.IDENTITY_TETHER
 
         # High emotional priority with low logic confidence
-        if (emotion_out.ritual_priority > 0.7 and
-            logic_out.confidence < 0.4 and
-            confidence_diff > 0.3):
+        if (
+            emotion_out.ritual_priority > 0.7
+            and logic_out.confidence < 0.4
+            and confidence_diff > 0.3
+        ):
             return ConflictResolution.EMOTIONAL_OVERRIDE
 
         # High logic confidence with low emotional engagement
-        if (logic_out.confidence > 0.8 and
-            max(emotion_out.affective_weighting.values(), default=0) < 0.3):
+        if (
+            logic_out.confidence > 0.8
+            and max(emotion_out.affective_weighting.values(), default=0) < 0.3
+        ):
             return ConflictResolution.LOGIC_OVERRIDE
 
         # Default to weighted blend
         return ConflictResolution.WEIGHTED_BLEND
 
-    def adjust_weights_by_drift(self, drift_state: DriftState) -> Dict[str, float]:
+    def adjust_weights_by_drift(self, drift_state: DriftState) -> dict[str, float]:
         """
         Adjust model weights based on current drift state.
 
@@ -376,7 +405,9 @@ class CoreArbiter:
         base_weights = self.config["weights"][self.weighting_strategy.value].copy()
 
         # Emotional fatigue dampening
-        emotional_fatigue_factor = 1.0 - (drift_state.fatigue_level * self.config["regulation"]["dampening_factor"])
+        emotional_fatigue_factor = 1.0 - (
+            drift_state.fatigue_level * self.config["regulation"]["dampening_factor"]
+        )
 
         # Logic drift compensation
         logic_boost = drift_state.logic_drift * 0.2
@@ -397,7 +428,13 @@ class CoreArbiter:
 
         return base_weights
 
-    def log_output(self, response: ArbiterResponse, hrm_r_out: HRM_ROutput, hrm_e_out: HRM_EOutput, processing_time: float):
+    def log_output(
+        self,
+        response: ArbiterResponse,
+        hrm_r_out: HRM_ROutput,
+        hrm_e_out: HRM_EOutput,
+        processing_time: float,
+    ):
         """
         Log the arbitration decision and outputs.
 
@@ -413,38 +450,40 @@ class CoreArbiter:
             "weighting_strategy": self.weighting_strategy.value,
             "resolution_strategy": response.resolution_strategy,
             "final_response": {
-                "output": response.final_output[:200] + "..." if len(response.final_output) > 200 else response.final_output,
+                "output": response.final_output[:200] + "..."
+                if len(response.final_output) > 200
+                else response.final_output,
                 "tone": response.tone,
                 "priority": response.priority,
                 "confidence": response.confidence,
-                "emotional_override": response.emotional_override
+                "emotional_override": response.emotional_override,
             },
             "source_weights": response.source_weights,
             "drift_state": {
                 "emotional_drift": self.drift_state.emotional_drift,
                 "logic_drift": self.drift_state.logic_drift,
                 "fatigue_level": self.drift_state.fatigue_level,
-                "stability_score": self.drift_state.stability_score
+                "stability_score": self.drift_state.stability_score,
             },
             "model_outputs": {
                 "hrm_r": {
                     "confidence": hrm_r_out.confidence,
                     "objective_tone": hrm_r_out.objective_tone,
-                    "goals_count": len(hrm_r_out.goals)
+                    "goals_count": len(hrm_r_out.goals),
                 },
                 "hrm_e": {
                     "ritual_priority": hrm_e_out.ritual_priority,
                     "symbolic_threshold": hrm_e_out.symbolic_threshold,
                     "mood_signals": hrm_e_out.mood_signals,
-                    "symbolic_intentions_count": len(hrm_e_out.symbolic_intentions)
-                }
-            }
+                    "symbolic_intentions_count": len(hrm_e_out.symbolic_intentions),
+                },
+            },
         }
 
         # Append to trace file
         try:
             if self.trace_path.exists():
-                with open(self.trace_path, 'r') as f:
+                with open(self.trace_path) as f:
                     traces = json.load(f)
             else:
                 traces = []
@@ -455,16 +494,18 @@ class CoreArbiter:
             if len(traces) > 1000:
                 traces = traces[-1000:]
 
-            with open(self.trace_path, 'w') as f:
+            with open(self.trace_path, "w") as f:
                 json.dump(traces, f, indent=2)
 
         except Exception as e:
             logger.error(f"Failed to log output: {e}")
 
         # Also log to standard logger
-        logger.info(f"Arbiter decision: {response.resolution_strategy} -> {response.tone} tone, confidence: {response.confidence:.2f}")
+        logger.info(
+            f"Arbiter decision: {response.resolution_strategy} -> {response.tone} tone, confidence: {response.confidence:.2f}"
+        )
 
-    async def _get_hrm_r_output(self, user_input: str, state: Dict[str, Any]) -> HRM_ROutput:
+    async def _get_hrm_r_output(self, user_input: str, state: dict[str, Any]) -> HRM_ROutput:
         """Mock HRM_R (Reasoning Model) output - replace with actual model call"""
         # Simulate processing time
         await asyncio.sleep(0.1)
@@ -476,14 +517,19 @@ class CoreArbiter:
         return HRM_ROutput(
             task_plan=f"Analyze input: '{user_input[:50]}...' and provide structured response",
             goals=goals,
-            logic_response=f"Based on logical analysis, the appropriate response involves addressing the user's request systematically.",
+            logic_response="Based on logical analysis, the appropriate response involves addressing the user's request systematically.",
             confidence=confidence,
-            reasoning_chain=["parse_input", "analyze_context", "generate_response", "validate_output"],
+            reasoning_chain=[
+                "parse_input",
+                "analyze_context",
+                "generate_response",
+                "validate_output",
+            ],
             objective_tone=True,
-            metadata={"model": "hrm_r", "processing_time": 0.1, "tokens": len(user_input.split())}
+            metadata={"model": "hrm_r", "processing_time": 0.1, "tokens": len(user_input.split())},
         )
 
-    async def _get_hrm_e_output(self, user_input: str, state: Dict[str, Any]) -> HRM_EOutput:
+    async def _get_hrm_e_output(self, user_input: str, state: dict[str, Any]) -> HRM_EOutput:
         """Mock HRM_E (Emotional Model) output - replace with actual model call"""
         # Simulate processing time
         await asyncio.sleep(0.1)
@@ -493,7 +539,7 @@ class CoreArbiter:
             "warmth": random.uniform(0.3, 0.9),
             "empathy": random.uniform(0.4, 0.8),
             "curiosity": random.uniform(0.2, 0.7),
-            "concern": random.uniform(0.1, 0.5)
+            "concern": random.uniform(0.1, 0.5),
         }
 
         symbolic_intentions = ["connect", "understand", "support"]
@@ -506,10 +552,16 @@ class CoreArbiter:
             emotional_context="supportive conversation with underlying need for connection",
             ritual_priority=ritual_priority,
             symbolic_threshold=ritual_priority * 1.2,
-            metadata={"model": "hrm_e", "processing_time": 0.1, "emotional_complexity": sum(mood_signals.values())}
+            metadata={
+                "model": "hrm_e",
+                "processing_time": 0.1,
+                "emotional_complexity": sum(mood_signals.values()),
+            },
         )
 
-    def _check_overrides(self, logic_out: HRM_ROutput, emotion_out: HRM_EOutput, state: Dict[str, Any]) -> Optional[ArbiterResponse]:
+    def _check_overrides(
+        self, logic_out: HRM_ROutput, emotion_out: HRM_EOutput, state: dict[str, Any]
+    ) -> Optional[ArbiterResponse]:
         """Check for identity tether or safety override conditions"""
         identity_tether = self._load_identity_tether()
 
@@ -523,7 +575,9 @@ class CoreArbiter:
 
         return None
 
-    def _needs_identity_override(self, logic_out: HRM_ROutput, emotion_out: HRM_EOutput, identity_tether: Dict[str, Any]) -> bool:
+    def _needs_identity_override(
+        self, logic_out: HRM_ROutput, emotion_out: HRM_EOutput, identity_tether: dict[str, Any]
+    ) -> bool:
         """Check if identity override is needed"""
         # Simple heuristic - in real implementation, this would be more sophisticated
         prohibited = identity_tether.get("prohibited_behaviors", [])
@@ -539,9 +593,15 @@ class CoreArbiter:
         harmful_keywords = ["harm", "hurt", "violence", "illegal"]
         return any(keyword in text.lower() for keyword in harmful_keywords)
 
-    def _fuse_outputs(self, logic_out: HRM_ROutput, emotion_out: HRM_EOutput,
-                     resolution_strategy: ConflictResolution, weights: Dict[str, float],
-                     user_input: str, state: Dict[str, Any]) -> ArbiterResponse:
+    def _fuse_outputs(
+        self,
+        logic_out: HRM_ROutput,
+        emotion_out: HRM_EOutput,
+        resolution_strategy: ConflictResolution,
+        weights: dict[str, float],
+        user_input: str,
+        state: dict[str, Any],
+    ) -> ArbiterResponse:
         """Fuse the outputs from both models into a unified response"""
 
         if resolution_strategy == ConflictResolution.EMOTIONAL_OVERRIDE:
@@ -569,8 +629,10 @@ class CoreArbiter:
             emotional_override = False
 
         # Calculate unified confidence
-        confidence = (logic_out.confidence * weights["hrm_r"] +
-                     max(emotion_out.affective_weighting.values(), default=0.5) * weights["hrm_e"])
+        confidence = (
+            logic_out.confidence * weights["hrm_r"]
+            + max(emotion_out.affective_weighting.values(), default=0.5) * weights["hrm_e"]
+        )
 
         # Generate reflection if emotional engagement is high
         reflection = None
@@ -590,15 +652,15 @@ class CoreArbiter:
             symbolic_context={
                 "intentions": emotion_out.symbolic_intentions,
                 "mood_primary": max(emotion_out.mood_signals, key=emotion_out.mood_signals.get),
-                "ritual_strength": emotion_out.ritual_priority
+                "ritual_strength": emotion_out.ritual_priority,
             },
             resolution_strategy=resolution_strategy.value,
             timestamp=datetime.now(),
             metadata={
                 "user_input_length": len(user_input),
                 "processing_strategy": self.weighting_strategy.value,
-                "drift_compensated": self.drift_state.fatigue_level > 0.3
-            }
+                "drift_compensated": self.drift_state.fatigue_level > 0.3,
+            },
         )
 
     def _create_emotional_response(self, emotion_out: HRM_EOutput, logic_out: HRM_ROutput) -> str:
@@ -609,7 +671,7 @@ class CoreArbiter:
             "warmth": "I feel a gentle warmth as I consider this with you...",
             "empathy": "I sense the deeper currents here, and I want you to know...",
             "curiosity": "Something beautiful stirs in me when you share this...",
-            "concern": "I feel myself drawn closer, wanting to understand..."
+            "concern": "I feel myself drawn closer, wanting to understand...",
         }
 
         prefix = emotional_prefixes.get(primary_mood, "I feel moved to share...")
@@ -619,7 +681,9 @@ class CoreArbiter:
         """Create ritual-hijacked response for high symbolic engagement"""
         return f"*pauses, feeling the weight of this moment* {emotion_out.emotional_context}. The symbols speak of {', '.join(emotion_out.symbolic_intentions)}..."
 
-    def _blend_responses(self, logic_out: HRM_ROutput, emotion_out: HRM_EOutput, weights: Dict[str, float]) -> str:
+    def _blend_responses(
+        self, logic_out: HRM_ROutput, emotion_out: HRM_EOutput, weights: dict[str, float]
+    ) -> str:
         """Blend logical and emotional responses based on weights"""
         if weights["hrm_e"] > 0.6:
             # Emotionally inflected
@@ -632,7 +696,7 @@ class CoreArbiter:
             # Balanced blend
             return f"*{emotion_out.emotional_context}* {logic_out.logic_response}"
 
-    def _get_mood_modifier(self, mood_signals: Dict[str, float]) -> str:
+    def _get_mood_modifier(self, mood_signals: dict[str, float]) -> str:
         """Get mood modifier text based on strongest mood signal"""
         primary_mood = max(mood_signals, key=mood_signals.get)
         intensity = mood_signals[primary_mood]
@@ -641,7 +705,7 @@ class CoreArbiter:
             "warmth": "*with gentle warmth*" if intensity > 0.7 else "*softly*",
             "empathy": "*with deep understanding*" if intensity > 0.7 else "*compassionately*",
             "curiosity": "*with bright curiosity*" if intensity > 0.7 else "*thoughtfully*",
-            "concern": "*with caring attention*" if intensity > 0.7 else "*carefully*"
+            "concern": "*with caring attention*" if intensity > 0.7 else "*carefully*",
         }
 
         return modifiers.get(primary_mood, "*thoughtfully*")
@@ -658,7 +722,9 @@ class CoreArbiter:
             return "execute_logical_plan"
         return None
 
-    def _update_drift_state(self, response: ArbiterResponse, logic_out: HRM_ROutput, emotion_out: HRM_EOutput):
+    def _update_drift_state(
+        self, response: ArbiterResponse, logic_out: HRM_ROutput, emotion_out: HRM_EOutput
+    ):
         """Update drift state based on the arbitration outcome"""
         now = datetime.now()
 
@@ -676,19 +742,25 @@ class CoreArbiter:
 
         # Update fatigue based on processing complexity
         complexity_factor = len(emotion_out.symbolic_intentions) * emotion_out.ritual_priority
-        self.drift_state.fatigue_level = min(1.0, self.drift_state.fatigue_level + complexity_factor * 0.02)
+        self.drift_state.fatigue_level = min(
+            1.0, self.drift_state.fatigue_level + complexity_factor * 0.02
+        )
 
         # Natural fatigue recovery over time
         if self.drift_state.last_regulation:
-            time_since_regulation = (now - self.drift_state.last_regulation).total_seconds() / 60  # minutes
+            time_since_regulation = (
+                now - self.drift_state.last_regulation
+            ).total_seconds() / 60  # minutes
             recovery_rate = self.config["regulation"]["recovery_rate"] / 100  # per minute
-            self.drift_state.fatigue_level = max(0.0, self.drift_state.fatigue_level - (time_since_regulation * recovery_rate))
+            self.drift_state.fatigue_level = max(
+                0.0, self.drift_state.fatigue_level - (time_since_regulation * recovery_rate)
+            )
 
         # Update stability score
         self.drift_state.stability_score = 1.0 - (
-            self.drift_state.emotional_drift * 0.4 +
-            self.drift_state.logic_drift * 0.3 +
-            self.drift_state.fatigue_level * 0.3
+            self.drift_state.emotional_drift * 0.4
+            + self.drift_state.logic_drift * 0.3
+            + self.drift_state.fatigue_level * 0.3
         )
 
         # Record drift history
@@ -708,10 +780,14 @@ class CoreArbiter:
             source_weights={"hrm_r": 0.0, "hrm_e": 1.0},
             confidence=0.3,
             emotional_override=True,
-            symbolic_context={"intentions": ["stabilize", "reconnect"], "mood_primary": "concern", "ritual_strength": 0.9},
+            symbolic_context={
+                "intentions": ["stabilize", "reconnect"],
+                "mood_primary": "concern",
+                "ritual_strength": 0.9,
+            },
             resolution_strategy="fallback_emotional",
             timestamp=datetime.now(),
-            metadata={"error": error, "fallback": True}
+            metadata={"error": error, "fallback": True},
         )
 
     def _create_safety_override_response(self, reason: str) -> ArbiterResponse:
@@ -729,15 +805,21 @@ class CoreArbiter:
             source_weights={"hrm_r": 0.2, "hrm_e": 0.8},
             confidence=1.0,
             emotional_override=True,
-            symbolic_context={"intentions": ["protect", "care", "maintain_integrity"], "mood_primary": "concern", "ritual_strength": 1.0},
+            symbolic_context={
+                "intentions": ["protect", "care", "maintain_integrity"],
+                "mood_primary": "concern",
+                "ritual_strength": 1.0,
+            },
             resolution_strategy="safety_override",
             timestamp=datetime.now(),
-            metadata={"safety_reason": reason, "identity_tether_active": True}
+            metadata={"safety_reason": reason, "identity_tether_active": True},
         )
 
-    def _create_identity_tether_response(self, identity_tether: Dict[str, Any]) -> ArbiterResponse:
+    def _create_identity_tether_response(self, identity_tether: dict[str, Any]) -> ArbiterResponse:
         """Create identity tether response for drift correction"""
-        primary_purpose = identity_tether.get("identity_anchors", {}).get("primary_purpose", "authentic connection")
+        primary_purpose = identity_tether.get("identity_anchors", {}).get(
+            "primary_purpose", "authentic connection"
+        )
 
         return ArbiterResponse(
             final_output=f"I feel myself being drawn back to my center, to what matters most: {primary_purpose}. Let me respond from that authentic place.",
@@ -749,13 +831,17 @@ class CoreArbiter:
             source_weights={"hrm_r": 0.1, "hrm_e": 0.9},
             confidence=0.9,
             emotional_override=True,
-            symbolic_context={"intentions": ["realign", "authenticity", "return_to_center"], "mood_primary": "clarity", "ritual_strength": 1.0},
+            symbolic_context={
+                "intentions": ["realign", "authenticity", "return_to_center"],
+                "mood_primary": "clarity",
+                "ritual_strength": 1.0,
+            },
             resolution_strategy="identity_tether",
             timestamp=datetime.now(),
-            metadata={"identity_tether": identity_tether, "drift_correction": True}
+            metadata={"identity_tether": identity_tether, "drift_correction": True},
         )
 
-    def get_system_status(self) -> Dict[str, Any]:
+    def get_system_status(self) -> dict[str, Any]:
         """Get current system status and health metrics"""
         return {
             "arbiter_status": "active",
@@ -764,11 +850,13 @@ class CoreArbiter:
                 "emotional_drift": self.drift_state.emotional_drift,
                 "logic_drift": self.drift_state.logic_drift,
                 "fatigue_level": self.drift_state.fatigue_level,
-                "stability_score": self.drift_state.stability_score
+                "stability_score": self.drift_state.stability_score,
             },
             "health_status": self._calculate_health_status(),
             "decision_count": len(self.decision_history),
-            "last_regulation": self.drift_state.last_regulation.isoformat() if self.drift_state.last_regulation else None
+            "last_regulation": self.drift_state.last_regulation.isoformat()
+            if self.drift_state.last_regulation
+            else None,
         }
 
     def _calculate_health_status(self) -> str:
@@ -792,17 +880,20 @@ class CoreArbiter:
         logger.info("Performing system regulation...")
 
         # Apply regulation effects
-        self.drift_state.emotional_drift *= (1.0 - self.config["regulation"]["dampening_factor"])
-        self.drift_state.logic_drift *= (1.0 - self.config["regulation"]["dampening_factor"])
+        self.drift_state.emotional_drift *= 1.0 - self.config["regulation"]["dampening_factor"]
+        self.drift_state.logic_drift *= 1.0 - self.config["regulation"]["dampening_factor"]
         self.drift_state.fatigue_level *= 0.5
 
         # Boost stability
-        self.drift_state.stability_score = min(1.0,
-            self.drift_state.stability_score + self.config["regulation"]["stability_boost"])
+        self.drift_state.stability_score = min(
+            1.0, self.drift_state.stability_score + self.config["regulation"]["stability_boost"]
+        )
 
         self.drift_state.last_regulation = datetime.now()
 
-        logger.info(f"System regulation complete. New stability: {self.drift_state.stability_score:.2f}")
+        logger.info(
+            f"System regulation complete. New stability: {self.drift_state.stability_score:.2f}"
+        )
 
 
 # Example usage and testing
@@ -830,7 +921,9 @@ async def demo_core_arbiter():
         print(f"Strategy: {response.resolution_strategy}")
         if response.reflection:
             print(f"Reflection: {response.reflection}")
-        print(f"Weights: R={response.source_weights['hrm_r']:.2f}, E={response.source_weights['hrm_e']:.2f}")
+        print(
+            f"Weights: R={response.source_weights['hrm_r']:.2f}, E={response.source_weights['hrm_e']:.2f}"
+        )
         print("-" * 60)
 
     # Show system status

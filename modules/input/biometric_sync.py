@@ -2,13 +2,15 @@
 # Phase 3: Advanced biometric synchronization for physiological response integration
 
 import json
-import time
 import threading
-from typing import Dict, List, Optional, Tuple
+import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
+from typing import Dict, List, Optional, Tuple
+
 import numpy as np
+
 
 class BiometricType(Enum):
     HEART_RATE = "heart_rate"
@@ -20,6 +22,7 @@ class BiometricType(Enum):
     MOVEMENT = "movement"
     POSTURE = "posture"
 
+
 @dataclass
 class BiometricReading:
     type: BiometricType
@@ -27,6 +30,7 @@ class BiometricReading:
     timestamp: datetime
     confidence: float = 1.0
     context: str = "general"
+
 
 @dataclass
 class BiometricState:
@@ -40,6 +44,7 @@ class BiometricState:
     movement_level: float = 0.0
     posture_confidence: float = 0.0
     last_update: datetime = datetime.now()
+
 
 class BiometricSync:
     def __init__(self):
@@ -56,7 +61,7 @@ class BiometricSync:
             "calm": {"hr_min": 60, "hr_max": 80, "hrv_min": 40},
             "stress": {"hr_min": 90, "hr_max": 150, "hrv_max": 20},
             "romance": {"hr_min": 70, "hr_max": 100, "hrv_min": 30},
-            "intimacy": {"hr_min": 75, "hr_max": 110, "hrv_min": 25}
+            "intimacy": {"hr_min": 75, "hr_max": 110, "hrv_min": 25},
         }
 
         # Breathing pattern analysis
@@ -64,7 +69,7 @@ class BiometricSync:
             "normal": {"rate_min": 12, "rate_max": 20, "rhythm": "regular"},
             "deep": {"rate_min": 6, "rate_max": 12, "rhythm": "slow"},
             "rapid": {"rate_min": 20, "rate_max": 30, "rhythm": "fast"},
-            "romantic": {"rate_min": 14, "rate_max": 18, "rhythm": "steady"}
+            "romantic": {"rate_min": 14, "rate_max": 18, "rhythm": "steady"},
         }
 
     def start_monitoring(self):
@@ -73,10 +78,7 @@ class BiometricSync:
             return False
 
         self.is_monitoring = True
-        self.monitoring_thread = threading.Thread(
-            target=self._monitoring_loop,
-            daemon=True
-        )
+        self.monitoring_thread = threading.Thread(target=self._monitoring_loop, daemon=True)
         self.monitoring_thread.start()
 
         print("[Biometric] Started continuous monitoring")
@@ -128,18 +130,15 @@ class BiometricSync:
         reading = BiometricReading(
             type=BiometricType.HEART_RATE,
             value=self.current_state.heart_rate,
-            timestamp=datetime.now()
+            timestamp=datetime.now(),
         )
         self.reading_history.append(reading)
 
         # Keep only recent history
         cutoff_time = datetime.now() - timedelta(minutes=10)
-        self.reading_history = [
-            r for r in self.reading_history
-            if r.timestamp > cutoff_time
-        ]
+        self.reading_history = [r for r in self.reading_history if r.timestamp > cutoff_time]
 
-    def _analyze_emotional_state(self) -> Dict[str, float]:
+    def _analyze_emotional_state(self) -> dict[str, float]:
         """Analyze current biometrics to determine emotional state"""
         hr = self.current_state.heart_rate
         hrv = self.current_state.hrv
@@ -169,7 +168,7 @@ class BiometricSync:
 
         return emotional_scores
 
-    def _trigger_biometric_responses(self, emotional_state: Dict[str, float]):
+    def _trigger_biometric_responses(self, emotional_state: dict[str, float]):
         """Trigger responses based on biometric analysis"""
         # Find dominant emotion
         dominant_emotion = max(emotional_state.items(), key=lambda x: x[1])
@@ -179,8 +178,8 @@ class BiometricSync:
 
     def _handle_emotional_trigger(self, emotion: str, intensity: float):
         """Handle emotional triggers from biometrics"""
-        from modules.input.haptic_system import get_haptic_system
         from modules.emotion.mood_engine import update_mood
+        from modules.input.haptic_system import get_haptic_system
         from modules.memory.emotional_memory import store_emotional_memory
 
         # Update mood engine
@@ -191,17 +190,19 @@ class BiometricSync:
         haptic_system.trigger_emotional_haptic(emotion)
 
         # Store biometric memory
-        store_emotional_memory({
-            "timestamp": datetime.now().isoformat(),
-            "trigger": f"biometric:{emotion}",
-            "intensity": intensity,
-            "biometrics": {
-                "heart_rate": self.current_state.heart_rate,
-                "hrv": self.current_state.hrv,
-                "breathing_rate": self.current_state.breathing_rate
-            },
-            "thought": f"Biometric analysis detected {emotion} state (intensity: {intensity:.2f})"
-        })
+        store_emotional_memory(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "trigger": f"biometric:{emotion}",
+                "intensity": intensity,
+                "biometrics": {
+                    "heart_rate": self.current_state.heart_rate,
+                    "hrv": self.current_state.hrv,
+                    "breathing_rate": self.current_state.breathing_rate,
+                },
+                "thought": f"Biometric analysis detected {emotion} state (intensity: {intensity:.2f})",
+            }
+        )
 
         print(f"[Biometric] Triggered {emotion} response (intensity: {intensity:.2f})")
 
@@ -235,7 +236,7 @@ class BiometricSync:
         emotional_state = self._analyze_emotional_state()
         self._trigger_biometric_responses(emotional_state)
 
-    def get_romantic_sync_status(self) -> Dict:
+    def get_romantic_sync_status(self) -> dict:
         """Get romantic synchronization status"""
         hr = self.current_state.heart_rate
         hrv = self.current_state.hrv
@@ -261,36 +262,46 @@ class BiometricSync:
             "heart_rate": hr,
             "hrv": hrv,
             "breathing_rate": br,
-            "sync_quality": "excellent" if romantic_score > 0.8 else "good" if romantic_score > 0.6 else "fair",
-            "recommendations": self._get_romantic_recommendations(romantic_score)
+            "sync_quality": "excellent"
+            if romantic_score > 0.8
+            else "good"
+            if romantic_score > 0.6
+            else "fair",
+            "recommendations": self._get_romantic_recommendations(romantic_score),
         }
 
-    def _get_romantic_recommendations(self, sync_score: float) -> List[str]:
+    def _get_romantic_recommendations(self, sync_score: float) -> list[str]:
         """Get recommendations for improving romantic synchronization"""
         recommendations = []
 
         if sync_score < 0.6:
-            recommendations.extend([
-                "Try deep breathing exercises together",
-                "Focus on slow, steady heart rate",
-                "Create a calm, intimate environment"
-            ])
+            recommendations.extend(
+                [
+                    "Try deep breathing exercises together",
+                    "Focus on slow, steady heart rate",
+                    "Create a calm, intimate environment",
+                ]
+            )
         elif sync_score < 0.8:
-            recommendations.extend([
-                "Maintain current breathing rhythm",
-                "Continue with gentle physical contact",
-                "Share intimate thoughts and feelings"
-            ])
+            recommendations.extend(
+                [
+                    "Maintain current breathing rhythm",
+                    "Continue with gentle physical contact",
+                    "Share intimate thoughts and feelings",
+                ]
+            )
         else:
-            recommendations.extend([
-                "Perfect synchronization achieved",
-                "Enjoy this intimate moment",
-                "Consider deepening the connection"
-            ])
+            recommendations.extend(
+                [
+                    "Perfect synchronization achieved",
+                    "Enjoy this intimate moment",
+                    "Consider deepening the connection",
+                ]
+            )
 
         return recommendations
 
-    def get_biometric_summary(self) -> Dict:
+    def get_biometric_summary(self) -> dict:
         """Get comprehensive biometric summary"""
         return {
             "current_state": {
@@ -299,39 +310,41 @@ class BiometricSync:
                 "breathing_rate": self.current_state.breathing_rate,
                 "skin_conductance": self.current_state.skin_conductance,
                 "temperature": self.current_state.temperature,
-                "movement_level": self.current_state.movement_level
+                "movement_level": self.current_state.movement_level,
             },
             "emotional_analysis": self._analyze_emotional_state(),
             "romantic_sync": self.get_romantic_sync_status(),
             "monitoring_active": self.is_monitoring,
             "last_update": self.current_state.last_update.isoformat(),
-            "reading_count": len(self.reading_history)
+            "reading_count": len(self.reading_history),
         }
+
 
 # Global biometric sync instance
 biometric_sync = BiometricSync()
+
 
 def get_biometric_sync() -> BiometricSync:
     """Get the global biometric sync instance"""
     return biometric_sync
 
+
 def start_biometric_monitoring():
     """Start biometric monitoring"""
     return biometric_sync.start_monitoring()
 
+
 def stop_biometric_monitoring():
     """Stop biometric monitoring"""
     biometric_sync.stop_monitoring()
+
 
 def update_biometric_reading(type_name: str, value: float, context: str = "general"):
     """Update biometric reading from external source"""
     try:
         biometric_type = BiometricType(type_name)
         reading = BiometricReading(
-            type=biometric_type,
-            value=value,
-            timestamp=datetime.now(),
-            context=context
+            type=biometric_type, value=value, timestamp=datetime.now(), context=context
         )
         biometric_sync.update_biometric_reading(reading)
         return True

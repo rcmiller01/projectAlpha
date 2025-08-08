@@ -5,14 +5,15 @@ Provides comprehensive debug logging, decision tracking, and explainability
 for the unified companion system.
 """
 
-import logging
 import json
+import logging
 import time
-from typing import Dict, List, Any, Optional
-from datetime import datetime
-from dataclasses import dataclass, asdict
 from contextlib import contextmanager
+from dataclasses import asdict, dataclass
+from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
 
 class LogLevel(Enum):
     TRACE = "TRACE"
@@ -21,6 +22,7 @@ class LogLevel(Enum):
     WARNING = "WARNING"
     ERROR = "ERROR"
     CRITICAL = "CRITICAL"
+
 
 class DecisionCategory(Enum):
     MODE_DETECTION = "mode_detection"
@@ -31,38 +33,43 @@ class DecisionCategory(Enum):
     MEMORY_RETRIEVAL = "memory_retrieval"
     ADAPTATION_LOGIC = "adaptation_logic"
 
+
 @dataclass
 class DecisionPoint:
     """Individual decision point in the processing flow"""
+
     category: DecisionCategory
     description: str
-    input_data: Dict[str, Any]
+    input_data: dict[str, Any]
     decision_logic: str
     output_result: Any
     confidence_score: float
     processing_time_ms: float
     timestamp: datetime
-    context_factors: Dict[str, Any]
+    context_factors: dict[str, Any]
+
 
 @dataclass
 class ProcessingTrace:
     """Complete trace of processing decisions"""
+
     interaction_id: str
     user_id: str
     session_id: str
     start_time: datetime
     end_time: Optional[datetime]
     total_processing_time_ms: float
-    decision_points: List[DecisionPoint]
-    final_outcome: Dict[str, Any]
-    performance_metrics: Dict[str, float]
+    decision_points: list[DecisionPoint]
+    final_outcome: dict[str, Any]
+    performance_metrics: dict[str, float]
+
 
 class EnhancedLogger:
     """
     Enhanced logging system with decision tracking and explainability
     """
 
-    def __init__(self, name: str, config: Dict[str, Any]):
+    def __init__(self, name: str, config: dict[str, Any]):
         self.name = name
         self.config = config
 
@@ -80,7 +87,7 @@ class EnhancedLogger:
 
         # Decision tracking
         self.current_trace: Optional[ProcessingTrace] = None
-        self.decision_history: List[ProcessingTrace] = []
+        self.decision_history: list[ProcessingTrace] = []
         self.max_history_size = config.get("max_history_size", 1000)
 
         # Performance monitoring
@@ -89,14 +96,12 @@ class EnhancedLogger:
             "average_processing_time": 0.0,
             "crisis_interventions": 0,
             "mode_transitions": 0,
-            "memory_retrievals": 0
+            "memory_retrievals": 0,
         }
 
     def _setup_handlers(self):
         """Set up logging handlers with proper formatting"""
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        )
+        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
         # Console handler for development
         if self.config.get("console_logging", True):
@@ -132,15 +137,21 @@ class EnhancedLogger:
             total_processing_time_ms=0.0,
             decision_points=[],
             final_outcome={},
-            performance_metrics={}
+            performance_metrics={},
         )
 
         self.logger.info(f"Started interaction trace: {interaction_id}")
 
-    def log_decision(self, category: DecisionCategory, description: str,
-                    input_data: Dict[str, Any], decision_logic: str,
-                    output_result: Any, confidence_score: float,
-                    context_factors: Optional[Dict[str, Any]] = None):
+    def log_decision(
+        self,
+        category: DecisionCategory,
+        description: str,
+        input_data: dict[str, Any],
+        decision_logic: str,
+        output_result: Any,
+        confidence_score: float,
+        context_factors: Optional[dict[str, Any]] = None,
+    ):
         """Log a decision point with full context"""
 
         if not self.current_trace:
@@ -158,7 +169,7 @@ class EnhancedLogger:
             confidence_score=confidence_score,
             processing_time_ms=(time.time() - processing_start) * 1000,
             timestamp=datetime.now(),
-            context_factors=context_factors or {}
+            context_factors=context_factors or {},
         )
 
         self.current_trace.decision_points.append(decision_point)
@@ -172,17 +183,23 @@ class EnhancedLogger:
 
         self.decision_logger.log(
             getattr(logging, log_level.value),
-            f"[{category.value}] {description} | Confidence: {confidence_score:.3f} | Logic: {decision_logic}"
+            f"[{category.value}] {description} | Confidence: {confidence_score:.3f} | Logic: {decision_logic}",
         )
 
         # Debug-level detailed logging
         if self.logger.isEnabledFor(logging.DEBUG):
             self.logger.debug(f"Decision Details - {category.value}:")
-            self.logger.debug(f"  Input: {json.dumps(decision_point.input_data, indent=2, default=str)}")
-            self.logger.debug(f"  Output: {json.dumps(decision_point.output_result, indent=2, default=str)}")
-            self.logger.debug(f"  Context: {json.dumps(decision_point.context_factors, indent=2, default=str)}")
+            self.logger.debug(
+                f"  Input: {json.dumps(decision_point.input_data, indent=2, default=str)}"
+            )
+            self.logger.debug(
+                f"  Output: {json.dumps(decision_point.output_result, indent=2, default=str)}"
+            )
+            self.logger.debug(
+                f"  Context: {json.dumps(decision_point.context_factors, indent=2, default=str)}"
+            )
 
-    def finish_interaction_trace(self, final_outcome: Dict[str, Any]):
+    def finish_interaction_trace(self, final_outcome: dict[str, Any]):
         """Complete the current interaction trace"""
         if not self.current_trace:
             self.logger.warning("No active trace to finish")
@@ -200,17 +217,21 @@ class EnhancedLogger:
             "total_decisions": len(self.current_trace.decision_points),
             "processing_time_ms": self.current_trace.total_processing_time_ms,
             "average_decision_time_ms": (
-                sum(dp.processing_time_ms for dp in self.current_trace.decision_points) /
-                len(self.current_trace.decision_points)
-            ) if self.current_trace.decision_points else 0.0,
-            "crisis_decisions": len([
-                dp for dp in self.current_trace.decision_points
-                if dp.category == DecisionCategory.CRISIS_ASSESSMENT
-            ]),
-            "low_confidence_decisions": len([
-                dp for dp in self.current_trace.decision_points
-                if dp.confidence_score < 0.5
-            ])
+                sum(dp.processing_time_ms for dp in self.current_trace.decision_points)
+                / len(self.current_trace.decision_points)
+            )
+            if self.current_trace.decision_points
+            else 0.0,
+            "crisis_decisions": len(
+                [
+                    dp
+                    for dp in self.current_trace.decision_points
+                    if dp.category == DecisionCategory.CRISIS_ASSESSMENT
+                ]
+            ),
+            "low_confidence_decisions": len(
+                [dp for dp in self.current_trace.decision_points if dp.confidence_score < 0.5]
+            ),
         }
 
         # Store trace in history
@@ -218,7 +239,7 @@ class EnhancedLogger:
 
         # Trim history if needed
         if len(self.decision_history) > self.max_history_size:
-            self.decision_history = self.decision_history[-self.max_history_size:]
+            self.decision_history = self.decision_history[-self.max_history_size :]
 
         # Log completion
         self.logger.info(
@@ -249,19 +270,19 @@ class EnhancedLogger:
         self.performance_metrics["total_interactions"] = len(self.decision_history)
 
         total_time = sum(trace.total_processing_time_ms for trace in self.decision_history)
-        self.performance_metrics["average_processing_time"] = total_time / len(self.decision_history)
+        self.performance_metrics["average_processing_time"] = total_time / len(
+            self.decision_history
+        )
 
         self.performance_metrics["crisis_interventions"] = sum(
-            trace.performance_metrics.get("crisis_decisions", 0)
-            for trace in self.decision_history
+            trace.performance_metrics.get("crisis_decisions", 0) for trace in self.decision_history
         )
 
         # Count mode transitions (decisions that change mode)
         mode_transitions = 0
         for trace in self.decision_history:
             mode_decisions = [
-                dp for dp in trace.decision_points
-                if dp.category == DecisionCategory.MODE_DETECTION
+                dp for dp in trace.decision_points if dp.category == DecisionCategory.MODE_DETECTION
             ]
             if len(mode_decisions) > 1:
                 mode_transitions += len(mode_decisions) - 1
@@ -269,7 +290,13 @@ class EnhancedLogger:
         self.performance_metrics["mode_transitions"] = mode_transitions
 
         self.performance_metrics["memory_retrievals"] = sum(
-            len([dp for dp in trace.decision_points if dp.category == DecisionCategory.MEMORY_RETRIEVAL])
+            len(
+                [
+                    dp
+                    for dp in trace.decision_points
+                    if dp.category == DecisionCategory.MEMORY_RETRIEVAL
+                ]
+            )
             for trace in self.decision_history
         )
 
@@ -297,11 +324,7 @@ class EnhancedLogger:
     def decision_context(self, category: DecisionCategory, description: str):
         """Context manager for timing and logging decisions"""
         start_time = time.time()
-        context_data = {
-            "start_time": start_time,
-            "category": category,
-            "description": description
-        }
+        context_data = {"start_time": start_time, "category": category, "description": description}
 
         try:
             yield context_data
@@ -311,15 +334,19 @@ class EnhancedLogger:
         finally:
             processing_time = (time.time() - start_time) * 1000
             if self.logger.isEnabledFor(logging.DEBUG):
-                self.logger.debug(f"Decision timing [{category.value}] {description}: {processing_time:.1f}ms")
+                self.logger.debug(
+                    f"Decision timing [{category.value}] {description}: {processing_time:.1f}ms"
+                )
 
-    def get_explainability_report(self, interaction_id: Optional[str] = None) -> Dict[str, Any]:
+    def get_explainability_report(self, interaction_id: Optional[str] = None) -> dict[str, Any]:
         """Generate explainability report for decisions"""
         if interaction_id:
             # Find specific interaction
             trace = next(
                 (t for t in self.decision_history if t.interaction_id == interaction_id),
-                self.current_trace if self.current_trace and self.current_trace.interaction_id == interaction_id else None
+                self.current_trace
+                if self.current_trace and self.current_trace.interaction_id == interaction_id
+                else None,
             )
             if not trace:
                 return {"error": f"Interaction {interaction_id} not found"}
@@ -337,7 +364,7 @@ class EnhancedLogger:
             "interactions_analyzed": len(traces),
             "decision_breakdown": {},
             "performance_summary": {},
-            "recommendations": []
+            "recommendations": [],
         }
 
         # Analyze decision patterns
@@ -351,20 +378,28 @@ class EnhancedLogger:
             if category_decisions:
                 report["decision_breakdown"][category.value] = {
                     "count": len(category_decisions),
-                    "average_confidence": sum(dp.confidence_score for dp in category_decisions) / len(category_decisions),
-                    "average_processing_time_ms": sum(dp.processing_time_ms for dp in category_decisions) / len(category_decisions),
-                    "low_confidence_count": len([dp for dp in category_decisions if dp.confidence_score < 0.5])
+                    "average_confidence": sum(dp.confidence_score for dp in category_decisions)
+                    / len(category_decisions),
+                    "average_processing_time_ms": sum(
+                        dp.processing_time_ms for dp in category_decisions
+                    )
+                    / len(category_decisions),
+                    "low_confidence_count": len(
+                        [dp for dp in category_decisions if dp.confidence_score < 0.5]
+                    ),
                 }
 
         # Performance summary
         if traces:
             avg_processing_time = sum(t.total_processing_time_ms for t in traces) / len(traces)
-            avg_decisions_per_interaction = sum(len(t.decision_points) for t in traces) / len(traces)
+            avg_decisions_per_interaction = sum(len(t.decision_points) for t in traces) / len(
+                traces
+            )
 
             report["performance_summary"] = {
                 "average_processing_time_ms": avg_processing_time,
                 "average_decisions_per_interaction": avg_decisions_per_interaction,
-                "total_decisions_analyzed": len(all_decisions)
+                "total_decisions_analyzed": len(all_decisions),
             }
 
         # Generate recommendations
@@ -372,27 +407,33 @@ class EnhancedLogger:
 
         # Check for performance issues
         if report["performance_summary"].get("average_processing_time_ms", 0) > 1000:
-            recommendations.append("Consider optimizing processing pipeline - average response time exceeds 1 second")
+            recommendations.append(
+                "Consider optimizing processing pipeline - average response time exceeds 1 second"
+            )
 
         # Check for low confidence patterns
         for category, stats in report["decision_breakdown"].items():
             if stats["average_confidence"] < 0.6:
-                recommendations.append(f"Low confidence in {category} decisions - consider model retraining or rule refinement")
+                recommendations.append(
+                    f"Low confidence in {category} decisions - consider model retraining or rule refinement"
+                )
 
             if stats["low_confidence_count"] > stats["count"] * 0.3:
-                recommendations.append(f"High percentage of low-confidence {category} decisions - review decision logic")
+                recommendations.append(
+                    f"High percentage of low-confidence {category} decisions - review decision logic"
+                )
 
         report["recommendations"] = recommendations
 
         return report
 
-    def get_performance_metrics(self) -> Dict[str, Any]:
+    def get_performance_metrics(self) -> dict[str, Any]:
         """Get current performance metrics"""
         return {
             **self.performance_metrics,
             "history_size": len(self.decision_history),
             "current_trace_active": self.current_trace is not None,
-            "last_updated": datetime.now().isoformat()
+            "last_updated": datetime.now().isoformat(),
         }
 
     # Convenience methods for different log levels

@@ -5,13 +5,14 @@ Plays ambient music/sound based on mood and interaction.
 Adds immersion (e.g., soft jazz when Lyra sings, thunder when Solene seethes).
 """
 
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Tuple
-from enum import Enum
 import json
 import os
 import random
 from dataclasses import dataclass
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
+
 
 class AudioType(Enum):
     AMBIENT = "ambient"
@@ -20,6 +21,7 @@ class AudioType(Enum):
     ATMOSPHERIC = "atmospheric"
     EMOTIONAL = "emotional"
     INTERACTIVE = "interactive"
+
 
 class MoodCategory(Enum):
     ROMANTIC = "romantic"
@@ -34,22 +36,24 @@ class MoodCategory(Enum):
     PLAYFUL = "playful"
     INTIMATE = "intimate"
 
+
 @dataclass
 class AudioTrack:
     track_id: str
     name: str
     audio_type: AudioType
-    mood_categories: List[MoodCategory]
+    mood_categories: list[MoodCategory]
     file_path: str
     duration: float
     volume_default: float
     fade_in_duration: float
     fade_out_duration: float
     loop: bool
-    persona_affinity: Dict[str, float]  # How well this track fits each persona
-    emotional_triggers: List[str]
-    interaction_triggers: List[str]
-    metadata: Dict[str, Any]
+    persona_affinity: dict[str, float]  # How well this track fits each persona
+    emotional_triggers: list[str]
+    interaction_triggers: list[str]
+    metadata: dict[str, Any]
+
 
 @dataclass
 class AudioPlayback:
@@ -60,6 +64,7 @@ class AudioPlayback:
     loop_count: int
     trigger_context: str
 
+
 class MoodscapeAudioLayer:
     """
     Manages ambient audio that responds to mood, persona, and interaction context.
@@ -68,10 +73,12 @@ class MoodscapeAudioLayer:
 
     def __init__(self):
         self.storage_path = "storage/audio/moodscape_config.json"
-        self.audio_library: Dict[str, AudioTrack] = {}
+        self.audio_library: dict[str, AudioTrack] = {}
         self.current_playback: Optional[AudioPlayback] = None
-        self.playback_history: List[AudioPlayback] = []
-        self.mood_preferences: Dict[str, Dict[str, Any]] = {}  # User preferences for mood-audio combinations
+        self.playback_history: list[AudioPlayback] = []
+        self.mood_preferences: dict[
+            str, dict[str, Any]
+        ] = {}  # User preferences for mood-audio combinations
         self.volume_master = 0.7
         self.crossfade_duration = 3.0
         self._initialize_audio_library()
@@ -84,173 +91,177 @@ class MoodscapeAudioLayer:
         tracks_data = [
             # Mia's Romantic/Nurturing Tracks
             {
-                'track_id': 'mia_gentle_piano',
-                'name': 'Gentle Piano Reverie',
-                'audio_type': AudioType.MUSIC,
-                'mood_categories': [MoodCategory.ROMANTIC, MoodCategory.PEACEFUL],
-                'file_path': 'audio/mia/gentle_piano.mp3',
-                'duration': 180.0,
-                'volume_default': 0.6,
-                'fade_in_duration': 4.0,
-                'fade_out_duration': 3.0,
-                'loop': True,
-                'persona_affinity': {'mia': 0.9, 'solene': 0.3, 'lyra': 0.7, 'doc': 0.5},
-                'emotional_triggers': ['love', 'tenderness', 'comfort', 'intimacy'],
-                'interaction_triggers': ['emotional_support', 'romantic_conversation', 'gentle_touch'],
-                'metadata': {'genre': 'neoclassical', 'tempo': 'slow', 'mood': 'tender'}
+                "track_id": "mia_gentle_piano",
+                "name": "Gentle Piano Reverie",
+                "audio_type": AudioType.MUSIC,
+                "mood_categories": [MoodCategory.ROMANTIC, MoodCategory.PEACEFUL],
+                "file_path": "audio/mia/gentle_piano.mp3",
+                "duration": 180.0,
+                "volume_default": 0.6,
+                "fade_in_duration": 4.0,
+                "fade_out_duration": 3.0,
+                "loop": True,
+                "persona_affinity": {"mia": 0.9, "solene": 0.3, "lyra": 0.7, "doc": 0.5},
+                "emotional_triggers": ["love", "tenderness", "comfort", "intimacy"],
+                "interaction_triggers": [
+                    "emotional_support",
+                    "romantic_conversation",
+                    "gentle_touch",
+                ],
+                "metadata": {"genre": "neoclassical", "tempo": "slow", "mood": "tender"},
             },
             {
-                'track_id': 'mia_string_quartet',
-                'name': 'Heartstring Quartet',
-                'audio_type': AudioType.MUSIC,
-                'mood_categories': [MoodCategory.ROMANTIC, MoodCategory.MELANCHOLIC],
-                'file_path': 'audio/mia/string_quartet.mp3',
-                'duration': 240.0,
-                'volume_default': 0.5,
-                'fade_in_duration': 5.0,
-                'fade_out_duration': 4.0,
-                'loop': True,
-                'persona_affinity': {'mia': 0.9, 'solene': 0.4, 'lyra': 0.6, 'doc': 0.7},
-                'emotional_triggers': ['longing', 'bittersweet', 'nostalgia', 'deep_love'],
-                'interaction_triggers': ['memory_sharing', 'vulnerability', 'emotional_depth'],
-                'metadata': {'genre': 'chamber', 'tempo': 'moderate', 'mood': 'emotive'}
+                "track_id": "mia_string_quartet",
+                "name": "Heartstring Quartet",
+                "audio_type": AudioType.MUSIC,
+                "mood_categories": [MoodCategory.ROMANTIC, MoodCategory.MELANCHOLIC],
+                "file_path": "audio/mia/string_quartet.mp3",
+                "duration": 240.0,
+                "volume_default": 0.5,
+                "fade_in_duration": 5.0,
+                "fade_out_duration": 4.0,
+                "loop": True,
+                "persona_affinity": {"mia": 0.9, "solene": 0.4, "lyra": 0.6, "doc": 0.7},
+                "emotional_triggers": ["longing", "bittersweet", "nostalgia", "deep_love"],
+                "interaction_triggers": ["memory_sharing", "vulnerability", "emotional_depth"],
+                "metadata": {"genre": "chamber", "tempo": "moderate", "mood": "emotive"},
             },
-
             # Solene's Passionate/Intense Tracks
             {
-                'track_id': 'solene_flamenco_guitar',
-                'name': 'Fiery Flamenco',
-                'audio_type': AudioType.MUSIC,
-                'mood_categories': [MoodCategory.PASSIONATE, MoodCategory.DRAMATIC],
-                'file_path': 'audio/solene/flamenco_guitar.mp3',
-                'duration': 200.0,
-                'volume_default': 0.7,
-                'fade_in_duration': 2.0,
-                'fade_out_duration': 3.0,
-                'loop': True,
-                'persona_affinity': {'mia': 0.4, 'solene': 0.95, 'lyra': 0.5, 'doc': 0.3},
-                'emotional_triggers': ['passion', 'fire', 'intensity', 'desire'],
-                'interaction_triggers': ['heated_discussion', 'passionate_moment', 'challenge'],
-                'metadata': {'genre': 'flamenco', 'tempo': 'fast', 'mood': 'fiery'}
+                "track_id": "solene_flamenco_guitar",
+                "name": "Fiery Flamenco",
+                "audio_type": AudioType.MUSIC,
+                "mood_categories": [MoodCategory.PASSIONATE, MoodCategory.DRAMATIC],
+                "file_path": "audio/solene/flamenco_guitar.mp3",
+                "duration": 200.0,
+                "volume_default": 0.7,
+                "fade_in_duration": 2.0,
+                "fade_out_duration": 3.0,
+                "loop": True,
+                "persona_affinity": {"mia": 0.4, "solene": 0.95, "lyra": 0.5, "doc": 0.3},
+                "emotional_triggers": ["passion", "fire", "intensity", "desire"],
+                "interaction_triggers": ["heated_discussion", "passionate_moment", "challenge"],
+                "metadata": {"genre": "flamenco", "tempo": "fast", "mood": "fiery"},
             },
             {
-                'track_id': 'solene_storm_ambient',
-                'name': 'Thunderstorm Passion',
-                'audio_type': AudioType.ATMOSPHERIC,
-                'mood_categories': [MoodCategory.INTENSE, MoodCategory.DRAMATIC],
-                'file_path': 'audio/solene/storm_ambient.mp3',
-                'duration': 300.0,
-                'volume_default': 0.8,
-                'fade_in_duration': 6.0,
-                'fade_out_duration': 5.0,
-                'loop': True,
-                'persona_affinity': {'mia': 0.2, 'solene': 0.9, 'lyra': 0.6, 'doc': 0.4},
-                'emotional_triggers': ['anger', 'frustration', 'overwhelming_emotion', 'catharsis'],
-                'interaction_triggers': ['conflict', 'emotional_release', 'intensity'],
-                'metadata': {'genre': 'nature', 'tempo': 'variable', 'mood': 'stormy'}
+                "track_id": "solene_storm_ambient",
+                "name": "Thunderstorm Passion",
+                "audio_type": AudioType.ATMOSPHERIC,
+                "mood_categories": [MoodCategory.INTENSE, MoodCategory.DRAMATIC],
+                "file_path": "audio/solene/storm_ambient.mp3",
+                "duration": 300.0,
+                "volume_default": 0.8,
+                "fade_in_duration": 6.0,
+                "fade_out_duration": 5.0,
+                "loop": True,
+                "persona_affinity": {"mia": 0.2, "solene": 0.9, "lyra": 0.6, "doc": 0.4},
+                "emotional_triggers": ["anger", "frustration", "overwhelming_emotion", "catharsis"],
+                "interaction_triggers": ["conflict", "emotional_release", "intensity"],
+                "metadata": {"genre": "nature", "tempo": "variable", "mood": "stormy"},
             },
-
             # Lyra's Mystical/Ethereal Tracks
             {
-                'track_id': 'lyra_ethereal_choir',
-                'name': 'Celestial Voices',
-                'audio_type': AudioType.ATMOSPHERIC,
-                'mood_categories': [MoodCategory.MYSTICAL, MoodCategory.CONTEMPLATIVE],
-                'file_path': 'audio/lyra/ethereal_choir.mp3',
-                'duration': 220.0,
-                'volume_default': 0.5,
-                'fade_in_duration': 8.0,
-                'fade_out_duration': 6.0,
-                'loop': True,
-                'persona_affinity': {'mia': 0.6, 'solene': 0.3, 'lyra': 0.95, 'doc': 0.7},
-                'emotional_triggers': ['wonder', 'transcendence', 'mystery', 'spiritual'],
-                'interaction_triggers': ['philosophical_discussion', 'cosmic_contemplation', 'poetry'],
-                'metadata': {'genre': 'ambient', 'tempo': 'very_slow', 'mood': 'ethereal'}
+                "track_id": "lyra_ethereal_choir",
+                "name": "Celestial Voices",
+                "audio_type": AudioType.ATMOSPHERIC,
+                "mood_categories": [MoodCategory.MYSTICAL, MoodCategory.CONTEMPLATIVE],
+                "file_path": "audio/lyra/ethereal_choir.mp3",
+                "duration": 220.0,
+                "volume_default": 0.5,
+                "fade_in_duration": 8.0,
+                "fade_out_duration": 6.0,
+                "loop": True,
+                "persona_affinity": {"mia": 0.6, "solene": 0.3, "lyra": 0.95, "doc": 0.7},
+                "emotional_triggers": ["wonder", "transcendence", "mystery", "spiritual"],
+                "interaction_triggers": [
+                    "philosophical_discussion",
+                    "cosmic_contemplation",
+                    "poetry",
+                ],
+                "metadata": {"genre": "ambient", "tempo": "very_slow", "mood": "ethereal"},
             },
             {
-                'track_id': 'lyra_crystal_bowls',
-                'name': 'Crystal Resonance',
-                'audio_type': AudioType.AMBIENT,
-                'mood_categories': [MoodCategory.MYSTICAL, MoodCategory.PEACEFUL],
-                'file_path': 'audio/lyra/crystal_bowls.mp3',
-                'duration': 180.0,
-                'volume_default': 0.4,
-                'fade_in_duration': 10.0,
-                'fade_out_duration': 8.0,
-                'loop': True,
-                'persona_affinity': {'mia': 0.5, 'solene': 0.2, 'lyra': 0.9, 'doc': 0.8},
-                'emotional_triggers': ['meditation', 'clarity', 'inner_peace', 'wisdom'],
-                'interaction_triggers': ['deep_thought', 'meditation', 'spiritual_guidance'],
-                'metadata': {'genre': 'healing', 'tempo': 'timeless', 'mood': 'transcendent'}
+                "track_id": "lyra_crystal_bowls",
+                "name": "Crystal Resonance",
+                "audio_type": AudioType.AMBIENT,
+                "mood_categories": [MoodCategory.MYSTICAL, MoodCategory.PEACEFUL],
+                "file_path": "audio/lyra/crystal_bowls.mp3",
+                "duration": 180.0,
+                "volume_default": 0.4,
+                "fade_in_duration": 10.0,
+                "fade_out_duration": 8.0,
+                "loop": True,
+                "persona_affinity": {"mia": 0.5, "solene": 0.2, "lyra": 0.9, "doc": 0.8},
+                "emotional_triggers": ["meditation", "clarity", "inner_peace", "wisdom"],
+                "interaction_triggers": ["deep_thought", "meditation", "spiritual_guidance"],
+                "metadata": {"genre": "healing", "tempo": "timeless", "mood": "transcendent"},
             },
-
             # Doc's Therapeutic/Stable Tracks
             {
-                'track_id': 'doc_soft_jazz',
-                'name': 'Therapeutic Jazz',
-                'audio_type': AudioType.MUSIC,
-                'mood_categories': [MoodCategory.PEACEFUL, MoodCategory.CONTEMPLATIVE],
-                'file_path': 'audio/doc/soft_jazz.mp3',
-                'duration': 190.0,
-                'volume_default': 0.6,
-                'fade_in_duration': 3.0,
-                'fade_out_duration': 3.0,
-                'loop': True,
-                'persona_affinity': {'mia': 0.6, 'solene': 0.5, 'lyra': 0.7, 'doc': 0.9},
-                'emotional_triggers': ['comfort', 'stability', 'reassurance', 'grounding'],
-                'interaction_triggers': ['therapy_session', 'advice_giving', 'emotional_support'],
-                'metadata': {'genre': 'jazz', 'tempo': 'moderate', 'mood': 'comforting'}
+                "track_id": "doc_soft_jazz",
+                "name": "Therapeutic Jazz",
+                "audio_type": AudioType.MUSIC,
+                "mood_categories": [MoodCategory.PEACEFUL, MoodCategory.CONTEMPLATIVE],
+                "file_path": "audio/doc/soft_jazz.mp3",
+                "duration": 190.0,
+                "volume_default": 0.6,
+                "fade_in_duration": 3.0,
+                "fade_out_duration": 3.0,
+                "loop": True,
+                "persona_affinity": {"mia": 0.6, "solene": 0.5, "lyra": 0.7, "doc": 0.9},
+                "emotional_triggers": ["comfort", "stability", "reassurance", "grounding"],
+                "interaction_triggers": ["therapy_session", "advice_giving", "emotional_support"],
+                "metadata": {"genre": "jazz", "tempo": "moderate", "mood": "comforting"},
             },
             {
-                'track_id': 'doc_nature_ambient',
-                'name': 'Forest Sanctuary',
-                'audio_type': AudioType.NATURE,
-                'mood_categories': [MoodCategory.PEACEFUL, MoodCategory.CONTEMPLATIVE],
-                'file_path': 'audio/doc/nature_ambient.mp3',
-                'duration': 250.0,
-                'volume_default': 0.5,
-                'fade_in_duration': 5.0,
-                'fade_out_duration': 4.0,
-                'loop': True,
-                'persona_affinity': {'mia': 0.7, 'solene': 0.4, 'lyra': 0.8, 'doc': 0.85},
-                'emotional_triggers': ['peace', 'grounding', 'natural_healing', 'restoration'],
-                'interaction_triggers': ['healing_conversation', 'stress_relief', 'mindfulness'],
-                'metadata': {'genre': 'nature', 'tempo': 'natural', 'mood': 'restorative'}
+                "track_id": "doc_nature_ambient",
+                "name": "Forest Sanctuary",
+                "audio_type": AudioType.NATURE,
+                "mood_categories": [MoodCategory.PEACEFUL, MoodCategory.CONTEMPLATIVE],
+                "file_path": "audio/doc/nature_ambient.mp3",
+                "duration": 250.0,
+                "volume_default": 0.5,
+                "fade_in_duration": 5.0,
+                "fade_out_duration": 4.0,
+                "loop": True,
+                "persona_affinity": {"mia": 0.7, "solene": 0.4, "lyra": 0.8, "doc": 0.85},
+                "emotional_triggers": ["peace", "grounding", "natural_healing", "restoration"],
+                "interaction_triggers": ["healing_conversation", "stress_relief", "mindfulness"],
+                "metadata": {"genre": "nature", "tempo": "natural", "mood": "restorative"},
             },
-
             # Universal/Interactive Tracks
             {
-                'track_id': 'universal_heartbeat',
-                'name': 'Synchronized Heartbeat',
-                'audio_type': AudioType.INTERACTIVE,
-                'mood_categories': [MoodCategory.ROMANTIC, MoodCategory.INTIMATE],
-                'file_path': 'audio/universal/heartbeat.mp3',
-                'duration': 120.0,
-                'volume_default': 0.3,
-                'fade_in_duration': 2.0,
-                'fade_out_duration': 2.0,
-                'loop': True,
-                'persona_affinity': {'mia': 0.8, 'solene': 0.7, 'lyra': 0.6, 'doc': 0.5},
-                'emotional_triggers': ['intimacy', 'connection', 'synchrony', 'closeness'],
-                'interaction_triggers': ['physical_touch', 'intimate_moment', 'heartbeat_sync'],
-                'metadata': {'genre': 'biometric', 'tempo': 'heartrate', 'mood': 'intimate'}
+                "track_id": "universal_heartbeat",
+                "name": "Synchronized Heartbeat",
+                "audio_type": AudioType.INTERACTIVE,
+                "mood_categories": [MoodCategory.ROMANTIC, MoodCategory.INTIMATE],
+                "file_path": "audio/universal/heartbeat.mp3",
+                "duration": 120.0,
+                "volume_default": 0.3,
+                "fade_in_duration": 2.0,
+                "fade_out_duration": 2.0,
+                "loop": True,
+                "persona_affinity": {"mia": 0.8, "solene": 0.7, "lyra": 0.6, "doc": 0.5},
+                "emotional_triggers": ["intimacy", "connection", "synchrony", "closeness"],
+                "interaction_triggers": ["physical_touch", "intimate_moment", "heartbeat_sync"],
+                "metadata": {"genre": "biometric", "tempo": "heartrate", "mood": "intimate"},
             },
             {
-                'track_id': 'universal_breathing',
-                'name': 'Guided Breathing',
-                'audio_type': AudioType.INTERACTIVE,
-                'mood_categories': [MoodCategory.PEACEFUL, MoodCategory.CONTEMPLATIVE],
-                'file_path': 'audio/universal/breathing.mp3',
-                'duration': 300.0,
-                'volume_default': 0.4,
-                'fade_in_duration': 3.0,
-                'fade_out_duration': 3.0,
-                'loop': True,
-                'persona_affinity': {'mia': 0.7, 'solene': 0.5, 'lyra': 0.8, 'doc': 0.9},
-                'emotional_triggers': ['calm', 'centering', 'anxiety_relief', 'meditation'],
-                'interaction_triggers': ['stress_response', 'anxiety_management', 'relaxation'],
-                'metadata': {'genre': 'therapeutic', 'tempo': 'breathing', 'mood': 'calming'}
-            }
+                "track_id": "universal_breathing",
+                "name": "Guided Breathing",
+                "audio_type": AudioType.INTERACTIVE,
+                "mood_categories": [MoodCategory.PEACEFUL, MoodCategory.CONTEMPLATIVE],
+                "file_path": "audio/universal/breathing.mp3",
+                "duration": 300.0,
+                "volume_default": 0.4,
+                "fade_in_duration": 3.0,
+                "fade_out_duration": 3.0,
+                "loop": True,
+                "persona_affinity": {"mia": 0.7, "solene": 0.5, "lyra": 0.8, "doc": 0.9},
+                "emotional_triggers": ["calm", "centering", "anxiety_relief", "meditation"],
+                "interaction_triggers": ["stress_response", "anxiety_management", "relaxation"],
+                "metadata": {"genre": "therapeutic", "tempo": "breathing", "mood": "calming"},
+            },
         ]
 
         # Convert to AudioTrack objects
@@ -258,9 +269,14 @@ class MoodscapeAudioLayer:
             track = AudioTrack(**track_data)
             self.audio_library[track.track_id] = track
 
-    def select_audio_for_mood(self, persona_name: str, current_mood: str,
-                             emotional_state: Dict[str, float], interaction_context: str,
-                             user_preferences: Optional[Dict[str, Any]] = None) -> Optional[AudioTrack]:
+    def select_audio_for_mood(
+        self,
+        persona_name: str,
+        current_mood: str,
+        emotional_state: dict[str, float],
+        interaction_context: str,
+        user_preferences: Optional[dict[str, Any]] = None,
+    ) -> Optional[AudioTrack]:
         """
         Select appropriate audio track based on mood, persona, and context
 
@@ -277,7 +293,8 @@ class MoodscapeAudioLayer:
 
         # Filter tracks by persona affinity
         suitable_tracks = [
-            track for track in self.audio_library.values()
+            track
+            for track in self.audio_library.values()
             if track.persona_affinity.get(persona_name.lower(), 0) > 0.3
         ]
 
@@ -321,8 +338,9 @@ class MoodscapeAudioLayer:
 
         return None
 
-    def start_audio_playback(self, track: AudioTrack, volume: Optional[float] = None,
-                            trigger_context: str = "manual") -> bool:
+    def start_audio_playback(
+        self, track: AudioTrack, volume: Optional[float] = None, trigger_context: str = "manual"
+    ) -> bool:
         """
         Start audio playback with crossfading if another track is playing
 
@@ -346,7 +364,7 @@ class MoodscapeAudioLayer:
                 volume=playback_volume,
                 is_playing=True,
                 loop_count=0,
-                trigger_context=trigger_context
+                trigger_context=trigger_context,
             )
 
             # Handle crossfading if another track is playing
@@ -375,12 +393,16 @@ class MoodscapeAudioLayer:
         # to gradually fade out the current track while fading in the new one
 
         if self.current_playback:
-            print(f"Crossfading from {self.current_playback.track.name} to {new_playback.track.name}")
+            print(
+                f"Crossfading from {self.current_playback.track.name} to {new_playback.track.name}"
+            )
 
             # Simulate crossfade timing
-            fade_duration = min(self.crossfade_duration,
-                               self.current_playback.track.fade_out_duration,
-                               new_playback.track.fade_in_duration)
+            fade_duration = min(
+                self.crossfade_duration,
+                self.current_playback.track.fade_out_duration,
+                new_playback.track.fade_in_duration,
+            )
 
             # Mark current track as fading out
             self.current_playback.is_playing = False
@@ -396,10 +418,10 @@ class MoodscapeAudioLayer:
 
         # Simulate audio system interaction
         track_info = {
-            'file_path': playback.track.file_path,
-            'volume': playback.volume,
-            'fade_in': playback.track.fade_in_duration,
-            'loop': playback.track.loop
+            "file_path": playback.track.file_path,
+            "volume": playback.volume,
+            "fade_in": playback.track.fade_in_duration,
+            "loop": playback.track.loop,
         }
 
         # Here you would call actual audio playback system
@@ -453,7 +475,9 @@ class MoodscapeAudioLayer:
             old_volume = self.current_playback.volume
             new_volume = max(0.0, min(1.0, volume)) * self.volume_master
 
-            print(f"Adjusting volume from {old_volume:.2f} to {new_volume:.2f} over {fade_duration}s")
+            print(
+                f"Adjusting volume from {old_volume:.2f} to {new_volume:.2f} over {fade_duration}s"
+            )
 
             self.current_playback.volume = new_volume
 
@@ -464,8 +488,9 @@ class MoodscapeAudioLayer:
             print(f"Error adjusting volume: {e}")
             return False
 
-    def get_mood_audio_recommendations(self, persona_name: str,
-                                     emotional_state: Dict[str, float]) -> List[Dict[str, Any]]:
+    def get_mood_audio_recommendations(
+        self, persona_name: str, emotional_state: dict[str, float]
+    ) -> list[dict[str, Any]]:
         """
         Get audio recommendations for current mood without starting playback
 
@@ -492,41 +517,46 @@ class MoodscapeAudioLayer:
             total_score = (persona_score * 0.6) + (emotion_score * 0.4)
 
             if total_score > 0.2:  # Minimum relevance threshold
-                recommendations.append({
-                    'track_id': track.track_id,
-                    'name': track.name,
-                    'type': track.audio_type.value,
-                    'mood_categories': [cat.value for cat in track.mood_categories],
-                    'score': total_score,
-                    'persona_affinity': persona_score,
-                    'emotion_match': emotion_score,
-                    'duration': track.duration,
-                    'description': self._generate_track_description(track)
-                })
+                recommendations.append(
+                    {
+                        "track_id": track.track_id,
+                        "name": track.name,
+                        "type": track.audio_type.value,
+                        "mood_categories": [cat.value for cat in track.mood_categories],
+                        "score": total_score,
+                        "persona_affinity": persona_score,
+                        "emotion_match": emotion_score,
+                        "duration": track.duration,
+                        "description": self._generate_track_description(track),
+                    }
+                )
 
         # Sort by score
-        recommendations.sort(key=lambda x: x['score'], reverse=True)
+        recommendations.sort(key=lambda x: x["score"], reverse=True)
 
         return recommendations[:5]  # Return top 5 recommendations
 
     def _generate_track_description(self, track: AudioTrack) -> str:
         """Generate a description of the track for the user"""
         descriptions = {
-            'mia_gentle_piano': "Soft piano melodies that wrap around you like a warm embrace",
-            'mia_string_quartet': "Emotional strings that speak to the heart's deepest feelings",
-            'solene_flamenco_guitar': "Passionate guitar that ignites the fire within",
-            'solene_storm_ambient': "Thunderous atmosphere that matches intense emotions",
-            'lyra_ethereal_choir': "Celestial voices that lift the spirit to otherworldly realms",
-            'lyra_crystal_bowls': "Crystal tones that resonate with inner wisdom",
-            'doc_soft_jazz': "Smooth jazz that brings comfort and stability",
-            'doc_nature_ambient': "Natural sounds that ground and restore the soul",
-            'universal_heartbeat': "Synchronized rhythms that connect hearts",
-            'universal_breathing': "Guided breathing that centers and calms"
+            "mia_gentle_piano": "Soft piano melodies that wrap around you like a warm embrace",
+            "mia_string_quartet": "Emotional strings that speak to the heart's deepest feelings",
+            "solene_flamenco_guitar": "Passionate guitar that ignites the fire within",
+            "solene_storm_ambient": "Thunderous atmosphere that matches intense emotions",
+            "lyra_ethereal_choir": "Celestial voices that lift the spirit to otherworldly realms",
+            "lyra_crystal_bowls": "Crystal tones that resonate with inner wisdom",
+            "doc_soft_jazz": "Smooth jazz that brings comfort and stability",
+            "doc_nature_ambient": "Natural sounds that ground and restore the soul",
+            "universal_heartbeat": "Synchronized rhythms that connect hearts",
+            "universal_breathing": "Guided breathing that centers and calms",
         }
 
-        return descriptions.get(track.track_id, f"A {track.audio_type.value} track for {', '.join([cat.value for cat in track.mood_categories])} moments")
+        return descriptions.get(
+            track.track_id,
+            f"A {track.audio_type.value} track for {', '.join([cat.value for cat in track.mood_categories])} moments",
+        )
 
-    def get_current_playback_status(self) -> Optional[Dict[str, Any]]:
+    def get_current_playback_status(self) -> Optional[dict[str, Any]]:
         """Get current playback status information"""
         if not self.current_playback:
             return None
@@ -535,16 +565,18 @@ class MoodscapeAudioLayer:
         elapsed_time = (current_time - self.current_playback.start_time).total_seconds()
 
         return {
-            'track_id': self.current_playback.track.track_id,
-            'track_name': self.current_playback.track.name,
-            'is_playing': self.current_playback.is_playing,
-            'volume': self.current_playback.volume,
-            'elapsed_time': elapsed_time,
-            'total_duration': self.current_playback.track.duration,
-            'progress_percentage': min(100, (elapsed_time / self.current_playback.track.duration) * 100),
-            'trigger_context': self.current_playback.trigger_context,
-            'loop_count': self.current_playback.loop_count,
-            'mood_categories': [cat.value for cat in self.current_playback.track.mood_categories]
+            "track_id": self.current_playback.track.track_id,
+            "track_name": self.current_playback.track.name,
+            "is_playing": self.current_playback.is_playing,
+            "volume": self.current_playback.volume,
+            "elapsed_time": elapsed_time,
+            "total_duration": self.current_playback.track.duration,
+            "progress_percentage": min(
+                100, (elapsed_time / self.current_playback.track.duration) * 100
+            ),
+            "trigger_context": self.current_playback.trigger_context,
+            "loop_count": self.current_playback.loop_count,
+            "mood_categories": [cat.value for cat in self.current_playback.track.mood_categories],
         }
 
     def update_user_preferences(self, track_id: str, preference_score: float):
@@ -554,30 +586,31 @@ class MoodscapeAudioLayer:
 
         # Store as Dict[str, Any] to handle different data types
         preferences = self.mood_preferences[track_id]
-        preferences['user_rating'] = max(0.0, min(1.0, preference_score))
-        preferences['last_updated'] = datetime.now().isoformat()
+        preferences["user_rating"] = max(0.0, min(1.0, preference_score))
+        preferences["last_updated"] = datetime.now().isoformat()
 
         # Save preferences
         self._save_configuration()
 
-    def get_audio_history(self, limit: int = 10) -> List[Dict[str, Any]]:
+    def get_audio_history(self, limit: int = 10) -> list[dict[str, Any]]:
         """Get recent audio playback history"""
         recent_history = self.playback_history[-limit:] if self.playback_history else []
 
         return [
             {
-                'track_name': playback.track.name,
-                'track_id': playback.track.track_id,
-                'start_time': playback.start_time.isoformat(),
-                'volume': playback.volume,
-                'trigger_context': playback.trigger_context,
-                'mood_categories': [cat.value for cat in playback.track.mood_categories]
+                "track_name": playback.track.name,
+                "track_id": playback.track.track_id,
+                "start_time": playback.start_time.isoformat(),
+                "volume": playback.volume,
+                "trigger_context": playback.trigger_context,
+                "mood_categories": [cat.value for cat in playback.track.mood_categories],
             }
             for playback in recent_history
         ]
 
-    def create_mood_playlist(self, persona_name: str, target_mood: str,
-                           duration_minutes: int = 30) -> List[str]:
+    def create_mood_playlist(
+        self, persona_name: str, target_mood: str, duration_minutes: int = 30
+    ) -> list[str]:
         """
         Create a playlist for a specific mood and duration
 
@@ -596,16 +629,21 @@ class MoodscapeAudioLayer:
 
         # Filter tracks by persona and mood
         suitable_tracks = [
-            track for track in self.audio_library.values()
-            if (track.persona_affinity.get(persona_name.lower(), 0) > 0.4 and
-                any(cat.value == target_mood for cat in track.mood_categories))
+            track
+            for track in self.audio_library.values()
+            if (
+                track.persona_affinity.get(persona_name.lower(), 0) > 0.4
+                and any(cat.value == target_mood for cat in track.mood_categories)
+            )
         ]
 
         if not suitable_tracks:
             return []
 
         # Sort by persona affinity
-        suitable_tracks.sort(key=lambda x: x.persona_affinity.get(persona_name.lower(), 0), reverse=True)
+        suitable_tracks.sort(
+            key=lambda x: x.persona_affinity.get(persona_name.lower(), 0), reverse=True
+        )
 
         # Build playlist
         while total_duration < target_duration and suitable_tracks:
@@ -629,12 +667,12 @@ class MoodscapeAudioLayer:
         """Load audio configuration and preferences"""
         if os.path.exists(self.storage_path):
             try:
-                with open(self.storage_path, 'r', encoding='utf-8') as f:
+                with open(self.storage_path, encoding="utf-8") as f:
                     data = json.load(f)
 
-                self.mood_preferences = data.get('mood_preferences', {})
-                self.volume_master = data.get('volume_master', 0.7)
-                self.crossfade_duration = data.get('crossfade_duration', 3.0)
+                self.mood_preferences = data.get("mood_preferences", {})
+                self.volume_master = data.get("volume_master", 0.7)
+                self.crossfade_duration = data.get("crossfade_duration", 3.0)
 
             except Exception as e:
                 print(f"Error loading audio configuration: {e}")
@@ -645,20 +683,22 @@ class MoodscapeAudioLayer:
             os.makedirs(os.path.dirname(self.storage_path), exist_ok=True)
 
             data = {
-                'mood_preferences': self.mood_preferences,
-                'volume_master': self.volume_master,
-                'crossfade_duration': self.crossfade_duration,
-                'last_updated': datetime.now().isoformat()
+                "mood_preferences": self.mood_preferences,
+                "volume_master": self.volume_master,
+                "crossfade_duration": self.crossfade_duration,
+                "last_updated": datetime.now().isoformat(),
             }
 
-            with open(self.storage_path, 'w', encoding='utf-8') as f:
+            with open(self.storage_path, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
 
         except Exception as e:
             print(f"Error saving audio configuration: {e}")
 
+
 # Global instance
 _moodscape_audio = None
+
 
 def get_moodscape_audio_layer() -> MoodscapeAudioLayer:
     """Get global moodscape audio layer instance"""
@@ -667,9 +707,15 @@ def get_moodscape_audio_layer() -> MoodscapeAudioLayer:
         _moodscape_audio = MoodscapeAudioLayer()
     return _moodscape_audio
 
+
 # Integration helpers
-def start_mood_audio(persona_name: str, current_mood: str, emotional_state: Dict[str, float],
-                    interaction_context: str, user_preferences: Optional[Dict[str, Any]] = None) -> bool:
+def start_mood_audio(
+    persona_name: str,
+    current_mood: str,
+    emotional_state: dict[str, float],
+    interaction_context: str,
+    user_preferences: Optional[dict[str, Any]] = None,
+) -> bool:
     """
     Start mood-appropriate audio for current context
 
@@ -688,7 +734,10 @@ def start_mood_audio(persona_name: str, current_mood: str, emotional_state: Dict
 
     return False
 
-def get_mood_audio_suggestions(persona_name: str, emotional_state: Dict[str, float]) -> List[Dict[str, Any]]:
+
+def get_mood_audio_suggestions(
+    persona_name: str, emotional_state: dict[str, float]
+) -> list[dict[str, Any]]:
     """
     Get audio suggestions for current mood without starting playback
 

@@ -2,8 +2,10 @@ import random
 import time
 from datetime import datetime, timedelta
 from threading import Thread
-from modules.reflection.emotion_reflector import EmotionReflector
+
 from modules.memory_writer import log_memory_entry
+from modules.reflection.emotion_reflector import EmotionReflector
+
 
 class BackgroundJournaling:
     def __init__(self, emotion_reflector: EmotionReflector):
@@ -46,13 +48,11 @@ class BackgroundJournaling:
             return
 
         pulse = self._generate_pulse()
-        log_memory_entry({
-            "timestamp": datetime.now().isoformat(),
-            "pulse": pulse
-        })
+        log_memory_entry({"timestamp": datetime.now().isoformat(), "pulse": pulse})
 
     def start(self):
         """Start the background journaling process."""
+
         def journaling_loop():
             while not self.stop_flag:
                 self._log_pulse()

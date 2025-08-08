@@ -8,7 +8,9 @@ import asyncio
 import json
 import time
 from datetime import datetime
+
 import requests
+
 
 class ConnectivityManagerQA:
     """Targeted tests for the Connectivity Manager"""
@@ -34,31 +36,27 @@ class ConnectivityManagerQA:
         response = self.make_request("GET", "/api/connectivity/status")
         if response and response.status_code == 200:
             data = response.json()
-            mode = data.get('current_mode', 'unknown')
-            services = data.get('services', {})
+            mode = data.get("current_mode", "unknown")
+            services = data.get("services", {})
 
             print(f"✅ Initial connectivity mode: {mode}")
             print("📊 Service status:")
 
             service_status = {}
             for service_id, service_data in services.items():
-                name = service_data.get('name', service_id)
-                available = service_data.get('available', False)
-                uptime = service_data.get('uptime_percentage', 0)
+                name = service_data.get("name", service_id)
+                available = service_data.get("available", False)
+                uptime = service_data.get("uptime_percentage", 0)
                 status_icon = "🟢" if available else "🔴"
 
                 print(f"   {status_icon} {name}: {uptime:.1f}% uptime")
                 service_status[service_id] = {
-                    'name': name,
-                    'available': available,
-                    'uptime': uptime
+                    "name": name,
+                    "available": available,
+                    "uptime": uptime,
                 }
 
-            return {
-                'mode': mode,
-                'services': service_status,
-                'raw_data': data
-            }
+            return {"mode": mode, "services": service_status, "raw_data": data}
         else:
             print("❌ Failed to get connectivity status")
             return None
@@ -79,10 +77,12 @@ class ConnectivityManagerQA:
             "service_id": "mock_unreachable",
             "name": "Mock Unreachable Service",
             "url": "http://definitely-not-reachable-service.invalid:9999/health",
-            "timeout": 2
+            "timeout": 2,
         }
 
-        response = self.make_request("POST", "/api/connectivity/add-service", json=mock_service_data)
+        response = self.make_request(
+            "POST", "/api/connectivity/add-service", json=mock_service_data
+        )
         if response and response.status_code == 200:
             print("   ✅ Mock unreachable service added")
 
@@ -109,14 +109,14 @@ class ConnectivityManagerQA:
         response = self.make_request("GET", "/api/connectivity/status")
         if response and response.status_code == 200:
             data = response.json()
-            mode = data.get('current_mode', 'unknown')
-            services = data.get('services', {})
+            mode = data.get("current_mode", "unknown")
+            services = data.get("services", {})
 
             # Check if any services are marked as unavailable
             unavailable_services = [
-                service_data.get('name', sid)
+                service_data.get("name", sid)
                 for sid, service_data in services.items()
-                if not service_data.get('available', True)
+                if not service_data.get("available", True)
             ]
 
             print(f"📊 Current mode: {mode}")
@@ -128,7 +128,7 @@ class ConnectivityManagerQA:
                     print(f"      • {service}")
 
                 # Check if mode adjusted appropriately
-                if mode in ['offline', 'degraded', 'local_preferred']:
+                if mode in ["offline", "degraded", "local_preferred"]:
                     print("✅ System correctly detected connectivity issues")
                     return True
                 else:
@@ -148,8 +148,8 @@ class ConnectivityManagerQA:
         response = self.make_request("GET", "/api/connectivity/routing-adjustments")
         if response and response.status_code == 200:
             data = response.json()
-            prefer_local = data.get('prefer_local', False)
-            adjustments = data.get('adjustments', {})
+            prefer_local = data.get("prefer_local", False)
+            adjustments = data.get("adjustments", {})
 
             print(f"📊 Prefer local models: {prefer_local}")
             print(f"📊 Active adjustments: {len(adjustments)}")
@@ -175,28 +175,30 @@ class ConnectivityManagerQA:
         chat_data = {
             "message": technical_message,
             "session_id": self.test_session_id,
-            "persona": "technical"
+            "persona": "technical",
         }
 
         response = self.make_request("POST", "/api/chat", json=chat_data)
         if response and response.status_code == 200:
             data = response.json()
-            handler = data.get('handler', 'unknown')
-            routing_reason = data.get('routing_reason', '')
+            handler = data.get("handler", "unknown")
+            routing_reason = data.get("routing_reason", "")
 
-            print(f"✅ Chat successful")
+            print("✅ Chat successful")
             print(f"   🤖 Handler used: {handler}")
             print(f"   📝 Routing reason: {routing_reason}")
 
             # Verify appropriate handler selection
-            if prefer_local and 'local' in handler.lower():
+            if prefer_local and "local" in handler.lower():
                 print("✅ Correctly routed to local handler due to connectivity issues")
                 return True
-            elif not prefer_local and 'cloud' in handler.lower():
+            elif not prefer_local and "cloud" in handler.lower():
                 print("✅ Normal cloud routing maintained")
                 return True
             else:
-                print(f"⚠️ Routing may not match connectivity state (prefer_local={prefer_local}, handler={handler})")
+                print(
+                    f"⚠️ Routing may not match connectivity state (prefer_local={prefer_local}, handler={handler})"
+                )
                 return False
         else:
             print("❌ Chat request failed")
@@ -212,23 +214,23 @@ class ConnectivityManagerQA:
             data = response.json()
 
             # Simulate what frontend would show
-            mode = data.get('current_mode', 'unknown')
-            services = data.get('services', {})
+            mode = data.get("current_mode", "unknown")
+            services = data.get("services", {})
 
             # Generate user-friendly status messages
             status_messages = []
 
-            if mode == 'offline':
+            if mode == "offline":
                 status_messages.append("🔴 Offline mode - Using local AI models only")
-            elif mode == 'degraded':
+            elif mode == "degraded":
                 status_messages.append("🟡 Degraded connectivity - Preferring local models")
-            elif mode == 'online':
+            elif mode == "online":
                 status_messages.append("🟢 Online - All AI services available")
 
             # Service-specific messages
             for service_id, service_data in services.items():
-                if not service_data.get('available', True):
-                    name = service_data.get('name', service_id)
+                if not service_data.get("available", True):
+                    name = service_data.get("name", service_id)
                     status_messages.append(f"⚠️ {name} unavailable - Using alternatives")
 
             print("📱 Frontend status messages:")
@@ -261,7 +263,7 @@ class ConnectivityManagerQA:
             status_response = self.make_request("GET", "/api/connectivity/status")
             if status_response and status_response.status_code == 200:
                 data = status_response.json()
-                mode = data.get('current_mode', 'unknown')
+                mode = data.get("current_mode", "unknown")
                 print(f"   📊 Recovery mode: {mode}")
 
                 return True
@@ -283,7 +285,7 @@ class ConnectivityManagerQA:
             "offline_mode_detection": False,
             "routing_adjustments": False,
             "frontend_feedback": False,
-            "service_recovery": False
+            "service_recovery": False,
         }
 
         # Step 1: Get initial connectivity status
@@ -319,7 +321,9 @@ class ConnectivityManagerQA:
             status = "✅ PASS" if passed else "❌ FAIL"
             print(f"{status} {test_name.replace('_', ' ').title()}")
 
-        print(f"\n📊 Overall Score: {passed_tests}/{total_tests} ({(passed_tests/total_tests)*100:.1f}%)")
+        print(
+            f"\n📊 Overall Score: {passed_tests}/{total_tests} ({(passed_tests/total_tests)*100:.1f}%)"
+        )
 
         if passed_tests == total_tests:
             print("🎉 ALL CONNECTIVITY MANAGER TESTS PASSED!")
@@ -329,6 +333,7 @@ class ConnectivityManagerQA:
             print("⚠️ Connectivity manager needs attention")
 
         return test_results
+
 
 def main():
     """Run the connectivity manager QA suite"""
@@ -342,6 +347,7 @@ def main():
     results = loop.run_until_complete(qa.run_connectivity_qa_suite())
 
     return results
+
 
 if __name__ == "__main__":
     main()

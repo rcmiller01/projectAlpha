@@ -20,17 +20,17 @@ __description__ = "Autonomous emotional quantization system for local LLMs"
 
 # Import main classes for easy access
 try:
-    from .quant_autopilot import (
-        QuantizationAutopilot,
-        AutopilotDatabase,
-        QuantizationJob,
-        AutopilotRun
-    )
     from .idle_monitor import (
-        IdleMonitor,
         IdleConfig,
+        IdleMonitor,
         SystemMetrics,
-        create_idle_monitor_from_config
+        create_idle_monitor_from_config,
+    )
+    from .quant_autopilot import (
+        AutopilotDatabase,
+        AutopilotRun,
+        QuantizationAutopilot,
+        QuantizationJob,
     )
 except ImportError:
     # Handle relative imports when run as script
@@ -44,5 +44,5 @@ __all__ = [
     "IdleMonitor",
     "IdleConfig",
     "SystemMetrics",
-    "create_idle_monitor_from_config"
+    "create_idle_monitor_from_config",
 ]

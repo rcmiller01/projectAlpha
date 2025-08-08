@@ -8,13 +8,15 @@ import json
 import os
 import sys
 import time
-import requests
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
+import requests
 
 # Add project root to path
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
+
 
 def test_safe_mode_force():
     """Test SAFE_MODE_FORCE environment variable."""
@@ -35,9 +37,9 @@ def test_safe_mode_force():
         print(f"   Emotion loop paused: {status['emotion_loop_paused']}")
         print(f"   Writes locked: {status['writes_locked']}")
 
-        assert not status['safe_mode_enabled'], "Safe mode should be disabled"
-        assert not status['emotion_loop_paused'], "Emotion loop should not be paused"
-        assert not status['writes_locked'], "Writes should not be locked"
+        assert not status["safe_mode_enabled"], "Safe mode should be disabled"
+        assert not status["emotion_loop_paused"], "Emotion loop should not be paused"
+        assert not status["writes_locked"], "Writes should not be locked"
         print("   ✅ Normal operation confirmed")
 
         # Test with forced safe mode
@@ -46,7 +48,9 @@ def test_safe_mode_force():
 
         # Need to reimport to pick up new environment variable
         import importlib
+
         import src.core.core_conductor
+
         importlib.reload(src.core.core_conductor)
         from src.core.core_conductor import CoreConductor
 
@@ -58,9 +62,9 @@ def test_safe_mode_force():
         print(f"   Emotion loop paused: {status['emotion_loop_paused']}")
         print(f"   Writes locked: {status['writes_locked']}")
 
-        assert status['safe_mode_enabled'], "Safe mode should be enabled"
-        assert status['emotion_loop_paused'], "Emotion loop should be paused"
-        assert status['writes_locked'], "Writes should be locked"
+        assert status["safe_mode_enabled"], "Safe mode should be enabled"
+        assert status["emotion_loop_paused"], "Emotion loop should be paused"
+        assert status["writes_locked"], "Writes should be locked"
         print("   ✅ Forced safe mode confirmed")
 
         # Test safe mode operations
@@ -87,7 +91,7 @@ def test_safe_mode_force():
         assert success, "Should be able to enter safe mode manually"
 
         status = conductor_manual.get_safe_mode_status()
-        assert status['safe_mode_enabled'], "Safe mode should be active"
+        assert status["safe_mode_enabled"], "Safe mode should be active"
         print("   ✅ Manual safe mode entry works")
 
         # Try to exit safe mode
@@ -95,7 +99,7 @@ def test_safe_mode_force():
         assert success, f"Should be able to force exit safe mode: {message}"
 
         status = conductor_manual.get_safe_mode_status()
-        assert not status['safe_mode_enabled'], "Safe mode should be disabled"
+        assert not status["safe_mode_enabled"], "Safe mode should be disabled"
         print("   ✅ Manual safe mode exit works")
 
         return True
@@ -103,6 +107,7 @@ def test_safe_mode_force():
     except Exception as e:
         print(f"❌ Safe mode test failed: {e}")
         return False
+
 
 def test_idempotency():
     """Test idempotency functionality."""
@@ -146,6 +151,7 @@ def test_idempotency():
         print(f"❌ Idempotency test failed: {e}")
         return False
 
+
 def test_retry_logic():
     """Test retry and backoff functionality."""
     print("\n🔄 Testing Retry Logic")
@@ -153,8 +159,11 @@ def test_retry_logic():
 
     try:
         from backend.common.retry import (
-            retry_with_backoff, RetryConfig, RetryableError,
-            calculate_delay, backoff_delay
+            RetryableError,
+            RetryConfig,
+            backoff_delay,
+            calculate_delay,
+            retry_with_backoff,
         )
 
         # Test delay calculation
@@ -176,7 +185,7 @@ def test_retry_logic():
 
         @retry_with_backoff(
             config=RetryConfig(max_attempts=3, base_delay=0.1, jitter=False),
-            exceptions=(RetryableError,)
+            exceptions=(RetryableError,),
         )
         def failing_function():
             nonlocal attempt_count
@@ -192,8 +201,7 @@ def test_retry_logic():
 
         # Test non-retryable exception
         @retry_with_backoff(
-            config=RetryConfig(max_attempts=3, base_delay=0.1),
-            exceptions=(RetryableError,)
+            config=RetryConfig(max_attempts=3, base_delay=0.1), exceptions=(RetryableError,)
         )
         def non_retryable_function():
             raise ValueError("This should not be retried")
@@ -210,6 +218,7 @@ def test_retry_logic():
         print(f"❌ Retry logic test failed: {e}")
         return False
 
+
 def test_memory_quotas():
     """Test memory quota enforcement."""
     print("\n💾 Testing Memory Quotas")
@@ -223,23 +232,23 @@ def test_memory_quotas():
         memory_system = MemorySystem(memory_dir=test_memory_dir)
 
         # Override quotas for testing
-        memory_system.quotas['ephemeral']['max_items'] = 5
+        memory_system.quotas["ephemeral"]["max_items"] = 5
 
         print("\n📋 Test 1: Adding memories within quota")
 
         # Add memories within quota
         for i in range(3):
             success = memory_system.add_layered_memory(
-                'ephemeral',
-                f"Test memory {i}",
-                importance=0.5 + (i * 0.1)
+                "ephemeral", f"Test memory {i}", importance=0.5 + (i * 0.1)
             )
             assert success, f"Should be able to add memory {i}"
 
         status = memory_system.get_memory_quota_status()
-        ephemeral_status = status['ephemeral']
-        print(f"   Current usage: {ephemeral_status['current_items']}/{ephemeral_status['max_items']}")
-        assert not ephemeral_status['is_over_quota'], "Should not be over quota yet"
+        ephemeral_status = status["ephemeral"]
+        print(
+            f"   Current usage: {ephemeral_status['current_items']}/{ephemeral_status['max_items']}"
+        )
+        assert not ephemeral_status["is_over_quota"], "Should not be over quota yet"
         print("   ✅ Within quota operation successful")
 
         print("\n📋 Test 2: Quota enforcement and pruning")
@@ -247,22 +256,26 @@ def test_memory_quotas():
         # Add enough memories to exceed quota
         for i in range(3, 10):  # This will exceed the quota of 5
             memory_system.add_layered_memory(
-                'ephemeral',
+                "ephemeral",
                 f"Test memory {i}",
-                importance=0.1 + (i * 0.05)  # Varying importance
+                importance=0.1 + (i * 0.05),  # Varying importance
             )
 
         # Check that quota was enforced
         status = memory_system.get_memory_quota_status()
-        ephemeral_status = status['ephemeral']
-        print(f"   After quota enforcement: {ephemeral_status['current_items']}/{ephemeral_status['max_items']}")
-        assert ephemeral_status['current_items'] <= ephemeral_status['max_items'], "Should be within quota after pruning"
+        ephemeral_status = status["ephemeral"]
+        print(
+            f"   After quota enforcement: {ephemeral_status['current_items']}/{ephemeral_status['max_items']}"
+        )
+        assert (
+            ephemeral_status["current_items"] <= ephemeral_status["max_items"]
+        ), "Should be within quota after pruning"
         print("   ✅ Quota enforcement working")
 
         # Check pruning log
         pruning_log_path = Path("logs/memory_pruning.jsonl")
         if pruning_log_path.exists():
-            with open(pruning_log_path, 'r') as f:
+            with open(pruning_log_path) as f:
                 lines = f.readlines()
             if lines:
                 last_entry = json.loads(lines[-1])
@@ -275,8 +288,10 @@ def test_memory_quotas():
         full_status = memory_system.get_memory_quota_status()
         print("   Memory usage by layer:")
         for layer, layer_status in full_status.items():
-            usage_pct = layer_status['usage_percentage']
-            print(f"     {layer}: {layer_status['current_items']}/{layer_status['max_items']} ({usage_pct:.1f}%)")
+            usage_pct = layer_status["usage_percentage"]
+            print(
+                f"     {layer}: {layer_status['current_items']}/{layer_status['max_items']} ({usage_pct:.1f}%)"
+            )
 
         # Test manual pruning
         pruning_results = memory_system.prune_all_layers(force=True)
@@ -285,6 +300,7 @@ def test_memory_quotas():
 
         # Cleanup test directory
         import shutil
+
         if Path(test_memory_dir).exists():
             shutil.rmtree(test_memory_dir)
 
@@ -293,6 +309,7 @@ def test_memory_quotas():
     except Exception as e:
         print(f"❌ Memory quota test failed: {e}")
         return False
+
 
 def test_api_endpoints():
     """Test API endpoints for graceful degradation (requires running services)."""
@@ -310,8 +327,10 @@ def test_api_endpoints():
             response = requests.get(f"{base_url}/health", timeout=2)
             if response.status_code == 200:
                 health_data = response.json()
-                if 'safe_mode_enabled' in health_data:
-                    print(f"   ✅ {base_url} - Safe mode status: {health_data['safe_mode_enabled']}")
+                if "safe_mode_enabled" in health_data:
+                    print(
+                        f"   ✅ {base_url} - Safe mode status: {health_data['safe_mode_enabled']}"
+                    )
                 else:
                     print(f"   ✅ {base_url} - Health check passed")
             else:
@@ -328,7 +347,7 @@ def test_api_endpoints():
         headers = {
             "Content-Type": "application/json",
             "Idempotency-Key": f"test_key_{int(time.time())}",
-            "X-API-Key": "admin_test_token"
+            "X-API-Key": "admin_test_token",
         }
         data = {"strategy": "harmonic"}
 
@@ -341,7 +360,9 @@ def test_api_endpoints():
         if response1.status_code == response2.status_code:
             print(f"   ✅ Idempotency test: Both requests returned {response1.status_code}")
         else:
-            print(f"   ⚠️  Idempotency test: Different status codes {response1.status_code} vs {response2.status_code}")
+            print(
+                f"   ⚠️  Idempotency test: Different status codes {response1.status_code} vs {response2.status_code}"
+            )
 
     except requests.exceptions.ConnectionError:
         print("   ⚠️  Cannot test idempotency - service not running")
@@ -349,6 +370,7 @@ def test_api_endpoints():
         print(f"   ❌ Idempotency test error: {e}")
 
     return True
+
 
 def main():
     """Run all graceful degradation tests."""
@@ -409,6 +431,7 @@ def main():
         print("⚠️  Some tests failed - review the output above")
 
     print(f"\nTest completed at: {datetime.now().isoformat()}")
+
 
 if __name__ == "__main__":
     main()

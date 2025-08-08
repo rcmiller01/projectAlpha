@@ -5,10 +5,12 @@ Tests conversation pattern analysis and insight generation
 """
 
 import asyncio
-import aiohttp
 import json
 import time
 from datetime import datetime
+
+import aiohttp
+
 
 class ReflectionEngineQA:
     """Targeted tests for the Reflection Engine"""
@@ -34,32 +36,32 @@ class ReflectionEngineQA:
         conversation_flow = [
             {
                 "message": "Can you help me debug this Python code? I'm getting a syntax error.",
-                "expected_tone": "technical"
+                "expected_tone": "technical",
             },
             {
                 "message": "Thanks, that fixed it. But I'm really struggling with this project overall.",
-                "expected_tone": "supportive"
+                "expected_tone": "supportive",
             },
             {
                 "message": "I've been working on this for weeks and I feel like I'm not making progress.",
-                "expected_tone": "emotional"
+                "expected_tone": "emotional",
             },
             {
                 "message": "Maybe I should just give up and find a different career path.",
-                "expected_tone": "concerning"
+                "expected_tone": "concerning",
             },
             {
                 "message": "Actually, you know what? Let me try a different approach to this problem.",
-                "expected_tone": "determined"
+                "expected_tone": "determined",
             },
             {
                 "message": "This is actually working now! I think I understand the pattern.",
-                "expected_tone": "positive"
+                "expected_tone": "positive",
             },
             {
                 "message": "Can you explain more about object-oriented programming principles?",
-                "expected_tone": "learning"
-            }
+                "expected_tone": "learning",
+            },
         ]
 
         responses = []
@@ -69,19 +71,21 @@ class ReflectionEngineQA:
             payload = {
                 "message": chat_data["message"],
                 "session_id": self.test_session_id,
-                "persona": "companion"
+                "persona": "companion",
             }
 
             try:
                 async with self.session.post(f"{self.base_url}/api/chat", json=payload) as response:
                     if response.status == 200:
                         data = await response.json()
-                        responses.append({
-                            "message": chat_data["message"],
-                            "response": data.get("response", ""),
-                            "expected_tone": chat_data["expected_tone"],
-                            "timestamp": datetime.now().isoformat()
-                        })
+                        responses.append(
+                            {
+                                "message": chat_data["message"],
+                                "response": data.get("response", ""),
+                                "expected_tone": chat_data["expected_tone"],
+                                "timestamp": datetime.now().isoformat(),
+                            }
+                        )
                         print(f"   ✅ Response received ({len(data.get('response', ''))} chars)")
                     else:
                         print(f"   ❌ Chat failed: {response.status}")
@@ -117,7 +121,9 @@ class ReflectionEngineQA:
         print("🧠 Triggering manual reflection analysis...")
 
         try:
-            async with self.session.post(f"{self.base_url}/api/reflection/manual-trigger") as response:
+            async with self.session.post(
+                f"{self.base_url}/api/reflection/manual-trigger"
+            ) as response:
                 if response.status == 200:
                     data = await response.json()
                     print(f"✅ Manual reflection triggered: {data.get('message')}")
@@ -141,9 +147,11 @@ class ReflectionEngineQA:
                 async with self.session.get(f"{self.base_url}/api/reflection/summary") as response:
                     if response.status == 200:
                         data = await response.json()
-                        total_reflections = data.get('total_reflections', 0)
+                        total_reflections = data.get("total_reflections", 0)
                         if total_reflections > 0:
-                            print(f"✅ Background reflection complete: {total_reflections} reflections generated")
+                            print(
+                                f"✅ Background reflection complete: {total_reflections} reflections generated"
+                            )
                             return data
                         else:
                             print(f"   ⏳ Waiting... ({i*check_interval}s) - No reflections yet")
@@ -179,18 +187,18 @@ class ReflectionEngineQA:
                     engagement_tracked = False
 
                     for insight in insights:
-                        insight_type = insight.get('type', 'unknown')
+                        insight_type = insight.get("type", "unknown")
                         insight_types.add(insight_type)
-                        content = insight.get('content', '')
+                        content = insight.get("content", "")
 
                         print(f"   📊 {insight_type}: {content[:100]}...")
 
                         # Check for mood shift detection
-                        if 'mood' in content.lower() or 'emotional' in content.lower():
+                        if "mood" in content.lower() or "emotional" in content.lower():
                             mood_shifts_detected = True
 
                         # Check for engagement tracking
-                        if 'engagement' in content.lower() or 'interest' in content.lower():
+                        if "engagement" in content.lower() or "interest" in content.lower():
                             engagement_tracked = True
 
                     print(f"   🎯 Insight types detected: {', '.join(insight_types)}")
@@ -230,7 +238,7 @@ class ReflectionEngineQA:
         payload = {
             "message": follow_up_message,
             "session_id": self.test_session_id,
-            "persona": "companion"
+            "persona": "companion",
         }
 
         try:
@@ -241,8 +249,14 @@ class ReflectionEngineQA:
 
                     # Check for adaptive tone indicators
                     adaptive_indicators = [
-                        "remember", "like before", "similar to", "progress",
-                        "breakthrough", "pattern", "approach", "working through"
+                        "remember",
+                        "like before",
+                        "similar to",
+                        "progress",
+                        "breakthrough",
+                        "pattern",
+                        "approach",
+                        "working through",
                     ]
 
                     found_indicators = [ind for ind in adaptive_indicators if ind in response_text]
@@ -251,7 +265,7 @@ class ReflectionEngineQA:
                         print(f"✅ Adaptive tone detected: {', '.join(found_indicators)}")
                         return True
                     else:
-                        print(f"❌ No adaptive tone indicators found")
+                        print("❌ No adaptive tone indicators found")
                         print(f"   Response sample: {response_text[:200]}...")
                         return False
 
@@ -273,7 +287,7 @@ class ReflectionEngineQA:
             "reflection_enablement": False,
             "insight_generation": False,
             "insight_quality": False,
-            "tone_influence": False
+            "tone_influence": False,
         }
 
         # Step 1: Enable reflection engine
@@ -312,7 +326,9 @@ class ReflectionEngineQA:
             status = "✅ PASS" if passed else "❌ FAIL"
             print(f"{status} {test_name.replace('_', ' ').title()}")
 
-        print(f"\n📊 Overall Score: {passed_tests}/{total_tests} ({(passed_tests/total_tests)*100:.1f}%)")
+        print(
+            f"\n📊 Overall Score: {passed_tests}/{total_tests} ({(passed_tests/total_tests)*100:.1f}%)"
+        )
 
         if passed_tests == total_tests:
             print("🎉 ALL REFLECTION ENGINE TESTS PASSED!")
@@ -323,6 +339,7 @@ class ReflectionEngineQA:
 
         return test_results
 
+
 async def main():
     """Run the reflection engine QA suite"""
     print("🔄 Starting Reflection Engine QA Script...")
@@ -332,6 +349,7 @@ async def main():
         results = await qa.run_reflection_qa_suite()
 
     return results
+
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -2,24 +2,24 @@
 Emotional Voice Engine - Integrates with emotional configuration
 """
 
-import sys
 import os
+import sys
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from modules.config.emotion_config_manager import emotion_config
 import logging
 
+from modules.config.emotion_config_manager import emotion_config
+
 logger = logging.getLogger(__name__)
+
 
 class EmotionalVoiceEngine:
     def __init__(self):
         self.current_emotional_state = "balanced"
 
         # Register for configuration updates
-        emotion_config.register_config_callback(
-            "tone_profiles",
-            self.on_tone_profiles_updated
-        )
+        emotion_config.register_config_callback("tone_profiles", self.on_tone_profiles_updated)
 
     def set_emotional_state(self, emotional_state: str):
         """Update current emotional state and voice settings"""
@@ -51,6 +51,7 @@ class EmotionalVoiceEngine:
         """Handle tone profile configuration changes"""
         logger.info("Tone profiles updated - refreshing voice settings")
         self.set_emotional_state(self.current_emotional_state)
+
 
 # Global voice engine instance
 emotional_voice = EmotionalVoiceEngine()

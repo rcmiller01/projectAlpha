@@ -4,6 +4,7 @@
 import sqlite3
 from pathlib import Path
 
+
 def check_database(db_path):
     """Check database schema"""
     if not Path(db_path).exists():
@@ -31,11 +32,12 @@ def check_database(db_path):
 
     conn.close()
 
+
 if __name__ == "__main__":
     check_database("emotion_training.db")
 
     # Also check the autopilot database if it exists
     autopilot_db = "emotion_quant_autopilot/emotion_training.db"
     if Path(autopilot_db).exists():
-        print("\n" + "="*50)
+        print("\n" + "=" * 50)
         check_database(autopilot_db)

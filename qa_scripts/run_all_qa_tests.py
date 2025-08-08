@@ -5,11 +5,12 @@ Executes all targeted QA scripts and provides comprehensive validation report
 """
 
 import asyncio
-import time
 import subprocess
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
+
 
 class DolphinV21MasterQA:
     """Master test coordinator for all Dolphin v2.1 advanced features"""
@@ -26,7 +27,7 @@ class DolphinV21MasterQA:
         print("🐬 COMPREHENSIVE QA VALIDATION SUITE")
         print("🐬" * 20)
         print(f"📅 Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        print(f"🎯 Target: http://localhost:8000")
+        print("🎯 Target: http://localhost:8000")
         print("=" * 70)
 
     async def check_backend_availability(self):
@@ -35,11 +36,12 @@ class DolphinV21MasterQA:
 
         try:
             import aiohttp
+
             async with aiohttp.ClientSession() as session:
                 async with session.get("http://localhost:8000/api/status") as response:
                     if response.status == 200:
                         data = await response.json()
-                        version = data.get('version', 'unknown')
+                        version = data.get("version", "unknown")
                         print(f"✅ Dolphin backend online - Version: {version}")
                         return True
                     else:
@@ -60,7 +62,8 @@ class DolphinV21MasterQA:
                 ["curl", "-s", "http://localhost:8000/api/status"],
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
+                check=False,
             )
 
             if result.returncode == 0:
@@ -84,9 +87,10 @@ class DolphinV21MasterQA:
         try:
             # Run the QA script
             process = await asyncio.create_subprocess_exec(
-                sys.executable, str(script_path),
+                sys.executable,
+                str(script_path),
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                stderr=asyncio.subprocess.PIPE,
             )
 
             stdout, stderr = await process.communicate()
@@ -95,8 +99,8 @@ class DolphinV21MasterQA:
             success = process.returncode == 0
 
             # Decode output
-            stdout_text = stdout.decode('utf-8', errors='ignore')
-            stderr_text = stderr.decode('utf-8', errors='ignore')
+            stdout_text = stdout.decode("utf-8", errors="ignore")
+            stderr_text = stderr.decode("utf-8", errors="ignore")
 
             # Print test output
             if stdout_text:
@@ -107,12 +111,12 @@ class DolphinV21MasterQA:
 
             # Store results
             self.test_results[test_name] = {
-                'success': success,
-                'execution_time': execution_time,
-                'script': script_name,
-                'stdout': stdout_text,
-                'stderr': stderr_text,
-                'return_code': process.returncode
+                "success": success,
+                "execution_time": execution_time,
+                "script": script_name,
+                "stdout": stdout_text,
+                "stderr": stderr_text,
+                "return_code": process.returncode,
             }
 
             status = "✅ PASSED" if success else "❌ FAILED"
@@ -125,13 +129,13 @@ class DolphinV21MasterQA:
             print(f"❌ Exception running {test_name}: {e}")
 
             self.test_results[test_name] = {
-                'success': False,
-                'execution_time': execution_time,
-                'script': script_name,
-                'stdout': '',
-                'stderr': str(e),
-                'return_code': -1,
-                'exception': str(e)
+                "success": False,
+                "execution_time": execution_time,
+                "script": script_name,
+                "stdout": "",
+                "stderr": str(e),
+                "return_code": -1,
+                "exception": str(e),
             }
 
             return False
@@ -143,12 +147,12 @@ class DolphinV21MasterQA:
         print("=" * 70)
 
         total_tests = len(self.test_results)
-        passed_tests = sum(1 for result in self.test_results.values() if result['success'])
+        passed_tests = sum(1 for result in self.test_results.values() if result["success"])
         failed_tests = total_tests - passed_tests
         total_execution_time = time.time() - self.start_time
 
         # Overall summary
-        print(f"🎯 OVERALL RESULTS:")
+        print("🎯 OVERALL RESULTS:")
         print(f"   Total Tests: {total_tests}")
         print(f"   ✅ Passed: {passed_tests}")
         print(f"   ❌ Failed: {failed_tests}")
@@ -156,21 +160,21 @@ class DolphinV21MasterQA:
         print(f"   📈 Success Rate: {(passed_tests/total_tests)*100:.1f}%")
 
         # Individual test results
-        print(f"\n📋 INDIVIDUAL TEST RESULTS:")
+        print("\n📋 INDIVIDUAL TEST RESULTS:")
         for test_name, result in self.test_results.items():
-            status = "✅ PASS" if result['success'] else "❌ FAIL"
-            time_taken = result['execution_time']
+            status = "✅ PASS" if result["success"] else "❌ FAIL"
+            time_taken = result["execution_time"]
             print(f"   {status} {test_name} ({time_taken:.1f}s)")
 
-            if not result['success']:
-                if 'exception' in result:
+            if not result["success"]:
+                if "exception" in result:
                     print(f"        Exception: {result['exception']}")
-                elif result['return_code'] != 0:
+                elif result["return_code"] != 0:
                     print(f"        Return code: {result['return_code']}")
 
         # Performance analysis
-        print(f"\n⚡ PERFORMANCE ANALYSIS:")
-        execution_times = [r['execution_time'] for r in self.test_results.values()]
+        print("\n⚡ PERFORMANCE ANALYSIS:")
+        execution_times = [r["execution_time"] for r in self.test_results.values()]
         if execution_times:
             avg_time = sum(execution_times) / len(execution_times)
             max_time = max(execution_times)
@@ -181,14 +185,24 @@ class DolphinV21MasterQA:
             print(f"   Shortest test: {min_time:.1f}s")
 
         # Feature assessment
-        print(f"\n🌟 FEATURE ASSESSMENT:")
+        print("\n🌟 FEATURE ASSESSMENT:")
         feature_status = {
-            "🔄 Reflection Engine": self.test_results.get("Reflection Engine QA", {}).get('success', False),
-            "🌤️ Connectivity Manager": self.test_results.get("Connectivity Manager QA", {}).get('success', False),
-            "🔐 Private Memory": self.test_results.get("Private Memory System QA", {}).get('success', False),
-            "🎭 Persona Instructions": self.test_results.get("Persona Instruction Manager QA", {}).get('success', False),
-            "🪩 Mirror Mode": self.test_results.get("Mirror Mode QA", {}).get('success', False),
-            "📈 System Metrics": self.test_results.get("System Metrics QA", {}).get('success', False)
+            "🔄 Reflection Engine": self.test_results.get("Reflection Engine QA", {}).get(
+                "success", False
+            ),
+            "🌤️ Connectivity Manager": self.test_results.get("Connectivity Manager QA", {}).get(
+                "success", False
+            ),
+            "🔐 Private Memory": self.test_results.get("Private Memory System QA", {}).get(
+                "success", False
+            ),
+            "🎭 Persona Instructions": self.test_results.get(
+                "Persona Instruction Manager QA", {}
+            ).get("success", False),
+            "🪩 Mirror Mode": self.test_results.get("Mirror Mode QA", {}).get("success", False),
+            "📈 System Metrics": self.test_results.get("System Metrics QA", {}).get(
+                "success", False
+            ),
         }
 
         for feature, status in feature_status.items():
@@ -196,7 +210,7 @@ class DolphinV21MasterQA:
             print(f"   {status_icon} {feature}")
 
         # Recommendations
-        print(f"\n💡 RECOMMENDATIONS:")
+        print("\n💡 RECOMMENDATIONS:")
         if failed_tests == 0:
             print("   🎉 All tests passed! Dolphin v2.1 is ready for production.")
             print("   🚀 Consider running load tests and security audits.")
@@ -209,7 +223,7 @@ class DolphinV21MasterQA:
             print("   📋 Verify all required services are running.")
 
         # Next steps
-        print(f"\n🎯 NEXT STEPS:")
+        print("\n🎯 NEXT STEPS:")
         print("   1. 📊 Review individual test outputs above")
         print("   2. 🔧 Address any failed test cases")
         print("   3. 🧪 Re-run specific tests after fixes")
@@ -235,7 +249,7 @@ class DolphinV21MasterQA:
             ("Private Memory System QA", "qa_private_memory.py"),
             ("Persona Instruction Manager QA", "qa_persona_instructions.py"),
             ("Mirror Mode QA", "qa_mirror_mode.py"),
-            ("Reflection Engine QA", "qa_reflection_engine.py")
+            ("Reflection Engine QA", "qa_reflection_engine.py"),
         ]
 
         print(f"\n🎯 EXECUTING {len(test_suites)} QA TEST SUITES...")
@@ -255,6 +269,7 @@ class DolphinV21MasterQA:
 
         return final_success and overall_success
 
+
 async def main():
     """Main QA coordinator execution"""
     print("🐬 Starting Dolphin v2.1 Comprehensive QA Suite...")
@@ -269,6 +284,7 @@ async def main():
     else:
         print("\n⚠️ Some QA tests failed. Review the report above.")
         return 1
+
 
 if __name__ == "__main__":
     exit_code = asyncio.run(main())

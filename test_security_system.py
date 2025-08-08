@@ -5,10 +5,11 @@ Tests RBAC, input validation, and audit logging.
 """
 
 import json
-import requests
 import sys
 import time
 from pathlib import Path
+
+import requests
 
 # Test configuration
 BASE_URL = "http://localhost:5000"
@@ -17,6 +18,7 @@ SYSTEM_TOKEN = "sys_test_token_456"
 USER_TOKEN = "user_test_token_789"
 INVALID_TOKEN = "invalid_token_999"
 
+
 def test_memory_api_security():
     """Test memory API security features."""
     print("🧪 Testing Memory API Security")
@@ -24,55 +26,67 @@ def test_memory_api_security():
 
     # Test 1: Add memory entry without token (should fail)
     print("\n📋 Test 1: No authentication")
-    response = requests.post(f"{BASE_URL}/api/memory/add_entry",
-                           json={"content": "test", "layer": "ephemeral"})
+    response = requests.post(
+        f"{BASE_URL}/api/memory/add_entry", json={"content": "test", "layer": "ephemeral"}
+    )
     assert response.status_code == 401, f"Expected 401, got {response.status_code}"
     print("✅ Correctly rejected request without token")
 
     # Test 2: Add memory entry with invalid token (should fail)
     print("\n📋 Test 2: Invalid authentication")
     headers = {"Authorization": f"Bearer {INVALID_TOKEN}"}
-    response = requests.post(f"{BASE_URL}/api/memory/add_entry",
-                           json={"content": "test", "layer": "ephemeral"},
-                           headers=headers)
+    response = requests.post(
+        f"{BASE_URL}/api/memory/add_entry",
+        json={"content": "test", "layer": "ephemeral"},
+        headers=headers,
+    )
     assert response.status_code in [401, 403], f"Expected 401/403, got {response.status_code}"
     print("✅ Correctly rejected request with invalid token")
 
     # Test 3: Add memory entry to identity layer with user token (should fail)
     print("\n📋 Test 3: Insufficient permissions for identity layer")
     headers = {"X-API-Key": USER_TOKEN}
-    response = requests.post(f"{BASE_URL}/api/memory/add_entry",
-                           json={"content": "test identity", "layer": "identity"},
-                           headers=headers)
+    response = requests.post(
+        f"{BASE_URL}/api/memory/add_entry",
+        json={"content": "test identity", "layer": "identity"},
+        headers=headers,
+    )
     assert response.status_code == 403, f"Expected 403, got {response.status_code}"
     print("✅ Correctly blocked user from identity layer")
 
     # Test 4: Add memory entry with admin token (should succeed)
     print("\n📋 Test 4: Valid admin access")
     headers = {"X-API-Key": ADMIN_TOKEN}
-    response = requests.post(f"{BASE_URL}/api/memory/add_entry",
-                           json={"content": "admin test", "layer": "identity"},
-                           headers=headers)
+    response = requests.post(
+        f"{BASE_URL}/api/memory/add_entry",
+        json={"content": "admin test", "layer": "identity"},
+        headers=headers,
+    )
     print(f"   Response status: {response.status_code}")
     print(f"   Response: {response.text}")
 
     # Test 5: Invalid JSON schema (should fail)
     print("\n📋 Test 5: Invalid JSON schema")
     headers = {"X-API-Key": USER_TOKEN}
-    response = requests.post(f"{BASE_URL}/api/memory/add_entry",
-                           json={"invalid_field": "test", "layer": "ephemeral"},
-                           headers=headers)
+    response = requests.post(
+        f"{BASE_URL}/api/memory/add_entry",
+        json={"invalid_field": "test", "layer": "ephemeral"},
+        headers=headers,
+    )
     assert response.status_code == 400, f"Expected 400, got {response.status_code}"
     print("✅ Correctly rejected invalid schema")
 
     # Test 6: Unknown fields (should fail)
     print("\n📋 Test 6: Unknown fields")
     headers = {"X-API-Key": USER_TOKEN}
-    response = requests.post(f"{BASE_URL}/api/memory/add_entry",
-                           json={"content": "test", "layer": "ephemeral", "unknown_field": "bad"},
-                           headers=headers)
+    response = requests.post(
+        f"{BASE_URL}/api/memory/add_entry",
+        json={"content": "test", "layer": "ephemeral", "unknown_field": "bad"},
+        headers=headers,
+    )
     assert response.status_code == 400, f"Expected 400, got {response.status_code}"
     print("✅ Correctly rejected unknown fields")
+
 
 def test_hrm_api_security():
     """Test HRM API security features."""
@@ -103,11 +117,12 @@ def test_hrm_api_security():
     # Test 4: Update identity layer with admin token
     print("\n📋 Test 4: Identity layer update with admin token")
     headers = {"X-API-Key": ADMIN_TOKEN}
-    response = requests.post(f"{BASE_URL}/api/hrm/identity",
-                           json={"core_values": {"test": "value"}},
-                           headers=headers)
+    response = requests.post(
+        f"{BASE_URL}/api/hrm/identity", json={"core_values": {"test": "value"}}, headers=headers
+    )
     print(f"   Response status: {response.status_code}")
     print(f"   Response: {response.text}")
+
 
 def test_audit_logging():
     """Test audit logging functionality."""
@@ -120,7 +135,7 @@ def test_audit_logging():
         print(f"✅ Audit log file exists: {audit_log_path}")
 
         # Read last few audit entries
-        with open(audit_log_path, 'r') as f:
+        with open(audit_log_path) as f:
             lines = f.readlines()
 
         print(f"✅ Found {len(lines)} audit entries")
@@ -131,11 +146,14 @@ def test_audit_logging():
             for line in lines[-3:]:
                 try:
                     entry = json.loads(line)
-                    print(f"   {entry.get('timestamp', 'unknown')} - {entry.get('action', 'unknown')} - Success: {entry.get('success', 'unknown')}")
+                    print(
+                        f"   {entry.get('timestamp', 'unknown')} - {entry.get('action', 'unknown')} - Success: {entry.get('success', 'unknown')}"
+                    )
                 except json.JSONDecodeError:
                     print(f"   Invalid JSON: {line[:50]}...")
     else:
         print("❌ Audit log file not found")
+
 
 def test_token_masking():
     """Test token masking in logs."""
@@ -162,6 +180,7 @@ def test_token_masking():
         assert result == expected, f"Expected {expected}, got {result} for token {token}"
         print(f"✅ {token or 'None'} -> {result}")
 
+
 def run_security_tests():
     """Run all security tests."""
     print("🚀 ProjectAlpha API Security Tests")
@@ -187,6 +206,7 @@ def run_security_tests():
     #     print("❌ API servers not running - skipping endpoint tests")
 
     print("\n🎉 Security tests completed!")
+
 
 if __name__ == "__main__":
     run_security_tests()

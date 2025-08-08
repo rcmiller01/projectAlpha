@@ -20,37 +20,40 @@ Compatible with: GraphRAG memory, Tool router, HRM stack, SLiM model system
 
 import logging
 import uuid
-from datetime import datetime
-from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 # Import core system components
 try:
-    from ..core.core_conductor import CoreConductor
     from ...memory.graphrag_memory import GraphRAGMemory
+    from ..core.core_conductor import CoreConductor
     from ..tools.tool_request_router import ToolRequestRouter
 except ImportError:
-    from src.core.core_conductor import CoreConductor
     from memory.graphrag_memory import GraphRAGMemory
+    from src.core.core_conductor import CoreConductor
     from src.tools.tool_request_router import ToolRequestRouter
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class AgentResponse:
     """Structured response from a SLiM agent"""
+
     agent_id: str
     role: str
     prompt: str
     response: str
-    context_facts: List[Dict[str, Any]]
-    memory_updates: List[Dict[str, Any]]
-    tool_calls: List[str]
+    context_facts: list[dict[str, Any]]
+    memory_updates: list[dict[str, Any]]
+    tool_calls: list[str]
     reasoning_depth: int
     timestamp: str
     confidence: float
+
 
 class SLiMAgent:
     """
@@ -66,13 +69,15 @@ class SLiMAgent:
     maintaining shared access to the projectAlpha AI infrastructure.
     """
 
-    def __init__(self,
-                 role: str,
-                 conductor: CoreConductor,
-                 memory: GraphRAGMemory,
-                 router: ToolRequestRouter,
-                 agent_id: Optional[str] = None,
-                 auto_memory_update: bool = True):
+    def __init__(
+        self,
+        role: str,
+        conductor: CoreConductor,
+        memory: GraphRAGMemory,
+        router: ToolRequestRouter,
+        agent_id: Optional[str] = None,
+        auto_memory_update: bool = True,
+    ):
         """
         Initialize a SLiM agent with integrated systems.
 
@@ -99,7 +104,9 @@ class SLiMAgent:
         # Validate role availability
         if role not in conductor.models:
             available_roles = list(conductor.models.keys())
-            logger.warning(f"Role '{role}' not available in conductor. Available: {available_roles}")
+            logger.warning(
+                f"Role '{role}' not available in conductor. Available: {available_roles}"
+            )
             # Fall back to conductor role if available
             if "conductor" in conductor.models:
                 self.role = "conductor"
@@ -149,7 +156,7 @@ class SLiMAgent:
 
         except Exception as e:
             logger.error(f"Error in agent {self.agent_id} processing: {e}")
-            return f"Agent {self.agent_id} encountered an error: {str(e)}"
+            return f"Agent {self.agent_id} encountered an error: {e!s}"
 
     def run_structured(self, prompt: str, depth: int = 1, use_tools: bool = True) -> AgentResponse:
         """
@@ -189,7 +196,7 @@ class SLiMAgent:
                 tool_calls=tool_calls,
                 reasoning_depth=depth,
                 timestamp=datetime.now().isoformat(),
-                confidence=confidence
+                confidence=confidence,
             )
 
         except Exception as e:
@@ -199,16 +206,16 @@ class SLiMAgent:
                 agent_id=self.agent_id,
                 role=self.role,
                 prompt=prompt,
-                response=f"Processing error: {str(e)}",
+                response=f"Processing error: {e!s}",
                 context_facts=[],
                 memory_updates=[],
                 tool_calls=[],
                 reasoning_depth=depth,
                 timestamp=datetime.now().isoformat(),
-                confidence=0.0
+                confidence=0.0,
             )
 
-    def _retrieve_context(self, prompt: str, depth: int) -> List[Dict[str, Any]]:
+    def _retrieve_context(self, prompt: str, depth: int) -> list[dict[str, Any]]:
         """Retrieve relevant context from GraphRAG memory."""
         try:
             query_result = self.memory.query_related(prompt, depth=depth)
@@ -219,7 +226,7 @@ class SLiMAgent:
             logger.warning(f"Memory context retrieval failed: {e}")
             return []
 
-    def _evaluate_tool_usage(self, prompt: str, context: List[Dict[str, Any]]) -> List[str]:
+    def _evaluate_tool_usage(self, prompt: str, context: list[dict[str, Any]]) -> list[str]:
         """Evaluate whether tools should be used for this prompt (extensible)."""
         tool_calls = []
 
@@ -240,7 +247,9 @@ class SLiMAgent:
         logger.debug(f"Agent {self.agent_id} identified potential tool calls: {tool_calls}")
         return tool_calls
 
-    def _generate_response(self, prompt: str, context: List[Dict[str, Any]], tool_calls: List[str]) -> str:
+    def _generate_response(
+        self, prompt: str, context: list[dict[str, Any]], tool_calls: list[str]
+    ) -> str:
         """Generate response using the conductor's role-specific model."""
         try:
             # Prepare context string from related facts
@@ -256,18 +265,18 @@ class SLiMAgent:
 
             # Generate using conductor
             response = self.conductor.generate(
-                role=self.role,
-                prompt=prompt,
-                context=context_str if context_str else None
+                role=self.role, prompt=prompt, context=context_str if context_str else None
             )
 
             return response
 
         except Exception as e:
             logger.error(f"Response generation failed for agent {self.agent_id}: {e}")
-            return f"I apologize, but I encountered an error processing your request: {str(e)}"
+            return f"I apologize, but I encountered an error processing your request: {e!s}"
 
-    def _update_memory(self, prompt: str, response: str, context: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _update_memory(
+        self, prompt: str, response: str, context: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
         """Extract facts from interaction and update memory."""
         memory_updates = []
 
@@ -281,15 +290,15 @@ class SLiMAgent:
                 "metadata": {
                     "role": self.role,
                     "timestamp": self.last_activity,
-                    "response_length": len(response)
-                }
+                    "response_length": len(response),
+                },
             }
 
             self.memory.add_fact(
                 interaction_fact["subject"],
                 interaction_fact["predicate"],
                 interaction_fact["object"],
-                interaction_fact["metadata"]
+                interaction_fact["metadata"],
             )
             memory_updates.append(interaction_fact)
 
@@ -300,7 +309,7 @@ class SLiMAgent:
 
         return memory_updates
 
-    def _calculate_confidence(self, context: List[Dict[str, Any]], response: str) -> float:
+    def _calculate_confidence(self, context: list[dict[str, Any]], response: str) -> float:
         """Calculate confidence score for the response (0.0 to 1.0)."""
         confidence = 0.5  # Base confidence
 
@@ -317,7 +326,7 @@ class SLiMAgent:
         # Ensure within bounds
         return min(1.0, max(0.0, confidence))
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Get current agent status and statistics."""
         return {
             "agent_id": self.agent_id,
@@ -326,7 +335,7 @@ class SLiMAgent:
             "total_responses": self.total_responses,
             "last_activity": self.last_activity,
             "auto_memory_update": self.auto_memory_update,
-            "model_available": self.role in self.conductor.models
+            "model_available": self.role in self.conductor.models,
         }
 
     def reset_session(self) -> None:

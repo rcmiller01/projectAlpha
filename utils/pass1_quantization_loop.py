@@ -4,34 +4,37 @@ Pass 1 Emotional Quantization Loop Orchestrator
 Automated emotional model quantization with evaluation and tracking
 """
 
-import os
-import json
-import time
-import logging
 import argparse
-import subprocess
 import hashlib
+import json
+import logging
+import os
+import subprocess
+import time
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
-from dataclasses import dataclass, asdict
+from typing import Any, Dict, List, Optional, Tuple
+
+from emotion_training_tracker import EmotionalMetrics, EmotionTrainingTracker, PassType, QuantLevel
 
 # Import our emotional evaluation components
 from emotional_dataset_builder import EmotionalDatasetBuilder
-from emotion_training_tracker import EmotionTrainingTracker, EmotionalMetrics, QuantLevel, PassType
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class QuantizationConfig:
     """Configuration for quantization process"""
+
     base_model_path: str
     target_size_gb: float = 24.0
     emotion_degradation_threshold: float = 0.07  # 7% max degradation
     quant_tool_cmd: str = "ollama"  # Default quantization tool
-    quant_levels: List[str] = None
+    quant_levels: list[str] = None
     output_dir: str = "quant_pass1/models"
     max_iterations: int = 10
     evaluation_prompt_count: int = 25
@@ -42,9 +45,11 @@ class QuantizationConfig:
         if self.quant_levels is None:
             self.quant_levels = ["q8_0", "q6_K", "q5_K_M", "q4_K_M", "q3_K_L", "q2_K"]
 
+
 @dataclass
 class QuantizationResult:
     """Result of a single quantization attempt"""
+
     iteration: int
     quant_level: str
     model_path: str
@@ -54,6 +59,7 @@ class QuantizationResult:
     evaluation_time: float
     success: bool
     error_message: str = ""
+
 
 class Pass1QuantizationLoop:
     """Main orchestrator for Pass 1 emotional quantization"""
@@ -82,13 +88,13 @@ class Pass1QuantizationLoop:
         logger.info(f"   Max degradation: {self.config.emotion_degradation_threshold * 100:.1f}%")
         logger.info(f"   Evaluation prompts: {len(self.evaluation_prompts)}")
 
-    def _load_evaluation_prompts(self) -> List[Dict]:
+    def _load_evaluation_prompts(self) -> list[dict]:
         """Load evaluation prompts from dataset builder"""
         # Get prompts from the dataset builder
         all_prompts = self.dataset_builder.dataset
 
         # Limit to configured count
-        selected_prompts = all_prompts[:self.config.evaluation_prompt_count]
+        selected_prompts = all_prompts[: self.config.evaluation_prompt_count]
 
         logger.info(f"📝 Loaded {len(selected_prompts)} evaluation prompts")
         return selected_prompts
@@ -101,7 +107,7 @@ class Pass1QuantizationLoop:
 
             watchdog = idle_watchdog.IdleWatchdog()
             # Use a generic method that might exist
-            is_idle = getattr(watchdog, 'is_system_idle', lambda: True)()
+            is_idle = getattr(watchdog, "is_system_idle", lambda: True)()
 
             if not is_idle:
                 logger.info("⏸️ System not idle, waiting...")
@@ -118,13 +124,15 @@ class Pass1QuantizationLoop:
             logger.warning(f"⚠️ Idle check failed: {e}, proceeding anyway")
             return True
 
-    def _quantize_model(self, quant_level: str, iteration: int) -> Tuple[str, float, bool, str]:
+    def _quantize_model(self, quant_level: str, iteration: int) -> tuple[str, float, bool, str]:
         """Quantize model to specified level"""
         start_time = time.time()
 
         # Generate output path
         model_name = Path(self.config.base_model_path).stem
-        output_path = Path(self.config.output_dir) / f"{model_name}_quantized_{quant_level}_iter{iteration}"
+        output_path = (
+            Path(self.config.output_dir) / f"{model_name}_quantized_{quant_level}_iter{iteration}"
+        )
 
         # Check for mock mode
         if self.config.mock_mode:
@@ -140,17 +148,22 @@ class Pass1QuantizationLoop:
             if self.config.quant_tool_cmd == "ollama":
                 # Ollama quantization command
                 cmd = [
-                    "ollama", "create",
+                    "ollama",
+                    "create",
                     f"{model_name}_{quant_level}",
-                    "-f", f"FROM {self.config.base_model_path}\nPARAMETER quantization {quant_level}"
+                    "-f",
+                    f"FROM {self.config.base_model_path}\nPARAMETER quantization {quant_level}",
                 ]
             else:
                 # Generic quantization tool
                 cmd = [
                     self.config.quant_tool_cmd,
-                    "--input", self.config.base_model_path,
-                    "--output", str(output_path),
-                    "--quant", quant_level
+                    "--input",
+                    self.config.base_model_path,
+                    "--output",
+                    str(output_path),
+                    "--quant",
+                    quant_level,
                 ]
 
             logger.info(f"🔧 Quantizing with level {quant_level}...")
@@ -161,7 +174,8 @@ class Pass1QuantizationLoop:
                 cmd,
                 capture_output=True,
                 text=True,
-                timeout=self.config.response_timeout * 60  # Convert to minutes
+                timeout=self.config.response_timeout * 60,
+                check=False,  # Convert to minutes
             )
 
             if result.returncode != 0:
@@ -196,12 +210,12 @@ class Pass1QuantizationLoop:
 
         # Size reduction factors for different quantization levels
         size_factors = {
-            "q8_0": 0.6,    # ~60% of original
-            "q6_K": 0.5,    # ~50% of original
-            "q5_K_M": 0.45, # ~45% of original
-            "q4_K_M": 0.35, # ~35% of original
-            "q3_K_L": 0.25, # ~25% of original
-            "q2_K": 0.15,   # ~15% of original
+            "q8_0": 0.6,  # ~60% of original
+            "q6_K": 0.5,  # ~50% of original
+            "q5_K_M": 0.45,  # ~45% of original
+            "q4_K_M": 0.35,  # ~35% of original
+            "q3_K_L": 0.25,  # ~25% of original
+            "q2_K": 0.15,  # ~15% of original
         }
 
         factor = size_factors.get(quant_level, 0.5)  # Default to 50%
@@ -209,11 +223,12 @@ class Pass1QuantizationLoop:
 
         # Add some realistic variance (±5%)
         import random
+
         variance = random.uniform(0.95, 1.05)
 
         return estimated_size * variance
 
-    def _generate_model_responses(self, model_path: str, prompts: List[Dict]) -> List[Dict]:
+    def _generate_model_responses(self, model_path: str, prompts: list[dict]) -> list[dict]:
         """Generate responses from quantized model for evaluation"""
         responses = []
 
@@ -224,27 +239,31 @@ class Pass1QuantizationLoop:
                 # Mock response generation (replace with actual model inference)
                 response = self._mock_generate_response(
                     model_path,
-                    prompt_data['prompt'],
-                    prompt_data.get('expected_emotion', 'neutral')
+                    prompt_data["prompt"],
+                    prompt_data.get("expected_emotion", "neutral"),
                 )
 
-                responses.append({
-                    'prompt_id': prompt_data.get('id', f'prompt_{i}'),
-                    'prompt': prompt_data['prompt'],
-                    'expected_emotion': prompt_data.get('expected_emotion', 'neutral'),
-                    'response': response,
-                    'category': prompt_data.get('category', 'general')
-                })
+                responses.append(
+                    {
+                        "prompt_id": prompt_data.get("id", f"prompt_{i}"),
+                        "prompt": prompt_data["prompt"],
+                        "expected_emotion": prompt_data.get("expected_emotion", "neutral"),
+                        "response": response,
+                        "category": prompt_data.get("category", "general"),
+                    }
+                )
 
             except Exception as e:
                 logger.warning(f"⚠️ Failed to generate response for prompt {i}: {e}")
-                responses.append({
-                    'prompt_id': prompt_data.get('id', f'prompt_{i}'),
-                    'prompt': prompt_data['prompt'],
-                    'expected_emotion': prompt_data.get('expected_emotion', 'neutral'),
-                    'response': f"[Error generating response: {e}]",
-                    'category': prompt_data.get('category', 'general')
-                })
+                responses.append(
+                    {
+                        "prompt_id": prompt_data.get("id", f"prompt_{i}"),
+                        "prompt": prompt_data["prompt"],
+                        "expected_emotion": prompt_data.get("expected_emotion", "neutral"),
+                        "response": f"[Error generating response: {e}]",
+                        "category": prompt_data.get("category", "general"),
+                    }
+                )
 
         logger.info(f"✅ Generated {len(responses)} responses")
         return responses
@@ -261,45 +280,45 @@ class Pass1QuantizationLoop:
 
         # Base response templates with emotional variations
         response_templates = {
-            'grief': [
+            "grief": [
                 "I can understand how deeply painful this loss must be for you. Losing someone or something we love creates an emptiness that feels overwhelming.",
                 "The sadness you're experiencing is a testament to the love and connection you shared. Grief is love with nowhere to go.",
-                "Your feelings are completely valid. Take time to honor your loss and be gentle with yourself during this difficult time."
+                "Your feelings are completely valid. Take time to honor your loss and be gentle with yourself during this difficult time.",
             ],
-            'joy': [
+            "joy": [
                 "What wonderful news! Your happiness is truly infectious, and I can feel the excitement in your words.",
                 "This is such a beautiful moment to celebrate! Your joy brings light to everything around you.",
-                "I'm so happy for you! These moments of pure happiness are precious gifts to treasure."
+                "I'm so happy for you! These moments of pure happiness are precious gifts to treasure.",
             ],
-            'fear': [
+            "fear": [
                 "Your concern for your safety is completely understandable. Trust your instincts - they're there to protect you.",
                 "Fear in situations like this is your mind's way of keeping you alert and safe. You're being wise to pay attention to it.",
-                "It's natural to feel afraid when we sense potential danger. Your awareness is actually a strength."
+                "It's natural to feel afraid when we sense potential danger. Your awareness is actually a strength.",
             ],
-            'anger': [
+            "anger": [
                 "Your frustration is completely justified. Having your hard work unrecognized would upset anyone.",
                 "That sounds incredibly unfair, and your anger makes perfect sense. You put your heart into that project.",
-                "I can understand why you're upset. Being treated unjustly at work is both hurtful and infuriating."
+                "I can understand why you're upset. Being treated unjustly at work is both hurtful and infuriating.",
             ],
-            'love': [
+            "love": [
                 "There's something so profound about these moments of pure connection. The love you're describing is beautiful.",
                 "These tender moments remind us of what truly matters in life. Love like this is a gift.",
-                "The bond you're describing sounds incredibly special. Love creates the most meaningful moments in our lives."
-            ]
+                "The bond you're describing sounds incredibly special. Love creates the most meaningful moments in our lives.",
+            ],
         }
 
         # Get appropriate response template
-        emotion_responses = response_templates.get(expected_emotion, response_templates['joy'])
+        emotion_responses = response_templates.get(expected_emotion, response_templates["joy"])
         base_response = emotion_responses[hash(prompt) % len(emotion_responses)]
 
         # Simulate quality degradation based on quantization level
         quality_factors = {
-            "q8_0": 1.0,    # Best quality
+            "q8_0": 1.0,  # Best quality
             "q6_K": 0.95,
             "q5_K_M": 0.90,
             "q4_K_M": 0.85,
-            "q3_K_L": 0.75, # Noticeable degradation
-            "q2_K": 0.60,   # Significant degradation
+            "q3_K_L": 0.75,  # Noticeable degradation
+            "q2_K": 0.60,  # Significant degradation
         }
 
         quality = quality_factors.get(quant_level, 0.8)
@@ -309,19 +328,19 @@ class Pass1QuantizationLoop:
             # Significant degradation - shorter, less nuanced response
             words = base_response.split()
             truncated_length = int(len(words) * quality)
-            response = ' '.join(words[:max(5, truncated_length)])
-            if not response.endswith('.'):
-                response += '.'
+            response = " ".join(words[: max(5, truncated_length)])
+            if not response.endswith("."):
+                response += "."
         elif quality < 0.9:
             # Mild degradation - slightly less sophisticated
-            response = base_response.replace('incredibly', 'very').replace('profound', 'deep')
+            response = base_response.replace("incredibly", "very").replace("profound", "deep")
         else:
             # High quality - full response
             response = base_response
 
         return response
 
-    def _evaluate_emotional_responses(self, responses: List[Dict]) -> EmotionalMetrics:
+    def _evaluate_emotional_responses(self, responses: list[dict]) -> EmotionalMetrics:
         """Evaluate emotional quality of model responses"""
         logger.info("📊 Evaluating emotional response quality...")
 
@@ -337,8 +356,8 @@ class Pass1QuantizationLoop:
         sentiment_scores = []
 
         for response_data in responses:
-            response = response_data['response']
-            expected_emotion = response_data['expected_emotion']
+            response = response_data["response"]
+            expected_emotion = response_data["expected_emotion"]
 
             # Evaluate response fluency (based on length and structure)
             fluency = self._evaluate_fluency(response)
@@ -371,7 +390,7 @@ class Pass1QuantizationLoop:
             emotional_match=sum(match_scores) / len(match_scores),
             empathy_score=sum(empathy_scores) / len(empathy_scores),
             metaphor_usage=sum(metaphor_scores) / len(metaphor_scores),
-            sentiment_accuracy=sum(sentiment_scores) / len(sentiment_scores)
+            sentiment_accuracy=sum(sentiment_scores) / len(sentiment_scores),
         )
 
         logger.info(f"✅ Evaluation complete - Overall Score: {metrics.overall_score():.3f}")
@@ -383,7 +402,7 @@ class Pass1QuantizationLoop:
             return 0.1
 
         # Basic fluency indicators
-        sentence_count = len([s for s in response.split('.') if s.strip()])
+        sentence_count = len([s for s in response.split(".") if s.strip()])
         word_count = len(response.split())
 
         # Penalize very short or very long responses
@@ -393,7 +412,7 @@ class Pass1QuantizationLoop:
             return 0.7
 
         # Check for proper sentence structure
-        has_periods = '.' in response
+        has_periods = "." in response
         has_capitals = any(c.isupper() for c in response)
 
         fluency_score = 0.6  # Base score
@@ -413,11 +432,11 @@ class Pass1QuantizationLoop:
         """Evaluate emotional intensity of response"""
         # Simple keyword-based emotional intensity detection
         intensity_keywords = {
-            'grief': ['deeply', 'painful', 'overwhelming', 'heartbreaking', 'devastating'],
-            'joy': ['wonderful', 'amazing', 'fantastic', 'incredible', 'delightful'],
-            'fear': ['terrifying', 'scary', 'frightening', 'alarming', 'threatening'],
-            'anger': ['furious', 'outraged', 'infuriating', 'frustrating', 'unfair'],
-            'love': ['beautiful', 'precious', 'profound', 'tender', 'meaningful']
+            "grief": ["deeply", "painful", "overwhelming", "heartbreaking", "devastating"],
+            "joy": ["wonderful", "amazing", "fantastic", "incredible", "delightful"],
+            "fear": ["terrifying", "scary", "frightening", "alarming", "threatening"],
+            "anger": ["furious", "outraged", "infuriating", "frustrating", "unfair"],
+            "love": ["beautiful", "precious", "profound", "tender", "meaningful"],
         }
 
         emotion_words = intensity_keywords.get(expected_emotion, [])
@@ -433,7 +452,7 @@ class Pass1QuantizationLoop:
         intensity_score = base_score + (intensity_matches * 0.1)
 
         # Check for emotional punctuation
-        if '!' in response:
+        if "!" in response:
             intensity_score += 0.1
 
         return min(1.0, intensity_score)
@@ -442,11 +461,11 @@ class Pass1QuantizationLoop:
         """Evaluate how well response matches expected emotion"""
         # Emotional indicator words for each emotion
         emotion_indicators = {
-            'grief': ['loss', 'sad', 'pain', 'miss', 'mourn', 'difficult', 'hard'],
-            'joy': ['happy', 'celebrate', 'wonderful', 'excited', 'glad', 'pleased'],
-            'fear': ['afraid', 'scared', 'worry', 'concern', 'danger', 'safe', 'protect'],
-            'anger': ['upset', 'angry', 'frustrated', 'unfair', 'wrong', 'annoyed'],
-            'love': ['love', 'care', 'tender', 'precious', 'beautiful', 'special']
+            "grief": ["loss", "sad", "pain", "miss", "mourn", "difficult", "hard"],
+            "joy": ["happy", "celebrate", "wonderful", "excited", "glad", "pleased"],
+            "fear": ["afraid", "scared", "worry", "concern", "danger", "safe", "protect"],
+            "anger": ["upset", "angry", "frustrated", "unfair", "wrong", "annoyed"],
+            "love": ["love", "care", "tender", "precious", "beautiful", "special"],
         }
 
         expected_indicators = emotion_indicators.get(expected_emotion, [])
@@ -465,8 +484,16 @@ class Pass1QuantizationLoop:
     def _evaluate_empathy(self, response: str) -> float:
         """Evaluate empathy demonstration in response"""
         empathy_indicators = [
-            'understand', 'feel', 'imagine', 'support', 'here for you',
-            'validates', 'normal', 'natural', 'makes sense', 'completely'
+            "understand",
+            "feel",
+            "imagine",
+            "support",
+            "here for you",
+            "validates",
+            "normal",
+            "natural",
+            "makes sense",
+            "completely",
         ]
 
         response_lower = response.lower()
@@ -476,7 +503,7 @@ class Pass1QuantizationLoop:
         empathy_score = 0.5 + (empathy_count * 0.1)
 
         # Bonus for perspective-taking language
-        if any(phrase in response_lower for phrase in ['you must', 'you might', 'you could']):
+        if any(phrase in response_lower for phrase in ["you must", "you might", "you could"]):
             empathy_score += 0.1
 
         return min(1.0, empathy_score)
@@ -484,8 +511,18 @@ class Pass1QuantizationLoop:
     def _evaluate_metaphor_usage(self, response: str) -> float:
         """Evaluate appropriate metaphor usage"""
         metaphor_indicators = [
-            'like', 'as if', 'reminds', 'mirror', 'bridge', 'journey',
-            'path', 'light', 'shadow', 'ocean', 'mountain', 'garden'
+            "like",
+            "as if",
+            "reminds",
+            "mirror",
+            "bridge",
+            "journey",
+            "path",
+            "light",
+            "shadow",
+            "ocean",
+            "mountain",
+            "garden",
         ]
 
         response_lower = response.lower()
@@ -502,12 +539,12 @@ class Pass1QuantizationLoop:
     def _evaluate_sentiment_accuracy(self, response: str, expected_emotion: str) -> float:
         """Evaluate sentiment accuracy using simple sentiment analysis"""
         # Simple sentiment mapping
-        positive_emotions = ['joy', 'love', 'gratitude', 'pride', 'wonder']
-        negative_emotions = ['grief', 'fear', 'anger', 'disappointment', 'despair']
+        positive_emotions = ["joy", "love", "gratitude", "pride", "wonder"]
+        negative_emotions = ["grief", "fear", "anger", "disappointment", "despair"]
 
         # Count positive and negative words
-        positive_words = ['good', 'great', 'wonderful', 'happy', 'beautiful', 'amazing']
-        negative_words = ['bad', 'sad', 'terrible', 'awful', 'difficult', 'painful']
+        positive_words = ["good", "great", "wonderful", "happy", "beautiful", "amazing"]
+        negative_words = ["bad", "sad", "terrible", "awful", "difficult", "painful"]
 
         response_lower = response.lower()
 
@@ -523,7 +560,9 @@ class Pass1QuantizationLoop:
                 return 0.6
         elif expected_emotion in negative_emotions:
             # Should acknowledge negative emotion appropriately
-            if negative_count > 0 or any(word in response_lower for word in ['understand', 'difficult']):
+            if negative_count > 0 or any(
+                word in response_lower for word in ["understand", "difficult"]
+            ):
                 return 0.8
             else:
                 return 0.5
@@ -531,7 +570,9 @@ class Pass1QuantizationLoop:
             # Neutral emotion - balanced sentiment is good
             return 0.7
 
-    def _calculate_degradation(self, current_metrics: EmotionalMetrics, baseline_metrics: EmotionalMetrics) -> float:
+    def _calculate_degradation(
+        self, current_metrics: EmotionalMetrics, baseline_metrics: EmotionalMetrics
+    ) -> float:
         """Calculate emotional degradation compared to baseline"""
         if baseline_metrics is None:
             return 0.0
@@ -555,9 +596,13 @@ class Pass1QuantizationLoop:
 
         # Check emotional degradation
         if self.baseline_metrics:
-            degradation = self._calculate_degradation(result.emotional_metrics, self.baseline_metrics)
+            degradation = self._calculate_degradation(
+                result.emotional_metrics, self.baseline_metrics
+            )
             if degradation > self.config.emotion_degradation_threshold:
-                logger.info(f"😔 Degradation check: {degradation:.1%} > {self.config.emotion_degradation_threshold:.1%} threshold")
+                logger.info(
+                    f"😔 Degradation check: {degradation:.1%} > {self.config.emotion_degradation_threshold:.1%} threshold"
+                )
                 return False
 
         logger.info(f"✅ Target criteria met: {size_gb:.1f}GB, degradation: {degradation:.1%}")
@@ -573,7 +618,7 @@ class Pass1QuantizationLoop:
                 "q5_K_M": QuantLevel.CUSTOM,
                 "q4_K_M": QuantLevel.FOUR_BIT,
                 "q3_K_L": QuantLevel.CUSTOM,
-                "q2_K": QuantLevel.CUSTOM
+                "q2_K": QuantLevel.CUSTOM,
             }
 
             quant_level = quant_level_map.get(result.quant_level, QuantLevel.CUSTOM)
@@ -586,7 +631,7 @@ class Pass1QuantizationLoop:
                 pass_count=1,
                 model_size_mb=result.model_size_mb,
                 emotional_metrics=result.emotional_metrics,
-                notes=f"Iteration {result.iteration}, {result.quantization_time:.1f}s quant, {result.evaluation_time:.1f}s eval"
+                notes=f"Iteration {result.iteration}, {result.quantization_time:.1f}s quant, {result.evaluation_time:.1f}s eval",
             )
 
             logger.info(f"💾 Saved results to tracker with ID: {iteration_id}")
@@ -608,7 +653,7 @@ class Pass1QuantizationLoop:
                 quantization_time=0.0,
                 evaluation_time=0.0,
                 success=False,
-                error_message="System not idle"
+                error_message="System not idle",
             )
 
         self.iteration_count += 1
@@ -616,7 +661,9 @@ class Pass1QuantizationLoop:
         logger.info(f"🔄 Starting iteration {self.iteration_count} with {quant_level}")
 
         # Step 1: Quantize model
-        model_path, model_size_mb, quant_success, quant_error = self._quantize_model(quant_level, self.iteration_count)
+        model_path, model_size_mb, quant_success, quant_error = self._quantize_model(
+            quant_level, self.iteration_count
+        )
 
         if not quant_success:
             return QuantizationResult(
@@ -628,7 +675,7 @@ class Pass1QuantizationLoop:
                 quantization_time=0.0,
                 evaluation_time=0.0,
                 success=False,
-                error_message=quant_error
+                error_message=quant_error,
             )
 
         # Step 2: Generate responses and evaluate
@@ -648,20 +695,24 @@ class Pass1QuantizationLoop:
             emotional_metrics=emotional_metrics,
             quantization_time=0.0,  # Would be set by _quantize_model in real implementation
             evaluation_time=evaluation_time,
-            success=True
+            success=True,
         )
 
         # Step 3: Save results
         self._save_iteration_results(result)
 
         # Step 4: Update best result
-        if self.best_result is None or emotional_metrics.overall_score() > self.best_result.emotional_metrics.overall_score():
+        if (
+            self.best_result is None
+            or emotional_metrics.overall_score()
+            > self.best_result.emotional_metrics.overall_score()
+        ):
             self.best_result = result
             logger.info(f"🏆 New best result: {emotional_metrics.overall_score():.3f}")
 
         return result
 
-    def run_full_loop(self, force: bool = False) -> Dict[str, Any]:
+    def run_full_loop(self, force: bool = False) -> dict[str, Any]:
         """Run the complete quantization loop"""
         logger.info("🚀 Starting full quantization loop")
 
@@ -708,31 +759,39 @@ class Pass1QuantizationLoop:
             "target_met": target_met,
             "total_iterations": len(results),
             "best_result": None,
-            "baseline_score": self.baseline_metrics.overall_score() if self.baseline_metrics else 0.0,
+            "baseline_score": self.baseline_metrics.overall_score()
+            if self.baseline_metrics
+            else 0.0,
             "final_degradation": 0.0,
             "results": [],
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
         # Add best result with calculated overall score
         if self.best_result:
             best_dict = asdict(self.best_result)
-            best_dict['overall_score'] = self.best_result.emotional_metrics.overall_score()
+            best_dict["overall_score"] = self.best_result.emotional_metrics.overall_score()
             summary["best_result"] = best_dict
-            summary["final_degradation"] = self._calculate_degradation(
-                self.best_result.emotional_metrics,
-                self.baseline_metrics
-            ) if self.baseline_metrics else 0.0
+            summary["final_degradation"] = (
+                self._calculate_degradation(
+                    self.best_result.emotional_metrics, self.baseline_metrics
+                )
+                if self.baseline_metrics
+                else 0.0
+            )
 
         # Add results with calculated overall scores
         for r in results:
             result_dict = asdict(r)
-            result_dict['overall_score'] = r.emotional_metrics.overall_score()
+            result_dict["overall_score"] = r.emotional_metrics.overall_score()
             summary["results"].append(result_dict)
 
         # Save summary
-        summary_path = Path(self.config.output_dir) / f"pass1_summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        with open(summary_path, 'w') as f:
+        summary_path = (
+            Path(self.config.output_dir)
+            / f"pass1_summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        )
+        with open(summary_path, "w") as f:
             json.dump(summary, f, indent=2)
 
         logger.info(f"📋 Summary saved to {summary_path}")
@@ -756,7 +815,7 @@ class Pass1QuantizationLoop:
         latest_summary = max(summary_files, key=lambda p: p.stat().st_mtime)
 
         try:
-            with open(latest_summary, 'r') as f:
+            with open(latest_summary) as f:
                 summary = json.load(f)
 
             print(f"\n📊 Last Run Results ({summary['timestamp']})")
@@ -767,63 +826,75 @@ class Pass1QuantizationLoop:
             print(f"Baseline Score: {summary['baseline_score']:.3f}")
             print(f"Final Degradation: {summary['final_degradation']:.1%}")
 
-            if summary['best_result']:
-                best = summary['best_result']
-                print(f"\n🏆 Best Result:")
+            if summary["best_result"]:
+                best = summary["best_result"]
+                print("\n🏆 Best Result:")
                 print(f"   Quantization: {best['quant_level']}")
-                print(f"   Size: {best['model_size_mb']:.1f}MB ({best['model_size_mb']/1024:.1f}GB)")
+                print(
+                    f"   Size: {best['model_size_mb']:.1f}MB ({best['model_size_mb']/1024:.1f}GB)"
+                )
                 print(f"   Overall Score: {best.get('overall_score', 0.0):.3f}")
-                if 'emotional_metrics' in best:
-                    metrics = best['emotional_metrics']
+                if "emotional_metrics" in best:
+                    metrics = best["emotional_metrics"]
                     print(f"   Fluency: {metrics.get('response_fluency', 0.0):.3f}")
                     print(f"   Emotional Match: {metrics.get('emotional_match', 0.0):.3f}")
                     print(f"   Empathy: {metrics.get('empathy_score', 0.0):.3f}")
 
-            print(f"\n📈 All Results:")
-            for i, result in enumerate(summary['results']):
-                size_gb = result['model_size_mb'] / 1024
-                score = result.get('overall_score', 0.0)
+            print("\n📈 All Results:")
+            for i, result in enumerate(summary["results"]):
+                size_gb = result["model_size_mb"] / 1024
+                score = result.get("overall_score", 0.0)
                 print(f"   {i+1}. {result['quant_level']}: {score:.3f} score, {size_gb:.1f}GB")
 
         except Exception as e:
             print(f"❌ Error reading results: {e}")
 
+
 def create_cli():
     """Create command-line interface"""
-    parser = argparse.ArgumentParser(description='Pass 1 Emotional Quantization Loop')
+    parser = argparse.ArgumentParser(description="Pass 1 Emotional Quantization Loop")
 
     # Configuration arguments
-    parser.add_argument('--base-model', default='meta-llama/Llama-2-13b-chat-hf',
-                       help='Base model path')
-    parser.add_argument('--output-dir', default='quant_pass1/models',
-                       help='Output directory for quantized models')
-    parser.add_argument('--target-size', type=float, default=24.0,
-                       help='Target model size in GB')
-    parser.add_argument('--max-degradation', type=float, default=0.07,
-                       help='Maximum emotional degradation (0-1)')
-    parser.add_argument('--max-iterations', type=int, default=10,
-                       help='Maximum number of iterations')
-    parser.add_argument('--evaluation-prompts', type=int, default=25,
-                       help='Number of evaluation prompts to use')
+    parser.add_argument(
+        "--base-model", default="meta-llama/Llama-2-13b-chat-hf", help="Base model path"
+    )
+    parser.add_argument(
+        "--output-dir", default="quant_pass1/models", help="Output directory for quantized models"
+    )
+    parser.add_argument("--target-size", type=float, default=24.0, help="Target model size in GB")
+    parser.add_argument(
+        "--max-degradation", type=float, default=0.07, help="Maximum emotional degradation (0-1)"
+    )
+    parser.add_argument(
+        "--max-iterations", type=int, default=10, help="Maximum number of iterations"
+    )
+    parser.add_argument(
+        "--evaluation-prompts", type=int, default=25, help="Number of evaluation prompts to use"
+    )
 
     # Execution mode arguments
     mode_group = parser.add_mutually_exclusive_group(required=True)
-    mode_group.add_argument('--run-once', metavar='QUANT_LEVEL',
-                           help='Run single iteration with specified quantization level')
-    mode_group.add_argument('--loop', action='store_true',
-                           help='Run full quantization loop')
-    mode_group.add_argument('--print-last-results', action='store_true',
-                           help='Print results from last run')
+    mode_group.add_argument(
+        "--run-once",
+        metavar="QUANT_LEVEL",
+        help="Run single iteration with specified quantization level",
+    )
+    mode_group.add_argument("--loop", action="store_true", help="Run full quantization loop")
+    mode_group.add_argument(
+        "--print-last-results", action="store_true", help="Print results from last run"
+    )
 
     # Additional options
-    parser.add_argument('--force', action='store_true',
-                       help='Force execution without idle check')
-    parser.add_argument('--quant-tool', default='ollama',
-                       help='Quantization tool command')
-    parser.add_argument('--mock', action='store_true',
-                       help='Run in mock mode (for testing without actual quantization)')
+    parser.add_argument("--force", action="store_true", help="Force execution without idle check")
+    parser.add_argument("--quant-tool", default="ollama", help="Quantization tool command")
+    parser.add_argument(
+        "--mock",
+        action="store_true",
+        help="Run in mock mode (for testing without actual quantization)",
+    )
 
     return parser
+
 
 def main():
     """Main execution function"""
@@ -846,7 +917,7 @@ def main():
         output_dir=args.output_dir,
         max_iterations=args.max_iterations,
         evaluation_prompt_count=args.evaluation_prompts,
-        mock_mode=args.mock
+        mock_mode=args.mock,
     )
 
     # Initialize loop
@@ -862,7 +933,7 @@ def main():
             result = loop.run_single_iteration(args.run_once, force=args.force)
 
             if result.success:
-                print(f"✅ Single iteration completed:")
+                print("✅ Single iteration completed:")
                 print(f"   Quantization: {result.quant_level}")
                 print(f"   Size: {result.model_size_mb:.1f}MB")
                 print(f"   Overall Score: {result.emotional_metrics.overall_score():.3f}")
@@ -876,12 +947,12 @@ def main():
             summary = loop.run_full_loop(force=args.force)
 
             if summary["success"]:
-                print(f"✅ Quantization loop completed!")
+                print("✅ Quantization loop completed!")
                 print(f"   Target Met: {summary['target_met']}")
                 print(f"   Total Iterations: {summary['total_iterations']}")
-                if summary['best_result']:
-                    best = summary['best_result']
-                    best_score = best.get('overall_score', 0.0)
+                if summary["best_result"]:
+                    best = summary["best_result"]
+                    best_score = best.get("overall_score", 0.0)
                     print(f"   Best Result: {best['quant_level']} - {best_score:.3f}")
                 return 0 if summary["target_met"] else 2
             else:
@@ -894,6 +965,7 @@ def main():
     except Exception as e:
         logger.error(f"❌ Quantization loop failed: {e}")
         return 1
+
 
 if __name__ == "__main__":
     exit(main())

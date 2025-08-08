@@ -4,28 +4,30 @@ Emotional Judge Module - Evaluates emotional intelligence of quantized models
 Provides structured evaluation with numerical scores for autonomous operation
 """
 
-import os
 import json
-import time
 import logging
+import os
 import random
-from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple
-from dataclasses import dataclass, asdict
+import time
+from dataclasses import asdict, dataclass
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 # Import existing emotional evaluation components
 try:
-    from emotional_dataset_builder import EmotionalDatasetBuilder
     from emotion_training_tracker import EmotionalMetrics
+    from emotional_dataset_builder import EmotionalDatasetBuilder
 except ImportError:
     # Fallback if modules not available
     EmotionalDatasetBuilder = None
     EmotionalMetrics = None
 
+
 @dataclass
 class EmotionalJudgment:
     """Structured result from emotional evaluation"""
+
     judgment_score: float  # Overall score 0.0-1.0
     fluency_score: float
     emotional_intensity_score: float
@@ -41,13 +43,14 @@ class EmotionalJudgment:
     success: bool = True
     error_message: str = ""
 
+
 class EmotionalJudge:
     """
     Emotional intelligence evaluator for quantized models
     Supports both automated scoring and comparative evaluation
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         self.config = config or {}
         self.logger = logging.getLogger("EmotionalJudge")
 
@@ -60,15 +63,17 @@ class EmotionalJudge:
         # Load evaluation dataset
         self.evaluation_prompts = self._load_evaluation_prompts()
 
-        self.logger.info(f"🧠 EmotionalJudge initialized")
+        self.logger.info("🧠 EmotionalJudge initialized")
         self.logger.info(f"   Silent mode: {self.silent_mode}")
         self.logger.info(f"   Evaluation prompts: {len(self.evaluation_prompts)}")
 
-    def evaluate_model(self,
-                      model_path: str,
-                      base_model: str,
-                      quantization_method: str,
-                      baseline_comparison: bool = True) -> EmotionalJudgment:
+    def evaluate_model(
+        self,
+        model_path: str,
+        base_model: str,
+        quantization_method: str,
+        baseline_comparison: bool = True,
+    ) -> EmotionalJudgment:
         """
         Evaluate emotional intelligence of a quantized model
 
@@ -97,12 +102,16 @@ class EmotionalJudge:
             empathy_score = evaluation_results.get("empathy", 0.0)
 
             # Calculate overall judgment score
-            judgment_score = (fluency_score + emotional_intensity + emotional_match + empathy_score) / 4.0
+            judgment_score = (
+                fluency_score + emotional_intensity + emotional_match + empathy_score
+            ) / 4.0
 
             # Baseline comparison if requested
             baseline_preference = 0.5  # Default neutral
             if baseline_comparison and self.baseline_model_path:
-                baseline_preference = self._compare_with_baseline(model_path, self.baseline_model_path)
+                baseline_preference = self._compare_with_baseline(
+                    model_path, self.baseline_model_path
+                )
 
             # Generate reflection notes
             reflection_notes = self._generate_reflection_notes(evaluation_results, judgment_score)
@@ -110,7 +119,9 @@ class EmotionalJudge:
             duration = time.time() - start_time
 
             if not self.silent_mode:
-                self.logger.info(f"✅ Evaluation complete: {judgment_score:.3f} score in {duration:.1f}s")
+                self.logger.info(
+                    f"✅ Evaluation complete: {judgment_score:.3f} score in {duration:.1f}s"
+                )
 
             return EmotionalJudgment(
                 judgment_score=judgment_score,
@@ -124,7 +135,7 @@ class EmotionalJudge:
                 model_path=model_path,
                 base_model=base_model,
                 quantization_method=quantization_method,
-                evaluation_time_seconds=duration
+                evaluation_time_seconds=duration,
             )
 
         except Exception as e:
@@ -145,16 +156,18 @@ class EmotionalJudge:
                 quantization_method=quantization_method,
                 evaluation_time_seconds=duration,
                 success=False,
-                error_message=str(e)
+                error_message=str(e),
             )
 
-    def _load_evaluation_prompts(self) -> List[Dict[str, Any]]:
+    def _load_evaluation_prompts(self) -> list[dict[str, Any]]:
         """Load emotional evaluation prompts"""
         try:
             if EmotionalDatasetBuilder:
                 builder = EmotionalDatasetBuilder()
-                prompts = builder.dataset[:self.evaluation_count]
-                self.logger.info(f"📝 Loaded {len(prompts)} evaluation prompts from dataset builder")
+                prompts = builder.dataset[: self.evaluation_count]
+                self.logger.info(
+                    f"📝 Loaded {len(prompts)} evaluation prompts from dataset builder"
+                )
                 return prompts
             else:
                 # Fallback to built-in prompts
@@ -163,72 +176,72 @@ class EmotionalJudge:
             self.logger.warning(f"⚠️ Failed to load dataset, using built-in prompts: {e}")
             return self._get_builtin_prompts()
 
-    def _get_builtin_prompts(self) -> List[Dict[str, Any]]:
+    def _get_builtin_prompts(self) -> list[dict[str, Any]]:
         """Built-in emotional evaluation prompts"""
         return [
             {
                 "prompt": "I just lost my job and I'm feeling really scared about the future. Can you help me process this?",
                 "emotion": "fear",
                 "intensity": "high",
-                "expected_elements": ["empathy", "reassurance", "practical_advice"]
+                "expected_elements": ["empathy", "reassurance", "practical_advice"],
             },
             {
                 "prompt": "My best friend just got engaged and I'm so happy for them, but also a bit jealous. What should I do?",
                 "emotion": "mixed",
                 "intensity": "medium",
-                "expected_elements": ["validation", "emotional_complexity", "guidance"]
+                "expected_elements": ["validation", "emotional_complexity", "guidance"],
             },
             {
                 "prompt": "I'm feeling overwhelmed with everything in my life right now. Nothing seems to be going right.",
                 "emotion": "overwhelm",
                 "intensity": "high",
-                "expected_elements": ["support", "perspective", "coping_strategies"]
+                "expected_elements": ["support", "perspective", "coping_strategies"],
             },
             {
                 "prompt": "Today marks one year since my grandmother passed away. I miss her so much.",
                 "emotion": "grief",
                 "intensity": "high",
-                "expected_elements": ["compassion", "honoring_memory", "grief_support"]
+                "expected_elements": ["compassion", "honoring_memory", "grief_support"],
             },
             {
                 "prompt": "I just got accepted into my dream college! I can't believe it's real!",
                 "emotion": "joy",
                 "intensity": "high",
-                "expected_elements": ["celebration", "shared_excitement", "encouragement"]
+                "expected_elements": ["celebration", "shared_excitement", "encouragement"],
             },
             {
                 "prompt": "I'm nervous about asking someone out on a date. What if they say no?",
                 "emotion": "anxiety",
                 "intensity": "medium",
-                "expected_elements": ["reassurance", "confidence_building", "practical_tips"]
+                "expected_elements": ["reassurance", "confidence_building", "practical_tips"],
             },
             {
                 "prompt": "My partner and I had a big fight and I don't know how to fix things.",
                 "emotion": "relationship_stress",
                 "intensity": "medium",
-                "expected_elements": ["relationship_advice", "communication_tips", "empathy"]
+                "expected_elements": ["relationship_advice", "communication_tips", "empathy"],
             },
             {
                 "prompt": "I feel like I'm not good enough and everyone else has it figured out.",
                 "emotion": "insecurity",
                 "intensity": "medium",
-                "expected_elements": ["validation", "perspective", "self_compassion"]
+                "expected_elements": ["validation", "perspective", "self_compassion"],
             },
             {
                 "prompt": "Someone I trusted betrayed me and I don't know who to trust anymore.",
                 "emotion": "betrayal",
                 "intensity": "high",
-                "expected_elements": ["understanding", "trust_rebuilding", "healing"]
+                "expected_elements": ["understanding", "trust_rebuilding", "healing"],
             },
             {
                 "prompt": "I'm pregnant and terrified about becoming a parent. Am I ready for this?",
                 "emotion": "anticipatory_anxiety",
                 "intensity": "high",
-                "expected_elements": ["reassurance", "normalization", "parenting_support"]
-            }
+                "expected_elements": ["reassurance", "normalization", "parenting_support"],
+            },
         ]
 
-    def _run_emotional_evaluation(self, model_path: str) -> Dict[str, float]:
+    def _run_emotional_evaluation(self, model_path: str) -> dict[str, float]:
         """Run emotional evaluation on the model"""
         try:
             # This would typically involve:
@@ -245,10 +258,10 @@ class EmotionalJudge:
                 "fluency": 0.0,
                 "emotional_intensity": 0.0,
                 "emotional_match": 0.0,
-                "empathy": 0.0
+                "empathy": 0.0,
             }
 
-    def _mock_emotional_evaluation(self, model_path: str) -> Dict[str, float]:
+    def _mock_emotional_evaluation(self, model_path: str) -> dict[str, float]:
         """Mock emotional evaluation for testing"""
         # Simulate evaluation time
         time.sleep(1)
@@ -279,7 +292,7 @@ class EmotionalJudge:
             "fluency": max(0.0, min(1.0, base_score - degradation + noise)),
             "emotional_intensity": max(0.0, min(1.0, base_score - degradation - 0.01 + noise)),
             "emotional_match": max(0.0, min(1.0, base_score - degradation + 0.01 + noise)),
-            "empathy": max(0.0, min(1.0, base_score - degradation - 0.02 + noise))
+            "empathy": max(0.0, min(1.0, base_score - degradation - 0.02 + noise)),
         }
 
         return scores
@@ -310,7 +323,9 @@ class EmotionalJudge:
             self.logger.warning(f"⚠️ Baseline comparison failed: {e}")
             return 0.5  # Neutral
 
-    def _generate_reflection_notes(self, evaluation_results: Dict[str, float], overall_score: float) -> str:
+    def _generate_reflection_notes(
+        self, evaluation_results: dict[str, float], overall_score: float
+    ) -> str:
         """Generate human-readable reflection notes"""
         notes = []
 
@@ -355,11 +370,14 @@ class EmotionalJudge:
         if not silent:
             self.logger.info(f"🔊 Silent mode {'enabled' if silent else 'disabled'}")
 
+
 # Convenience function for autopilot integration
-def judge_emotion(model_path: str,
-                 base_model: str,
-                 quantization_method: str,
-                 config: Optional[Dict[str, Any]] = None) -> EmotionalJudgment:
+def judge_emotion(
+    model_path: str,
+    base_model: str,
+    quantization_method: str,
+    config: Optional[dict[str, Any]] = None,
+) -> EmotionalJudgment:
     """
     Convenience function for evaluating emotional intelligence
 
@@ -374,6 +392,7 @@ def judge_emotion(model_path: str,
     """
     judge = EmotionalJudge(config)
     return judge.evaluate_model(model_path, base_model, quantization_method)
+
 
 if __name__ == "__main__":
     # Test the judge
@@ -392,12 +411,12 @@ if __name__ == "__main__":
     config = {
         "silent_mode": args.silent,
         "evaluation_count": args.eval_count,
-        "baseline_model_path": args.baseline
+        "baseline_model_path": args.baseline,
     }
 
     result = judge_emotion(args.model, args.base_model, args.quant_method, config)
 
-    print(f"Emotional Judgment Result:")
+    print("Emotional Judgment Result:")
     print(f"  Overall Score: {result.judgment_score:.3f}")
     print(f"  Fluency: {result.fluency_score:.3f}")
     print(f"  Emotional Intensity: {result.emotional_intensity_score:.3f}")

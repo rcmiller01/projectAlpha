@@ -4,9 +4,10 @@ Simple Integration Test - Direct Component Testing
 Tests the quantization integration without CLI dependencies
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
+
 
 def test_components_directly():
     """Test components directly without CLI"""
@@ -19,17 +20,19 @@ def test_components_directly():
     # Test 1: Test quantizer module
     print("\nTest 1: Quantizer Module")
     try:
-        from quantize_model import quantize_model, ModelQuantizer
+        from quantize_model import ModelQuantizer, quantize_model
 
         # Test with mock backend
         result = quantize_model(
             base_model="test-model",
             quantization_method="q4_K_M",
-            config={"backend": "mock", "output_dir": "test_output"}
+            config={"backend": "mock", "output_dir": "test_output"},
         )
 
         if result and result.success:
-            print(f"[OK] Quantizer working: {result.model_size_mb:.1f}MB in {result.duration_seconds:.1f}s")
+            print(
+                f"[OK] Quantizer working: {result.model_size_mb:.1f}MB in {result.duration_seconds:.1f}s"
+            )
             test_results.append(True)
         else:
             print(f"[FAIL] Quantizer failed: {result.error_message if result else 'No result'}")
@@ -42,14 +45,14 @@ def test_components_directly():
     # Test 2: Test emotional judge
     print("\nTest 2: Emotional Judge")
     try:
-        from judge_emotion import judge_emotion, EmotionalJudge
+        from judge_emotion import EmotionalJudge, judge_emotion
 
         # Test with mock evaluation
         result = judge_emotion(
             model_path="test_output/test-model.mock",
             base_model="test-model",
             quantization_method="q4_K_M",
-            config={"silent_mode": True, "evaluation_count": 3}
+            config={"silent_mode": True, "evaluation_count": 3},
         )
 
         if result and result.success:
@@ -67,8 +70,9 @@ def test_components_directly():
     # Test 3: Test enhanced database
     print("\nTest 3: Enhanced Database")
     try:
-        from emotion_core_tracker import EmotionalQuantDatabase
         import uuid
+
+        from emotion_core_tracker import EmotionalQuantDatabase
 
         # Create test database
         db = EmotionalQuantDatabase("test_simple_integration.db")
@@ -84,7 +88,7 @@ def test_components_directly():
             emotional_deviation=0.03,
             execution_time_minutes=8.5,
             success=True,
-            result_summary="Simple integration test"
+            result_summary="Simple integration test",
         )
 
         print(f"[OK] Database working: Logged run {run_id}")
@@ -96,15 +100,14 @@ def test_components_directly():
 
     except Exception as e:
         print(f"[FAIL] Database error: {e}")
-        test_results.append(False)    # Test 4: Test state manager
+        test_results.append(False)  # Test 4: Test state manager
     print("\nTest 4: State Manager")
     try:
         from autopilot_state import AutopilotStateManager
 
         # Create state manager with minimal config
         state_mgr = AutopilotStateManager(
-            "test_simple_state.json",
-            {"enable_watchdog": False, "resource_monitoring_interval": 60}
+            "test_simple_state.json", {"enable_watchdog": False, "resource_monitoring_interval": 60}
         )
 
         # Test basic operations
@@ -113,7 +116,7 @@ def test_components_directly():
         state_mgr.complete_job(True)
         state_mgr.stop_autopilot()
 
-        print(f"[OK] State Manager working")
+        print("[OK] State Manager working")
         print(f"     Running: {status.get('is_running', False)}")
         print(f"     Jobs today: {status.get('jobs_today', 0)}")
         test_results.append(True)
@@ -150,6 +153,7 @@ def test_components_directly():
     print("\nTest 6: Configuration")
     try:
         import json
+
         config_path = Path("emotion_quant_autopilot/autopilot_config.json")
 
         if config_path.exists():
@@ -157,8 +161,11 @@ def test_components_directly():
                 config = json.load(f)
 
             required_sections = [
-                "idle_monitoring", "safety_limits", "evaluation_settings",
-                "output_paths", "notifications"
+                "idle_monitoring",
+                "safety_limits",
+                "evaluation_settings",
+                "output_paths",
+                "notifications",
             ]
 
             missing = [s for s in required_sections if s not in config]
@@ -207,6 +214,7 @@ def test_components_directly():
         print("INTEGRATION INCOMPLETE - Major issues detected")
 
     return passed == total
+
 
 if __name__ == "__main__":
     success = test_components_directly()

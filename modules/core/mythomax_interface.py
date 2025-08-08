@@ -7,7 +7,8 @@ for the unified companion system.
 
 try:
     import torch
-    from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+    from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
@@ -15,18 +16,19 @@ except ImportError:
     AutoTokenizer = None
     AutoModelForCausalLM = None
     BitsAndBytesConfig = None
-from typing import Dict, Any, Optional, List
-import logging
 import asyncio
-from datetime import datetime
+import logging
 import os
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 
 class MythoMaxInterface:
     """
     Local quantized MythoMax interface optimized for unified companion responses
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         if config is None:
             config = {}
 
@@ -44,7 +46,7 @@ class MythoMaxInterface:
                 load_in_4bit=True,
                 bnb_4bit_compute_dtype=torch.float16,
                 bnb_4bit_use_double_quant=True,
-                bnb_4bit_quant_type="nf4"
+                bnb_4bit_quant_type="nf4",
             )
 
             # Generation parameters optimized for emotional intelligence
@@ -55,7 +57,7 @@ class MythoMaxInterface:
                 "top_k": 40,
                 "repetition_penalty": 1.1,
                 "do_sample": True,
-                "pad_token_id": None  # Will be set after tokenizer load
+                "pad_token_id": None,  # Will be set after tokenizer load
             }
         else:
             self.quantization_config = None
@@ -82,7 +84,7 @@ class MythoMaxInterface:
                 quantization_config=self.quantization_config,
                 device_map=self.device,
                 torch_dtype=torch.float16,
-                trust_remote_code=True
+                trust_remote_code=True,
             )
 
             # Update generation config with pad token
@@ -97,7 +99,9 @@ class MythoMaxInterface:
             self.is_loaded = True
             logging.info("Falling back to mock mode due to loading error")
 
-    async def generate_response(self, enhanced_prompt: str, user_context: Optional[Dict[str, Any]] = None) -> str:
+    async def generate_response(
+        self, enhanced_prompt: str, user_context: Optional[dict[str, Any]] = None
+    ) -> str:
         """
         Generate unified companion response using enhanced prompt with psychological guidance
         """
@@ -119,14 +123,12 @@ class MythoMaxInterface:
                 outputs = await asyncio.get_event_loop().run_in_executor(
                     None,
                     lambda: self.model.generate(
-                        inputs,
-                        **self.generation_config,
-                        attention_mask=torch.ones_like(inputs)
-                    )
+                        inputs, **self.generation_config, attention_mask=torch.ones_like(inputs)
+                    ),
                 )
 
             # Decode response
-            response = self.tokenizer.decode(outputs[0][len(inputs[0]):], skip_special_tokens=True)
+            response = self.tokenizer.decode(outputs[0][len(inputs[0]) :], skip_special_tokens=True)
 
             # Clean and format response
             cleaned_response = self._clean_response(response)
@@ -137,7 +139,9 @@ class MythoMaxInterface:
             logging.error(f"Error generating MythoMax response: {e}")
             return "I'm having trouble processing that right now. Could you try rephrasing?"
 
-    def _generate_mock_response(self, enhanced_prompt: str, user_context: Optional[Dict[str, Any]] = None) -> str:
+    def _generate_mock_response(
+        self, enhanced_prompt: str, user_context: Optional[dict[str, Any]] = None
+    ) -> str:
         """Generate a mock response for testing purposes"""
 
         # Analyze the prompt to generate an appropriate mock response
@@ -158,7 +162,9 @@ class MythoMaxInterface:
         else:
             return "I'm here with you, ready to support you in whatever way you need most right now. Whether you need someone to listen, help with a problem, or just be present with you, I'm here. What's on your mind today?"
 
-    def _format_prompt_for_mythomax(self, enhanced_prompt: str, user_context: Optional[Dict[str, Any]] = None) -> str:
+    def _format_prompt_for_mythomax(
+        self, enhanced_prompt: str, user_context: Optional[dict[str, Any]] = None
+    ) -> str:
         """Format the enhanced prompt for optimal MythoMax processing"""
 
         # MythoMax responds well to character-based prompts
@@ -180,29 +186,29 @@ Respond naturally as this unified companion, maintaining your caring personality
         unwanted_prefixes = ["AI:", "Assistant:", "Response:", "Companion:"]
         for prefix in unwanted_prefixes:
             if response.startswith(prefix):
-                response = response[len(prefix):].strip()
+                response = response[len(prefix) :].strip()
 
         # Ensure response doesn't end abruptly
-        if response and not response.endswith(('.', '!', '?', '"', "'", '...', '*')):
+        if response and not response.endswith((".", "!", "?", '"', "'", "...", "*")):
             response += "..."
 
         return response
 
-    def get_model_info(self) -> Dict[str, Any]:
+    def get_model_info(self) -> dict[str, Any]:
         """Get information about the loaded model"""
         return {
             "model_path": self.model_path,
             "is_loaded": self.is_loaded,
             "device": self.device,
             "quantization": "4-bit",
-            "memory_usage": self._get_memory_usage() if self.is_loaded else None
+            "memory_usage": self._get_memory_usage() if self.is_loaded else None,
         }
 
-    def _get_memory_usage(self) -> Dict[str, float]:
+    def _get_memory_usage(self) -> dict[str, float]:
         """Get current GPU memory usage"""
         if torch.cuda.is_available():
             return {
                 "allocated_gb": torch.cuda.memory_allocated() / 1024**3,
-                "cached_gb": torch.cuda.memory_reserved() / 1024**3
+                "cached_gb": torch.cuda.memory_reserved() / 1024**3,
             }
         return {"cpu_only": True}

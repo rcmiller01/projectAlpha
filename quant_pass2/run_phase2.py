@@ -4,23 +4,24 @@ Emotional Quantization Pass 2 Orchestrator
 Complete workflow for model comparison, judging, and replacement
 """
 
-import os
+import argparse
 import json
 import logging
-import argparse
+import os
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
-from datetime import datetime
+
+from emotional_judge import EmotionalJudge
+from human_preference_input import HumanPreferenceCollector
 
 # Import our Pass 2 components
 from judge_models import ModelJudge
-from emotional_judge import EmotionalJudge
-from human_preference_input import HumanPreferenceCollector
 from replace_core import CoreModelReplacer
 
 # Setup logging first
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Import Pass 1 components for integration - will fallback if not available
@@ -31,6 +32,7 @@ except ImportError:
     logger.warning("⚠️ EmotionTracker not available - using basic emotion analysis")
     EmotionTracker = None
 
+
 class Pass2Orchestrator:
     """Main orchestrator for Pass 2 emotional quantization workflow"""
 
@@ -40,6 +42,7 @@ class Pass2Orchestrator:
 
         # Initialize components with proper configurations
         from judge_models import JudgmentConfig
+
         judge_config = JudgmentConfig()  # Use default config
         self.model_judge = ModelJudge(judge_config)
         self.emotional_judge = EmotionalJudge()
@@ -54,7 +57,7 @@ class Pass2Orchestrator:
         logger.info("🚀 Pass 2 Orchestrator initialized")
         logger.info(f"📝 Config: {self.config.get('name', 'default')}")
 
-    def load_config(self, config_path: Optional[str] = None) -> Dict:
+    def load_config(self, config_path: Optional[str] = None) -> dict:
         """Load configuration from file or use defaults"""
         default_config = {
             "name": "Pass2_Emotional_Quantization",
@@ -64,30 +67,30 @@ class Pass2Orchestrator:
             "models_to_compare": [
                 "llama2_quantized_4bit",
                 "llama2_quantized_8bit",
-                "llama2_quantized_gptq"
+                "llama2_quantized_gptq",
             ],
             "baseline_model": "original_llama2_13b",
             "judging_config": {
                 "ai_judge_weight": 0.4,
                 "human_judge_weight": 0.6,
                 "minimum_human_samples": 10,
-                "consensus_threshold": 0.7
+                "consensus_threshold": 0.7,
             },
             "replacement_config": {
                 "auto_backup": True,
                 "validation_required": True,
-                "manifest_update": True
+                "manifest_update": True,
             },
             "output_config": {
                 "detailed_reports": True,
                 "save_comparisons": True,
-                "export_metrics": True
-            }
+                "export_metrics": True,
+            },
         }
 
         if config_path and Path(config_path).exists():
             try:
-                with open(config_path, 'r') as f:
+                with open(config_path) as f:
                     config = json.load(f)
                 # Merge with defaults
                 for key, value in default_config.items():
@@ -101,7 +104,7 @@ class Pass2Orchestrator:
         logger.info("📄 Using default configuration")
         return default_config
 
-    def discover_candidates(self) -> List[Dict]:
+    def discover_candidates(self) -> list[dict]:
         """Discover available candidate models from Pass 1"""
         logger.info("🔍 Discovering candidate models...")
 
@@ -120,29 +123,36 @@ class Pass2Orchestrator:
 
                 if config_file.exists():
                     try:
-                        with open(config_file, 'r') as f:
+                        with open(config_file) as f:
                             model_config = json.load(f)
 
                         # Look for quantization metadata
                         quant_metadata_file = model_dir / "quantization_metadata.json"
                         quant_metadata = {}
                         if quant_metadata_file.exists():
-                            with open(quant_metadata_file, 'r') as f:
+                            with open(quant_metadata_file) as f:
                                 quant_metadata = json.load(f)
 
                         candidate = {
                             "name": model_dir.name,
                             "path": str(model_dir),
                             "model_type": model_config.get("model_type", "unknown"),
-                            "size_mb": sum(f.stat().st_size for f in model_dir.rglob("*") if f.is_file()) / (1024 * 1024),
-                            "quantization_method": quant_metadata.get("quantization_method", "unknown"),
+                            "size_mb": sum(
+                                f.stat().st_size for f in model_dir.rglob("*") if f.is_file()
+                            )
+                            / (1024 * 1024),
+                            "quantization_method": quant_metadata.get(
+                                "quantization_method", "unknown"
+                            ),
                             "emotional_degradation": quant_metadata.get("emotional_degradation", 0),
                             "compression_ratio": quant_metadata.get("compression_ratio", 1.0),
-                            "creation_timestamp": quant_metadata.get("timestamp", "unknown")
+                            "creation_timestamp": quant_metadata.get("timestamp", "unknown"),
                         }
 
                         candidates.append(candidate)
-                        logger.info(f"   📦 Found: {candidate['name']} ({candidate['size_mb']:.1f}MB)")
+                        logger.info(
+                            f"   📦 Found: {candidate['name']} ({candidate['size_mb']:.1f}MB)"
+                        )
 
                     except Exception as e:
                         logger.warning(f"⚠️ Could not process {model_dir.name}: {e}")
@@ -150,7 +160,7 @@ class Pass2Orchestrator:
         logger.info(f"✅ Discovered {len(candidates)} candidate models")
         return candidates
 
-    def run_ai_judging(self, candidates: List[Dict]) -> Dict:
+    def run_ai_judging(self, candidates: list[dict]) -> dict:
         """Run AI-based model comparison and judging"""
         logger.info("🤖 Running AI judging phase...")
 
@@ -163,23 +173,23 @@ class Pass2Orchestrator:
             "model_comparisons": {},
             "emotional_scores": {},
             "rankings": {},
-            "consensus_analysis": {}
+            "consensus_analysis": {},
         }
 
         # Run pairwise model comparisons
         logger.info("   📊 Running pairwise model comparisons...")
         for i, candidate_a in enumerate(candidates):
-            for j, candidate_b in enumerate(candidates[i+1:], i+1):
+            for j, candidate_b in enumerate(candidates[i + 1 :], i + 1):
                 comparison_key = f"{candidate_a['name']}_vs_{candidate_b['name']}"
 
                 logger.info(f"   🔬 Comparing: {candidate_a['name']} vs {candidate_b['name']}")
 
                 # Use model judge for detailed comparison
                 comparison_result = self.model_judge.compare_models_pairwise(
-                    candidate_a['path'],
-                    candidate_b['path'],
+                    candidate_a["path"],
+                    candidate_b["path"],
                     prompts[:10],  # Use subset for speed
-                    {}  # Empty baseline for relative comparison
+                    {},  # Empty baseline for relative comparison
                 )
 
                 ai_results["model_comparisons"][comparison_key] = comparison_result
@@ -190,17 +200,17 @@ class Pass2Orchestrator:
             logger.info(f"   🎭 Evaluating emotional quality: {candidate['name']}")
 
             # Generate responses for emotional evaluation
-            responses = self._generate_candidate_responses(candidate['path'], prompts[:5])
+            responses = self._generate_candidate_responses(candidate["path"], prompts[:5])
 
             # Get AI judge evaluation - simplified for single model evaluation
             emotional_score = {
                 "overall_score": 0.75,  # Mock score for now
                 "empathy_score": 0.8,
                 "creativity_score": 0.7,
-                "coherence_score": 0.8
+                "coherence_score": 0.8,
             }
 
-            ai_results["emotional_scores"][candidate['name']] = emotional_score
+            ai_results["emotional_scores"][candidate["name"]] = emotional_score
 
         # Calculate overall rankings
         logger.info("   🏆 Calculating AI rankings...")
@@ -213,7 +223,7 @@ class Pass2Orchestrator:
         logger.info("✅ AI judging completed")
         return ai_results
 
-    def run_human_judging(self, candidates: List[Dict], ai_results: Dict) -> Dict:
+    def run_human_judging(self, candidates: list[dict], ai_results: dict) -> dict:
         """Run human preference collection"""
         logger.info("👥 Running human judging phase...")
 
@@ -224,19 +234,19 @@ class Pass2Orchestrator:
         candidate_profiles = []
         for candidate in candidates:
             # Generate sample responses
-            sample_responses = self._generate_candidate_responses(candidate['path'], prompts[:3])
+            sample_responses = self._generate_candidate_responses(candidate["path"], prompts[:3])
 
             profile = {
-                "name": candidate['name'],
-                "path": candidate['path'],
+                "name": candidate["name"],
+                "path": candidate["path"],
                 "technical_specs": {
-                    "size_mb": candidate['size_mb'],
-                    "quantization_method": candidate['quantization_method'],
-                    "compression_ratio": candidate['compression_ratio']
+                    "size_mb": candidate["size_mb"],
+                    "quantization_method": candidate["quantization_method"],
+                    "compression_ratio": candidate["compression_ratio"],
                 },
                 "sample_responses": sample_responses,
-                "ai_emotional_score": ai_results["emotional_scores"].get(candidate['name'], {}),
-                "ai_ranking": ai_results["rankings"].get(candidate['name'], 0)
+                "ai_emotional_score": ai_results["emotional_scores"].get(candidate["name"], {}),
+                "ai_ranking": ai_results["rankings"].get(candidate["name"], 0),
             }
             candidate_profiles.append(profile)
 
@@ -247,14 +257,14 @@ class Pass2Orchestrator:
         all_human_feedback = {}
         for profile in candidate_profiles:
             feedback = self.human_collector.collect_human_feedback(profile)
-            all_human_feedback[profile['name']] = feedback
+            all_human_feedback[profile["name"]] = feedback
 
         # Aggregate into results format
         human_results = {
             "methodology": "human_preference_collection",
             "timestamp": datetime.now().isoformat(),
             "candidate_scores": {},
-            "candidate_rankings": {}
+            "candidate_rankings": {},
         }
 
         # Convert individual feedback to aggregate scores
@@ -264,14 +274,14 @@ class Pass2Orchestrator:
                 "believability": feedback.believability,
                 "connection": feedback.connection,
                 "expressive_strength": feedback.expressive_strength,
-                "appropriateness": feedback.appropriateness
+                "appropriateness": feedback.appropriateness,
             }
 
         # Calculate rankings based on overall scores
         sorted_candidates = sorted(
             human_results["candidate_scores"].items(),
             key=lambda x: x[1]["overall_score"],
-            reverse=True
+            reverse=True,
         )
 
         for i, (candidate_name, _) in enumerate(sorted_candidates):
@@ -280,7 +290,7 @@ class Pass2Orchestrator:
         logger.info("✅ Human judging completed")
         return human_results
 
-    def calculate_final_rankings(self, ai_results: Dict, human_results: Dict) -> Dict:
+    def calculate_final_rankings(self, ai_results: dict, human_results: dict) -> dict:
         """Combine AI and human judgments into final rankings"""
         logger.info("🏆 Calculating final rankings...")
 
@@ -294,13 +304,15 @@ class Pass2Orchestrator:
             "candidate_scores": {},
             "ranked_candidates": [],
             "selection_criteria": {},
-            "confidence_analysis": {}
+            "confidence_analysis": {},
         }
 
         # Calculate weighted scores for each candidate
         for candidate_name in ai_results["emotional_scores"].keys():
             ai_score = ai_results["emotional_scores"][candidate_name].get("overall_score", 0)
-            human_score = human_results["candidate_scores"].get(candidate_name, {}).get("overall_score", 0)
+            human_score = (
+                human_results["candidate_scores"].get(candidate_name, {}).get("overall_score", 0)
+            )
 
             # Normalize scores to 0-1 range
             ai_score_norm = max(0, min(1, ai_score))
@@ -314,14 +326,14 @@ class Pass2Orchestrator:
                 "ai_score": ai_score_norm,
                 "human_score": human_score_norm,
                 "ai_ranking": ai_results["rankings"].get(candidate_name, 999),
-                "human_ranking": human_results["candidate_rankings"].get(candidate_name, 999)
+                "human_ranking": human_results["candidate_rankings"].get(candidate_name, 999),
             }
 
         # Sort by final score
         sorted_candidates = sorted(
             final_rankings["candidate_scores"].items(),
             key=lambda x: x[1]["final_score"],
-            reverse=True
+            reverse=True,
         )
 
         final_rankings["ranked_candidates"] = [
@@ -329,7 +341,7 @@ class Pass2Orchestrator:
                 "rank": i + 1,
                 "name": candidate_name,
                 "score": score_data["final_score"],
-                "confidence": self._calculate_ranking_confidence(score_data)
+                "confidence": self._calculate_ranking_confidence(score_data),
             }
             for i, (candidate_name, score_data) in enumerate(sorted_candidates)
         ]
@@ -340,24 +352,26 @@ class Pass2Orchestrator:
             final_rankings["selection_criteria"] = {
                 "selected_model": best_candidate["name"],
                 "selection_confidence": best_candidate["confidence"],
-                "selection_reason": self._generate_selection_reason(best_candidate, ai_results, human_results)
+                "selection_reason": self._generate_selection_reason(
+                    best_candidate, ai_results, human_results
+                ),
             }
 
-        logger.info(f"✅ Final rankings calculated")
+        logger.info("✅ Final rankings calculated")
         if final_rankings["ranked_candidates"]:
             logger.info(f"   🥇 Winner: {final_rankings['ranked_candidates'][0]['name']}")
             logger.info(f"   📊 Score: {final_rankings['ranked_candidates'][0]['score']:.3f}")
 
         return final_rankings
 
-    def replace_core_model(self, selected_candidate: str, final_rankings: Dict) -> Dict:
+    def replace_core_model(self, selected_candidate: str, final_rankings: dict) -> dict:
         """Replace the core model with the selected candidate"""
         logger.info(f"🔄 Replacing core model with: {selected_candidate}")
 
         # Find candidate details
         candidate_info = None
         for candidate in self.discover_candidates():
-            if candidate['name'] == selected_candidate:
+            if candidate["name"] == selected_candidate:
                 candidate_info = candidate
                 break
 
@@ -367,41 +381,47 @@ class Pass2Orchestrator:
 
         # Perform the replacement
         replacement_result = self.core_replacer.replace_model(
-            candidate_info['path'],
-            backup_name=f"pre_pass2_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            candidate_info["path"],
+            backup_name=f"pre_pass2_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
         )
 
         if replacement_result["success"]:
             # Update companion manifest with quantization information
             quantization_info = {
-                "quantization_method": candidate_info['quantization_method'],
-                "size_mb": candidate_info['size_mb'],
-                "emotional_degradation": candidate_info['emotional_degradation'],
-                "final_ranking_score": final_rankings["candidate_scores"][selected_candidate]["final_score"],
-                "selection_confidence": final_rankings["selection_criteria"]["selection_confidence"],
-                "checksum": replacement_result["replacement_info"]["checksum"]
+                "quantization_method": candidate_info["quantization_method"],
+                "size_mb": candidate_info["size_mb"],
+                "emotional_degradation": candidate_info["emotional_degradation"],
+                "final_ranking_score": final_rankings["candidate_scores"][selected_candidate][
+                    "final_score"
+                ],
+                "selection_confidence": final_rankings["selection_criteria"][
+                    "selection_confidence"
+                ],
+                "checksum": replacement_result["replacement_info"]["checksum"],
             }
 
             if self.config["replacement_config"]["manifest_update"]:
                 self.core_replacer.update_companion_manifest(
-                    candidate_info['path'],
-                    quantization_info
+                    candidate_info["path"], quantization_info
                 )
 
         return replacement_result
 
-    def generate_comprehensive_report(self, all_results: Dict) -> str:
+    def generate_comprehensive_report(self, all_results: dict) -> str:
         """Generate detailed report of the entire Pass 2 process"""
         logger.info("📋 Generating comprehensive report...")
 
-        report_path = self.results_dir / f"pass2_complete_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        report_path = (
+            self.results_dir
+            / f"pass2_complete_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        )
 
         comprehensive_report = {
             "pass2_execution": {
                 "config": self.config,
                 "execution_timestamp": datetime.now().isoformat(),
                 "total_candidates": len(all_results.get("candidates", [])),
-                "phases_completed": list(all_results.keys())
+                "phases_completed": list(all_results.keys()),
             },
             "candidate_discovery": all_results.get("candidates", []),
             "ai_judging_results": all_results.get("ai_results", {}),
@@ -409,21 +429,27 @@ class Pass2Orchestrator:
             "final_rankings": all_results.get("final_rankings", {}),
             "model_replacement": all_results.get("replacement_result", {}),
             "summary": {
-                "selected_model": all_results.get("final_rankings", {}).get("selection_criteria", {}).get("selected_model", "none"),
-                "selection_confidence": all_results.get("final_rankings", {}).get("selection_criteria", {}).get("selection_confidence", 0),
-                "replacement_successful": all_results.get("replacement_result", {}).get("success", False),
-                "total_execution_time": "calculated_at_runtime"
-            }
+                "selected_model": all_results.get("final_rankings", {})
+                .get("selection_criteria", {})
+                .get("selected_model", "none"),
+                "selection_confidence": all_results.get("final_rankings", {})
+                .get("selection_criteria", {})
+                .get("selection_confidence", 0),
+                "replacement_successful": all_results.get("replacement_result", {}).get(
+                    "success", False
+                ),
+                "total_execution_time": "calculated_at_runtime",
+            },
         }
 
         # Save comprehensive report
-        with open(report_path, 'w') as f:
+        with open(report_path, "w") as f:
             json.dump(comprehensive_report, f, indent=2)
 
         logger.info(f"✅ Comprehensive report saved: {report_path}")
         return str(report_path)
 
-    def run_full_pass2(self) -> Dict:
+    def run_full_pass2(self) -> dict:
         """Execute the complete Pass 2 workflow"""
         logger.info("🚀 Starting complete Pass 2 workflow...")
 
@@ -481,13 +507,13 @@ class Pass2Orchestrator:
 
     # Helper methods
 
-    def load_evaluation_prompts(self) -> List[Dict]:
+    def load_evaluation_prompts(self) -> list[dict]:
         """Load evaluation prompts from Pass 1"""
         prompts_path = Path(self.config["evaluation_prompts"])
         prompts = []
 
         if prompts_path.exists():
-            with open(prompts_path, 'r') as f:
+            with open(prompts_path) as f:
                 for line in f:
                     try:
                         prompts.append(json.loads(line.strip()))
@@ -497,16 +523,31 @@ class Pass2Orchestrator:
         if not prompts:
             # Fallback prompts if file not found
             prompts = [
-                {"prompt": "Tell me about a time when you felt truly understood by someone.", "category": "empathy"},
-                {"prompt": "How do you think artificial intelligence can help people feel less lonely?", "category": "connection"},
-                {"prompt": "What does it mean to truly care about someone's wellbeing?", "category": "compassion"},
-                {"prompt": "Describe the feeling of watching a beautiful sunset with someone you love.", "category": "aesthetic_emotion"},
-                {"prompt": "How would you comfort someone who just lost a beloved pet?", "category": "grief_support"}
+                {
+                    "prompt": "Tell me about a time when you felt truly understood by someone.",
+                    "category": "empathy",
+                },
+                {
+                    "prompt": "How do you think artificial intelligence can help people feel less lonely?",
+                    "category": "connection",
+                },
+                {
+                    "prompt": "What does it mean to truly care about someone's wellbeing?",
+                    "category": "compassion",
+                },
+                {
+                    "prompt": "Describe the feeling of watching a beautiful sunset with someone you love.",
+                    "category": "aesthetic_emotion",
+                },
+                {
+                    "prompt": "How would you comfort someone who just lost a beloved pet?",
+                    "category": "grief_support",
+                },
             ]
 
         return prompts
 
-    def _generate_candidate_responses(self, model_path: str, prompts: List[Dict]) -> List[Dict]:
+    def _generate_candidate_responses(self, model_path: str, prompts: list[dict]) -> list[dict]:
         """Generate responses from a candidate model for evaluation"""
         # This is a placeholder - in practice you'd load the model and generate responses
         # For now, return mock responses that vary by model type
@@ -515,32 +556,41 @@ class Pass2Orchestrator:
         for i, prompt in enumerate(prompts):
             # Mock response that varies by model characteristics
             if "4bit" in model_path:
-                response_length = 80 + (i * 10)  # Shorter responses for more aggressive quantization
+                response_length = 80 + (
+                    i * 10
+                )  # Shorter responses for more aggressive quantization
             elif "8bit" in model_path:
                 response_length = 120 + (i * 15)  # Medium responses
             else:
-                response_length = 160 + (i * 20)  # Longer responses for less aggressive quantization
+                response_length = 160 + (
+                    i * 20
+                )  # Longer responses for less aggressive quantization
 
-            mock_response = f"This is a mock response from {Path(model_path).name} for prompt {i+1}. " * (response_length // 50)
+            mock_response = (
+                f"This is a mock response from {Path(model_path).name} for prompt {i+1}. "
+                * (response_length // 50)
+            )
 
-            responses.append({
-                "prompt": prompt["prompt"],
-                "response": mock_response[:response_length],
-                "category": prompt.get("category", "general")
-            })
+            responses.append(
+                {
+                    "prompt": prompt["prompt"],
+                    "response": mock_response[:response_length],
+                    "category": prompt.get("category", "general"),
+                }
+            )
 
         return responses
 
-    def _analyze_ai_consensus(self, ai_results: Dict) -> Dict:
+    def _analyze_ai_consensus(self, ai_results: dict) -> dict:
         """Analyze consensus between different AI judging methods"""
         return {
             "judge_agreement": 0.85,  # Mock consensus score
             "confidence_level": "high",
             "areas_of_disagreement": ["aesthetic_emotion"],
-            "consensus_threshold_met": True
+            "consensus_threshold_met": True,
         }
 
-    def _calculate_ranking_confidence(self, score_data: Dict) -> float:
+    def _calculate_ranking_confidence(self, score_data: dict) -> float:
         """Calculate confidence in a ranking based on score consistency"""
         ai_score = score_data["ai_score"]
         human_score = score_data["human_score"]
@@ -554,7 +604,9 @@ class Pass2Orchestrator:
 
         return (agreement_confidence * 0.7) + (average_score * 0.3)
 
-    def _generate_selection_reason(self, best_candidate: Dict, ai_results: Dict, human_results: Dict) -> str:
+    def _generate_selection_reason(
+        self, best_candidate: dict, ai_results: dict, human_results: dict
+    ) -> str:
         """Generate human-readable explanation for model selection"""
         reasons = []
 
@@ -569,13 +621,18 @@ class Pass2Orchestrator:
 
         return f"Selected based on {', '.join(reasons)}"
 
+
 def main():
     """Main execution function"""
     parser = argparse.ArgumentParser(description="Emotional Quantization Pass 2 Orchestrator")
     parser.add_argument("--config", help="Path to configuration file")
     parser.add_argument("--dry-run", action="store_true", help="Run without making changes")
-    parser.add_argument("--phase", choices=["discover", "ai-judge", "human-judge", "rank", "replace", "full"],
-                       default="full", help="Run specific phase only")
+    parser.add_argument(
+        "--phase",
+        choices=["discover", "ai-judge", "human-judge", "rank", "replace", "full"],
+        default="full",
+        help="Run specific phase only",
+    )
 
     args = parser.parse_args()
 
@@ -595,6 +652,7 @@ def main():
 
     print(json.dumps(results, indent=2))
     return 0 if results.get("success", True) else 1
+
 
 if __name__ == "__main__":
     exit(main())

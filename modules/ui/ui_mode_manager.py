@@ -2,19 +2,22 @@
 # Phase 2: UI mode management for companion vs dev mode
 
 import json
-from typing import Dict, List, Optional
 from dataclasses import dataclass
-from enum import Enum
 from datetime import datetime
+from enum import Enum
+from typing import Dict, List, Optional
+
 
 class UIMode(Enum):
     COMPANION = "companion"  # Avatar visible, romantic interface
-    DEV = "dev"              # ChatGPT-like interface, no avatar
+    DEV = "dev"  # ChatGPT-like interface, no avatar
+
 
 class InterfaceType(Enum):
     WEB = "web"
     MOBILE = "mobile"
     DESKTOP = "desktop"
+
 
 @dataclass
 class UISettings:
@@ -24,6 +27,7 @@ class UISettings:
     theme: str
     layout: str
     animations_enabled: bool
+
 
 class UIModeManager:
     def __init__(self):
@@ -44,18 +48,22 @@ class UIModeManager:
                     "voice_synthesis": True,
                     "activity_suggestions": True,
                     "relationship_tracking": True,
-                    "nsfw_generation": True
+                    "nsfw_generation": True,
                 },
                 "ui_elements": {
                     "avatar_display": "prominent",
                     "chat_interface": "romantic_style",
                     "activity_panel": "visible",
                     "relationship_status": "visible",
-                    "voice_controls": "visible"
+                    "voice_controls": "visible",
                 },
                 "personas": {
-                    "unified_ai": {"type": "adaptive_companion", "avatar_enabled": True, "emotional_hooks": True}
-                }
+                    "unified_ai": {
+                        "type": "adaptive_companion",
+                        "avatar_enabled": True,
+                        "emotional_hooks": True,
+                    }
+                },
             },
             UIMode.DEV: {
                 "avatar_visible": False,
@@ -68,19 +76,23 @@ class UIModeManager:
                     "voice_synthesis": False,
                     "activity_suggestions": False,
                     "relationship_tracking": False,
-                    "nsfw_generation": False
+                    "nsfw_generation": False,
                 },
                 "ui_elements": {
                     "avatar_display": "hidden",
                     "chat_interface": "minimal_clean",
                     "activity_panel": "hidden",
                     "relationship_status": "hidden",
-                    "voice_controls": "hidden"
+                    "voice_controls": "hidden",
                 },
                 "personas": {
-                    "unified_ai": {"type": "adaptive_companion", "avatar_enabled": False, "emotional_hooks": False}
-                }
-            }
+                    "unified_ai": {
+                        "type": "adaptive_companion",
+                        "avatar_enabled": False,
+                        "emotional_hooks": False,
+                    }
+                },
+            },
         }
 
         # Interface-specific configurations
@@ -89,20 +101,20 @@ class UIModeManager:
                 "responsive": True,
                 "touch_support": False,
                 "keyboard_shortcuts": True,
-                "screen_size": "desktop"
+                "screen_size": "desktop",
             },
             InterfaceType.MOBILE: {
                 "responsive": True,
                 "touch_support": True,
                 "keyboard_shortcuts": False,
-                "screen_size": "mobile"
+                "screen_size": "mobile",
             },
             InterfaceType.DESKTOP: {
                 "responsive": False,
                 "touch_support": False,
                 "keyboard_shortcuts": True,
-                "screen_size": "desktop"
-            }
+                "screen_size": "desktop",
+            },
         }
 
         # Initialize default settings
@@ -115,10 +127,10 @@ class UIModeManager:
             "current_interface": self.current_interface.value,
             "mode_config": self.mode_configs[self.current_mode],
             "interface_config": self.interface_configs[self.current_interface],
-            "last_updated": datetime.now().isoformat()
+            "last_updated": datetime.now().isoformat(),
         }
 
-    def switch_mode(self, new_mode: UIMode) -> Dict:
+    def switch_mode(self, new_mode: UIMode) -> dict:
         """Switch between companion and dev modes"""
         if new_mode not in self.mode_configs:
             return {"error": "Invalid UI mode"}
@@ -131,10 +143,10 @@ class UIModeManager:
         return {
             "message": f"Switched to {new_mode.value} mode",
             "new_mode": new_mode.value,
-            "ui_settings": self.ui_settings
+            "ui_settings": self.ui_settings,
         }
 
-    def set_interface_type(self, interface_type: InterfaceType) -> Dict:
+    def set_interface_type(self, interface_type: InterfaceType) -> dict:
         """Set interface type (web, mobile, desktop)"""
         if interface_type not in self.interface_configs:
             return {"error": "Invalid interface type"}
@@ -147,10 +159,10 @@ class UIModeManager:
         return {
             "message": f"Interface set to {interface_type.value}",
             "interface_type": interface_type.value,
-            "ui_settings": self.ui_settings
+            "ui_settings": self.ui_settings,
         }
 
-    def get_current_ui_config(self) -> Dict:
+    def get_current_ui_config(self) -> dict:
         """Get current UI configuration"""
         return {
             "mode": self.current_mode.value,
@@ -158,7 +170,7 @@ class UIModeManager:
             "settings": self.ui_settings,
             "avatar_visible": self.ui_settings["mode_config"]["avatar_visible"],
             "theme": self.ui_settings["mode_config"]["theme"],
-            "layout": self.ui_settings["mode_config"]["layout"]
+            "layout": self.ui_settings["mode_config"]["layout"],
         }
 
     def is_avatar_visible(self) -> bool:
@@ -170,7 +182,7 @@ class UIModeManager:
         features = self.ui_settings["mode_config"]["features"]
         return features.get(feature, False)
 
-    def get_persona_config(self, persona_id: str) -> Dict:
+    def get_persona_config(self, persona_id: str) -> dict:
         """Get configuration for a specific persona in current mode"""
         personas = self.ui_settings["mode_config"]["personas"]
         return personas.get(persona_id, {})
@@ -185,26 +197,26 @@ class UIModeManager:
         persona_config = self.get_persona_config(persona_id)
         return persona_config.get("emotional_hooks", False)
 
-    def get_available_personas(self) -> Dict:
+    def get_available_personas(self) -> dict:
         """Get all available personas and their configurations"""
         return {
             "unified_ai": {
                 "name": "Companion",
                 "type": "adaptive_companion",
                 "llm_model": "mythomax",
-                "description": "Adaptive AI companion with contextual personality adaptation"
+                "description": "Adaptive AI companion with contextual personality adaptation",
             }
         }
 
-    def get_ui_elements_config(self) -> Dict:
+    def get_ui_elements_config(self) -> dict:
         """Get UI elements configuration for current mode"""
         return self.ui_settings["mode_config"]["ui_elements"]
 
-    def get_interface_config(self) -> Dict:
+    def get_interface_config(self) -> dict:
         """Get interface-specific configuration"""
         return self.ui_settings["interface_config"]
 
-    def customize_mode(self, mode: UIMode, customizations: Dict) -> Dict:
+    def customize_mode(self, mode: UIMode, customizations: dict) -> dict:
         """Customize mode-specific settings"""
         if mode not in self.mode_configs:
             return {"error": "Invalid mode"}
@@ -229,10 +241,10 @@ class UIModeManager:
 
         return {
             "message": f"Customized {mode.value} mode",
-            "updated_config": self.mode_configs[mode]
+            "updated_config": self.mode_configs[mode],
         }
 
-    def get_mode_comparison(self) -> Dict:
+    def get_mode_comparison(self) -> dict:
         """Get comparison between companion and dev modes"""
         comparison = {
             "companion_mode": {
@@ -240,46 +252,50 @@ class UIModeManager:
                 "avatar_visible": True,
                 "features": self.mode_configs[UIMode.COMPANION]["features"],
                 "ui_style": "romantic_intimate",
-                "best_for": ["romantic companionship", "emotional connection", "visual interaction"]
+                "best_for": [
+                    "romantic companionship",
+                    "emotional connection",
+                    "visual interaction",
+                ],
             },
             "dev_mode": {
                 "description": "Clean ChatGPT-like interface for development and testing",
                 "avatar_visible": False,
                 "features": self.mode_configs[UIMode.DEV]["features"],
                 "ui_style": "professional_clean",
-                "best_for": ["development", "testing", "professional use"]
-            }
+                "best_for": ["development", "testing", "professional use"],
+            },
         }
 
         return comparison
 
-    def get_interface_recommendations(self) -> Dict:
+    def get_interface_recommendations(self) -> dict:
         """Get interface recommendations based on current mode"""
         recommendations = {
             UIMode.COMPANION: {
                 InterfaceType.WEB: "Best for desktop romantic companionship with full features",
                 InterfaceType.MOBILE: "Good for mobile romantic interactions with touch gestures",
-                InterfaceType.DESKTOP: "Optimal for immersive romantic experience with large screen"
+                InterfaceType.DESKTOP: "Optimal for immersive romantic experience with large screen",
             },
             UIMode.DEV: {
                 InterfaceType.WEB: "Standard for development and testing",
                 InterfaceType.MOBILE: "Limited but functional for mobile development",
-                InterfaceType.DESKTOP: "Best for development with full keyboard shortcuts"
-            }
+                InterfaceType.DESKTOP: "Best for development with full keyboard shortcuts",
+            },
         }
 
         return recommendations.get(self.current_mode, {})
 
-    def export_ui_config(self) -> Dict:
+    def export_ui_config(self) -> dict:
         """Export current UI configuration"""
         return {
             "export_time": datetime.now().isoformat(),
             "ui_settings": self.ui_settings,
             "mode_configs": self.mode_configs,
-            "interface_configs": self.interface_configs
+            "interface_configs": self.interface_configs,
         }
 
-    def import_ui_config(self, config: Dict) -> Dict:
+    def import_ui_config(self, config: dict) -> dict:
         """Import UI configuration"""
         if "ui_settings" in config:
             self.ui_settings = config["ui_settings"]
@@ -294,8 +310,9 @@ class UIModeManager:
 
         return {
             "message": "UI configuration imported successfully",
-            "current_config": self.get_current_ui_config()
+            "current_config": self.get_current_ui_config(),
         }
+
 
 # Global UI mode manager instance
 ui_mode_manager = UIModeManager()

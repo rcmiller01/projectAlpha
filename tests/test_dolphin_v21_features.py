@@ -6,16 +6,18 @@ Persona Instructions, Mirror Mode, and System Metrics
 """
 
 import asyncio
-import aiohttp
 import json
+import os
 import time
 from datetime import datetime
-import os
-import pytest
 from unittest import mock
+
+import aiohttp
+import pytest
 
 if os.getenv("RUN_INTEGRATION", "false") != "true":
     pytest.skip("Integration tests skipped", allow_module_level=True)
+
 
 class DolphinV21Tester:
     """Test suite for Dolphin AI Orchestrator v2.1 advanced features"""
@@ -65,7 +67,9 @@ class DolphinV21Tester:
             async with self.session.get(f"{self.base_url}/api/reflection/summary") as response:
                 if response.status == 200:
                     data = await response.json()
-                    print(f"✅ Reflection engine status: {data.get('total_reflections', 0)} reflections generated")
+                    print(
+                        f"✅ Reflection engine status: {data.get('total_reflections', 0)} reflections generated"
+                    )
                 else:
                     print(f"⚠️ Reflection engine not available (status: {response.status})")
 
@@ -75,7 +79,7 @@ class DolphinV21Tester:
                     data = await response.json()
                     print(f"✅ Reflection engine enabled: {data.get('status')}")
                 else:
-                    print(f"⚠️ Could not enable reflection engine")
+                    print("⚠️ Could not enable reflection engine")
 
         except Exception as e:
             print(f"❌ Reflection engine test failed: {e}")
@@ -89,24 +93,26 @@ class DolphinV21Tester:
             async with self.session.get(f"{self.base_url}/api/connectivity/status") as response:
                 if response.status == 200:
                     data = await response.json()
-                    mode = data.get('current_mode', 'unknown')
+                    mode = data.get("current_mode", "unknown")
                     print(f"✅ Connectivity mode: {mode}")
 
                     # Show service status
-                    services = data.get('services', {})
+                    services = data.get("services", {})
                     for service_id, service_data in services.items():
-                        status = "🟢" if service_data.get('available') else "🔴"
-                        name = service_data.get('name', service_id)
-                        uptime = service_data.get('uptime_percentage', 0)
+                        status = "🟢" if service_data.get("available") else "🔴"
+                        name = service_data.get("name", service_id)
+                        uptime = service_data.get("uptime_percentage", 0)
                         print(f"   {status} {name}: {uptime:.1f}% uptime")
                 else:
                     print(f"⚠️ Connectivity manager not available (status: {response.status})")
 
             # Get routing adjustments
-            async with self.session.get(f"{self.base_url}/api/connectivity/routing-adjustments") as response:
+            async with self.session.get(
+                f"{self.base_url}/api/connectivity/routing-adjustments"
+            ) as response:
                 if response.status == 200:
                     data = await response.json()
-                    prefer_local = data.get('prefer_local', False)
+                    prefer_local = data.get("prefer_local", False)
                     print(f"✅ Routing preference: {'Local' if prefer_local else 'Cloud'}")
 
         except Exception as e:
@@ -121,9 +127,11 @@ class DolphinV21Tester:
             async with self.session.get(f"{self.base_url}/api/private-memory/status") as response:
                 if response.status == 200:
                     data = await response.json()
-                    is_unlocked = data.get('is_unlocked', False)
-                    total_memories = data.get('total_private_memories', 0)
-                    print(f"✅ Private memory: {total_memories} entries, {'Unlocked' if is_unlocked else 'Locked'}")
+                    is_unlocked = data.get("is_unlocked", False)
+                    total_memories = data.get("total_private_memories", 0)
+                    print(
+                        f"✅ Private memory: {total_memories} entries, {'Unlocked' if is_unlocked else 'Locked'}"
+                    )
                 else:
                     print(f"⚠️ Private memory not available (status: {response.status})")
                     return
@@ -131,12 +139,13 @@ class DolphinV21Tester:
             # Test unlock if locked
             if not is_unlocked:
                 unlock_data = {"password": "default_dev_password"}
-                async with self.session.post(f"{self.base_url}/api/private-memory/unlock",
-                                           json=unlock_data) as response:
+                async with self.session.post(
+                    f"{self.base_url}/api/private-memory/unlock", json=unlock_data
+                ) as response:
                     if response.status == 200:
                         print("✅ Private memory unlocked successfully")
                     else:
-                        print(f"❌ Failed to unlock private memory")
+                        print("❌ Failed to unlock private memory")
                         return
 
             # Test adding a private memory
@@ -144,17 +153,18 @@ class DolphinV21Tester:
                 "content": "This is a test private memory entry",
                 "tags": ["test", "demo"],
                 "category": "testing",
-                "metadata": {"test_timestamp": datetime.now().isoformat()}
+                "metadata": {"test_timestamp": datetime.now().isoformat()},
             }
 
-            async with self.session.post(f"{self.base_url}/api/private-memory/add",
-                                       json=memory_data) as response:
+            async with self.session.post(
+                f"{self.base_url}/api/private-memory/add", json=memory_data
+            ) as response:
                 if response.status == 200:
                     data = await response.json()
-                    entry_id = data.get('entry_id')
+                    entry_id = data.get("entry_id")
                     print(f"✅ Added private memory: {entry_id}")
                 else:
-                    print(f"❌ Failed to add private memory")
+                    print("❌ Failed to add private memory")
 
         except Exception as e:
             print(f"❌ Private memory test failed: {e}")
@@ -170,28 +180,34 @@ class DolphinV21Tester:
                     manifestos = await response.json()
                     print(f"✅ Found {len(manifestos)} persona manifestos:")
                     for manifesto in manifestos[:3]:  # Show first 3
-                        name = manifesto.get('name', 'Unknown')
-                        persona_id = manifesto.get('id', 'unknown')
-                        active = "🎯" if manifesto.get('is_active') else "  "
+                        name = manifesto.get("name", "Unknown")
+                        persona_id = manifesto.get("id", "unknown")
+                        active = "🎯" if manifesto.get("is_active") else "  "
                         print(f"   {active} {name} ({persona_id})")
                 else:
-                    print(f"⚠️ Persona instruction manager not available (status: {response.status})")
+                    print(
+                        f"⚠️ Persona instruction manager not available (status: {response.status})"
+                    )
                     return
 
             # Test activating a persona
             if manifestos:
-                test_persona = manifestos[0]['id']
-                async with self.session.post(f"{self.base_url}/api/personas/activate/{test_persona}") as response:
+                test_persona = manifestos[0]["id"]
+                async with self.session.post(
+                    f"{self.base_url}/api/personas/activate/{test_persona}"
+                ) as response:
                     if response.status == 200:
                         print(f"✅ Activated persona: {test_persona}")
                     else:
-                        print(f"❌ Failed to activate persona")
+                        print("❌ Failed to activate persona")
 
                 # Get active instructions
-                async with self.session.get(f"{self.base_url}/api/personas/active-instructions") as response:
+                async with self.session.get(
+                    f"{self.base_url}/api/personas/active-instructions"
+                ) as response:
                     if response.status == 200:
                         data = await response.json()
-                        persona_name = data.get('name', 'Unknown')
+                        persona_name = data.get("name", "Unknown")
                         print(f"✅ Active persona instructions loaded: {persona_name}")
 
         except Exception as e:
@@ -206,11 +222,13 @@ class DolphinV21Tester:
             async with self.session.get(f"{self.base_url}/api/mirror-mode/status") as response:
                 if response.status == 200:
                     data = await response.json()
-                    enabled = data.get('mirror_enabled', False)
-                    intensity = data.get('mirror_intensity', 0)
-                    total_reflections = data.get('total_reflections', 0)
-                    print(f"✅ Mirror mode: {'Enabled' if enabled else 'Disabled'} "
-                          f"(Intensity: {intensity}, Reflections: {total_reflections})")
+                    enabled = data.get("mirror_enabled", False)
+                    intensity = data.get("mirror_intensity", 0)
+                    total_reflections = data.get("total_reflections", 0)
+                    print(
+                        f"✅ Mirror mode: {'Enabled' if enabled else 'Disabled'} "
+                        f"(Intensity: {intensity}, Reflections: {total_reflections})"
+                    )
                 else:
                     print(f"⚠️ Mirror mode not available (status: {response.status})")
                     return
@@ -218,12 +236,13 @@ class DolphinV21Tester:
             # Test enabling mirror mode
             if not enabled:
                 enable_data = {"intensity": 0.5, "enabled_types": ["reasoning", "emotional"]}
-                async with self.session.post(f"{self.base_url}/api/mirror-mode/enable",
-                                           json=enable_data) as response:
+                async with self.session.post(
+                    f"{self.base_url}/api/mirror-mode/enable", json=enable_data
+                ) as response:
                     if response.status == 200:
                         print("✅ Mirror mode enabled successfully")
                     else:
-                        print(f"❌ Failed to enable mirror mode")
+                        print("❌ Failed to enable mirror mode")
 
         except Exception as e:
             print(f"❌ Mirror mode test failed: {e}")
@@ -237,11 +256,13 @@ class DolphinV21Tester:
             async with self.session.get(f"{self.base_url}/api/metrics/realtime") as response:
                 if response.status == 200:
                     data = await response.json()
-                    system = data.get('system', {})
-                    cpu = system.get('cpu_percent', 0)
-                    memory = system.get('memory_percent', 0)
-                    uptime = system.get('uptime_hours', 0)
-                    print(f"✅ System metrics: CPU {cpu:.1f}%, Memory {memory:.1f}%, Uptime {uptime:.1f}h")
+                    system = data.get("system", {})
+                    cpu = system.get("cpu_percent", 0)
+                    memory = system.get("memory_percent", 0)
+                    uptime = system.get("uptime_hours", 0)
+                    print(
+                        f"✅ System metrics: CPU {cpu:.1f}%, Memory {memory:.1f}%, Uptime {uptime:.1f}h"
+                    )
                 else:
                     print(f"⚠️ System metrics not available (status: {response.status})")
                     return
@@ -252,16 +273,16 @@ class DolphinV21Tester:
                     models = await response.json()
                     print(f"✅ Model usage tracked for {len(models)} models:")
                     for model, stats in list(models.items())[:3]:  # Show first 3
-                        requests = stats.get('total_requests', 0)
-                        avg_time = stats.get('avg_response_time_ms', 0)
+                        requests = stats.get("total_requests", 0)
+                        avg_time = stats.get("avg_response_time_ms", 0)
                         print(f"   📊 {model}: {requests} requests, {avg_time:.1f}ms avg")
 
             # Get health check
             async with self.session.get(f"{self.base_url}/api/metrics/health") as response:
                 if response.status == 200:
                     data = await response.json()
-                    status = data.get('status', 'unknown')
-                    health_score = data.get('health_score', 0)
+                    status = data.get("status", "unknown")
+                    health_score = data.get("health_score", 0)
                     print(f"✅ System health: {status} (Score: {health_score:.2f})")
 
         except Exception as e:
@@ -277,28 +298,28 @@ class DolphinV21Tester:
                 "message": "Help me understand how reflection works in AI systems",
                 "session_id": "test_v21_session",
                 "persona": "analyst",
-                "context": {
-                    "test_mode": True,
-                    "enable_reflection": True,
-                    "enable_mirror": True
-                }
+                "context": {"test_mode": True, "enable_reflection": True, "enable_mirror": True},
             }
 
             async with self.session.post(f"{self.base_url}/api/chat", json=chat_data) as response:
                 if response.status == 200:
                     data = await response.json()
-                    handler = data.get('handler', 'unknown')
-                    persona = data.get('persona_used', 'unknown')
-                    response_text = data.get('response', '')
+                    handler = data.get("handler", "unknown")
+                    persona = data.get("persona_used", "unknown")
+                    response_text = data.get("response", "")
 
-                    print(f"✅ Enhanced chat successful:")
+                    print("✅ Enhanced chat successful:")
                     print(f"   🎭 Persona: {persona}")
                     print(f"   🤖 Handler: {handler}")
                     print(f"   📝 Response length: {len(response_text)} characters")
 
                     # Check for mirror mode indicators
-                    if '*' in response_text or 'I chose' in response_text or 'My reasoning' in response_text:
-                        print(f"   🪩 Mirror mode reflection detected!")
+                    if (
+                        "*" in response_text
+                        or "I chose" in response_text
+                        or "My reasoning" in response_text
+                    ):
+                        print("   🪩 Mirror mode reflection detected!")
                 else:
                     print(f"❌ Enhanced chat failed (status: {response.status})")
 
@@ -333,6 +354,7 @@ class DolphinV21Tester:
         print("4. 🔐 Test private memory features")
         print("5. 🪩 Enable mirror mode for self-aware AI responses")
 
+
 async def main():
     """Main test execution"""
     print("Starting Dolphin v2.1 Advanced Features Test...")
@@ -340,6 +362,7 @@ async def main():
 
     async with DolphinV21Tester() as tester:
         await tester.run_full_test_suite()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

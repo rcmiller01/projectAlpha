@@ -2,13 +2,14 @@
 # Phase 3: Virtual reality integration for immersive shared experiences
 
 import json
-import time
+import math
 import threading
-from typing import Dict, List, Optional, Tuple
+import time
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-import math
+from typing import Dict, List, Optional, Tuple
+
 
 class VRSceneType(Enum):
     ROMANTIC_GARDEN = "romantic_garden"
@@ -22,6 +23,7 @@ class VRSceneType(Enum):
     WALKING_HAND_IN_HAND = "walking_hand_in_hand"
     MEDITATION_SPACE = "meditation_space"
 
+
 class VRInteractionType(Enum):
     TOUCH = "touch"
     HUG = "hug"
@@ -34,25 +36,28 @@ class VRInteractionType(Enum):
     WHISPER = "whisper"
     EMBRACE = "embrace"
 
+
 @dataclass
 class VRScene:
     scene_type: VRSceneType
     name: str
     description: str
-    environment_data: Dict
-    lighting: Dict
+    environment_data: dict
+    lighting: dict
     audio_ambience: str
-    interactive_elements: List[str]
+    interactive_elements: list[str]
     romantic_intensity: float  # 0.0 to 1.0
+
 
 @dataclass
 class VRInteraction:
     interaction_type: VRInteractionType
     intensity: float
     duration: float
-    location: Tuple[float, float, float]
+    location: tuple[float, float, float]
     target: str  # "avatar", "environment", "both"
     emotional_context: str
+
 
 class VRIntegration:
     def __init__(self):
@@ -70,7 +75,7 @@ class VRIntegration:
             "webxr": False,
             "oculus": False,
             "vive": False,
-            "desktop_vr": False
+            "desktop_vr": False,
         }
 
         self._detect_vr_devices()
@@ -81,11 +86,12 @@ class VRIntegration:
             # Check for WebXR support with navigator API fallback
             if self._has_navigator_api():
                 from js import navigator
-                if hasattr(navigator, 'xr'):
+
+                if hasattr(navigator, "xr"):
                     self.device_support["webxr"] = True
 
                 # Check for WebVR support (legacy)
-                if hasattr(navigator, 'getVRDisplays'):
+                if hasattr(navigator, "getVRDisplays"):
                     self.device_support["webvr"] = True
             else:
                 # Non-browser environment - check for VR runtime APIs
@@ -102,24 +108,26 @@ class VRIntegration:
         """Check if navigator API is available (browser environment)"""
         try:
             import js
-            return hasattr(js, 'navigator')
+
+            return hasattr(js, "navigator")
         except ImportError:
             return False
 
-    def _detect_system_vr(self) -> Dict[str, bool]:
+    def _detect_system_vr(self) -> dict[str, bool]:
         """Detect VR devices using system APIs when navigator unavailable"""
         vr_support = {}
 
         try:
             import platform
+
             system = platform.system().lower()
 
             # Check for VR runtime on different platforms
-            if system == 'windows':
+            if system == "windows":
                 vr_support.update(self._check_windows_vr())
-            elif system == 'linux':
+            elif system == "linux":
                 vr_support.update(self._check_linux_vr())
-            elif system == 'darwin':
+            elif system == "darwin":
                 vr_support.update(self._check_macos_vr())
 
         except Exception as e:
@@ -127,14 +135,17 @@ class VRIntegration:
 
         return vr_support
 
-    def _check_windows_vr(self) -> Dict[str, bool]:
+    def _check_windows_vr(self) -> dict[str, bool]:
         """Check for VR support on Windows"""
         support = {}
 
         try:
             # Check for SteamVR
             import os
-            steam_vr_path = os.path.expandvars(r"%PROGRAMFILES(x86)%\Steam\steamapps\common\SteamVR")
+
+            steam_vr_path = os.path.expandvars(
+                r"%PROGRAMFILES(x86)%\Steam\steamapps\common\SteamVR"
+            )
             support["steamvr"] = os.path.exists(steam_vr_path)
 
             # Check for Oculus runtime
@@ -146,13 +157,13 @@ class VRIntegration:
 
         return support
 
-    def _check_linux_vr(self) -> Dict[str, bool]:
+    def _check_linux_vr(self) -> dict[str, bool]:
         """Check for VR support on Linux"""
         support = {}
 
         try:
-            import subprocess
             import os
+            import subprocess
 
             # Check for SteamVR on Linux
             steam_vr_linux = os.path.expanduser("~/.steam/steam/steamapps/common/SteamVR")
@@ -160,7 +171,9 @@ class VRIntegration:
 
             # Check for OpenXR runtime
             try:
-                result = subprocess.run(['which', 'openxr'], capture_output=True, text=True)
+                result = subprocess.run(
+                    ["which", "openxr"], capture_output=True, text=True, check=False
+                )
                 support["openxr"] = result.returncode == 0
             except:
                 pass
@@ -170,12 +183,12 @@ class VRIntegration:
 
         return support
 
-    def _check_macos_vr(self) -> Dict[str, bool]:
+    def _check_macos_vr(self) -> dict[str, bool]:
         """Check for VR support on macOS"""
         # Limited VR support on macOS
         return {"desktop_vr": False}
 
-    def _load_scene_definitions(self) -> Dict[VRSceneType, VRScene]:
+    def _load_scene_definitions(self) -> dict[VRSceneType, VRScene]:
         """Load VR scene definitions"""
         return {
             VRSceneType.ROMANTIC_GARDEN: VRScene(
@@ -186,19 +199,18 @@ class VRIntegration:
                     "terrain": "garden",
                     "vegetation": ["roses", "lilies", "cherry_blossoms"],
                     "water_features": ["fountain", "small_pond"],
-                    "seating": ["stone_bench", "gazebo", "swing"]
+                    "seating": ["stone_bench", "gazebo", "swing"],
                 },
                 lighting={
                     "primary": "warm_sunset",
                     "secondary": "string_lights",
                     "intensity": 0.7,
-                    "color": "golden"
+                    "color": "golden",
                 },
                 audio_ambience="gentle_birds_and_water",
                 interactive_elements=["touch_roses", "sit_bench", "walk_path", "gaze_fountain"],
-                romantic_intensity=0.8
+                romantic_intensity=0.8,
             ),
-
             VRSceneType.COZY_HOME: VRScene(
                 scene_type=VRSceneType.COZY_HOME,
                 name="Cozy Home",
@@ -207,19 +219,18 @@ class VRIntegration:
                     "interior": "modern_cozy",
                     "furniture": ["comfortable_sofa", "fireplace", "dining_table"],
                     "decorations": ["candles", "flowers", "artwork"],
-                    "rooms": ["living_room", "kitchen", "bedroom"]
+                    "rooms": ["living_room", "kitchen", "bedroom"],
                 },
                 lighting={
                     "primary": "warm_indoor",
                     "secondary": "candlelight",
                     "intensity": 0.6,
-                    "color": "warm_white"
+                    "color": "warm_white",
                 },
                 audio_ambience="soft_music_and_fireplace",
                 interactive_elements=["sit_sofa", "cook_together", "dance", "cuddle"],
-                romantic_intensity=0.9
+                romantic_intensity=0.9,
             ),
-
             VRSceneType.BEACH_SUNSET: VRScene(
                 scene_type=VRSceneType.BEACH_SUNSET,
                 name="Beach Sunset",
@@ -228,19 +239,18 @@ class VRIntegration:
                     "terrain": "beach",
                     "water": "ocean_waves",
                     "sky": "sunset",
-                    "seating": ["beach_blanket", "driftwood_log"]
+                    "seating": ["beach_blanket", "driftwood_log"],
                 },
                 lighting={
                     "primary": "sunset",
                     "secondary": "reflection_water",
                     "intensity": 0.8,
-                    "color": "golden_orange"
+                    "color": "golden_orange",
                 },
                 audio_ambience="ocean_waves_and_seagulls",
                 interactive_elements=["walk_beach", "sit_blanket", "touch_water", "watch_sunset"],
-                romantic_intensity=0.7
+                romantic_intensity=0.7,
             ),
-
             VRSceneType.INTIMATE_BEDROOM: VRScene(
                 scene_type=VRSceneType.INTIMATE_BEDROOM,
                 name="Intimate Bedroom",
@@ -249,53 +259,53 @@ class VRIntegration:
                     "interior": "romantic_bedroom",
                     "furniture": ["king_bed", "nightstands", "armchair"],
                     "lighting": ["bedside_lamps", "candles"],
-                    "decorations": ["rose_petals", "silk_sheets"]
+                    "decorations": ["rose_petals", "silk_sheets"],
                 },
                 lighting={
                     "primary": "soft_bedside",
                     "secondary": "candlelight",
                     "intensity": 0.4,
-                    "color": "warm_amber"
+                    "color": "warm_amber",
                 },
                 audio_ambience="soft_romantic_music",
                 interactive_elements=["lie_bed", "embrace", "whisper", "intimate_touch"],
-                romantic_intensity=1.0
-            )
+                romantic_intensity=1.0,
+            ),
         }
 
-    def _load_interaction_patterns(self) -> Dict[VRInteractionType, Dict]:
+    def _load_interaction_patterns(self) -> dict[VRInteractionType, dict]:
         """Load VR interaction patterns"""
         return {
             VRInteractionType.TOUCH: {
                 "duration": 2.0,
                 "intensity_range": (0.3, 0.7),
                 "haptic_pattern": "gentle_touch",
-                "audio_feedback": "soft_touch_sound"
+                "audio_feedback": "soft_touch_sound",
             },
             VRInteractionType.HUG: {
                 "duration": 5.0,
                 "intensity_range": (0.6, 0.9),
                 "haptic_pattern": "embrace",
-                "audio_feedback": "warm_embrace_sound"
+                "audio_feedback": "warm_embrace_sound",
             },
             VRInteractionType.KISS: {
                 "duration": 3.0,
                 "intensity_range": (0.7, 1.0),
                 "haptic_pattern": "kiss",
-                "audio_feedback": "romantic_kiss_sound"
+                "audio_feedback": "romantic_kiss_sound",
             },
             VRInteractionType.DANCE: {
                 "duration": 30.0,
                 "intensity_range": (0.4, 0.8),
                 "haptic_pattern": "rhythm",
-                "audio_feedback": "romantic_music"
+                "audio_feedback": "romantic_music",
             },
             VRInteractionType.HOLD_HANDS: {
                 "duration": 10.0,
                 "intensity_range": (0.5, 0.8),
                 "haptic_pattern": "gentle_pressure",
-                "audio_feedback": "hand_holding_sound"
-            }
+                "audio_feedback": "hand_holding_sound",
+            },
         }
 
     def start_vr_session(self, scene_type: str = "romantic_garden") -> bool:
@@ -353,7 +363,9 @@ class VRIntegration:
         # Position AI companion avatar
         self.avatar_position = (1.0, 0.0, 0.0)  # Slightly to the right
 
-        print(f"[VR] Positioned avatars - User: {self.user_position}, Avatar: {self.avatar_position}")
+        print(
+            f"[VR] Positioned avatars - User: {self.user_position}, Avatar: {self.avatar_position}"
+        )
 
     def _setup_interactive_elements(self):
         """Set up interactive elements in the scene"""
@@ -390,14 +402,16 @@ class VRIntegration:
         if distance < 1.0:  # Close proximity
             self._trigger_proximity_response(distance)
 
-    def _calculate_distance(self, pos1: Tuple[float, float, float], pos2: Tuple[float, float, float]) -> float:
+    def _calculate_distance(
+        self, pos1: tuple[float, float, float], pos2: tuple[float, float, float]
+    ) -> float:
         """Calculate distance between two 3D positions"""
         return math.sqrt(sum((a - b) ** 2 for a, b in zip(pos1, pos2)))
 
     def _trigger_proximity_response(self, distance: float):
         """Trigger response based on proximity to avatar"""
-        from modules.input.haptic_system import get_haptic_system
         from modules.emotion.mood_engine import update_mood
+        from modules.input.haptic_system import get_haptic_system
 
         # Update mood based on proximity
         proximity_intensity = max(0.0, 1.0 - distance)
@@ -436,19 +450,21 @@ class VRIntegration:
                 duration=pattern["duration"],
                 location=self.avatar_position,
                 target="avatar",
-                emotional_context="romantic"
+                emotional_context="romantic",
             )
 
             # Execute interaction
             self._execute_vr_interaction(interaction)
 
             # Store interaction history
-            self.interaction_history.append({
-                "type": interaction_type,
-                "intensity": intensity,
-                "timestamp": datetime.now().isoformat(),
-                "scene": self.current_scene.name if self.current_scene else None
-            })
+            self.interaction_history.append(
+                {
+                    "type": interaction_type,
+                    "intensity": intensity,
+                    "timestamp": datetime.now().isoformat(),
+                    "scene": self.current_scene.name if self.current_scene else None,
+                }
+            )
 
             print(f"[VR] Triggered {interaction_type} interaction")
             return True
@@ -459,8 +475,8 @@ class VRIntegration:
 
     def _execute_vr_interaction(self, interaction: VRInteraction):
         """Execute a VR interaction"""
-        from modules.input.haptic_system import get_haptic_system
         from modules.emotion.mood_engine import update_mood
+        from modules.input.haptic_system import get_haptic_system
 
         # Update mood based on interaction
         update_mood(f"vr:{interaction.interaction_type.value}", intensity=interaction.intensity)
@@ -469,7 +485,7 @@ class VRIntegration:
         haptic_system = get_haptic_system()
         haptic_system.trigger_romantic_haptic(
             interaction.interaction_type.value,
-            intensity="moderate" if interaction.intensity > 0.7 else "gentle"
+            intensity="moderate" if interaction.intensity > 0.7 else "gentle",
         )
 
         # Update avatar animation
@@ -486,7 +502,7 @@ class VRIntegration:
             VRInteractionType.HUG: "embrace_animation",
             VRInteractionType.KISS: "kiss_animation",
             VRInteractionType.DANCE: "dance_animation",
-            VRInteractionType.HOLD_HANDS: "hand_holding_animation"
+            VRInteractionType.HOLD_HANDS: "hand_holding_animation",
         }
 
         animation = animation_map.get(interaction.interaction_type, "idle_animation")
@@ -525,7 +541,7 @@ class VRIntegration:
         self.current_scene = None
         print("[VR] Stopped VR session")
 
-    def get_vr_status(self) -> Dict:
+    def get_vr_status(self) -> dict:
         """Get current VR system status"""
         return {
             "active": self.is_vr_active,
@@ -534,28 +550,38 @@ class VRIntegration:
             "user_position": self.user_position,
             "avatar_position": self.avatar_position,
             "available_scenes": [scene.value for scene in VRSceneType],
-            "recent_interactions": self.interaction_history[-5:] if self.interaction_history else [],
-            "romantic_intensity": self.current_scene.romantic_intensity if self.current_scene else 0.0
+            "recent_interactions": self.interaction_history[-5:]
+            if self.interaction_history
+            else [],
+            "romantic_intensity": self.current_scene.romantic_intensity
+            if self.current_scene
+            else 0.0,
         }
+
 
 # Global VR integration instance
 vr_integration = VRIntegration()
+
 
 def get_vr_integration() -> VRIntegration:
     """Get the global VR integration instance"""
     return vr_integration
 
+
 def start_vr_session(scene_type: str = "romantic_garden") -> bool:
     """Start a VR session"""
     return vr_integration.start_vr_session(scene_type)
+
 
 def stop_vr_session():
     """Stop VR session"""
     vr_integration.stop_vr_session()
 
+
 def trigger_vr_interaction(interaction_type: str, intensity: float = 0.5) -> bool:
     """Trigger VR interaction"""
     return vr_integration.trigger_vr_interaction(interaction_type, intensity)
+
 
 def change_vr_scene(scene_type: str) -> bool:
     """Change VR scene"""

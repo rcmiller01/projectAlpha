@@ -4,33 +4,32 @@ Loop Controller for Autonomous Emotional Quantization
 Iterates quantization attempts until targets are met
 """
 
-import os
 import json
-import time
 import logging
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass
+import os
 import signal
 import sys
+import time
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
-from quantize_emotion import EmotionalQuantizer, QuantizationConfig
 from emotion_tracker import EmotionTracker
+from quantize_emotion import EmotionalQuantizer, QuantizationConfig
 
 # Setup logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('quant_pass1/quantization_loop.log'),
-        logging.StreamHandler()
-    ]
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[logging.FileHandler("quant_pass1/quantization_loop.log"), logging.StreamHandler()],
 )
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class LoopConfig:
     """Configuration for the quantization loop"""
+
     max_attempts: int = 10
     target_size_gb: float = 24.0
     max_emotional_degradation: float = 0.07
@@ -38,6 +37,7 @@ class LoopConfig:
     adaptive_parameters: bool = True
     save_intermediate: bool = True
     early_stopping: bool = True
+
 
 class QuantizationLoop:
     """Autonomous quantization loop controller"""
@@ -62,7 +62,9 @@ class QuantizationLoop:
         Path("quant_pass1/checkpoints").mkdir(parents=True, exist_ok=True)
 
         logger.info("🔄 Quantization Loop Controller initialized")
-        logger.info(f"🎯 Targets: Size ≤ {loop_config.target_size_gb}GB, Degradation ≤ {loop_config.max_emotional_degradation*100}%")
+        logger.info(
+            f"🎯 Targets: Size ≤ {loop_config.target_size_gb}GB, Degradation ≤ {loop_config.max_emotional_degradation*100}%"
+        )
         logger.info(f"🔁 Max attempts: {loop_config.max_attempts}")
 
     def _signal_handler(self, signum, frame):
@@ -76,7 +78,7 @@ class QuantizationLoop:
             self.quantizer = EmotionalQuantizer(self.quant_config)
         return self.quantizer
 
-    def evaluate_attempt_result(self, results: Dict) -> Tuple[bool, Optional[Dict]]:
+    def evaluate_attempt_result(self, results: dict) -> tuple[bool, Optional[dict]]:
         """Evaluate if attempt results meet target criteria"""
         best_method_result = None
         targets_met = False
@@ -90,13 +92,14 @@ class QuantizationLoop:
 
             if meets_size and meets_quality:
                 targets_met = True
-                if (best_method_result is None or
-                    result.get("model_size_gb", float('inf')) < best_method_result.get("model_size_gb", float('inf'))):
+                if best_method_result is None or result.get(
+                    "model_size_gb", float("inf")
+                ) < best_method_result.get("model_size_gb", float("inf")):
                     best_method_result = result
 
         return targets_met, best_method_result
 
-    def check_convergence(self, current_results: Dict) -> bool:
+    def check_convergence(self, current_results: dict) -> bool:
         """Check if results are converging (no significant improvement)"""
         if len(self.attempt_history) < 3:
             return False
@@ -116,7 +119,9 @@ class QuantizationLoop:
 
         # Calculate variance in recent degradation scores
         mean_degradation = sum(degradation_scores) / len(degradation_scores)
-        variance = sum((x - mean_degradation) ** 2 for x in degradation_scores) / len(degradation_scores)
+        variance = sum((x - mean_degradation) ** 2 for x in degradation_scores) / len(
+            degradation_scores
+        )
 
         is_converged = variance < self.loop_config.convergence_threshold
 
@@ -128,7 +133,7 @@ class QuantizationLoop:
 
         return self.convergence_count >= 2  # Require consistent convergence
 
-    def adapt_quantization_parameters(self, attempt_number: int, previous_results: Dict):
+    def adapt_quantization_parameters(self, attempt_number: int, previous_results: dict):
         """Adapt quantization parameters based on previous results"""
         if not self.loop_config.adaptive_parameters:
             return
@@ -163,16 +168,22 @@ class QuantizationLoop:
         # Adjust target slightly if consistently failing
         if attempt_number >= 3:
             consistent_size_failure = all(
-                not any(result.get("meets_size_target", False) for result in attempt.values() if "error" not in result)
+                not any(
+                    result.get("meets_size_target", False)
+                    for result in attempt.values()
+                    if "error" not in result
+                )
                 for attempt in self.attempt_history[-2:]
             )
 
             if consistent_size_failure:
                 old_target = self.quant_config.target_size_gb
                 self.quant_config.target_size_gb *= 1.1  # Increase by 10%
-                logger.info(f"📈 Relaxed size target: {old_target:.1f}GB → {self.quant_config.target_size_gb:.1f}GB")
+                logger.info(
+                    f"📈 Relaxed size target: {old_target:.1f}GB → {self.quant_config.target_size_gb:.1f}GB"
+                )
 
-    def save_checkpoint(self, attempt_number: int, results: Dict):
+    def save_checkpoint(self, attempt_number: int, results: dict):
         """Save checkpoint of current progress"""
         if not self.loop_config.save_intermediate:
             return
@@ -185,15 +196,15 @@ class QuantizationLoop:
             "quant_config": {
                 "target_size_gb": self.quant_config.target_size_gb,
                 "emotion_threshold": self.quant_config.emotion_threshold,
-                "quant_methods": self.quant_config.quant_methods
+                "quant_methods": self.quant_config.quant_methods,
             },
-            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         }
 
         checkpoint_file = f"quant_pass1/checkpoints/checkpoint_attempt_{attempt_number}.json"
 
         try:
-            with open(checkpoint_file, 'w') as f:
+            with open(checkpoint_file, "w") as f:
                 json.dump(checkpoint, f, indent=2)
             logger.info(f"💾 Checkpoint saved: {checkpoint_file}")
         except Exception as e:
@@ -202,7 +213,7 @@ class QuantizationLoop:
     def load_checkpoint(self, checkpoint_file: str) -> bool:
         """Load checkpoint and resume from previous state"""
         try:
-            with open(checkpoint_file, 'r') as f:
+            with open(checkpoint_file) as f:
                 checkpoint = json.load(f)
 
             self.attempt_history = checkpoint.get("attempt_history", [])
@@ -210,9 +221,15 @@ class QuantizationLoop:
 
             # Restore configuration
             quant_config = checkpoint.get("quant_config", {})
-            self.quant_config.target_size_gb = quant_config.get("target_size_gb", self.quant_config.target_size_gb)
-            self.quant_config.emotion_threshold = quant_config.get("emotion_threshold", self.quant_config.emotion_threshold)
-            self.quant_config.quant_methods = quant_config.get("quant_methods", self.quant_config.quant_methods)
+            self.quant_config.target_size_gb = quant_config.get(
+                "target_size_gb", self.quant_config.target_size_gb
+            )
+            self.quant_config.emotion_threshold = quant_config.get(
+                "emotion_threshold", self.quant_config.emotion_threshold
+            )
+            self.quant_config.quant_methods = quant_config.get(
+                "quant_methods", self.quant_config.quant_methods
+            )
 
             logger.info(f"📂 Resumed from checkpoint: {checkpoint_file}")
             logger.info(f"🔄 Previous attempts: {len(self.attempt_history)}")
@@ -223,7 +240,7 @@ class QuantizationLoop:
             logger.error(f"❌ Failed to load checkpoint: {e}")
             return False
 
-    def generate_progress_report(self, attempt_number: int, results: Dict) -> str:
+    def generate_progress_report(self, attempt_number: int, results: dict) -> str:
         """Generate progress report for current attempt"""
         report = []
         report.append(f"📊 ATTEMPT #{attempt_number + 1} RESULTS")
@@ -253,7 +270,7 @@ class QuantizationLoop:
 
         return "\n".join(report)
 
-    def should_continue(self, attempt_number: int, results: Dict) -> Tuple[bool, str]:
+    def should_continue(self, attempt_number: int, results: dict) -> tuple[bool, str]:
         """Determine if loop should continue"""
 
         # Check max attempts
@@ -281,8 +298,9 @@ class QuantizationLoop:
             for attempt in recent_attempts:
                 for method, result in attempt.items():
                     if "error" not in result:
-                        if (result.get("meets_size_target", False) or
-                            result.get("meets_quality_target", False)):
+                        if result.get("meets_size_target", False) or result.get(
+                            "meets_quality_target", False
+                        ):
                             any_progress = True
                             break
                 if any_progress:
@@ -293,7 +311,7 @@ class QuantizationLoop:
 
         return True, "Continuing optimization"
 
-    def run_autonomous_loop(self) -> Dict:
+    def run_autonomous_loop(self) -> dict:
         """Run the autonomous quantization loop"""
         logger.info("🚀 Starting autonomous quantization loop")
         logger.info("=" * 60)
@@ -319,8 +337,10 @@ class QuantizationLoop:
                     targets_met, best_result = self.evaluate_attempt_result(results)
 
                     # Update best result
-                    if best_result and (self.best_result is None or
-                                      best_result["model_size_gb"] < self.best_result["model_size_gb"]):
+                    if best_result and (
+                        self.best_result is None
+                        or best_result["model_size_gb"] < self.best_result["model_size_gb"]
+                    ):
                         self.best_result = best_result
                         logger.info("🏆 New best result found!")
 
@@ -364,7 +384,7 @@ class QuantizationLoop:
                 "best_result": self.best_result,
                 "total_attempts": len(self.attempt_history),
                 "total_time": total_time,
-                "attempt_history": self.attempt_history
+                "attempt_history": self.attempt_history,
             }
 
         except Exception as e:
@@ -385,11 +405,13 @@ class QuantizationLoop:
             report.append("🏆 BEST RESULT ACHIEVED:")
             report.append(f"  🔧 Method: {self.best_result['method']}")
             report.append(f"  📦 Model size: {self.best_result['model_size_gb']:.2f}GB")
-            report.append(f"  💔 Emotional degradation: {self.best_result['emotional_degradation']*100:.2f}%")
+            report.append(
+                f"  💔 Emotional degradation: {self.best_result['emotional_degradation']*100:.2f}%"
+            )
             report.append(f"  ✅ Meets size target: {self.best_result['meets_size_target']}")
             report.append(f"  ✅ Meets quality target: {self.best_result['meets_quality_target']}")
 
-            if self.best_result['meets_size_target'] and self.best_result['meets_quality_target']:
+            if self.best_result["meets_size_target"] and self.best_result["meets_quality_target"]:
                 report.append("")
                 report.append("🎉 SUCCESS! All targets achieved!")
             else:
@@ -414,7 +436,9 @@ class QuantizationLoop:
 
         if total_methods_tested > 0:
             success_rate = (successful_attempts / total_methods_tested) * 100
-            report.append(f"  Success rate: {success_rate:.1f}% ({successful_attempts}/{total_methods_tested})")
+            report.append(
+                f"  Success rate: {success_rate:.1f}% ({successful_attempts}/{total_methods_tested})"
+            )
 
         return "\n".join(report)
 
@@ -426,35 +450,33 @@ class QuantizationLoop:
                 "target_size_gb": self.loop_config.target_size_gb,
                 "max_emotional_degradation": self.loop_config.max_emotional_degradation,
                 "convergence_threshold": self.loop_config.convergence_threshold,
-                "adaptive_parameters": self.loop_config.adaptive_parameters
+                "adaptive_parameters": self.loop_config.adaptive_parameters,
             },
             "quantization_config": {
                 "model_path": self.quant_config.model_path,
                 "output_path": self.quant_config.output_path,
                 "final_target_size_gb": self.quant_config.target_size_gb,
                 "final_emotion_threshold": self.quant_config.emotion_threshold,
-                "final_quant_methods": self.quant_config.quant_methods
+                "final_quant_methods": self.quant_config.quant_methods,
             },
             "results": {
                 "best_result": self.best_result,
                 "total_attempts": len(self.attempt_history),
                 "attempt_history": self.attempt_history,
-                "convergence_count": self.convergence_count
+                "convergence_count": self.convergence_count,
             },
-            "metadata": {
-                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-                "version": "1.0"
-            }
+            "metadata": {"timestamp": time.strftime("%Y-%m-%d %H:%M:%S"), "version": "1.0"},
         }
 
         results_file = "quant_pass1/loop_results/autonomous_quantization_results.json"
 
         try:
-            with open(results_file, 'w') as f:
+            with open(results_file, "w") as f:
                 json.dump(final_results, f, indent=2)
             logger.info(f"💾 Final results saved: {results_file}")
         except Exception as e:
             logger.error(f"❌ Failed to save final results: {e}")
+
 
 def main():
     """Main execution function"""
@@ -472,14 +494,14 @@ def main():
         convergence_threshold=0.001,
         adaptive_parameters=True,
         save_intermediate=True,
-        early_stopping=True
+        early_stopping=True,
     )
 
     quant_config = QuantizationConfig(
         model_path=model_path,
         output_path="quant_pass1",
         target_size_gb=size_target_gb,
-        emotion_threshold=emotion_threshold
+        emotion_threshold=emotion_threshold,
     )
 
     # Check for existing checkpoint
@@ -494,7 +516,7 @@ def main():
         logger.info(f"📂 Found checkpoint: {latest_checkpoint}")
 
         response = input("Resume from checkpoint? (y/n): ").lower().strip()
-        if response == 'y':
+        if response == "y":
             if loop_controller.load_checkpoint(str(latest_checkpoint)):
                 logger.info("✅ Resumed from checkpoint")
             else:
@@ -517,6 +539,7 @@ def main():
     except Exception as e:
         logger.error(f"❌ Autonomous quantization failed: {e}")
         return 3
+
 
 if __name__ == "__main__":
     exit_code = main()

@@ -26,12 +26,13 @@ sys.path.append(str(project_root))
 # Try different import patterns
 try:
     from src.core.core_conductor import CoreConductor
-    from src.core.init_models import load_model, get_model_info
+    from src.core.init_models import get_model_info, load_model
 except ImportError:
     # Fallback import pattern
     sys.path.append(str(project_root / "src"))
     from core.core_conductor import CoreConductor
-    from core.init_models import load_model, get_model_info
+    from core.init_models import get_model_info, load_model
+
 
 def demo_model_loading():
     """Demonstrate model loading capabilities"""
@@ -61,6 +62,7 @@ def demo_model_loading():
 
     return conductor_model, logic_model
 
+
 def demo_enhanced_conductor():
     """Demonstrate enhanced conductor with model integration"""
     print("\n\n🎯 Enhanced CoreConductor Demo")
@@ -71,7 +73,7 @@ def demo_enhanced_conductor():
     conductor = CoreConductor(
         memory_file="data/demo_enhanced_conductor.json",
         tool_log_file="logs/demo_enhanced_conductor.jsonl",
-        conductor_id="demo_conductor"
+        conductor_id="demo_conductor",
     )
 
     # Show model status
@@ -80,7 +82,7 @@ def demo_enhanced_conductor():
     print(f"   Total models loaded: {model_status['total_models']}")
     print(f"   Available roles: {model_status['loaded_roles']}")
 
-    for role, info in model_status['models'].items():
+    for role, info in model_status["models"].items():
         print(f"   {role}: {info['type']} ({info.get('model_name', 'unknown')})")
 
     # Test direct model generation
@@ -90,7 +92,7 @@ def demo_enhanced_conductor():
         "conductor": "What strategic approach should we take for improving user engagement?",
         "logic": "Analyze the cause-and-effect relationships in user satisfaction",
         "emotion": "How might users feel about changes to the AI interaction style?",
-        "creative": "Generate innovative ideas for enhancing the user experience"
+        "creative": "Generate innovative ideas for enhancing the user experience",
     }
 
     for role, prompt in test_cases.items():
@@ -102,6 +104,7 @@ def demo_enhanced_conductor():
 
     return conductor
 
+
 def demo_strategic_decision_with_models():
     """Demonstrate strategic decision making with AI model enhancement"""
     print("\n\n🧠 Strategic Decision Making with AI Models")
@@ -110,14 +113,14 @@ def demo_strategic_decision_with_models():
     # Initialize conductor
     conductor = CoreConductor(
         memory_file="data/demo_strategic_models.json",
-        tool_log_file="logs/demo_strategic_models.jsonl"
+        tool_log_file="logs/demo_strategic_models.jsonl",
     )
 
     # Set strategic objectives
     objectives = [
         "Improve AI response quality and relevance",
         "Enhance user engagement and satisfaction",
-        "Optimize system performance and reliability"
+        "Optimize system performance and reliability",
     ]
     conductor.set_objectives(objectives)
 
@@ -133,23 +136,21 @@ def demo_strategic_decision_with_models():
     constraints = [
         "Must maintain current response speed",
         "Cannot compromise user privacy",
-        "Must work within existing infrastructure"
+        "Must work within existing infrastructure",
     ]
 
     decision = conductor.make_strategic_decision(
-        situation=situation,
-        objectives=objectives,
-        constraints=constraints
+        situation=situation, objectives=objectives, constraints=constraints
     )
 
     # Display results
-    print(f"\n2. Decision Results:")
+    print("\n2. Decision Results:")
     print(f"   Decision ID: {decision.decision_id}")
     print(f"   Confidence: {decision.confidence:.3f}")
     print(f"   Memory Context: {len(decision.memory_context)} concepts")
     print(f"   Tool Recommendations: {decision.tool_recommendations}")
 
-    print(f"\n3. Reasoning Path:")
+    print("\n3. Reasoning Path:")
     for i, step in enumerate(decision.reasoning_path, 1):
         print(f"   {i}. {step}")
 
@@ -158,11 +159,12 @@ def demo_strategic_decision_with_models():
         print(f"   {i}. {action}")
 
     # Test model reloading
-    print(f"\n5. Testing model reload functionality:")
+    print("\n5. Testing model reload functionality:")
     reload_success = conductor.reload_model("emotion")
     print(f"   Emotion model reload: {'Success' if reload_success else 'Failed'}")
 
     return decision
+
 
 def demo_environment_variable_configuration():
     """Demonstrate environment variable configuration"""
@@ -170,12 +172,7 @@ def demo_environment_variable_configuration():
     print("=" * 50)
 
     print("\n1. Current environment configuration:")
-    model_env_vars = [
-        "CONDUCTOR_MODEL",
-        "LOGIC_MODEL",
-        "EMOTION_MODEL",
-        "CREATIVE_MODEL"
-    ]
+    model_env_vars = ["CONDUCTOR_MODEL", "LOGIC_MODEL", "EMOTION_MODEL", "CREATIVE_MODEL"]
 
     for var in model_env_vars:
         value = os.getenv(var, "Not set")
@@ -187,7 +184,7 @@ def demo_environment_variable_configuration():
     demo_config = {
         "CONDUCTOR_MODEL": "demo-strategic-model",
         "LOGIC_MODEL": "demo-analytical-model",
-        "EMOTION_MODEL": "demo-empathic-model"
+        "EMOTION_MODEL": "demo-empathic-model",
     }
 
     original_values = {}
@@ -198,14 +195,13 @@ def demo_environment_variable_configuration():
 
     print("\n3. Loading conductor with custom environment:")
     conductor = CoreConductor(
-        memory_file="data/demo_env_conductor.json",
-        conductor_id="env_demo_conductor"
+        memory_file="data/demo_env_conductor.json", conductor_id="env_demo_conductor"
     )
 
     status = conductor.get_model_status()
     print(f"   Loaded models: {status['loaded_roles']}")
-    for role, info in status['models'].items():
-        model_name = info.get('model_name', 'unknown')
+    for role, info in status["models"].items():
+        model_name = info.get("model_name", "unknown")
         print(f"   {role}: {model_name}")
 
     # Restore original environment
@@ -219,6 +215,7 @@ def demo_environment_variable_configuration():
         print(f"   Restored {var}")
 
     return conductor
+
 
 def main():
     """Run complete enhanced conductor demonstration"""
@@ -235,7 +232,7 @@ def main():
         demo_environment_variable_configuration()
 
         # Final summary
-        print(f"\n\n🎊 DEMONSTRATION COMPLETE")
+        print("\n\n🎊 DEMONSTRATION COMPLETE")
         print("=" * 60)
         print("✅ Model loading system functional")
         print("✅ Multi-role model usage working")
@@ -245,13 +242,15 @@ def main():
         print("✅ Model management and reloading functional")
         print(f"\n📊 Final Decision Confidence: {decision.confidence:.3f}")
         print(f"📋 Action Plan Items: {len(decision.action_plan)}")
-        print(f"🔧 Available Model Roles: conductor, logic, emotion, creative")
+        print("🔧 Available Model Roles: conductor, logic, emotion, creative")
         print("\n🚀 Enhanced CoreConductor ready for production!")
 
     except Exception as e:
         print(f"\n❌ Error during demonstration: {e}")
         import traceback
+
         traceback.print_exc()
+
 
 if __name__ == "__main__":
     main()

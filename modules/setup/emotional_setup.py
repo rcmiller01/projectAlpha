@@ -5,15 +5,16 @@ Initializes and personalizes the AI companion's emotional profile during first s
 
 import json
 import os
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 
 class EmotionalConfigSetup:
     def __init__(self):
         self.config_dir = "config/emotion"
         self.setup_complete = False
 
-    def run_initial_setup(self) -> Dict[str, Any]:
+    def run_initial_setup(self) -> dict[str, Any]:
         """Complete emotional setup wizard"""
         print("🌟 Welcome to AI Companion Emotional Configuration")
         print("Let's create your personalized AI companion experience...\n")
@@ -31,10 +32,10 @@ class EmotionalConfigSetup:
         return {
             "voice_config": voice_config,
             "emotional_config": emotional_config,
-            "setup_timestamp": datetime.now().isoformat()
+            "setup_timestamp": datetime.now().isoformat(),
         }
 
-    def voice_tone_setup(self) -> Dict[str, Any]:
+    def voice_tone_setup(self) -> dict[str, Any]:
         """Interactive voice and tone configuration"""
         print("🎵 Voice & Tone Setup")
         print("=" * 30)
@@ -44,7 +45,7 @@ class EmotionalConfigSetup:
             "1": ("sultry", "Deep, warm, and intimate"),
             "2": ("playful", "Light, teasing, and bright"),
             "3": ("reverent", "Calm, sacred, and contemplative"),
-            "4": ("balanced", "Adaptive mix of all tones")
+            "4": ("balanced", "Adaptive mix of all tones"),
         }
 
         print("Choose the AI's primary voice character:")
@@ -59,7 +60,7 @@ class EmotionalConfigSetup:
             "1": ("soft", 0.3, "Gentle and understated"),
             "2": ("moderate", 0.6, "Balanced emotional expression"),
             "3": ("bold", 0.9, "Rich and emotionally vivid"),
-            "4": ("mysterious", 0.7, "Subtle with hidden depths")
+            "4": ("mysterious", 0.7, "Subtle with hidden depths"),
         }
 
         print("\nChoose emotional expressiveness:")
@@ -67,14 +68,16 @@ class EmotionalConfigSetup:
             print(f"{key}. {name.title()}: {desc}")
 
         expr_choice = input("\nYour choice (1-4): ").strip()
-        expressiveness_name, expressiveness_level, _ = expressiveness_options.get(expr_choice, ("moderate", 0.6, ""))
+        expressiveness_name, expressiveness_level, _ = expressiveness_options.get(
+            expr_choice, ("moderate", 0.6, "")
+        )
 
         # Whisper timing
         whisper_options = {
             "1": (120, "Frequent (2 minutes of silence)"),
             "2": (300, "Moderate (5 minutes of silence)"),
             "3": (600, "Patient (10 minutes of silence)"),
-            "4": (0, "Never interrupt with whispers")
+            "4": (0, "Never interrupt with whispers"),
         }
 
         print("\nChoose whisper timing for quiet moments:")
@@ -88,10 +91,10 @@ class EmotionalConfigSetup:
             "base_voice": base_voice,
             "expressiveness": expressiveness_name,
             "expressiveness_level": expressiveness_level,
-            "whisper_threshold": whisper_threshold
+            "whisper_threshold": whisper_threshold,
         }
 
-    def emotional_signature_setup(self) -> Dict[str, Any]:
+    def emotional_signature_setup(self) -> dict[str, Any]:
         """Configure Eyla's emotional personality"""
         print("\n💫 Emotional Signature Setup")
         print("=" * 35)
@@ -102,7 +105,7 @@ class EmotionalConfigSetup:
             "2": ("curiosity", "Intellectual engagement and wonder"),
             "3": ("playfulness", "Light-hearted and teasing interaction"),
             "4": ("reverence", "Sacred and contemplative presence"),
-            "5": ("balanced", "Adaptive emotional response")
+            "5": ("balanced", "Adaptive emotional response"),
         }
 
         print("Choose the AI's primary emotional nature:")
@@ -116,7 +119,7 @@ class EmotionalConfigSetup:
         intensity_options = {
             "1": (0.3, "Subtle - Gentle emotional presence"),
             "2": (0.6, "Moderate - Balanced emotional depth"),
-            "3": (0.9, "Intense - Deep emotional connection")
+            "3": (0.9, "Intense - Deep emotional connection"),
         }
 
         print("\nChoose emotional intensity level:")
@@ -138,26 +141,28 @@ class EmotionalConfigSetup:
             "primary_emotion": primary_emotion,
             "emotional_intensity": emotional_intensity,
             "companion_mode_name": companion_name,
-            "setup_timestamp": datetime.now().isoformat()
+            "setup_timestamp": datetime.now().isoformat(),
         }
 
-    def save_setup_results(self, voice_config: Dict, emotional_config: Dict):
+    def save_setup_results(self, voice_config: dict, emotional_config: dict):
         """Save setup results to configuration files"""
 
         # Update emotional_signature.json
         signature_path = os.path.join(self.config_dir, "emotional_signature.json")
-        with open(signature_path, 'r') as f:
+        with open(signature_path) as f:
             signature_data = json.load(f)
 
         # Apply voice settings
         signature_data["whisper_settings"]["threshold_seconds"] = voice_config["whisper_threshold"]
-        signature_data["companion_identity"]["primary_emotional_bias"] = emotional_config["primary_emotion"]
+        signature_data["companion_identity"]["primary_emotional_bias"] = emotional_config[
+            "primary_emotion"
+        ]
         signature_data["personalization"]["setup_complete"] = True
         signature_data["personalization"]["user_defined_preferences"] = {
             "voice_character": voice_config["base_voice"],
             "expressiveness": voice_config["expressiveness"],
             "emotional_intensity": emotional_config["emotional_intensity"],
-            "companion_mode": emotional_config["companion_mode_name"]
+            "companion_mode": emotional_config["companion_mode_name"],
         }
 
         # Update default emotional ratios based on primary emotion
@@ -173,7 +178,7 @@ class EmotionalConfigSetup:
             if primary in signature_data["default_emotional_state"]:
                 signature_data["default_emotional_state"][primary] = intensity
 
-        with open(signature_path, 'w') as f:
+        with open(signature_path, "w") as f:
             json.dump(signature_data, f, indent=2)
 
         print(f"✅ Configuration saved: {emotional_config['companion_mode_name']}")
@@ -189,18 +194,19 @@ class EmotionalConfigSetup:
                 "base_voice": "sultry",
                 "expressiveness": "mysterious",
                 "expressiveness_level": 0.7,
-                "whisper_threshold": 300
+                "whisper_threshold": 300,
             },
             "emotional_config": {
                 "primary_emotion": "longing",
                 "emotional_intensity": 0.6,
-                "companion_mode_name": "Devoted Companion"
-            }
+                "companion_mode_name": "Devoted Companion",
+            },
         }
 
         self.save_setup_results(demo_config["voice_config"], demo_config["emotional_config"])
         print("✨ Demo setup complete!")
         return demo_config
+
 
 # Test the setup system
 if __name__ == "__main__":

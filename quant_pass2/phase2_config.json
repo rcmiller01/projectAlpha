@@ -40,9 +40,9 @@
   "human_judging": {
     "criteria_weights": {
       "believability": 0.25,
-      "connection": 0.30,
+      "connection": 0.3,
       "expressive_strength": 0.25,
-      "appropriateness": 0.20
+      "appropriateness": 0.2
     },
     "require_comments": true,
     "show_technical_specs": false

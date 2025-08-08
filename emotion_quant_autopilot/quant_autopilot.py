@@ -4,42 +4,46 @@ Emotion Quantization Autopilot - Master Control Loop
 Autonomous emotional quantization system with idle-triggered execution
 """
 
+import json
 import os
 import sys
-import json
 
 # Fix Windows console encoding for Unicode characters
-if sys.platform == 'win32':
+if sys.platform == "win32":
     try:
         import codecs
-        if hasattr(sys.stdout, 'buffer'):
-            sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
-            sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+
+        if hasattr(sys.stdout, "buffer"):
+            sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer, "strict")
+            sys.stderr = codecs.getwriter("utf-8")(sys.stderr.buffer, "strict")
     except Exception:
         # Fallback: just continue without UTF-8 encoding
         pass
-import sqlite3
 import logging
+import sqlite3
 import subprocess
 import threading
 import time
 import uuid
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
-from dataclasses import dataclass, asdict
+from typing import Any, Dict, List, Optional, Tuple
 
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent))
 
+from emotion_training_tracker import EmotionalMetrics, EmotionTrainingTracker, PassType, QuantLevel
+from emotional_dataset_builder import EmotionalDatasetBuilder
+
 # Import our components
 from idle_monitor import IdleMonitor, create_idle_monitor_from_config
-from emotional_dataset_builder import EmotionalDatasetBuilder
-from emotion_training_tracker import EmotionTrainingTracker, EmotionalMetrics, QuantLevel, PassType
+
 
 @dataclass
 class AutopilotRun:
     """Represents a single autopilot execution run"""
+
     run_id: str
     trigger_type: str  # "idle", "manual", "scheduled"
     timestamp: datetime
@@ -53,9 +57,11 @@ class AutopilotRun:
     error_message: str = ""
     execution_time_minutes: float = 0.0
 
+
 @dataclass
 class QuantizationJob:
     """Represents a quantization job in the queue"""
+
     job_id: str
     base_model: str
     quantization_method: str
@@ -65,6 +71,7 @@ class QuantizationJob:
     def __post_init__(self):
         if self.created_at is None:
             self.created_at = datetime.now()
+
 
 class AutopilotDatabase:
     """Database manager for autopilot operations"""
@@ -79,7 +86,8 @@ class AutopilotDatabase:
             cursor = conn.cursor()
 
             # Create autopilot_runs table
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS autopilot_runs (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     run_id TEXT UNIQUE NOT NULL,
@@ -96,10 +104,12 @@ class AutopilotDatabase:
                     execution_time_minutes REAL DEFAULT 0.0,
                     created_at TEXT DEFAULT CURRENT_TIMESTAMP
                 )
-            """)
+            """
+            )
 
             # Create quantization_queue table
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS quantization_queue (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     job_id TEXT UNIQUE NOT NULL,
@@ -113,7 +123,8 @@ class AutopilotDatabase:
                     run_id TEXT NULL,
                     FOREIGN KEY (run_id) REFERENCES autopilot_runs (run_id)
                 )
-            """)
+            """
+            )
 
             conn.commit()
 
@@ -121,18 +132,29 @@ class AutopilotDatabase:
         """Add autopilot run record"""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO autopilot_runs (
                     run_id, trigger_type, timestamp, model_path, base_model,
                     quantization_method, target_size_gb, result_summary,
                     judgment_score, success, error_message, execution_time_minutes
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                run.run_id, run.trigger_type, run.timestamp.isoformat(),
-                run.model_path, run.base_model, run.quantization_method,
-                run.target_size_gb, run.result_summary, run.judgment_score,
-                run.success, run.error_message, run.execution_time_minutes
-            ))
+            """,
+                (
+                    run.run_id,
+                    run.trigger_type,
+                    run.timestamp.isoformat(),
+                    run.model_path,
+                    run.base_model,
+                    run.quantization_method,
+                    run.target_size_gb,
+                    run.result_summary,
+                    run.judgment_score,
+                    run.success,
+                    run.error_message,
+                    run.execution_time_minutes,
+                ),
+            )
             return cursor.lastrowid or 0
 
     def add_quantization_job(self, job: QuantizationJob) -> int:
@@ -140,37 +162,48 @@ class AutopilotDatabase:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             created_at = job.created_at or datetime.now()
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO quantization_queue (
                     job_id, base_model, quantization_method, priority, created_at
                 ) VALUES (?, ?, ?, ?, ?)
-            """, (
-                job.job_id, job.base_model, job.quantization_method,
-                job.priority, created_at.isoformat()
-            ))
+            """,
+                (
+                    job.job_id,
+                    job.base_model,
+                    job.quantization_method,
+                    job.priority,
+                    created_at.isoformat(),
+                ),
+            )
             return cursor.lastrowid or 0
 
-    def get_pending_jobs(self, limit: int = 10) -> List[QuantizationJob]:
+    def get_pending_jobs(self, limit: int = 10) -> list[QuantizationJob]:
         """Get pending jobs from queue, ordered by priority and creation time"""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT job_id, base_model, quantization_method, priority, created_at
                 FROM quantization_queue
                 WHERE status = 'pending'
                 ORDER BY priority DESC, created_at ASC
                 LIMIT ?
-            """, (limit,))
+            """,
+                (limit,),
+            )
 
             jobs = []
             for row in cursor.fetchall():
-                jobs.append(QuantizationJob(
-                    job_id=row[0],
-                    base_model=row[1],
-                    quantization_method=row[2],
-                    priority=row[3],
-                    created_at=datetime.fromisoformat(row[4])
-                ))
+                jobs.append(
+                    QuantizationJob(
+                        job_id=row[0],
+                        base_model=row[1],
+                        quantization_method=row[2],
+                        priority=row[3],
+                        created_at=datetime.fromisoformat(row[4]),
+                    )
+                )
             return jobs
 
     def update_job_status(self, job_id: str, status: str, run_id: Optional[str] = None) -> None:
@@ -179,23 +212,29 @@ class AutopilotDatabase:
             cursor = conn.cursor()
 
             timestamp_field = None
-            if status == 'running':
-                timestamp_field = 'started_at'
-            elif status in ['completed', 'failed']:
-                timestamp_field = 'completed_at'
+            if status == "running":
+                timestamp_field = "started_at"
+            elif status in ["completed", "failed"]:
+                timestamp_field = "completed_at"
 
             if timestamp_field:
-                cursor.execute(f"""
+                cursor.execute(
+                    f"""
                     UPDATE quantization_queue
                     SET status = ?, {timestamp_field} = ?, run_id = ?
                     WHERE job_id = ?
-                """, (status, datetime.now().isoformat(), run_id, job_id))
+                """,
+                    (status, datetime.now().isoformat(), run_id, job_id),
+                )
             else:
-                cursor.execute("""
+                cursor.execute(
+                    """
                     UPDATE quantization_queue
                     SET status = ?, run_id = ?
                     WHERE job_id = ?
-                """, (status, run_id, job_id))
+                """,
+                    (status, run_id, job_id),
+                )
 
             conn.commit()
 
@@ -209,12 +248,16 @@ class AutopilotDatabase:
 
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT COUNT(*) FROM autopilot_runs
                 WHERE timestamp >= ? AND timestamp < ?
-            """, (start_of_day.isoformat(), end_of_day.isoformat()))
+            """,
+                (start_of_day.isoformat(), end_of_day.isoformat()),
+            )
 
             return cursor.fetchone()[0]
+
 
 class QuantizationAutopilot:
     """
@@ -272,10 +315,10 @@ class QuantizationAutopilot:
         self.logger.info(f"   Auto-start: {self.config.get('auto_start', False)}")
         self.logger.info(f"   Max daily loops: {self.config.get('max_active_loops_per_day', 3)}")
 
-    def _load_config(self) -> Dict:
+    def _load_config(self) -> dict:
         """Load configuration from JSON file"""
         try:
-            with open(self.config_path, 'r') as f:
+            with open(self.config_path) as f:
                 config = json.load(f)
             return config
         except FileNotFoundError:
@@ -294,11 +337,8 @@ class QuantizationAutopilot:
 
         logging.basicConfig(
             level=logging.INFO,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            handlers=[
-                logging.FileHandler(log_file),
-                logging.StreamHandler()
-            ]
+            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            handlers=[logging.FileHandler(log_file), logging.StreamHandler()],
         )
 
         self.logger = logging.getLogger("QuantizationAutopilot")
@@ -333,11 +373,13 @@ class QuantizationAutopilot:
         models_dir = Path(self.config["output_paths"]["models_directory"])
 
         if models_dir.exists():
-            total_size = sum(f.stat().st_size for f in models_dir.rglob('*') if f.is_file())
+            total_size = sum(f.stat().st_size for f in models_dir.rglob("*") if f.is_file())
             total_size_gb = total_size / (1024**3)
 
             if total_size_gb > max_disk_usage:
-                self.logger.warning(f"💽 Disk usage limit exceeded: {total_size_gb:.1f}GB > {max_disk_usage}GB")
+                self.logger.warning(
+                    f"💽 Disk usage limit exceeded: {total_size_gb:.1f}GB > {max_disk_usage}GB"
+                )
                 return False
 
         # Check concurrent processes
@@ -363,7 +405,9 @@ class QuantizationAutopilot:
             return
 
         job = pending_jobs[0]
-        self.logger.info(f"🎯 Starting quantization job: {job.base_model} -> {job.quantization_method}")
+        self.logger.info(
+            f"🎯 Starting quantization job: {job.base_model} -> {job.quantization_method}"
+        )
 
         # Start quantization in background thread
         thread = threading.Thread(target=self._execute_quantization_job, args=(job,), daemon=True)
@@ -392,7 +436,7 @@ class QuantizationAutopilot:
             target_size_gb=self.config["target_model_size_range_gb"][1],
             result_summary="",
             judgment_score=0.0,
-            success=False
+            success=False,
         )
 
         self.current_job = job
@@ -401,7 +445,9 @@ class QuantizationAutopilot:
             # Update job status
             self.db.update_job_status(job.job_id, "running", run_id)
 
-            self.logger.info(f"🚀 Starting quantization: {job.base_model} -> {job.quantization_method}")
+            self.logger.info(
+                f"🚀 Starting quantization: {job.base_model} -> {job.quantization_method}"
+            )
 
             # Execute quantization using existing pass1_quantization_loop
             result = self._run_quantization_process(job)
@@ -416,7 +462,9 @@ class QuantizationAutopilot:
                 self.logger.info(f"✅ Quantization completed: score {result['judgment_score']:.3f}")
 
                 # Send success notification
-                self._send_notification(f"✅ Quantization successful: {job.base_model} -> {job.quantization_method}")
+                self._send_notification(
+                    f"✅ Quantization successful: {job.base_model} -> {job.quantization_method}"
+                )
 
             else:
                 self.current_run.error_message = result["error"]
@@ -426,7 +474,9 @@ class QuantizationAutopilot:
                 self.logger.error(f"❌ Quantization failed: {result['error']}")
 
                 # Send failure notification
-                self._send_notification(f"❌ Quantization failed: {job.base_model} -> {result['error']}")
+                self._send_notification(
+                    f"❌ Quantization failed: {job.base_model} -> {result['error']}"
+                )
 
         except Exception as e:
             self.current_run.error_message = str(e)
@@ -452,7 +502,7 @@ class QuantizationAutopilot:
 
             self.logger.info(f"🏁 Job completed in {execution_time:.1f} minutes")
 
-    def _run_quantization_process(self, job: QuantizationJob) -> Dict[str, Any]:
+    def _run_quantization_process(self, job: QuantizationJob) -> dict[str, Any]:
         """Run the actual quantization process with full integration"""
         import uuid
         from datetime import datetime
@@ -463,12 +513,13 @@ class QuantizationAutopilot:
         try:
             # Import our integrated modules
             import sys
-            sys.path.append('..')  # Add parent directory to path
 
-            from quantize_model import quantize_model
-            from judge_emotion import judge_emotion
-            from emotion_core_tracker import EmotionalQuantDatabase
+            sys.path.append("..")  # Add parent directory to path
+
             from autopilot_state import AutopilotStateManager
+            from emotion_core_tracker import EmotionalQuantDatabase
+            from judge_emotion import judge_emotion
+            from quantize_model import quantize_model
 
             # Initialize enhanced database and state manager
             db = EmotionalQuantDatabase("../emotion_training.db")
@@ -477,7 +528,7 @@ class QuantizationAutopilot:
             # Update state - starting quantization
             state_manager.start_autopilot(job.job_id, run_id)
 
-            self.logger.info(f"🚀 Starting integrated quantization process")
+            self.logger.info("🚀 Starting integrated quantization process")
             self.logger.info(f"   Run ID: {run_id}")
             self.logger.info(f"   Job: {job.base_model} -> {job.quantization_method}")
 
@@ -487,7 +538,7 @@ class QuantizationAutopilot:
             quantizer_config = {
                 "output_dir": self.config["output_paths"]["models_directory"],
                 "backend": self.config.get("quantization_backend", "mock"),  # Use mock for testing
-                "temp_dir": self.config["output_paths"]["temp_directory"]
+                "temp_dir": self.config["output_paths"]["temp_directory"],
             }
 
             # Determine target size range from config
@@ -499,7 +550,7 @@ class QuantizationAutopilot:
                 base_model=job.base_model,
                 quantization_method=job.quantization_method,
                 config=quantizer_config,
-                target_size_range_gb=size_range
+                target_size_range_gb=size_range,
             )
 
             if not quant_result.success:
@@ -518,7 +569,7 @@ class QuantizationAutopilot:
                     execution_time_minutes=execution_time,
                     success=False,
                     result_summary=error_msg,
-                    error_message=quant_result.error_message
+                    error_message=quant_result.error_message,
                 )
 
                 state_manager.complete_job(success=False)
@@ -528,7 +579,7 @@ class QuantizationAutopilot:
                     "error": error_msg,
                     "model_path": "",
                     "judgment_score": 0.0,
-                    "summary": ""
+                    "summary": "",
                 }
 
             self.logger.info(f"✅ Quantization successful: {quant_result.model_path}")
@@ -542,14 +593,14 @@ class QuantizationAutopilot:
                 "silent_mode": True,  # Unattended operation
                 "evaluation_count": self.config["evaluation_settings"]["evaluation_prompt_count"],
                 "baseline_model_path": self.config.get("baseline_model_path"),
-                "response_timeout": self.config["evaluation_settings"]["response_timeout_seconds"]
+                "response_timeout": self.config["evaluation_settings"]["response_timeout_seconds"],
             }
 
             judgment_result = judge_emotion(
                 model_path=quant_result.model_path,
                 base_model=job.base_model,
                 quantization_method=job.quantization_method,
-                config=judge_config
+                config=judge_config,
             )
 
             if not judgment_result.success:
@@ -567,7 +618,7 @@ class QuantizationAutopilot:
                     execution_time_minutes=execution_time,
                     success=False,
                     result_summary=error_msg,
-                    error_message=judgment_result.error_message
+                    error_message=judgment_result.error_message,
                 )
 
                 state_manager.complete_job(success=False)
@@ -577,13 +628,15 @@ class QuantizationAutopilot:
                     "error": error_msg,
                     "model_path": quant_result.model_path,
                     "judgment_score": 0.0,
-                    "summary": ""
+                    "summary": "",
                 }
 
-            self.logger.info(f"✅ Evaluation successful:")
+            self.logger.info("✅ Evaluation successful:")
             self.logger.info(f"   Overall Score: {judgment_result.judgment_score:.3f}")
             self.logger.info(f"   Fluency: {judgment_result.fluency_score:.3f}")
-            self.logger.info(f"   Emotional Intensity: {judgment_result.emotional_intensity_score:.3f}")
+            self.logger.info(
+                f"   Emotional Intensity: {judgment_result.emotional_intensity_score:.3f}"
+            )
             self.logger.info(f"   Emotional Match: {judgment_result.emotional_match_score:.3f}")
             self.logger.info(f"   Empathy: {judgment_result.empathy_score:.3f}")
 
@@ -612,7 +665,7 @@ class QuantizationAutopilot:
                 emotional_deviation=emotional_deviation,
                 execution_time_minutes=execution_time,
                 success=True,
-                result_summary=result_summary
+                result_summary=result_summary,
             )
 
             # Log detailed evaluation results
@@ -624,7 +677,7 @@ class QuantizationAutopilot:
                 parent_model=job.base_model,
                 quantization_method=job.quantization_method,
                 generation=1,  # First generation quantization
-                size_mb=quant_result.model_size_mb
+                size_mb=quant_result.model_size_mb,
             )
 
             # Step 5: Evaluate if this should be a seed candidate
@@ -633,9 +686,9 @@ class QuantizationAutopilot:
             size_gb = quant_result.model_size_mb / 1024
 
             is_seed_candidate = (
-                emotional_deviation <= deviation_threshold and
-                size_gb <= size_threshold_gb and
-                judgment_result.judgment_score >= 0.75
+                emotional_deviation <= deviation_threshold
+                and size_gb <= size_threshold_gb
+                and judgment_result.judgment_score >= 0.75
             )
 
             if is_seed_candidate:
@@ -649,9 +702,11 @@ class QuantizationAutopilot:
                 performance_summary = db.get_performance_summary()
                 seed_candidates = performance_summary.get("seed_candidates", [])
 
-                if not seed_candidates or performance_rank <= min(c["rank"] for c in seed_candidates):
+                if not seed_candidates or performance_rank <= min(
+                    c["rank"] for c in seed_candidates
+                ):
                     db.select_as_seed(quant_result.model_path)
-                    self.logger.info(f"🎯 Selected as new seed model!")
+                    self.logger.info("🎯 Selected as new seed model!")
 
             # Step 6: Update state and complete job
             state_manager.complete_job(success=True)
@@ -660,7 +715,7 @@ class QuantizationAutopilot:
             db.set_autopilot_state("last_successful_run", run_id)
             db.set_autopilot_state("last_successful_model", quant_result.model_path)
 
-            self.logger.info(f"✅ Integrated quantization process complete")
+            self.logger.info("✅ Integrated quantization process complete")
             self.logger.info(f"   Run ID: {run_id}")
             self.logger.info(f"   Emotional deviation: {emotional_deviation:.3f}")
             self.logger.info(f"   Seed candidate: {is_seed_candidate}")
@@ -675,20 +730,20 @@ class QuantizationAutopilot:
                 "seed_candidate": is_seed_candidate,
                 "execution_time_minutes": execution_time,
                 "quantization_result": quant_result,
-                "judgment_result": judgment_result
+                "judgment_result": judgment_result,
             }
 
         except Exception as e:
             # Handle any unexpected errors
             execution_time = (datetime.now() - start_time).total_seconds() / 60
-            error_msg = f"Unexpected error in quantization process: {str(e)}"
+            error_msg = f"Unexpected error in quantization process: {e!s}"
 
             self.logger.error(f"❌ {error_msg}")
 
             try:
                 # Try to log the error
-                from emotion_core_tracker import EmotionalQuantDatabase
                 from autopilot_state import AutopilotStateManager
+                from emotion_core_tracker import EmotionalQuantDatabase
 
                 db = EmotionalQuantDatabase("../emotion_training.db")
                 state_manager = AutopilotStateManager("../autopilot_state.json", self.config)
@@ -703,7 +758,7 @@ class QuantizationAutopilot:
                     execution_time_minutes=execution_time,
                     success=False,
                     result_summary=error_msg,
-                    error_message=str(e)
+                    error_message=str(e),
                 )
 
                 state_manager.complete_job(success=False)
@@ -717,7 +772,7 @@ class QuantizationAutopilot:
                 "model_path": "",
                 "judgment_score": 0.0,
                 "summary": "",
-                "run_id": run_id
+                "run_id": run_id,
             }
 
     def _send_notification(self, message: str) -> None:
@@ -725,8 +780,10 @@ class QuantizationAutopilot:
         self.logger.info(f"📢 Notification: {message}")
 
         # Log-only mode (always enabled)
-        notification_file = Path(self.config["output_paths"]["logs_directory"]) / "notifications.log"
-        with open(notification_file, 'a') as f:
+        notification_file = (
+            Path(self.config["output_paths"]["logs_directory"]) / "notifications.log"
+        )
+        with open(notification_file, "a") as f:
             f.write(f"{datetime.now().isoformat()} - {message}\n")
 
         # TODO: Add email and Slack notifications based on config
@@ -740,7 +797,8 @@ class QuantizationAutopilot:
         """Attempt to recover from a crash or unclean shutdown"""
         try:
             import sys
-            sys.path.append('..')
+
+            sys.path.append("..")
             from autopilot_state import AutopilotStateManager
             from emotion_core_tracker import EmotionalQuantDatabase
 
@@ -766,8 +824,9 @@ class QuantizationAutopilot:
                 self.db.update_job_status(recovery_info["current_job_id"], "failed")
 
                 # Log the recovery event
-                db.set_autopilot_state("crash_recovery",
-                    f"Recovered from crash at {datetime.now().isoformat()}")
+                db.set_autopilot_state(
+                    "crash_recovery", f"Recovered from crash at {datetime.now().isoformat()}"
+                )
 
                 self.logger.info("🔧 Marked interrupted job as failed")
 
@@ -787,11 +846,12 @@ class QuantizationAutopilot:
             self.logger.error(f"❌ Crash recovery failed: {e}")
             return False
 
-    def get_integration_status(self) -> Dict[str, Any]:
+    def get_integration_status(self) -> dict[str, Any]:
         """Get status of all integrated components"""
         try:
             import sys
-            sys.path.append('..')
+
+            sys.path.append("..")
             from autopilot_state import AutopilotStateManager
             from emotion_core_tracker import EmotionalQuantDatabase
 
@@ -801,12 +861,13 @@ class QuantizationAutopilot:
                 "judge_available": False,
                 "database_available": False,
                 "state_manager_available": False,
-                "integration_status": "disconnected"
+                "integration_status": "disconnected",
             }
 
             # Test quantizer
             try:
                 from quantize_model import ModelQuantizer
+
                 status["quantizer_available"] = True
             except ImportError as e:
                 self.logger.warning(f"⚠️ Quantizer not available: {e}")
@@ -814,6 +875,7 @@ class QuantizationAutopilot:
             # Test judge
             try:
                 from judge_emotion import EmotionalJudge
+
                 status["judge_available"] = True
             except ImportError as e:
                 self.logger.warning(f"⚠️ Judge not available: {e}")
@@ -833,8 +895,14 @@ class QuantizationAutopilot:
                 self.logger.warning(f"⚠️ State manager not available: {e}")
 
             # Determine overall integration status
-            if all([status["quantizer_available"], status["judge_available"],
-                   status["database_available"], status["state_manager_available"]]):
+            if all(
+                [
+                    status["quantizer_available"],
+                    status["judge_available"],
+                    status["database_available"],
+                    status["state_manager_available"],
+                ]
+            ):
                 status["integration_status"] = "fully_integrated"
             elif any([status["quantizer_available"], status["judge_available"]]):
                 status["integration_status"] = "partially_integrated"
@@ -847,7 +915,9 @@ class QuantizationAutopilot:
             self.logger.error(f"❌ Failed to get integration status: {e}")
             return {"integration_status": "error", "error": str(e)}
 
-    def add_quantization_job(self, base_model: str, quantization_method: str, priority: int = 5) -> str:
+    def add_quantization_job(
+        self, base_model: str, quantization_method: str, priority: int = 5
+    ) -> str:
         """Add a new quantization job to the queue"""
         job_id = str(uuid.uuid4())
 
@@ -855,11 +925,13 @@ class QuantizationAutopilot:
             job_id=job_id,
             base_model=base_model,
             quantization_method=quantization_method,
-            priority=priority
+            priority=priority,
         )
 
         self.db.add_quantization_job(job)
-        self.logger.info(f"➕ Added job to queue: {base_model} -> {quantization_method} (priority: {priority})")
+        self.logger.info(
+            f"➕ Added job to queue: {base_model} -> {quantization_method} (priority: {priority})"
+        )
 
         return job_id
 
@@ -909,7 +981,7 @@ class QuantizationAutopilot:
 
         self.logger.info("✅ Autopilot stopped")
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Get current autopilot status"""
         idle_status = self.idle_monitor.get_idle_status()
         pending_jobs = self.db.get_pending_jobs()
@@ -923,51 +995,54 @@ class QuantizationAutopilot:
             "daily_runs": daily_runs,
             "max_daily_runs": self.config.get("max_active_loops_per_day", 3),
             "safety_checks": {
-                "emergency_stop_exists": Path(self.config["safety_limits"]["emergency_stop_file"]).exists(),
-                "within_daily_limits": daily_runs < self.config.get("max_active_loops_per_day", 3)
-            }
+                "emergency_stop_exists": Path(
+                    self.config["safety_limits"]["emergency_stop_file"]
+                ).exists(),
+                "within_daily_limits": daily_runs < self.config.get("max_active_loops_per_day", 3),
+            },
         }
+
 
 # CLI interface
 def create_cli():
     """Create command-line interface"""
     import argparse
 
-    parser = argparse.ArgumentParser(description='Emotion Quantization Autopilot')
+    parser = argparse.ArgumentParser(description="Emotion Quantization Autopilot")
 
-    parser.add_argument('--config', default='autopilot_config.json',
-                       help='Configuration file path')
+    parser.add_argument("--config", default="autopilot_config.json", help="Configuration file path")
 
-    subparsers = parser.add_subparsers(dest='command', help='Available commands')
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # Start command
-    start_parser = subparsers.add_parser('start', help='Start autopilot system')
+    start_parser = subparsers.add_parser("start", help="Start autopilot system")
 
     # Stop command
-    stop_parser = subparsers.add_parser('stop', help='Stop autopilot system')
+    stop_parser = subparsers.add_parser("stop", help="Stop autopilot system")
 
     # Status command
-    status_parser = subparsers.add_parser('status', help='Show autopilot status')
+    status_parser = subparsers.add_parser("status", help="Show autopilot status")
 
     # Add job command
-    add_parser = subparsers.add_parser('add-job', help='Add quantization job')
-    add_parser.add_argument('--model', required=True, help='Base model name')
-    add_parser.add_argument('--quant', required=True, help='Quantization method')
-    add_parser.add_argument('--priority', type=int, default=5, help='Job priority (1-10)')
+    add_parser = subparsers.add_parser("add-job", help="Add quantization job")
+    add_parser.add_argument("--model", required=True, help="Base model name")
+    add_parser.add_argument("--quant", required=True, help="Quantization method")
+    add_parser.add_argument("--priority", type=int, default=5, help="Job priority (1-10)")
 
     # Queue command
-    queue_parser = subparsers.add_parser('queue', help='Show job queue')
+    queue_parser = subparsers.add_parser("queue", help="Show job queue")
 
     # Populate command
-    populate_parser = subparsers.add_parser('populate', help='Populate default queue')
+    populate_parser = subparsers.add_parser("populate", help="Populate default queue")
 
     # Recovery command
-    recover_parser = subparsers.add_parser('recover', help='Recover from crash')
+    recover_parser = subparsers.add_parser("recover", help="Recover from crash")
 
     # Integration status command
-    integration_parser = subparsers.add_parser('integration', help='Show integration status')
+    integration_parser = subparsers.add_parser("integration", help="Show integration status")
 
     return parser
+
 
 def main():
     """Main execution function"""
@@ -982,7 +1057,7 @@ def main():
         # Create autopilot instance
         autopilot = QuantizationAutopilot(args.config)
 
-        if args.command == 'start':
+        if args.command == "start":
             autopilot.start()
 
             try:
@@ -992,29 +1067,31 @@ def main():
             except KeyboardInterrupt:
                 autopilot.stop()
 
-        elif args.command == 'stop':
+        elif args.command == "stop":
             autopilot.stop()
             print("✅ Autopilot stopped")
 
-        elif args.command == 'status':
+        elif args.command == "status":
             status = autopilot.get_status()
             print(json.dumps(status, indent=2, default=str))
 
-        elif args.command == 'add-job':
+        elif args.command == "add-job":
             job_id = autopilot.add_quantization_job(args.model, args.quant, args.priority)
             print(f"✅ Added job {job_id}: {args.model} -> {args.quant}")
 
-        elif args.command == 'queue':
+        elif args.command == "queue":
             pending_jobs = autopilot.db.get_pending_jobs()
             print(f"📋 Pending Jobs ({len(pending_jobs)}):")
             for job in pending_jobs:
-                print(f"   {job.base_model} -> {job.quantization_method} (priority: {job.priority})")
+                print(
+                    f"   {job.base_model} -> {job.quantization_method} (priority: {job.priority})"
+                )
 
-        elif args.command == 'populate':
+        elif args.command == "populate":
             autopilot.populate_default_queue()
             print("Queue populated with default jobs")
 
-        elif args.command == 'recover':
+        elif args.command == "recover":
             print("Attempting crash recovery...")
             success = autopilot.recover_from_crash()
             if success:
@@ -1023,7 +1100,7 @@ def main():
                 print("Recovery failed")
                 return 1
 
-        elif args.command == 'integration':
+        elif args.command == "integration":
             status = autopilot.get_integration_status()
             print("Integration Status:")
             print(f"   Overall: {status['integration_status']}")
@@ -1032,7 +1109,7 @@ def main():
             print(f"   Database: {'[OK]' if status['database_available'] else '[FAIL]'}")
             print(f"   State Manager: {'[OK]' if status['state_manager_available'] else '[FAIL]'}")
 
-            if status.get('error'):
+            if status.get("error"):
                 print(f"   Error: {status['error']}")
 
         return 0
@@ -1040,6 +1117,7 @@ def main():
     except Exception as e:
         print(f"Error: {e}")
         return 1
+
 
 if __name__ == "__main__":
     exit(main())

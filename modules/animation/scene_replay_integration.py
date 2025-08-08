@@ -2,10 +2,12 @@
 # Scene Replay Integration Module - Connects Unity SceneReplay.cs with backend
 
 import json
-import requests
 from datetime import datetime
-from typing import Dict, Optional, List
 from enum import Enum
+from typing import Dict, List, Optional
+
+import requests
+
 
 class SceneType(Enum):
     KNEEL = "kneel"
@@ -14,6 +16,7 @@ class SceneType(Enum):
     RITUAL = "ritual"
     INTIMATE = "intimate"
 
+
 class SceneReplayIntegration:
     def __init__(self):
         self.unity_endpoint = "http://localhost:8080"  # Unity WebGL build
@@ -21,8 +24,9 @@ class SceneReplayIntegration:
         self.scene_history = []
         self.current_scene = None
 
-    def trigger_scene_replay(self, scene_type: str, persona: str = "mia",
-                           mood: str = None, symbol: str = None) -> Dict:
+    def trigger_scene_replay(
+        self, scene_type: str, persona: str = "mia", mood: str = None, symbol: str = None
+    ) -> dict:
         """Trigger scene replay based on type and context"""
 
         # Determine scene type
@@ -50,30 +54,35 @@ class SceneReplayIntegration:
         else:
             return SceneType.IDLE
 
-    def _generate_scene_params(self, scene_type: SceneType, persona: str,
-                             mood: str, symbol: str) -> Dict:
+    def _generate_scene_params(
+        self, scene_type: SceneType, persona: str, mood: str, symbol: str
+    ) -> dict:
         """Generate scene parameters for playback"""
         base_params = {
             "persona": persona,
             "mood": mood or "neutral",
             "symbol": symbol,
             "timestamp": datetime.now().isoformat(),
-            "scene_type": scene_type.value
+            "scene_type": scene_type.value,
         }
 
         # Add persona-specific parameters
         if persona == "mia":
-            base_params.update({
-                "lighting": "warm_candlelight",
-                "camera_angle": "intimate_close",
-                "animation_speed": 1.0
-            })
+            base_params.update(
+                {
+                    "lighting": "warm_candlelight",
+                    "camera_angle": "intimate_close",
+                    "animation_speed": 1.0,
+                }
+            )
         elif persona == "solene":
-            base_params.update({
-                "lighting": "dramatic_shadows",
-                "camera_angle": "dramatic_wide",
-                "animation_speed": 1.2
-            })
+            base_params.update(
+                {
+                    "lighting": "dramatic_shadows",
+                    "camera_angle": "dramatic_wide",
+                    "animation_speed": 1.2,
+                }
+            )
 
         # Add mood-specific parameters
         if mood == "passionate":
@@ -85,21 +94,19 @@ class SceneReplayIntegration:
 
         return base_params
 
-    def _trigger_unity_scene(self, scene_type: SceneType, params: Dict) -> Dict:
+    def _trigger_unity_scene(self, scene_type: SceneType, params: dict) -> dict:
         """Trigger Unity scene playback via WebGL"""
         try:
             # Prepare Unity message
             unity_message = {
                 "action": "play_scene",
                 "scene_id": scene_type.value,
-                "parameters": params
+                "parameters": params,
             }
 
             # Send to Unity WebGL build
             response = requests.post(
-                f"{self.unity_endpoint}/scene/play",
-                json=unity_message,
-                timeout=5
+                f"{self.unity_endpoint}/scene/play", json=unity_message, timeout=5
             )
 
             if response.status_code == 200:
@@ -109,15 +116,15 @@ class SceneReplayIntegration:
                     "method": "unity",
                     "scene_type": scene_type.value,
                     "parameters": params,
-                    "timestamp": datetime.now().isoformat()
+                    "timestamp": datetime.now().isoformat(),
                 }
             else:
                 return {"error": f"Unity scene failed: {response.status_code}"}
 
         except Exception as e:
-            return {"error": f"Unity scene error: {str(e)}"}
+            return {"error": f"Unity scene error: {e!s}"}
 
-    def _trigger_animatediff_scene(self, scene_type: SceneType, params: Dict) -> Dict:
+    def _trigger_animatediff_scene(self, scene_type: SceneType, params: dict) -> dict:
         """Trigger AnimateDiff scene generation"""
         try:
             # Generate AnimateDiff prompt based on scene type
@@ -130,14 +137,12 @@ class SceneReplayIntegration:
                 "num_frames": 24,
                 "fps": 8,
                 "guidance_scale": 7.5,
-                "seed": hash(f"{scene_type.value}_{params['persona']}") % 1000000
+                "seed": hash(f"{scene_type.value}_{params['persona']}") % 1000000,
             }
 
             # Send to AnimateDiff
             response = requests.post(
-                f"{self.animatediff_endpoint}/generate",
-                json=animatediff_request,
-                timeout=30
+                f"{self.animatediff_endpoint}/generate", json=animatediff_request, timeout=30
             )
 
             if response.status_code == 200:
@@ -149,15 +154,15 @@ class SceneReplayIntegration:
                     "scene_type": scene_type.value,
                     "parameters": params,
                     "video_url": result.get("video_url"),
-                    "timestamp": datetime.now().isoformat()
+                    "timestamp": datetime.now().isoformat(),
                 }
             else:
                 return {"error": f"AnimateDiff failed: {response.status_code}"}
 
         except Exception as e:
-            return {"error": f"AnimateDiff error: {str(e)}"}
+            return {"error": f"AnimateDiff error: {e!s}"}
 
-    def _generate_animatediff_prompt(self, scene_type: SceneType, params: Dict) -> str:
+    def _generate_animatediff_prompt(self, scene_type: SceneType, params: dict) -> str:
         """Generate AnimateDiff prompt based on scene type and parameters"""
         persona = params["persona"]
         mood = params["mood"]
@@ -167,7 +172,7 @@ class SceneReplayIntegration:
             SceneType.FLAME: f"beautiful woman with fire, {mood} expression, dramatic lighting",
             SceneType.RITUAL: f"beautiful woman performing ritual, {mood} expression, mystical lighting",
             SceneType.INTIMATE: f"beautiful woman in intimate moment, {mood} expression, romantic lighting",
-            SceneType.IDLE: f"beautiful woman idle, {mood} expression, natural lighting"
+            SceneType.IDLE: f"beautiful woman idle, {mood} expression, natural lighting",
         }
 
         prompt = base_prompts.get(scene_type, base_prompts[SceneType.IDLE])
@@ -180,13 +185,13 @@ class SceneReplayIntegration:
 
         return prompt
 
-    def _log_scene_trigger(self, scene_type: SceneType, params: Dict, method: str):
+    def _log_scene_trigger(self, scene_type: SceneType, params: dict, method: str):
         """Log scene trigger for history"""
         log_entry = {
             "scene_type": scene_type.value,
             "method": method,
             "parameters": params,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
         self.scene_history.append(log_entry)
 
@@ -194,12 +199,13 @@ class SceneReplayIntegration:
         if len(self.scene_history) > 50:
             self.scene_history = self.scene_history[-50:]
 
-    def get_scene_history(self, limit: int = 10) -> List[Dict]:
+    def get_scene_history(self, limit: int = 10) -> list[dict]:
         """Get recent scene history"""
         return self.scene_history[-limit:]
 
-    def recall_scene(self, scene_type: str = None, persona: str = None,
-                    mood: str = None) -> Optional[Dict]:
+    def recall_scene(
+        self, scene_type: str = None, persona: str = None, mood: str = None
+    ) -> Optional[dict]:
         """Recall a specific scene from history"""
         for scene in reversed(self.scene_history):
             if scene_type and scene["scene_type"] != scene_type:
@@ -210,6 +216,7 @@ class SceneReplayIntegration:
                 continue
             return scene
         return None
+
 
 # Global instance
 scene_replay = SceneReplayIntegration()

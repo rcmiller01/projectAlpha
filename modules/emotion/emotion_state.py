@@ -2,10 +2,11 @@
 # Enhanced emotion state management for romantic companionship
 
 import time
-from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
 
 from core.emotion.anchor_centering import emotional_watchdog
+
 
 class EmotionState:
     def __init__(self):
@@ -20,7 +21,7 @@ class EmotionState:
             "calm": 0.5,  # Default neutral state
             "tired": 0.0,
             "stressed": 0.0,
-            "anxious": 0.0
+            "anxious": 0.0,
         }
 
         # Romantic emotions for Phase 1
@@ -34,7 +35,7 @@ class EmotionState:
             "romantic": 0.0,
             "affection": 0.0,
             "desire": 0.0,
-            "intimacy": 0.0
+            "intimacy": 0.0,
         }
 
         # Relationship context
@@ -46,7 +47,7 @@ class EmotionState:
             "milestones": [],
             "preferences": {},
             "inside_jokes": [],
-            "shared_memories": []
+            "shared_memories": [],
         }
 
         # Emotion decay settings
@@ -59,7 +60,7 @@ class EmotionState:
             "silence_duration": 0.0,  # in seconds
             "longest_silence": 0.0,
             "silence_count": 0,
-            "silence_threshold": 3600  # 1 hour
+            "silence_threshold": 3600,  # 1 hour
         }
 
         # Emotional autonomy metrics
@@ -69,10 +70,10 @@ class EmotionState:
             "last_internal_thought": time.time(),
             "thought_frequency": 600,  # 10 minutes default
             "initiation_readiness": 0.0,
-            "spontaneous_expression_level": 0.0
+            "spontaneous_expression_level": 0.0,
         }
 
-    def update_from_text(self, detected_emotions: Dict[str, float]):
+    def update_from_text(self, detected_emotions: dict[str, float]):
         """Update emotions based on text analysis"""
         current_time = datetime.now()
         self._apply_decay(current_time)
@@ -82,7 +83,9 @@ class EmotionState:
             if emotion in self.emotions:
                 self.emotions[emotion] = min(1.0, self.emotions[emotion] + intensity)
             elif emotion in self.romantic_emotions:
-                self.romantic_emotions[emotion] = min(1.0, self.romantic_emotions[emotion] + intensity)
+                self.romantic_emotions[emotion] = min(
+                    1.0, self.romantic_emotions[emotion] + intensity
+                )
 
         self.last_update = current_time
         self._update_relationship_context()
@@ -97,7 +100,9 @@ class EmotionState:
         # Heart rate analysis
         if bpm > 100:
             if context == "romantic":
-                self.romantic_emotions["passion"] = min(1.0, self.romantic_emotions["passion"] + 0.3)
+                self.romantic_emotions["passion"] = min(
+                    1.0, self.romantic_emotions["passion"] + 0.3
+                )
                 self.romantic_emotions["desire"] = min(1.0, self.romantic_emotions["desire"] + 0.2)
             else:
                 self.emotions["stressed"] = min(1.0, self.emotions["stressed"] + 0.3)
@@ -128,7 +133,9 @@ class EmotionState:
             self.emotions[emotion] = max(0.0, self.emotions[emotion] * decay_factor)
 
         for emotion in self.romantic_emotions:
-            self.romantic_emotions[emotion] = max(0.0, self.romantic_emotions[emotion] * decay_factor)
+            self.romantic_emotions[emotion] = max(
+                0.0, self.romantic_emotions[emotion] * decay_factor
+            )
 
     def _update_relationship_context(self):
         """Update relationship context based on interactions"""
@@ -154,13 +161,15 @@ class EmotionState:
         dominant_emotion = max(all_emotions, key=all_emotions.get)
         return dominant_emotion if all_emotions[dominant_emotion] > 0.1 else "neutral"
 
-    def get_romantic_context(self) -> Dict[str, Any]:
+    def get_romantic_context(self) -> dict[str, Any]:
         """Get romantic context for persona responses"""
         dominant_romantic_emotion = None
         romantic_intensity = 0.0
 
         if any(value > 0 for value in self.romantic_emotions.values()):
-            dominant_romantic_emotion = max(self.romantic_emotions, key=lambda k: self.romantic_emotions[k])
+            dominant_romantic_emotion = max(
+                self.romantic_emotions, key=lambda k: self.romantic_emotions[k]
+            )
             romantic_intensity = max(self.romantic_emotions.values())
 
         return {
@@ -168,18 +177,16 @@ class EmotionState:
             "romantic_intensity": romantic_intensity,
             "relationship_stage": self.relationship_context["relationship_stage"],
             "interaction_count": self.relationship_context["interaction_count"],
-            "days_since_start": self.relationship_context["relationship_duration_days"]
+            "days_since_start": self.relationship_context["relationship_duration_days"],
         }
 
     def add_milestone(self, milestone: str, date: Optional[datetime] = None):
         """Add a relationship milestone"""
         if date is None:
             date = datetime.now()
-        self.relationship_context["milestones"].append({
-            "description": milestone,
-            "date": date,
-            "emotions": self.to_dict()
-        })
+        self.relationship_context["milestones"].append(
+            {"description": milestone, "date": date, "emotions": self.to_dict()}
+        )
 
     def add_preference(self, category: str, preference: str):
         """Add a user preference"""
@@ -189,14 +196,16 @@ class EmotionState:
 
     def add_shared_memory(self, memory: str, emotion: Optional[str] = None):
         """Add a shared memory"""
-        self.relationship_context["shared_memories"].append({
-            "description": memory,
-            "date": datetime.now(),
-            "emotion": emotion or self.current_emotion(),
-            "context": self.to_dict()
-        })
+        self.relationship_context["shared_memories"].append(
+            {
+                "description": memory,
+                "date": datetime.now(),
+                "emotion": emotion or self.current_emotion(),
+                "context": self.to_dict(),
+            }
+        )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert emotion state to dictionary"""
         return {
             "emotions": self.emotions.copy(),
@@ -206,10 +215,10 @@ class EmotionState:
             "last_update": self.last_update.isoformat(),
             "silence_tracker": self.silence_tracker.copy(),
             "desire_to_initiate": self.desire_to_initiate,
-            "autonomy_state": self.autonomy_state.copy()
+            "autonomy_state": self.autonomy_state.copy(),
         }
 
-    def from_dict(self, data: Dict[str, Any]):
+    def from_dict(self, data: dict[str, Any]):
         """Load emotion state from dictionary"""
         if "emotions" in data:
             self.emotions.update(data["emotions"])
@@ -235,8 +244,13 @@ class EmotionState:
             if self.silence_tracker["silence_duration"] > 0:
                 # Update silence statistics
                 self.silence_tracker["silence_count"] += 1
-                if self.silence_tracker["silence_duration"] > self.silence_tracker["longest_silence"]:
-                    self.silence_tracker["longest_silence"] = self.silence_tracker["silence_duration"]
+                if (
+                    self.silence_tracker["silence_duration"]
+                    > self.silence_tracker["longest_silence"]
+                ):
+                    self.silence_tracker["longest_silence"] = self.silence_tracker[
+                        "silence_duration"
+                    ]
 
             self.silence_tracker["last_user_input_time"] = current_time
             self.silence_tracker["silence_duration"] = 0.0
@@ -247,7 +261,9 @@ class EmotionState:
 
         else:
             # Calculate current silence duration
-            self.silence_tracker["silence_duration"] = current_time - self.silence_tracker["last_user_input_time"]
+            self.silence_tracker["silence_duration"] = (
+                current_time - self.silence_tracker["last_user_input_time"]
+            )
 
             # Update desire_to_initiate based on silence duration
             self._update_desire_to_initiate()
@@ -266,15 +282,13 @@ class EmotionState:
 
         # Relationship stage modifier
         stage_multipliers = {
-            "new": 0.7,        # More reserved when new
+            "new": 0.7,  # More reserved when new
             "developing": 1.0,  # Normal initiation desire
-            "established": 1.3, # More comfortable reaching out
-            "long_term": 1.5   # Very comfortable with autonomy
+            "established": 1.3,  # More comfortable reaching out
+            "long_term": 1.5,  # Very comfortable with autonomy
         }
 
-        stage_modifier = stage_multipliers.get(
-            self.relationship_context["relationship_stage"], 1.0
-        )
+        stage_modifier = stage_multipliers.get(self.relationship_context["relationship_stage"], 1.0)
 
         # Calculate final desire
         total_desire = (base_desire + longing_boost + love_boost + affection_boost) * stage_modifier
@@ -286,10 +300,11 @@ class EmotionState:
         # Update spontaneous expression level
         if silence_hours > 2:  # After 2 hours, increase spontaneous expression
             self.autonomy_state["spontaneous_expression_level"] = min(
-                1.0, (silence_hours - 2) / 6.0  # Max level after 8 hours total
+                1.0,
+                (silence_hours - 2) / 6.0,  # Max level after 8 hours total
             )
 
-    def get_silence_metrics(self) -> Dict[str, Any]:
+    def get_silence_metrics(self) -> dict[str, Any]:
         """Get current silence tracking metrics"""
         current_time = time.time()
         current_silence = current_time - self.silence_tracker["last_user_input_time"]
@@ -301,19 +316,21 @@ class EmotionState:
             "longest_silence_hours": self.silence_tracker["longest_silence"] / 3600,
             "silence_count": self.silence_tracker["silence_count"],
             "time_since_last_input": current_silence,
-            "silence_threshold_exceeded": current_silence > self.silence_tracker["silence_threshold"]
+            "silence_threshold_exceeded": current_silence
+            > self.silence_tracker["silence_threshold"],
         }
 
-    def get_autonomy_metrics(self) -> Dict[str, Any]:
+    def get_autonomy_metrics(self) -> dict[str, Any]:
         """Get current autonomy and initiation metrics"""
         return {
             "desire_to_initiate": self.desire_to_initiate,
             "initiation_readiness": self.autonomy_state["initiation_readiness"],
             "spontaneous_expression_level": self.autonomy_state["spontaneous_expression_level"],
             "internal_thought_active": self.autonomy_state["internal_thought_active"],
-            "time_since_last_thought": (time.time() - self.autonomy_state["last_internal_thought"]) / 60,
+            "time_since_last_thought": (time.time() - self.autonomy_state["last_internal_thought"])
+            / 60,
             "autonomy_enabled": self.desire_to_initiate > 0.3,
-            "high_autonomy_state": self.desire_to_initiate > 0.6
+            "high_autonomy_state": self.desire_to_initiate > 0.6,
         }
 
     def trigger_internal_thought(self):
@@ -382,7 +399,10 @@ class EmotionState:
         return 0.0  # Not morning time
 
     def register_lust(self, amount: float):
-        self.romantic_emotions["desire"] = min(1.0, self.romantic_emotions.get("desire", 0.0) + amount)
+        self.romantic_emotions["desire"] = min(
+            1.0, self.romantic_emotions.get("desire", 0.0) + amount
+        )
+
 
 # Global emotion state instance
 emotion_state = EmotionState()

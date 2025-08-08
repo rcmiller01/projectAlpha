@@ -4,41 +4,40 @@ Emotional Quantization System for LLaMA2 13B
 Applies intelligent quantization while preserving emotional fidelity
 """
 
-import os
 import json
 import logging
+import os
 import time
-from pathlib import Path
-from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass
-import torch
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
 import numpy as np
-from transformers import (
-    AutoTokenizer,
-    AutoModelForCausalLM,
-    BitsAndBytesConfig,
-    pipeline
-)
-from datasets import Dataset
 import psutil
+import torch
+from datasets import Dataset
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, pipeline
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class QuantizationConfig:
     """Configuration for quantization parameters"""
+
     model_path: str
     output_path: str
     target_size_gb: float = 24.0
     emotion_threshold: float = 0.07  # 7% max degradation
-    quant_methods: List[str] = None
+    quant_methods: list[str] = None
     seed: int = 42
 
     def __post_init__(self):
         if self.quant_methods is None:
             self.quant_methods = ["4bit", "8bit", "gptq", "gguf"]
+
 
 class EmotionalQuantizer:
     """Main quantization system with emotional preservation"""
@@ -54,33 +53,32 @@ class EmotionalQuantizer:
         Path(f"{config.output_path}/models").mkdir(exist_ok=True)
         Path(f"{config.output_path}/metrics").mkdir(exist_ok=True)
 
-        logger.info(f"🧠 Emotional Quantizer initialized")
+        logger.info("🧠 Emotional Quantizer initialized")
         logger.info(f"📁 Model path: {config.model_path}")
         logger.info(f"🎯 Target size: {config.target_size_gb}GB")
         logger.info(f"💔 Max emotional degradation: {config.emotion_threshold*100}%")
 
-    def load_baseline_model(self) -> Tuple[AutoModelForCausalLM, AutoTokenizer]:
+    def load_baseline_model(self) -> tuple[AutoModelForCausalLM, AutoTokenizer]:
         """Load the unquantized baseline model"""
         logger.info("📥 Loading baseline model...")
 
         try:
             tokenizer = AutoTokenizer.from_pretrained(
-                self.config.model_path,
-                trust_remote_code=True
+                self.config.model_path, trust_remote_code=True
             )
 
             model = AutoModelForCausalLM.from_pretrained(
                 self.config.model_path,
                 torch_dtype=torch.float16,
                 device_map="auto",
-                trust_remote_code=True
+                trust_remote_code=True,
             )
 
             # Set padding token if missing
             if tokenizer.pad_token is None:
                 tokenizer.pad_token = tokenizer.eos_token
 
-            logger.info(f"✅ Baseline model loaded successfully")
+            logger.info("✅ Baseline model loaded successfully")
             return model, tokenizer
 
         except Exception as e:
@@ -103,11 +101,13 @@ class EmotionalQuantizer:
         logger.info(f"📊 Model size: {size_gb:.2f}GB")
         return size_gb
 
-    def apply_quantization(self, method: str, model, tokenizer) -> Tuple[AutoModelForCausalLM, str]:
+    def apply_quantization(self, method: str, model, tokenizer) -> tuple[AutoModelForCausalLM, str]:
         """Apply specific quantization method"""
         logger.info(f"🔧 Applying {method} quantization...")
 
-        output_model_path = f"{self.config.output_path}/models/{method}_attempt_{self.current_attempt}"
+        output_model_path = (
+            f"{self.config.output_path}/models/{method}_attempt_{self.current_attempt}"
+        )
 
         try:
             if method == "4bit":
@@ -115,26 +115,24 @@ class EmotionalQuantizer:
                     load_in_4bit=True,
                     bnb_4bit_compute_dtype=torch.float16,
                     bnb_4bit_use_double_quant=True,
-                    bnb_4bit_quant_type="nf4"
+                    bnb_4bit_quant_type="nf4",
                 )
 
                 quantized_model = AutoModelForCausalLM.from_pretrained(
                     self.config.model_path,
                     quantization_config=quantization_config,
                     device_map="auto",
-                    trust_remote_code=True
+                    trust_remote_code=True,
                 )
 
             elif method == "8bit":
-                quantization_config = BitsAndBytesConfig(
-                    load_in_8bit=True
-                )
+                quantization_config = BitsAndBytesConfig(load_in_8bit=True)
 
                 quantized_model = AutoModelForCausalLM.from_pretrained(
                     self.config.model_path,
                     quantization_config=quantization_config,
                     device_map="auto",
-                    trust_remote_code=True
+                    trust_remote_code=True,
                 )
 
             elif method == "gptq":
@@ -149,9 +147,7 @@ class EmotionalQuantizer:
                     )
 
                     quantized_model = AutoGPTQForCausalLM.from_pretrained(
-                        self.config.model_path,
-                        quantize_config=quantize_config,
-                        device_map="auto"
+                        self.config.model_path, quantize_config=quantize_config, device_map="auto"
                     )
 
                 except ImportError:
@@ -173,12 +169,12 @@ class EmotionalQuantizer:
             logger.error(f"❌ {method} quantization failed: {e}")
             raise
 
-    def load_evaluation_set(self) -> List[Dict]:
+    def load_evaluation_set(self) -> list[dict]:
         """Load emotional evaluation prompts"""
         eval_file = Path("quant_pass1/emotional_eval_set.jsonl")
 
         try:
-            with open(eval_file, 'r', encoding='utf-8') as f:
+            with open(eval_file, encoding="utf-8") as f:
                 eval_set = [json.loads(line) for line in f]
 
             logger.info(f"📋 Loaded {len(eval_set)} evaluation prompts")
@@ -197,7 +193,7 @@ class EmotionalQuantizer:
                 model=model,
                 tokenizer=tokenizer,
                 torch_dtype=torch.float16,
-                device_map="auto"
+                device_map="auto",
             )
 
             # Generate response
@@ -207,13 +203,13 @@ class EmotionalQuantizer:
                 do_sample=True,
                 temperature=0.7,
                 top_p=0.9,
-                pad_token_id=tokenizer.eos_token_id
+                pad_token_id=tokenizer.eos_token_id,
             )
 
             # Extract generated text (remove the prompt)
-            generated_text = response[0]['generated_text']
+            generated_text = response[0]["generated_text"]
             if generated_text.startswith(prompt):
-                generated_text = generated_text[len(prompt):].strip()
+                generated_text = generated_text[len(prompt) :].strip()
 
             return generated_text
 
@@ -221,7 +217,7 @@ class EmotionalQuantizer:
             logger.error(f"❌ Response generation failed: {e}")
             return ""
 
-    def evaluate_emotional_fidelity(self, model, tokenizer, eval_set: List[Dict]) -> Dict:
+    def evaluate_emotional_fidelity(self, model, tokenizer, eval_set: list[dict]) -> dict:
         """Evaluate emotional fidelity of quantized model"""
         from emotion_tracker import EmotionTracker
 
@@ -234,7 +230,7 @@ class EmotionalQuantizer:
             "avg_emotion_score": 0.0,
             "avg_sentiment_score": 0.0,
             "avg_metaphor_density": 0.0,
-            "responses": []
+            "responses": [],
         }
 
         for i, prompt_data in enumerate(eval_set):
@@ -249,12 +245,14 @@ class EmotionalQuantizer:
                     # Analyze emotional content
                     emotion_metrics = tracker.analyze_emotional_content(response)
 
-                    results["responses"].append({
-                        "prompt": prompt,
-                        "response": response,
-                        "category": expected_category,
-                        "metrics": emotion_metrics
-                    })
+                    results["responses"].append(
+                        {
+                            "prompt": prompt,
+                            "response": response,
+                            "category": expected_category,
+                            "metrics": emotion_metrics,
+                        }
+                    )
 
                     results["successful_generations"] += 1
                     results["avg_emotion_score"] += emotion_metrics.get("emotion_score", 0)
@@ -274,21 +272,23 @@ class EmotionalQuantizer:
             results["avg_sentiment_score"] /= results["successful_generations"]
             results["avg_metaphor_density"] /= results["successful_generations"]
 
-        logger.info(f"📈 Evaluation complete: {results['successful_generations']}/{results['total_prompts']} successful")
+        logger.info(
+            f"📈 Evaluation complete: {results['successful_generations']}/{results['total_prompts']} successful"
+        )
         return results
 
-    def calculate_degradation(self, baseline_metrics: Dict, current_metrics: Dict) -> float:
+    def calculate_degradation(self, baseline_metrics: dict, current_metrics: dict) -> float:
         """Calculate emotional degradation percentage"""
         baseline_score = (
-            baseline_metrics["avg_emotion_score"] * 0.4 +
-            baseline_metrics["avg_sentiment_score"] * 0.4 +
-            baseline_metrics["avg_metaphor_density"] * 0.2
+            baseline_metrics["avg_emotion_score"] * 0.4
+            + baseline_metrics["avg_sentiment_score"] * 0.4
+            + baseline_metrics["avg_metaphor_density"] * 0.2
         )
 
         current_score = (
-            current_metrics["avg_emotion_score"] * 0.4 +
-            current_metrics["avg_sentiment_score"] * 0.4 +
-            current_metrics["avg_metaphor_density"] * 0.2
+            current_metrics["avg_emotion_score"] * 0.4
+            + current_metrics["avg_sentiment_score"] * 0.4
+            + current_metrics["avg_metaphor_density"] * 0.2
         )
 
         if baseline_score == 0:
@@ -297,7 +297,7 @@ class EmotionalQuantizer:
         degradation = (baseline_score - current_score) / baseline_score
         return max(0.0, degradation)  # Ensure non-negative
 
-    def run_quantization_pass(self) -> Dict:
+    def run_quantization_pass(self) -> dict:
         """Run complete quantization pass"""
         logger.info(f"🚀 Starting quantization pass #{self.current_attempt + 1}")
 
@@ -310,10 +310,12 @@ class EmotionalQuantizer:
         if self.baseline_metrics is None:
             logger.info("📊 Establishing baseline metrics...")
             baseline_model, tokenizer = self.load_baseline_model()
-            self.baseline_metrics = self.evaluate_emotional_fidelity(baseline_model, tokenizer, eval_set)
+            self.baseline_metrics = self.evaluate_emotional_fidelity(
+                baseline_model, tokenizer, eval_set
+            )
 
             # Save baseline metrics
-            with open(f"{self.config.output_path}/metrics/baseline_metrics.json", 'w') as f:
+            with open(f"{self.config.output_path}/metrics/baseline_metrics.json", "w") as f:
                 json.dump(self.baseline_metrics, f, indent=2)
 
             # Clear baseline model from memory
@@ -336,7 +338,9 @@ class EmotionalQuantizer:
                 model_size = self.get_model_size_gb(model_path)
 
                 # Evaluate emotional fidelity
-                quant_metrics = self.evaluate_emotional_fidelity(quantized_model, tokenizer, eval_set)
+                quant_metrics = self.evaluate_emotional_fidelity(
+                    quantized_model, tokenizer, eval_set
+                )
 
                 # Calculate degradation
                 degradation = self.calculate_degradation(self.baseline_metrics, quant_metrics)
@@ -350,19 +354,28 @@ class EmotionalQuantizer:
                     "meets_size_target": model_size <= self.config.target_size_gb,
                     "meets_quality_target": degradation <= self.config.emotion_threshold,
                     "processing_time": time.time() - start_time,
-                    "metrics": quant_metrics
+                    "metrics": quant_metrics,
                 }
 
                 results[method] = result
 
                 # Log results
                 logger.info(f"📊 {method} Results:")
-                logger.info(f"   📦 Size: {model_size:.2f}GB (target: {self.config.target_size_gb}GB)")
-                logger.info(f"   💔 Degradation: {degradation*100:.2f}% (max: {self.config.emotion_threshold*100}%)")
-                logger.info(f"   ✅ Meets targets: Size={result['meets_size_target']}, Quality={result['meets_quality_target']}")
+                logger.info(
+                    f"   📦 Size: {model_size:.2f}GB (target: {self.config.target_size_gb}GB)"
+                )
+                logger.info(
+                    f"   💔 Degradation: {degradation*100:.2f}% (max: {self.config.emotion_threshold*100}%)"
+                )
+                logger.info(
+                    f"   ✅ Meets targets: Size={result['meets_size_target']}, Quality={result['meets_quality_target']}"
+                )
 
                 # Save individual result
-                with open(f"{self.config.output_path}/metrics/{method}_attempt_{self.current_attempt}.json", 'w') as f:
+                with open(
+                    f"{self.config.output_path}/metrics/{method}_attempt_{self.current_attempt}.json",
+                    "w",
+                ) as f:
                     json.dump(result, f, indent=2)
 
                 # Clean up memory
@@ -376,7 +389,7 @@ class EmotionalQuantizer:
                     "attempt": self.current_attempt,
                     "error": str(e),
                     "meets_size_target": False,
-                    "meets_quality_target": False
+                    "meets_quality_target": False,
                 }
 
         self.current_attempt += 1
@@ -384,10 +397,10 @@ class EmotionalQuantizer:
 
         return results
 
-    def find_best_result(self, results: Dict) -> Optional[Dict]:
+    def find_best_result(self, results: dict) -> Optional[dict]:
         """Find best quantization result that meets both targets"""
         best_result = None
-        best_score = float('inf')
+        best_score = float("inf")
 
         for method, result in results.items():
             if result.get("meets_size_target") and result.get("meets_quality_target"):
@@ -400,26 +413,29 @@ class EmotionalQuantizer:
 
         return best_result
 
-    def save_final_report(self, final_result: Dict):
+    def save_final_report(self, final_result: dict):
         """Save comprehensive final report"""
         report = {
             "quantization_config": {
                 "model_path": self.config.model_path,
                 "target_size_gb": self.config.target_size_gb,
                 "emotion_threshold": self.config.emotion_threshold,
-                "methods_tested": self.config.quant_methods
+                "methods_tested": self.config.quant_methods,
             },
             "baseline_metrics": self.baseline_metrics,
             "final_result": final_result,
             "all_attempts": self.results_log,
             "total_attempts": self.current_attempt,
-            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         }
 
-        with open(f"{self.config.output_path}/final_quantization_report.json", 'w') as f:
+        with open(f"{self.config.output_path}/final_quantization_report.json", "w") as f:
             json.dump(report, f, indent=2)
 
-        logger.info(f"📄 Final report saved to {self.config.output_path}/final_quantization_report.json")
+        logger.info(
+            f"📄 Final report saved to {self.config.output_path}/final_quantization_report.json"
+        )
+
 
 def main():
     """Main execution function"""
@@ -434,7 +450,7 @@ def main():
         model_path=model_path,
         output_path="quant_pass1",
         target_size_gb=size_target_gb,
-        emotion_threshold=emotion_threshold
+        emotion_threshold=emotion_threshold,
     )
 
     # Initialize quantizer
@@ -463,7 +479,9 @@ def main():
             logger.info("📊 Results summary:")
             for method, result in results.items():
                 if "error" not in result:
-                    logger.info(f"   {method}: {result['model_size_gb']:.2f}GB, {result['emotional_degradation']*100:.2f}% degradation")
+                    logger.info(
+                        f"   {method}: {result['model_size_gb']:.2f}GB, {result['emotional_degradation']*100:.2f}% degradation"
+                    )
 
             # Save report anyway
             quantizer.save_final_report(results)
@@ -473,6 +491,7 @@ def main():
         raise
 
     logger.info("🏁 Quantization Pass 1 Complete")
+
 
 if __name__ == "__main__":
     main()

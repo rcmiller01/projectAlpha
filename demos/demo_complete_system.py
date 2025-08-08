@@ -10,7 +10,9 @@ import asyncio
 import json
 import time
 from pathlib import Path
+
 from core.core_arbiter import CoreArbiter, WeightingStrategy
+
 
 async def demo_complete_system():
     """Demonstrate the complete CoreArbiter system"""
@@ -29,33 +31,33 @@ async def demo_complete_system():
             "ui_context": {
                 "current_emotion": "uncertainty",
                 "user_state": "seeking_connection",
-                "session_context": "new_conversation"
-            }
+                "session_context": "new_conversation",
+            },
         },
         {
             "user_input": "I'm struggling with a difficult decision about my career.",
             "ui_context": {
                 "current_emotion": "anxiety",
                 "user_state": "decision_support_needed",
-                "session_context": "ongoing_conversation"
-            }
+                "session_context": "ongoing_conversation",
+            },
         },
         {
             "user_input": "Sometimes I feel like nobody really understands me.",
             "ui_context": {
                 "current_emotion": "loneliness",
                 "user_state": "emotional_vulnerability",
-                "session_context": "deepening_connection"
-            }
+                "session_context": "deepening_connection",
+            },
         },
         {
             "user_input": "Can you analyze this data and give me a logical breakdown?",
             "ui_context": {
                 "current_emotion": "analytical",
                 "user_state": "task_focused",
-                "session_context": "utilitarian_request"
-            }
-        }
+                "session_context": "utilitarian_request",
+            },
+        },
     ]
 
     print("\n2. Simulating Conversation Flow:\n")
@@ -63,24 +65,25 @@ async def demo_complete_system():
     for i, scenario in enumerate(conversation_scenarios, 1):
         print(f"   💬 Conversation Turn {i}")
         print(f"   User: {scenario['user_input']}")
-        print(f"   Context: {scenario['ui_context']['current_emotion']} | {scenario['ui_context']['user_state']}")
+        print(
+            f"   Context: {scenario['ui_context']['current_emotion']} | {scenario['ui_context']['user_state']}"
+        )
 
         # Process through CoreArbiter
-        response = await arbiter.process_input(
-            scenario['user_input'],
-            scenario['ui_context']
-        )
+        response = await arbiter.process_input(scenario["user_input"], scenario["ui_context"])
 
         # Simulate UI mood ring update
         mood_mapping = {
             "emotional": {"color": "#EC4899", "icon": "💖", "intensity": "high"},
             "balanced": {"color": "#8B5CF6", "icon": "💭", "intensity": "medium"},
-            "objective": {"color": "#06B6D4", "icon": "🤔", "intensity": "low"}
+            "objective": {"color": "#06B6D4", "icon": "🤔", "intensity": "low"},
         }
 
         ui_mood = mood_mapping.get(response.tone, mood_mapping["balanced"])
 
-        print(f"   🎭 UI Mood Ring: {ui_mood['icon']} {ui_mood['color']} ({ui_mood['intensity']} intensity)")
+        print(
+            f"   🎭 UI Mood Ring: {ui_mood['icon']} {ui_mood['color']} ({ui_mood['intensity']} intensity)"
+        )
         print(f"   🤖 AI Response: {response.final_output}")
         print(f"   📊 Metadata: {response.tone} tone, {response.confidence:.0%} confidence")
 
@@ -88,11 +91,13 @@ async def demo_complete_system():
             print(f"   ✨ Reflection: {response.reflection}")
 
         if response.emotional_override:
-            print(f"   🌊 Emotional Override Active")
+            print("   🌊 Emotional Override Active")
 
         # Simulate drift notification
         if arbiter.drift_state.stability_score < 0.6:
-            print(f"   🌀 Drift Notification: 'I feel myself changing... (stability: {arbiter.drift_state.stability_score:.1%})'")
+            print(
+                f"   🌀 Drift Notification: 'I feel myself changing... (stability: {arbiter.drift_state.stability_score:.1%})'"
+            )
 
         print(f"   ⚖️  Resolution: {response.resolution_strategy}")
         print()
@@ -109,7 +114,7 @@ async def demo_complete_system():
     strategies = [
         WeightingStrategy.LOGIC_DOMINANT,
         WeightingStrategy.EMOTIONAL_PRIORITY,
-        WeightingStrategy.HARMONIC
+        WeightingStrategy.HARMONIC,
     ]
 
     for strategy in strategies:
@@ -118,7 +123,9 @@ async def demo_complete_system():
 
         response = await arbiter.process_input(test_input, test_state)
         print(f"   Response: {response.final_output[:80]}...")
-        print(f"   Weights: Logic={response.source_weights['hrm_r']:.1%}, Emotion={response.source_weights['hrm_e']:.1%}")
+        print(
+            f"   Weights: Logic={response.source_weights['hrm_r']:.1%}, Emotion={response.source_weights['hrm_e']:.1%}"
+        )
         print()
 
     # Demonstrate drift and regulation
@@ -130,16 +137,16 @@ async def demo_complete_system():
         emotional_state = {"context": "emotional_crisis", "intensity": 0.9}
         await arbiter.process_input(emotional_input, emotional_state)
 
-    print(f"   📉 After intensive processing:")
+    print("   📉 After intensive processing:")
     print(f"      Emotional drift: {arbiter.drift_state.emotional_drift:.1%}")
     print(f"      Fatigue level: {arbiter.drift_state.fatigue_level:.1%}")
     print(f"      Stability: {arbiter.drift_state.stability_score:.1%}")
 
     # Perform system regulation
-    print(f"\n   🔧 Performing system regulation...")
+    print("\n   🔧 Performing system regulation...")
     await arbiter.regulate_system()
 
-    print(f"   📈 After regulation:")
+    print("   📈 After regulation:")
     print(f"      Stability: {arbiter.drift_state.stability_score:.1%}")
     print(f"      Fatigue level: {arbiter.drift_state.fatigue_level:.1%}")
 
@@ -155,10 +162,11 @@ async def demo_complete_system():
     # Show trace file info
     trace_path = Path("logs/core_arbiter_trace.json")
     if trace_path.exists():
-        with open(trace_path, 'r') as f:
+        with open(trace_path) as f:
             traces = json.load(f)
         print(f"   📝 Trace Entries: {len(traces)}")
         print(f"   💾 Trace File: {trace_path}")
+
 
 def demo_ui_integration():
     """Demonstrate UI integration concepts"""
@@ -190,6 +198,7 @@ def demo_ui_integration():
     print("   💾 Local state management with React hooks")
     print("   🔄 Automatic retry and error handling")
 
+
 def demo_technical_architecture():
     """Show technical architecture overview"""
     print("\n🏗️  === Technical Architecture ===\n")
@@ -220,6 +229,7 @@ def demo_technical_architecture():
     print("   → Conflict Resolution → Response Generation")
     print("   → UI Update → Mood Ring → Visual Effects")
 
+
 async def main():
     """Main demo function"""
     await demo_complete_system()
@@ -235,7 +245,8 @@ async def main():
     print("6. Create ritual/symbolic response generation system")
     print("7. Build memory and anchor management interfaces")
 
-    print(f"\n✨ Demo completed! Check 'logs/core_arbiter_trace.json' for decision traces.")
+    print("\n✨ Demo completed! Check 'logs/core_arbiter_trace.json' for decision traces.")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

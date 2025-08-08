@@ -7,7 +7,7 @@ import logging
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent
@@ -16,12 +16,13 @@ sys.path.insert(0, str(project_root))
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from config.settings import settings, log_configuration_summary
+
+from config.settings import log_configuration_summary, settings
 
 # Configure logging with centralized settings
 logging.basicConfig(
     level=getattr(logging, settings.LOG_LEVEL),
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -29,11 +30,7 @@ logger = logging.getLogger(__name__)
 logger.info("🚀 Starting Unified AI Companion Backend")
 log_configuration_summary(settings)
 
-app = FastAPI(
-    title="Unified AI Companion Backend",
-    version="1.0.0",
-    debug=settings.DEBUG
-)
+app = FastAPI(title="Unified AI Companion Backend", version="1.0.0", debug=settings.DEBUG)
 
 # Add CORS middleware
 app.add_middleware(
@@ -47,24 +44,27 @@ app.add_middleware(
 # Anchor settings configuration
 ANCHOR_SETTINGS_PATH = Path("config/anchor_settings.json")
 
+
 class AnchorSettings(BaseModel):
     """Model for anchor settings configuration."""
-    weights: Dict[str, float]
+
+    weights: dict[str, float]
     signature: str = "Emberveil-01"
     locked: bool = False
     last_updated: str = ""
 
-def load_anchor_settings() -> Dict[str, Any]:
+
+def load_anchor_settings() -> dict[str, Any]:
     """Load anchor settings from configuration file."""
     try:
         if ANCHOR_SETTINGS_PATH.exists():
-            with open(ANCHOR_SETTINGS_PATH, 'r') as f:
+            with open(ANCHOR_SETTINGS_PATH) as f:
                 settings = json.load(f)
                 logger.info(f"Loaded anchor settings from {ANCHOR_SETTINGS_PATH}")
                 return settings
         else:
             logger.warning(f"Anchor settings file not found at {ANCHOR_SETTINGS_PATH}")
-    except (json.JSONDecodeError, IOError) as e:
+    except (OSError, json.JSONDecodeError) as e:
         logger.error(f"Failed to load anchor settings: {e}")
 
     # Return default settings
@@ -73,16 +73,17 @@ def load_anchor_settings() -> Dict[str, Any]:
             "persona_continuity": 0.4,
             "expression_accuracy": 0.3,
             "response_depth": 0.2,
-            "memory_alignment": 0.1
+            "memory_alignment": 0.1,
         },
         "signature": "Emberveil-01",
         "locked": False,
-        "last_updated": None
+        "last_updated": None,
     }
     logger.info("Using default anchor settings")
     return default_settings
 
-def save_anchor_settings(settings: Dict[str, Any]) -> None:
+
+def save_anchor_settings(settings: dict[str, Any]) -> None:
     """Save anchor settings to configuration file."""
     try:
         # Ensure config directory exists
@@ -91,16 +92,17 @@ def save_anchor_settings(settings: Dict[str, Any]) -> None:
         # Add timestamp
         settings["last_updated"] = datetime.utcnow().isoformat()
 
-        with open(ANCHOR_SETTINGS_PATH, 'w') as f:
+        with open(ANCHOR_SETTINGS_PATH, "w") as f:
             json.dump(settings, f, indent=2)
 
         logger.info(f"Saved anchor settings to {ANCHOR_SETTINGS_PATH}")
-    except (IOError, TypeError) as e:
+    except (OSError, TypeError) as e:
         logger.error(f"Failed to save anchor settings: {e}")
         raise HTTPException(status_code=500, detail="Failed to save anchor settings")
 
+
 @app.get("/api/anchor/settings")
-async def get_anchor_settings() -> Dict[str, Any]:
+async def get_anchor_settings() -> dict[str, Any]:
     """Get current anchor settings configuration."""
     try:
         settings = load_anchor_settings()
@@ -109,8 +111,9 @@ async def get_anchor_settings() -> Dict[str, Any]:
         logger.error(f"Error retrieving anchor settings: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve anchor settings")
 
+
 @app.post("/api/anchor/settings")
-async def update_anchor_settings(settings: AnchorSettings) -> Dict[str, Any]:
+async def update_anchor_settings(settings: AnchorSettings) -> dict[str, Any]:
     """Update anchor settings configuration."""
     try:
         settings_dict = settings.dict()
@@ -120,12 +123,15 @@ async def update_anchor_settings(settings: AnchorSettings) -> Dict[str, Any]:
         logger.error(f"Error updating anchor settings: {e}")
         raise HTTPException(status_code=500, detail="Failed to update anchor settings")
 
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
     return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
 
+
 if __name__ == "__main__":
     import uvicorn
+
     logging.basicConfig(level=logging.INFO)
     uvicorn.run(app, host="0.0.0.0", port=8000)

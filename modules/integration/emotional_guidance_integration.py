@@ -2,31 +2,34 @@
 Emotional Guidance Integration - Connect guidance coordinator with emotional config
 """
 
-import sys
 import os
+import sys
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from typing import Any, Dict, List
+
 from modules.config.emotion_config_manager import emotion_config
-from typing import Dict, Any, List
+
 
 class EmotionalGuidanceIntegrator:
     def __init__(self):
         self.current_emotional_state = "balanced"
         self.active_symbols = {}
 
-    def process_emotional_triggers(self, user_input: str, silence_duration: float) -> Dict[str, Any]:
+    def process_emotional_triggers(
+        self, user_input: str, silence_duration: float
+    ) -> dict[str, Any]:
         """Process user input for emotional triggers and hooks"""
         triggers_activated = []
 
         # Check silence hooks
         silence_hooks = emotion_config.configs.get("emotional_hooks", {}).get("silence_hooks", {})
         for hook_name, hook_config in silence_hooks.items():
-            if silence_duration >= hook_config.get("threshold_seconds", float('inf')):
-                triggers_activated.append({
-                    "type": "silence",
-                    "hook": hook_name,
-                    "config": hook_config
-                })
+            if silence_duration >= hook_config.get("threshold_seconds", float("inf")):
+                triggers_activated.append(
+                    {"type": "silence", "hook": hook_name, "config": hook_config}
+                )
 
         # Check symbol hooks
         self.check_symbol_triggers(user_input)
@@ -37,7 +40,7 @@ class EmotionalGuidanceIntegrator:
         return {
             "triggered_hooks": triggers_activated,
             "emotional_state": self.current_emotional_state,
-            "active_symbols": self.active_symbols
+            "active_symbols": self.active_symbols,
         }
 
     def check_symbol_triggers(self, text: str):
@@ -63,6 +66,7 @@ class EmotionalGuidanceIntegrator:
     def check_time_triggers(self):
         """Check for time-based emotional hooks"""
         from datetime import datetime
+
         current_hour = datetime.now().hour
 
         time_hooks = emotion_config.configs.get("emotional_hooks", {}).get("time_hooks", {})
@@ -72,7 +76,7 @@ class EmotionalGuidanceIntegrator:
                 # Time-based trigger activated
                 self.trigger_ritual_response(hook_config)
 
-    def trigger_ritual_response(self, hook_config: Dict):
+    def trigger_ritual_response(self, hook_config: dict):
         """Trigger a ritual response based on hook configuration"""
         emotional_state = hook_config.get("emotional_state")
         if emotional_state:
@@ -81,7 +85,7 @@ class EmotionalGuidanceIntegrator:
         # This would trigger the actual response generation
         return hook_config.get("response_templates", [])
 
-    def get_weighted_symbols_for_context(self) -> List[Dict]:
+    def get_weighted_symbols_for_context(self) -> list[dict]:
         """Get emotionally weighted symbols for current context"""
         symbol_map = emotion_config.configs.get("symbol_map", {})
         symbols = symbol_map.get("symbols", {})
@@ -94,6 +98,7 @@ class EmotionalGuidanceIntegrator:
         ]
 
         return sorted(weighted_symbols, key=lambda x: x["weight"], reverse=True)
+
 
 # Global integration instance
 emotional_guidance = EmotionalGuidanceIntegrator()

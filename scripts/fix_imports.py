@@ -11,34 +11,35 @@ import re
 import sys
 from pathlib import Path
 
+
 def fix_import_paths():
     """Fix import paths throughout the project"""
 
     # Define path mappings for common import fixes
     import_mappings = {
-        r'from backend.hrm_router import': r'from backend.hrm_router import',
-        r'import backend.hrm_router as hrm_router': r'import backend.hrm_router as hrm_router',
-        r'from backend.hrm_api import': r'from backend.hrm_api import',
-        r'import backend.hrm_api as hrm_api': r'import backend.hrm_api as hrm_api',
-        r'from core.core_arbiter import': r'from core.core_arbiter import',
-        r'import core.core_arbiter as core_arbiter': r'import core.core_arbiter as core_arbiter',
-        r'from core.mirror_mode import': r'from core.mirror_mode import',
-        r'import core.mirror_mode as mirror_mode': r'import core.mirror_mode as mirror_mode',
-        r'from core.symbolic_drift import': r'from core.symbolic_drift import',
-        r'import core.symbolic_drift as symbolic_drift': r'import core.symbolic_drift as symbolic_drift',
+        r"from backend.hrm_router import": r"from backend.hrm_router import",
+        r"import backend.hrm_router as hrm_router": r"import backend.hrm_router as hrm_router",
+        r"from backend.hrm_api import": r"from backend.hrm_api import",
+        r"import backend.hrm_api as hrm_api": r"import backend.hrm_api as hrm_api",
+        r"from core.core_arbiter import": r"from core.core_arbiter import",
+        r"import core.core_arbiter as core_arbiter": r"import core.core_arbiter as core_arbiter",
+        r"from core.mirror_mode import": r"from core.mirror_mode import",
+        r"import core.mirror_mode as mirror_mode": r"import core.mirror_mode as mirror_mode",
+        r"from core.symbolic_drift import": r"from core.symbolic_drift import",
+        r"import core.symbolic_drift as symbolic_drift": r"import core.symbolic_drift as symbolic_drift",
     }
 
     # Files and directories to scan
     scan_directories = [
-        'src/',
-        'backend/',
-        'tests/',
-        'testing/',
-        'webapp/',
-        'examples/',
-        'demos/',
-        'utils/',
-        'scripts/'
+        "src/",
+        "backend/",
+        "tests/",
+        "testing/",
+        "webapp/",
+        "examples/",
+        "demos/",
+        "utils/",
+        "scripts/",
     ]
 
     # Get project root
@@ -64,6 +65,7 @@ def fix_import_paths():
 
     return files_updated
 
+
 def fix_file_imports(file_path: Path, mappings: dict) -> bool:
     """
     Fix imports in a single file
@@ -76,7 +78,7 @@ def fix_file_imports(file_path: Path, mappings: dict) -> bool:
         bool: True if file was modified, False otherwise
     """
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
         original_content = content
@@ -87,7 +89,7 @@ def fix_file_imports(file_path: Path, mappings: dict) -> bool:
 
         # Write back if changed
         if content != original_content:
-            with open(file_path, 'w', encoding='utf-8') as f:
+            with open(file_path, "w", encoding="utf-8") as f:
                 f.write(content)
             return True
 
@@ -96,17 +98,18 @@ def fix_file_imports(file_path: Path, mappings: dict) -> bool:
 
     return False
 
+
 def validate_imports():
     """Validate that critical imports work after fixes"""
 
     print("\n🔍 Validating critical imports...")
 
     test_imports = [
-        ('backend.hrm_router', 'HRMRouter'),
-        ('backend.hrm_api', 'hrm_api'),
-        ('core.core_arbiter', 'CoreArbiter'),
-        ('core.mirror_mode', 'MirrorModeManager'),
-        ('core.symbolic_drift', 'symbolic_drift'),
+        ("backend.hrm_router", "HRMRouter"),
+        ("backend.hrm_api", "hrm_api"),
+        ("core.core_arbiter", "CoreArbiter"),
+        ("core.mirror_mode", "MirrorModeManager"),
+        ("core.symbolic_drift", "symbolic_drift"),
     ]
 
     validation_passed = 0
@@ -131,6 +134,7 @@ def validate_imports():
 
     print(f"\n📊 Validation complete: {validation_passed}/{len(test_imports)} imports successful")
     return validation_passed
+
 
 def create_import_guide():
     """Create a guide for the new import structure"""
@@ -210,10 +214,11 @@ sys.path.insert(0, str(project_root))
 """
 
     guide_path = Path(__file__).parent.parent / "documentation" / "IMPORT_GUIDE.md"
-    with open(guide_path, 'w', encoding='utf-8') as f:
+    with open(guide_path, "w", encoding="utf-8") as f:
         f.write(guide_content)
 
     print(f"📖 Created import guide: {guide_path}")
+
 
 if __name__ == "__main__":
     print("🚀 Project Import Path Fixer")
@@ -228,12 +233,12 @@ if __name__ == "__main__":
     # Create import guide
     create_import_guide()
 
-    print(f"\n✨ Summary:")
+    print("\n✨ Summary:")
     print(f"   📝 Files updated: {files_updated}")
     print(f"   ✅ Imports validated: {validation_passed}")
-    print(f"   📖 Import guide created")
+    print("   📖 Import guide created")
 
     if files_updated > 0:
-        print(f"\n⚠️  Please test your application to ensure all imports work correctly!")
+        print("\n⚠️  Please test your application to ensure all imports work correctly!")
     else:
-        print(f"\n🎯 No import fixes needed - all paths appear to be correct!")
+        print("\n🎯 No import fixes needed - all paths appear to be correct!")

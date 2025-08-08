@@ -6,16 +6,17 @@ Provides autonomous learning and adaptation capabilities for the companion syste
 
 import asyncio
 import logging
-from typing import Dict, List, Any, Optional
-from datetime import datetime, timedelta
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
 
 class AutonomyLevel(Enum):
     """Levels of autonomous behavior"""
+
     MANUAL = "manual"
     ASSISTED = "assisted"
     AUTONOMOUS = "autonomous"
@@ -25,11 +26,12 @@ class AutonomyLevel(Enum):
 @dataclass
 class AutonomousAction:
     """Represents an autonomous action taken by the system"""
+
     action_id: str
     action_type: str
     trigger_event: str
     confidence_score: float
-    parameters: Dict[str, Any]
+    parameters: dict[str, Any]
     timestamp: datetime
     outcome: Optional[str] = None
     user_feedback: Optional[str] = None
@@ -40,7 +42,7 @@ class AutonomousLearning:
     Autonomous learning system that adapts behavior based on user interactions
     """
 
-    def __init__(self, user_id: str, config: Dict[str, Any]):
+    def __init__(self, user_id: str, config: dict[str, Any]):
         self.user_id = user_id
         self.config = config
         self.logger = logging.getLogger(f"{__name__}.{user_id}")
@@ -58,7 +60,7 @@ class AutonomousLearning:
 
         self.logger.info(f"🤖 Autonomous learning initialized: Level={self.autonomy_level.value}")
 
-    async def process_interaction_feedback(self, interaction_data: Dict[str, Any]) -> None:
+    async def process_interaction_feedback(self, interaction_data: dict[str, Any]) -> None:
         """
         Process feedback from user interactions to learn and adapt
         """
@@ -69,7 +71,9 @@ class AutonomousLearning:
             emotional_response = interaction_data.get("emotional_response", {})
 
             # Update behavioral patterns
-            await self._update_behavioral_patterns(interaction_type, satisfaction_score, emotional_response)
+            await self._update_behavioral_patterns(
+                interaction_type, satisfaction_score, emotional_response
+            )
 
             # Check for adaptation opportunities
             if satisfaction_score < self.adaptation_threshold:
@@ -79,15 +83,17 @@ class AutonomousLearning:
             if satisfaction_score > 0.8:
                 await self._reinforce_successful_patterns(interaction_data)
 
-            self.logger.debug(f"📊 Processed interaction feedback: Type={interaction_type}, "
-                            f"Satisfaction={satisfaction_score:.2f}")
+            self.logger.debug(
+                f"📊 Processed interaction feedback: Type={interaction_type}, "
+                f"Satisfaction={satisfaction_score:.2f}"
+            )
 
         except Exception as e:
             self.logger.error(f"❌ Error processing interaction feedback: {e}")
 
-    async def _update_behavioral_patterns(self, interaction_type: str,
-                                        satisfaction_score: float,
-                                        emotional_response: Dict[str, float]) -> None:
+    async def _update_behavioral_patterns(
+        self, interaction_type: str, satisfaction_score: float, emotional_response: dict[str, float]
+    ) -> None:
         """Update behavioral patterns based on interaction outcomes"""
 
         if interaction_type not in self.behavioral_patterns:
@@ -95,7 +101,7 @@ class AutonomousLearning:
                 "success_rate": [],
                 "emotional_preferences": {},
                 "response_strategies": {},
-                "timing_patterns": {}
+                "timing_patterns": {},
             }
 
         pattern = self.behavioral_patterns[interaction_type]
@@ -111,7 +117,7 @@ class AutonomousLearning:
                 pattern["emotional_preferences"][emotion] = []
             pattern["emotional_preferences"][emotion].append(intensity)
 
-    async def _queue_adaptation(self, interaction_data: Dict[str, Any]) -> None:
+    async def _queue_adaptation(self, interaction_data: dict[str, Any]) -> None:
         """Queue an adaptation based on poor interaction outcome"""
 
         adaptation = {
@@ -119,18 +125,22 @@ class AutonomousLearning:
             "trigger_interaction": interaction_data,
             "proposed_changes": await self._generate_adaptation_proposals(interaction_data),
             "priority": self._calculate_adaptation_priority(interaction_data),
-            "timestamp": datetime.now()
+            "timestamp": datetime.now(),
         }
 
         self.adaptation_queue.append(adaptation)
         self.logger.info(f"🔄 Queued adaptation: {adaptation['adaptation_id']}")
 
         # Execute high-priority adaptations automatically if autonomy allows
-        if (self.autonomy_level in [AutonomyLevel.AUTONOMOUS, AutonomyLevel.PROACTIVE]
-            and adaptation["priority"] > 0.8):
+        if (
+            self.autonomy_level in [AutonomyLevel.AUTONOMOUS, AutonomyLevel.PROACTIVE]
+            and adaptation["priority"] > 0.8
+        ):
             await self._execute_adaptation(adaptation)
 
-    async def _generate_adaptation_proposals(self, interaction_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+    async def _generate_adaptation_proposals(
+        self, interaction_data: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """Generate proposals for adapting behavior"""
         proposals = []
 
@@ -139,25 +149,29 @@ class AutonomousLearning:
 
         # Propose response tone adjustments
         if any(emotion > 0.7 for emotion in emotional_state.values()):
-            proposals.append({
-                "type": "tone_adjustment",
-                "parameter": "emotional_sensitivity",
-                "adjustment": "+0.2",
-                "rationale": "High emotional intensity detected"
-            })
+            proposals.append(
+                {
+                    "type": "tone_adjustment",
+                    "parameter": "emotional_sensitivity",
+                    "adjustment": "+0.2",
+                    "rationale": "High emotional intensity detected",
+                }
+            )
 
         # Propose interaction style changes
         if interaction_data.get("satisfaction_score", 0.5) < 0.3:
-            proposals.append({
-                "type": "style_change",
-                "parameter": "interaction_style",
-                "adjustment": "more_supportive",
-                "rationale": "Low satisfaction score indicates need for more support"
-            })
+            proposals.append(
+                {
+                    "type": "style_change",
+                    "parameter": "interaction_style",
+                    "adjustment": "more_supportive",
+                    "rationale": "Low satisfaction score indicates need for more support",
+                }
+            )
 
         return proposals
 
-    def _calculate_adaptation_priority(self, interaction_data: Dict[str, Any]) -> float:
+    def _calculate_adaptation_priority(self, interaction_data: dict[str, Any]) -> float:
         """Calculate priority score for adaptation"""
         satisfaction = interaction_data.get("satisfaction_score", 0.5)
         emotional_intensity = max(interaction_data.get("emotional_state", {}).values() or [0])
@@ -167,7 +181,7 @@ class AutonomousLearning:
         priority = (1.0 - satisfaction) * 0.5 + emotional_intensity * 0.3 + crisis_level * 0.2
         return min(priority, 1.0)
 
-    async def _execute_adaptation(self, adaptation: Dict[str, Any]) -> None:
+    async def _execute_adaptation(self, adaptation: dict[str, Any]) -> None:
         """Execute an approved adaptation"""
         try:
             self.logger.info(f"🔧 Executing adaptation: {adaptation['adaptation_id']}")
@@ -182,7 +196,7 @@ class AutonomousLearning:
                 trigger_event=str(adaptation["trigger_interaction"]),
                 confidence_score=adaptation["priority"],
                 parameters=adaptation["proposed_changes"],
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
 
             self.autonomous_actions.append(action)
@@ -190,7 +204,7 @@ class AutonomousLearning:
         except Exception as e:
             self.logger.error(f"❌ Error executing adaptation: {e}")
 
-    async def _apply_behavioral_change(self, proposal: Dict[str, Any]) -> None:
+    async def _apply_behavioral_change(self, proposal: dict[str, Any]) -> None:
         """Apply a specific behavioral change"""
         change_type = proposal.get("type")
         parameter = proposal.get("parameter")
@@ -207,7 +221,7 @@ class AutonomousLearning:
             # Adjust interaction style
             pass
 
-    async def _reinforce_successful_patterns(self, interaction_data: Dict[str, Any]) -> None:
+    async def _reinforce_successful_patterns(self, interaction_data: dict[str, Any]) -> None:
         """Reinforce behavioral patterns that led to successful interactions"""
         interaction_type = interaction_data.get("interaction_type", "general")
 
@@ -218,7 +232,9 @@ class AutonomousLearning:
             for strategy in pattern.get("response_strategies", {}):
                 pattern["response_strategies"][strategy] *= 1.1  # Boost successful strategies
 
-    async def suggest_proactive_action(self, current_context: Dict[str, Any]) -> Optional[AutonomousAction]:
+    async def suggest_proactive_action(
+        self, current_context: dict[str, Any]
+    ) -> Optional[AutonomousAction]:
         """
         Suggest proactive actions based on learned patterns and current context
         """
@@ -231,9 +247,10 @@ class AutonomousLearning:
             time_since_last_interaction = current_context.get("time_since_last_interaction", 0)
 
             # Suggest check-in if user seems distressed and hasn't interacted recently
-            if (any(emotion > 0.6 for emotion in user_emotional_state.values())
-                and time_since_last_interaction > 3600):  # 1 hour
-
+            if (
+                any(emotion > 0.6 for emotion in user_emotional_state.values())
+                and time_since_last_interaction > 3600
+            ):  # 1 hour
                 action = AutonomousAction(
                     action_id=f"proactive_{int(datetime.now().timestamp())}",
                     action_type="wellness_check",
@@ -241,9 +258,9 @@ class AutonomousLearning:
                     confidence_score=0.7,
                     parameters={
                         "message_type": "gentle_check_in",
-                        "emotional_context": user_emotional_state
+                        "emotional_context": user_emotional_state,
                     },
-                    timestamp=datetime.now()
+                    timestamp=datetime.now(),
                 )
 
                 self.logger.info(f"💝 Suggesting proactive action: {action.action_type}")
@@ -254,7 +271,7 @@ class AutonomousLearning:
 
         return None
 
-    async def get_learning_summary(self) -> Dict[str, Any]:
+    async def get_learning_summary(self) -> dict[str, Any]:
         """Get summary of learning progress and behavioral adaptations"""
         total_interactions = len(self.interaction_history)
         total_adaptations = len(self.autonomous_actions)
@@ -263,7 +280,9 @@ class AutonomousLearning:
         satisfaction_by_type = {}
         for interaction_type, pattern in self.behavioral_patterns.items():
             if pattern["success_rate"]:
-                satisfaction_by_type[interaction_type] = sum(pattern["success_rate"]) / len(pattern["success_rate"])
+                satisfaction_by_type[interaction_type] = sum(pattern["success_rate"]) / len(
+                    pattern["success_rate"]
+                )
 
         return {
             "total_interactions_learned": total_interactions,
@@ -272,12 +291,12 @@ class AutonomousLearning:
             "satisfaction_by_interaction_type": satisfaction_by_type,
             "pending_adaptations": len(self.adaptation_queue),
             "learning_rate": self.learning_rate,
-            "adaptation_threshold": self.adaptation_threshold
+            "adaptation_threshold": self.adaptation_threshold,
         }
 
 
 # Factory function for autonomy system
-async def create_autonomy_system(user_id: str, config: Dict[str, Any]) -> AutonomousLearning:
+async def create_autonomy_system(user_id: str, config: dict[str, Any]) -> AutonomousLearning:
     """Create and initialize autonomy system"""
     autonomy = AutonomousLearning(user_id, config)
     logger.info(f"🤖 Autonomy system created for user {user_id}")

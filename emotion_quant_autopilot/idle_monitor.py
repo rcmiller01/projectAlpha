@@ -4,17 +4,20 @@ Idle System Monitor for Emotion Quantization Autopilot
 Monitors system resources and user activity to determine optimal execution windows
 """
 
-import time
-import psutil
 import logging
 import threading
-from datetime import datetime, timedelta
-from typing import Dict, Optional, Callable
+import time
+from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Dict, Optional
+
+import psutil
 
 try:
-    from pynput import mouse, keyboard
+    from pynput import keyboard, mouse
+
     PYNPUT_AVAILABLE = True
 except ImportError:
     PYNPUT_AVAILABLE = False
@@ -22,28 +25,34 @@ except ImportError:
 
 if PYNPUT_AVAILABLE:
     from typing import Union
+
     ListenerType = Union[mouse.Listener, keyboard.Listener]
 else:
     ListenerType = None
 
+
 @dataclass
 class SystemMetrics:
     """System resource metrics snapshot"""
+
     cpu_percent: float
     memory_percent: float
     disk_free_gb: float
     active_processes: int
     last_user_activity: Optional[datetime] = None
 
+
 @dataclass
 class IdleConfig:
     """Configuration for idle monitoring"""
+
     min_idle_minutes: int = 30
     cpu_threshold_percent: float = 15.0
     memory_threshold_percent: float = 80.0
     disk_threshold_gb: float = 50.0
     check_interval_seconds: int = 300  # 5 minutes
     user_activity_timeout_minutes: int = 15
+
 
 class IdleMonitor:
     """
@@ -59,7 +68,9 @@ class IdleMonitor:
 
     def __init__(self, config: IdleConfig, log_directory: Optional[str] = None):
         self.config = config
-        self.log_directory = Path(log_directory) if log_directory else Path("emotion_quant_autopilot/logs")
+        self.log_directory = (
+            Path(log_directory) if log_directory else Path("emotion_quant_autopilot/logs")
+        )
 
         # Ensure log directory exists
         self.log_directory.mkdir(parents=True, exist_ok=True)
@@ -95,11 +106,8 @@ class IdleMonitor:
 
         logging.basicConfig(
             level=logging.INFO,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            handlers=[
-                logging.FileHandler(log_file),
-                logging.StreamHandler()
-            ]
+            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            handlers=[logging.FileHandler(log_file), logging.StreamHandler()],
         )
 
         self.logger = logging.getLogger("IdleMonitor")
@@ -158,10 +166,11 @@ class IdleMonitor:
 
         # Disk space (for root/primary drive)
         import os
-        if os.name == 'nt':  # Windows
-            disk = psutil.disk_usage('C:\\')
+
+        if os.name == "nt":  # Windows
+            disk = psutil.disk_usage("C:\\")
         else:  # Unix/Linux
-            disk = psutil.disk_usage('/')
+            disk = psutil.disk_usage("/")
         disk_free_gb = disk.free / (1024**3)
 
         # Active process count
@@ -172,7 +181,7 @@ class IdleMonitor:
             memory_percent=memory_percent,
             disk_free_gb=disk_free_gb,
             active_processes=active_processes,
-            last_user_activity=self.last_user_activity
+            last_user_activity=self.last_user_activity,
         )
 
     def is_system_idle(self) -> bool:
@@ -199,13 +208,21 @@ class IdleMonitor:
 
         # Log current status
         if not user_idle_ok:
-            self.logger.debug(f"⏱️ User activity too recent: {user_idle_minutes:.1f} min (need {self.config.min_idle_minutes})")
+            self.logger.debug(
+                f"⏱️ User activity too recent: {user_idle_minutes:.1f} min (need {self.config.min_idle_minutes})"
+            )
         if not cpu_ok:
-            self.logger.debug(f"💻 CPU usage too high: {metrics.cpu_percent:.1f}% (max {self.config.cpu_threshold_percent}%)")
+            self.logger.debug(
+                f"💻 CPU usage too high: {metrics.cpu_percent:.1f}% (max {self.config.cpu_threshold_percent}%)"
+            )
         if not memory_ok:
-            self.logger.debug(f"🧠 Memory usage too high: {metrics.memory_percent:.1f}% (max {self.config.memory_threshold_percent}%)")
+            self.logger.debug(
+                f"🧠 Memory usage too high: {metrics.memory_percent:.1f}% (max {self.config.memory_threshold_percent}%)"
+            )
         if not disk_ok:
-            self.logger.debug(f"💽 Disk space too low: {metrics.disk_free_gb:.1f}GB (min {self.config.disk_threshold_gb}GB)")
+            self.logger.debug(
+                f"💽 Disk space too low: {metrics.disk_free_gb:.1f}GB (min {self.config.disk_threshold_gb}GB)"
+            )
 
         is_idle = user_idle_ok and cpu_ok and memory_ok and disk_ok
 
@@ -224,14 +241,11 @@ class IdleMonitor:
         if PYNPUT_AVAILABLE:
             try:
                 self.mouse_listener = mouse.Listener(
-                    on_move=self._on_mouse_move,
-                    on_click=self._on_mouse_click
+                    on_move=self._on_mouse_move, on_click=self._on_mouse_click
                 )
                 self.mouse_listener.start()
 
-                self.keyboard_listener = keyboard.Listener(
-                    on_press=self._on_key_press
-                )
+                self.keyboard_listener = keyboard.Listener(on_press=self._on_key_press)
                 self.keyboard_listener.start()
 
                 self.logger.info("👁️ User activity monitoring enabled")
@@ -305,7 +319,7 @@ class IdleMonitor:
         self.active_callback = callback
         self.logger.info("📞 Active callback registered")
 
-    def get_idle_status(self) -> Dict:
+    def get_idle_status(self) -> dict:
         """Get current idle status information"""
         metrics = self.get_system_metrics()
         now = datetime.now()
@@ -325,14 +339,14 @@ class IdleMonitor:
                 "cpu_percent": metrics.cpu_percent,
                 "memory_percent": metrics.memory_percent,
                 "disk_free_gb": metrics.disk_free_gb,
-                "active_processes": metrics.active_processes
+                "active_processes": metrics.active_processes,
             },
             "thresholds": {
                 "min_idle_minutes": self.config.min_idle_minutes,
                 "cpu_threshold": self.config.cpu_threshold_percent,
                 "memory_threshold": self.config.memory_threshold_percent,
-                "disk_threshold": self.config.disk_threshold_gb
-            }
+                "disk_threshold": self.config.disk_threshold_gb,
+            },
         }
 
     def force_idle_state(self) -> None:
@@ -345,7 +359,8 @@ class IdleMonitor:
         self.logger.warning("⚠️ Forcing active state (override)")
         self._change_state("active")
 
-def create_idle_monitor_from_config(config_dict: Dict) -> IdleMonitor:
+
+def create_idle_monitor_from_config(config_dict: dict) -> IdleMonitor:
     """Create IdleMonitor from configuration dictionary"""
     system_config = config_dict.get("system_monitoring", {})
 
@@ -354,12 +369,15 @@ def create_idle_monitor_from_config(config_dict: Dict) -> IdleMonitor:
         cpu_threshold_percent=system_config.get("cpu_threshold_percent", 15.0),
         memory_threshold_percent=system_config.get("memory_threshold_percent", 80.0),
         disk_threshold_gb=system_config.get("disk_space_threshold_gb", 50.0),
-        check_interval_seconds=system_config.get("check_interval_seconds", 300)
+        check_interval_seconds=system_config.get("check_interval_seconds", 300),
     )
 
-    log_dir = config_dict.get("output_paths", {}).get("logs_directory", "emotion_quant_autopilot/logs")
+    log_dir = config_dict.get("output_paths", {}).get(
+        "logs_directory", "emotion_quant_autopilot/logs"
+    )
 
     return IdleMonitor(idle_config, log_dir)
+
 
 # CLI interface for testing
 if __name__ == "__main__":
@@ -375,7 +393,7 @@ if __name__ == "__main__":
 
     # Load configuration
     try:
-        with open(args.config, 'r') as f:
+        with open(args.config) as f:
             config = json.load(f)
     except FileNotFoundError:
         print(f"❌ Config file not found: {args.config}")
@@ -419,9 +437,11 @@ if __name__ == "__main__":
         try:
             while True:
                 status = monitor.get_idle_status()
-                print(f"State: {status['current_state']} | "
-                      f"CPU: {status['metrics']['cpu_percent']:.1f}% | "
-                      f"MEM: {status['metrics']['memory_percent']:.1f}%")
+                print(
+                    f"State: {status['current_state']} | "
+                    f"CPU: {status['metrics']['cpu_percent']:.1f}% | "
+                    f"MEM: {status['metrics']['memory_percent']:.1f}%"
+                )
                 time.sleep(30)
         except KeyboardInterrupt:
             pass

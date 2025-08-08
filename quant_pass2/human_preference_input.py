@@ -4,22 +4,24 @@ Human Preference Input System
 Generates summaries for final candidates and collects human feedback
 """
 
-import os
 import json
 import logging
-from pathlib import Path
-from typing import Dict, List, Tuple, Optional, Any
-from dataclasses import dataclass, asdict
-from datetime import datetime
+import os
 import textwrap
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class CandidateProfile:
     """Profile of a candidate model for human review"""
+
     name: str
     path: str
     size_gb: float
@@ -27,28 +29,33 @@ class CandidateProfile:
     emotional_degradation: float
     ai_judge_score: float
     ai_judge_rank: int
-    sample_responses: List[Dict]
-    strengths: List[str]
-    weaknesses: List[str]
-    technical_specs: Dict
+    sample_responses: list[dict]
+    strengths: list[str]
+    weaknesses: list[str]
+    technical_specs: dict
+
 
 @dataclass
 class HumanRating:
     """Human rating for a specific aspect"""
+
     aspect: str
     score: int  # 1-10 scale
     notes: str
 
+
 @dataclass
 class HumanFeedback:
     """Complete human feedback for a candidate"""
+
     candidate_name: str
     overall_rating: int  # 1-10 scale
-    ratings: List[HumanRating]
-    preferred_responses: List[int]  # Indices of preferred sample responses
+    ratings: list[HumanRating]
+    preferred_responses: list[int]  # Indices of preferred sample responses
     general_comments: str
     recommendation: str  # 'accept', 'reject', 'needs_improvement'
     timestamp: str
+
 
 class HumanPreferenceCollector:
     """System for collecting and processing human feedback on model candidates"""
@@ -61,30 +68,32 @@ class HumanPreferenceCollector:
         self.evaluation_criteria = {
             "believability": {
                 "description": "How natural and human-like do the responses feel?",
-                "weight": 0.25
+                "weight": 0.25,
             },
             "connection": {
                 "description": "How well does the model create emotional connection?",
-                "weight": 0.30
+                "weight": 0.30,
             },
             "expressive_strength": {
                 "description": "How effectively does the model express empathy and support?",
-                "weight": 0.25
+                "weight": 0.25,
             },
             "appropriateness": {
                 "description": "How appropriate are the responses to the emotional context?",
-                "weight": 0.20
-            }
+                "weight": 0.20,
+            },
         }
 
         logger.info("👤 Human Preference Collector initialized")
 
-    def load_final_candidates(self, ai_judgment_file: str, top_n: int = 3) -> List[CandidateProfile]:
+    def load_final_candidates(
+        self, ai_judgment_file: str, top_n: int = 3
+    ) -> list[CandidateProfile]:
         """Load top candidates from AI judgment results"""
         logger.info(f"📂 Loading top {top_n} candidates from AI judgment")
 
         try:
-            with open(ai_judgment_file, 'r') as f:
+            with open(ai_judgment_file) as f:
                 ai_results = json.load(f)
 
             model_rankings = ai_results.get("model_rankings", {})
@@ -111,14 +120,14 @@ class HumanPreferenceCollector:
                     name=name,
                     path=candidate_path,
                     size_gb=scores.get("avg_embedding_similarity", 0),  # Placeholder
-                    quantization_method=name.split('_')[0] if '_' in name else 'unknown',
+                    quantization_method=name.split("_")[0] if "_" in name else "unknown",
                     emotional_degradation=1.0 - scores.get("overall_score", 0),
                     ai_judge_score=scores.get("overall_score", 0),
                     ai_judge_rank=i + 1,
                     sample_responses=sample_responses,
                     strengths=strengths,
                     weaknesses=weaknesses,
-                    technical_specs=self._get_technical_specs(name, scores)
+                    technical_specs=self._get_technical_specs(name, scores),
                 )
 
                 profiles.append(profile)
@@ -131,7 +140,7 @@ class HumanPreferenceCollector:
             logger.error(f"❌ Failed to load candidates: {e}")
             return []
 
-    def _extract_sample_responses(self, ai_results: Dict, model_name: str) -> List[Dict]:
+    def _extract_sample_responses(self, ai_results: dict, model_name: str) -> list[dict]:
         """Extract sample responses for a specific model"""
         samples = []
 
@@ -141,17 +150,21 @@ class HumanPreferenceCollector:
         model_responses = []
         for result in all_results:
             if result.get("model_a") == model_name:
-                model_responses.append({
-                    "prompt": result.get("prompt", ""),
-                    "response": result.get("response_a", ""),
-                    "comparison_score": result.get("embedding_similarity", 0)
-                })
+                model_responses.append(
+                    {
+                        "prompt": result.get("prompt", ""),
+                        "response": result.get("response_a", ""),
+                        "comparison_score": result.get("embedding_similarity", 0),
+                    }
+                )
             elif result.get("model_b") == model_name:
-                model_responses.append({
-                    "prompt": result.get("prompt", ""),
-                    "response": result.get("response_b", ""),
-                    "comparison_score": result.get("embedding_similarity", 0)
-                })
+                model_responses.append(
+                    {
+                        "prompt": result.get("prompt", ""),
+                        "response": result.get("response_b", ""),
+                        "comparison_score": result.get("embedding_similarity", 0),
+                    }
+                )
 
         # Select diverse, high-quality samples
         if model_responses:
@@ -161,7 +174,9 @@ class HumanPreferenceCollector:
 
         return samples
 
-    def _analyze_candidate(self, scores: Dict, sample_responses: List[Dict]) -> Tuple[List[str], List[str]]:
+    def _analyze_candidate(
+        self, scores: dict, sample_responses: list[dict]
+    ) -> tuple[list[str], list[str]]:
         """Analyze candidate strengths and weaknesses"""
         strengths = []
         weaknesses = []
@@ -196,15 +211,15 @@ class HumanPreferenceCollector:
 
         return strengths, weaknesses
 
-    def _get_technical_specs(self, name: str, scores: Dict) -> Dict:
+    def _get_technical_specs(self, name: str, scores: dict) -> dict:
         """Get technical specifications for candidate"""
         return {
-            "quantization_method": name.split('_')[0] if '_' in name else 'unknown',
+            "quantization_method": name.split("_")[0] if "_" in name else "unknown",
             "win_rate": scores.get("win_rate", 0),
             "total_comparisons": scores.get("total_comparisons", 0),
             "overall_score": scores.get("overall_score", 0),
             "emotion_preservation": scores.get("avg_emotion_preservation", 0),
-            "sentiment_alignment": scores.get("avg_sentiment_alignment", 0)
+            "sentiment_alignment": scores.get("avg_sentiment_alignment", 0),
         }
 
     def generate_candidate_summary(self, candidate: CandidateProfile) -> str:
@@ -223,7 +238,7 @@ class HumanPreferenceCollector:
 {chr(10).join(f"• {strength}" for strength in candidate.strengths)}
 
 ## ⚠️ Areas for Improvement
-{chr(10).join(f"• weakness" for weakness in candidate.weaknesses)}
+{chr(10).join("• weakness" for weakness in candidate.weaknesses)}
 
 ## 🗣️ Sample Responses
 
@@ -232,7 +247,9 @@ class HumanPreferenceCollector:
         # Add sample responses
         for i, sample in enumerate(candidate.sample_responses[:3], 1):
             prompt = textwrap.fill(sample["prompt"], width=80)
-            response = textwrap.fill(sample["response"], width=80, initial_indent="  ", subsequent_indent="  ")
+            response = textwrap.fill(
+                sample["response"], width=80, initial_indent="  ", subsequent_indent="  "
+            )
 
             summary += f"""
 ### Sample {i}
@@ -292,11 +309,7 @@ class HumanPreferenceCollector:
 
             notes = input(f"   Notes on {criterion} (optional): ").strip()
 
-            ratings.append(HumanRating(
-                aspect=criterion,
-                score=score,
-                notes=notes
-            ))
+            ratings.append(HumanRating(aspect=criterion, score=score, notes=notes))
 
         # Overall rating
         print("\n🎯 OVERALL ASSESSMENT")
@@ -323,7 +336,9 @@ class HumanPreferenceCollector:
             if preferred_str:
                 try:
                     preferred_responses = [int(x.strip()) - 1 for x in preferred_str.split(",")]
-                    preferred_responses = [x for x in preferred_responses if 0 <= x < len(candidate.sample_responses)]
+                    preferred_responses = [
+                        x for x in preferred_responses if 0 <= x < len(candidate.sample_responses)
+                    ]
                 except ValueError:
                     preferred_responses = []
         else:
@@ -362,7 +377,7 @@ class HumanPreferenceCollector:
             preferred_responses=preferred_responses,
             general_comments=general_comments,
             recommendation=recommendation,
-            timestamp=datetime.now().isoformat()
+            timestamp=datetime.now().isoformat(),
         )
 
         self.feedback_history.append(feedback)
@@ -370,7 +385,7 @@ class HumanPreferenceCollector:
         print(f"\n✅ Feedback collected for {candidate.name}")
         return feedback
 
-    def batch_collect_feedback(self, candidates: List[CandidateProfile]) -> List[HumanFeedback]:
+    def batch_collect_feedback(self, candidates: list[CandidateProfile]) -> list[HumanFeedback]:
         """Collect feedback for multiple candidates"""
         logger.info(f"👥 Collecting feedback for {len(candidates)} candidates")
 
@@ -397,7 +412,7 @@ class HumanPreferenceCollector:
 
         return weighted_score
 
-    def generate_feedback_report(self, all_feedback: List[HumanFeedback]) -> Dict:
+    def generate_feedback_report(self, all_feedback: list[HumanFeedback]) -> dict:
         """Generate comprehensive feedback report"""
         logger.info("📊 Generating feedback report")
 
@@ -407,7 +422,7 @@ class HumanPreferenceCollector:
             "evaluation_criteria": self.evaluation_criteria,
             "candidate_scores": {},
             "recommendations": {},
-            "summary": {}
+            "summary": {},
         }
 
         # Process each candidate's feedback
@@ -420,38 +435,48 @@ class HumanPreferenceCollector:
                 "recommendation": feedback.recommendation,
                 "detailed_ratings": {r.aspect: r.score for r in feedback.ratings},
                 "comments": feedback.general_comments,
-                "preferred_responses": feedback.preferred_responses
+                "preferred_responses": feedback.preferred_responses,
             }
 
             report["recommendations"][feedback.candidate_name] = feedback.recommendation
 
         # Generate summary
-        accepted_candidates = [name for name, rec in report["recommendations"].items() if rec == "accept"]
-        rejected_candidates = [name for name, rec in report["recommendations"].items() if rec == "reject"]
+        accepted_candidates = [
+            name for name, rec in report["recommendations"].items() if rec == "accept"
+        ]
+        rejected_candidates = [
+            name for name, rec in report["recommendations"].items() if rec == "reject"
+        ]
 
         report["summary"] = {
             "accepted_count": len(accepted_candidates),
             "rejected_count": len(rejected_candidates),
             "accepted_candidates": accepted_candidates,
             "rejected_candidates": rejected_candidates,
-            "avg_overall_rating": sum(f.overall_rating for f in all_feedback) / len(all_feedback) if all_feedback else 0,
-            "top_candidate": max(report["candidate_scores"].items(), key=lambda x: x[1]["weighted_score"])[0] if report["candidate_scores"] else None
+            "avg_overall_rating": sum(f.overall_rating for f in all_feedback) / len(all_feedback)
+            if all_feedback
+            else 0,
+            "top_candidate": max(
+                report["candidate_scores"].items(), key=lambda x: x[1]["weighted_score"]
+            )[0]
+            if report["candidate_scores"]
+            else None,
         }
 
         return report
 
-    def save_feedback(self, feedback_list: List[HumanFeedback], filepath: str):
+    def save_feedback(self, feedback_list: list[HumanFeedback], filepath: str):
         """Save human feedback to file"""
         try:
             data = {
                 "timestamp": datetime.now().isoformat(),
                 "evaluation_criteria": self.evaluation_criteria,
-                "feedback": [asdict(feedback) for feedback in feedback_list]
+                "feedback": [asdict(feedback) for feedback in feedback_list],
             }
 
             Path(filepath).parent.mkdir(parents=True, exist_ok=True)
 
-            with open(filepath, 'w', encoding='utf-8') as f:
+            with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
 
             logger.info(f"💾 Saved human feedback: {filepath}")
@@ -459,18 +484,19 @@ class HumanPreferenceCollector:
         except Exception as e:
             logger.error(f"❌ Failed to save feedback: {e}")
 
-    def save_report(self, report: Dict, filepath: str):
+    def save_report(self, report: dict, filepath: str):
         """Save feedback report to file"""
         try:
             Path(filepath).parent.mkdir(parents=True, exist_ok=True)
 
-            with open(filepath, 'w', encoding='utf-8') as f:
+            with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(report, f, indent=2, ensure_ascii=False)
 
             logger.info(f"📄 Saved feedback report: {filepath}")
 
         except Exception as e:
             logger.error(f"❌ Failed to save report: {e}")
+
 
 def main():
     """Main execution function"""
@@ -517,7 +543,7 @@ def main():
         print(f"Rejected candidates: {report['summary']['rejected_count']}")
         print(f"Average rating: {report['summary']['avg_overall_rating']:.1f}/10")
 
-        if report['summary']['top_candidate']:
+        if report["summary"]["top_candidate"]:
             print(f"Top candidate: {report['summary']['top_candidate']}")
 
         logger.info("✅ Human feedback collection completed")
@@ -526,6 +552,7 @@ def main():
     except Exception as e:
         logger.error(f"❌ Human feedback collection failed: {e}")
         return 2
+
 
 if __name__ == "__main__":
     exit_code = main()

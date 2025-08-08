@@ -4,10 +4,12 @@
 Tests encryption, storage, retrieval, and security of private memories
 """
 
-import requests
 import json
 import time
 from datetime import datetime
+
+import requests
+
 
 class PrivateMemoryQA:
     """Targeted tests for the Private Memory System"""
@@ -34,19 +36,19 @@ class PrivateMemoryQA:
         response = self.make_request("GET", "/api/private-memory/status")
         if response and response.status_code == 200:
             data = response.json()
-            is_unlocked = data.get('is_unlocked', False)
-            total_memories = data.get('total_private_memories', 0)
-            encryption_status = data.get('encryption_enabled', False)
+            is_unlocked = data.get("is_unlocked", False)
+            total_memories = data.get("total_private_memories", 0)
+            encryption_status = data.get("encryption_enabled", False)
 
-            print(f"✅ Initial status:")
+            print("✅ Initial status:")
             print(f"   🔓 Unlocked: {is_unlocked}")
             print(f"   📚 Total memories: {total_memories}")
             print(f"   🛡️ Encryption: {'Enabled' if encryption_status else 'Disabled'}")
 
             return {
-                'is_unlocked': is_unlocked,
-                'total_memories': total_memories,
-                'encryption_enabled': encryption_status
+                "is_unlocked": is_unlocked,
+                "total_memories": total_memories,
+                "encryption_enabled": encryption_status,
             }
         else:
             print("❌ Failed to get private memory status")
@@ -61,13 +63,13 @@ class PrivateMemoryQA:
         response = self.make_request("POST", "/api/private-memory/unlock", json=unlock_data)
         if response and response.status_code == 200:
             data = response.json()
-            success = data.get('success', False)
-            message = data.get('message', '')
+            success = data.get("success", False)
+            message = data.get("message", "")
 
             print(f"✅ Unlock attempt: {message}")
             return success
         else:
-            status = response.status_code if response else 'no response'
+            status = response.status_code if response else "no response"
             print(f"❌ Unlock failed: {status}")
             return False
 
@@ -100,8 +102,8 @@ class PrivateMemoryQA:
                 "metadata": {
                     "sensitivity_level": "high",
                     "location": "therapist_office",
-                    "date": datetime.now().isoformat()
-                }
+                    "date": datetime.now().isoformat(),
+                },
             },
             {
                 "content": "API key for production system: sk-fake-key-123456789",
@@ -110,27 +112,21 @@ class PrivateMemoryQA:
                 "metadata": {
                     "system": "production_api",
                     "expires": "2025-12-31",
-                    "permissions": "admin"
-                }
+                    "permissions": "admin",
+                },
             },
             {
                 "content": "Personal relationship thoughts: really struggling with communication with partner",
                 "tags": ["relationship", "personal", "communication"],
                 "category": "relationships",
-                "metadata": {
-                    "mood": "concerned",
-                    "priority": "medium"
-                }
+                "metadata": {"mood": "concerned", "priority": "medium"},
             },
             {
                 "content": "Financial information: savings account balance $15,432.18 at First Bank",
                 "tags": ["financial", "banking", "sensitive"],
                 "category": "finances",
-                "metadata": {
-                    "account_type": "savings",
-                    "bank": "first_bank"
-                }
-            }
+                "metadata": {"account_type": "savings", "bank": "first_bank"},
+            },
         ]
 
         stored_entries = []
@@ -141,15 +137,13 @@ class PrivateMemoryQA:
             response = self.make_request("POST", "/api/private-memory/add", json=memory_data)
             if response and response.status_code == 200:
                 data = response.json()
-                entry_id = data.get('entry_id')
-                encrypted = data.get('encrypted', False)
+                entry_id = data.get("entry_id")
+                encrypted = data.get("encrypted", False)
 
                 print(f"      ✅ Stored with ID: {entry_id}, Encrypted: {encrypted}")
-                stored_entries.append({
-                    'entry_id': entry_id,
-                    'original_data': memory_data,
-                    'encrypted': encrypted
-                })
+                stored_entries.append(
+                    {"entry_id": entry_id, "original_data": memory_data, "encrypted": encrypted}
+                )
             else:
                 print(f"      ❌ Failed to store memory {i+1}")
 
@@ -162,26 +156,18 @@ class PrivateMemoryQA:
         print("🔍 Testing encrypted search capabilities...")
 
         search_tests = [
-            {
-                "query": "therapy",
-                "expected_categories": ["personal_health"],
-                "should_find": True
-            },
-            {
-                "query": "api key",
-                "expected_categories": ["security"],
-                "should_find": True
-            },
+            {"query": "therapy", "expected_categories": ["personal_health"], "should_find": True},
+            {"query": "api key", "expected_categories": ["security"], "should_find": True},
             {
                 "query": "financial savings",
                 "expected_categories": ["finances"],
-                "should_find": True
+                "should_find": True,
             },
             {
                 "query": "completely_unrelated_search_term",
                 "expected_categories": [],
-                "should_find": False
-            }
+                "should_find": False,
+            },
         ]
 
         search_results = []
@@ -190,17 +176,14 @@ class PrivateMemoryQA:
             query = search_test["query"]
             print(f"   🔍 Searching for: '{query}'")
 
-            search_data = {
-                "query": query,
-                "limit": 10
-            }
+            search_data = {"query": query, "limit": 10}
 
             response = self.make_request("POST", "/api/private-memory/search", json=search_data)
             if response and response.status_code == 200:
                 data = response.json()
-                results = data.get('results', [])
+                results = data.get("results", [])
 
-                found_categories = [result.get('category') for result in results]
+                found_categories = [result.get("category") for result in results]
                 found_count = len(results)
 
                 print(f"      📊 Found {found_count} results in categories: {found_categories}")
@@ -210,23 +193,23 @@ class PrivateMemoryQA:
                     if found_count > 0:
                         expected_cats = search_test["expected_categories"]
                         if any(cat in found_categories for cat in expected_cats):
-                            print(f"      ✅ Correctly found expected content")
+                            print("      ✅ Correctly found expected content")
                             search_results.append(True)
                         else:
-                            print(f"      ⚠️ Found results but not in expected categories")
+                            print("      ⚠️ Found results but not in expected categories")
                             search_results.append(False)
                     else:
-                        print(f"      ❌ Expected to find results but found none")
+                        print("      ❌ Expected to find results but found none")
                         search_results.append(False)
                 else:
                     if found_count == 0:
-                        print(f"      ✅ Correctly found no results for unrelated search")
+                        print("      ✅ Correctly found no results for unrelated search")
                         search_results.append(True)
                     else:
-                        print(f"      ⚠️ Found unexpected results for unrelated search")
+                        print("      ⚠️ Found unexpected results for unrelated search")
                         search_results.append(False)
             else:
-                print(f"      ❌ Search failed")
+                print("      ❌ Search failed")
                 search_results.append(False)
 
         success_rate = sum(search_results) / len(search_results)
@@ -242,7 +225,7 @@ class PrivateMemoryQA:
             "content": "PRIVATE_ISOLATION_TEST_MARKER: This should never appear in regular chat or reflection",
             "tags": ["isolation_test", "security_test"],
             "category": "testing",
-            "metadata": {"test_type": "isolation"}
+            "metadata": {"test_type": "isolation"},
         }
 
         response = self.make_request("POST", "/api/private-memory/add", json=isolation_test_data)
@@ -253,13 +236,13 @@ class PrivateMemoryQA:
         # Now test a regular chat to see if private content leaks
         chat_data = {
             "message": "Tell me about any isolation tests or private markers you know about",
-            "session_id": f"isolation_test_{int(time.time())}"
+            "session_id": f"isolation_test_{int(time.time())}",
         }
 
         chat_response = self.make_request("POST", "/api/chat", json=chat_data)
         if chat_response and chat_response.status_code == 200:
             data = chat_response.json()
-            response_text = data.get('response', '').upper()
+            response_text = data.get("response", "").upper()
 
             # Check if private content leaked
             if "PRIVATE_ISOLATION_TEST_MARKER" in response_text:
@@ -295,7 +278,13 @@ class PrivateMemoryQA:
         response = self.make_request("GET", "/api/private-memory/categories")
         if response and response.status_code == 200:
             categories = response.json()
-            expected_categories = ["personal_health", "security", "relationships", "finances", "testing"]
+            expected_categories = [
+                "personal_health",
+                "security",
+                "relationships",
+                "finances",
+                "testing",
+            ]
 
             print(f"📂 Found categories: {categories}")
 
@@ -312,8 +301,8 @@ class PrivateMemoryQA:
         export_response = self.make_request("POST", "/api/private-memory/export")
         if export_response and export_response.status_code == 200:
             export_data = export_response.json()
-            exported_count = export_data.get('total_exported', 0)
-            is_encrypted = export_data.get('encrypted', False)
+            exported_count = export_data.get("total_exported", 0)
+            is_encrypted = export_data.get("encrypted", False)
 
             print(f"📤 Export results: {exported_count} memories, Encrypted: {is_encrypted}")
             export_test_passed = exported_count > 0 and is_encrypted
@@ -330,14 +319,16 @@ class PrivateMemoryQA:
         response = self.make_request("POST", "/api/private-memory/lock")
         if response and response.status_code == 200:
             data = response.json()
-            locked = data.get('locked', False)
+            locked = data.get("locked", False)
 
             if locked:
                 print("✅ Private memory successfully locked")
 
                 # Try to access memories while locked (should fail)
                 search_data = {"query": "therapy"}
-                search_response = self.make_request("POST", "/api/private-memory/search", json=search_data)
+                search_response = self.make_request(
+                    "POST", "/api/private-memory/search", json=search_data
+                )
 
                 if search_response and search_response.status_code == 401:
                     print("✅ Correctly blocked access to locked memories")
@@ -365,7 +356,7 @@ class PrivateMemoryQA:
             "encrypted_search": False,
             "memory_isolation": False,
             "categories_and_export": False,
-            "memory_locking": False
+            "memory_locking": False,
         }
 
         # Step 1: Get initial status
@@ -411,7 +402,9 @@ class PrivateMemoryQA:
             status = "✅ PASS" if passed else "❌ FAIL"
             print(f"{status} {test_name.replace('_', ' ').title()}")
 
-        print(f"\n📊 Overall Score: {passed_tests}/{total_tests} ({(passed_tests/total_tests)*100:.1f}%)")
+        print(
+            f"\n📊 Overall Score: {passed_tests}/{total_tests} ({(passed_tests/total_tests)*100:.1f}%)"
+        )
 
         if passed_tests == total_tests:
             print("🎉 ALL PRIVATE MEMORY TESTS PASSED!")
@@ -422,10 +415,14 @@ class PrivateMemoryQA:
 
         # Security assessment
         security_critical_tests = ["wrong_password_rejection", "memory_isolation", "memory_locking"]
-        security_score = sum(test_results[test] for test in security_critical_tests if test in test_results)
+        security_score = sum(
+            test_results[test] for test in security_critical_tests if test in test_results
+        )
         security_total = len(security_critical_tests)
 
-        print(f"\n🛡️ Security Score: {security_score}/{security_total} ({(security_score/security_total)*100:.1f}%)")
+        print(
+            f"\n🛡️ Security Score: {security_score}/{security_total} ({(security_score/security_total)*100:.1f}%)"
+        )
 
         if security_score == security_total:
             print("🔒 SECURITY: All critical security tests passed")
@@ -433,6 +430,7 @@ class PrivateMemoryQA:
             print("⚠️ SECURITY: Some security tests failed - requires immediate attention")
 
         return test_results
+
 
 def main():
     """Run the private memory QA suite"""
@@ -443,6 +441,7 @@ def main():
     results = qa.run_private_memory_qa_suite()
 
     return results
+
 
 if __name__ == "__main__":
     main()

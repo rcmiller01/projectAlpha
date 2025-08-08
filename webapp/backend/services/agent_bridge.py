@@ -19,12 +19,12 @@ Message Types:
 Author: ProjectAlpha Team
 """
 
-import sys
+import asyncio
 import json
 import logging
-import asyncio
-import re
 import os
+import re
+import sys
 from pathlib import Path
 
 # Add project root to path
@@ -33,11 +33,12 @@ sys.path.insert(0, str(project_root))
 
 try:
     from backend.hrm_router import HRMRouter
-    from src.core.core_conductor import CoreConductor
     from memory.graphrag_memory import GraphRAGMemory
-    from src.tools.tool_request_router import ToolRequestRouter
     from src.agents.deduction_agent import DeductionAgent
     from src.agents.metaphor_agent import MetaphorAgent
+    from src.core.core_conductor import CoreConductor
+    from src.tools.tool_request_router import ToolRequestRouter
+
     IMPORTS_SUCCESSFUL = True
 except ImportError as e:
     IMPORTS_SUCCESSFUL = False
@@ -46,10 +47,11 @@ except ImportError as e:
 # Configure logging to stderr to avoid interfering with JSON communication
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    stream=sys.stderr
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    stream=sys.stderr,
 )
 logger = logging.getLogger(__name__)
+
 
 class AgentBridgeService:
     """
@@ -79,21 +81,21 @@ class AgentBridgeService:
         """
         try:
             # Check for required fields based on message type
-            msg_type = data.get('type')
+            msg_type = data.get("type")
 
             if not msg_type:
                 return False, "Missing message type"
 
-            if msg_type not in ['init', 'invoke_agent', 'get_agents', 'shutdown']:
+            if msg_type not in ["init", "invoke_agent", "get_agents", "shutdown"]:
                 return False, f"Unknown message type: {msg_type}"
 
             # Validate payload if present
-            payload = data.get('payload', {})
+            payload = data.get("payload", {})
 
-            if msg_type == 'invoke_agent':
+            if msg_type == "invoke_agent":
                 # Validate agent invocation parameters
-                agent_type = payload.get('agent_type')
-                prompt = payload.get('prompt')
+                agent_type = payload.get("agent_type")
+                prompt = payload.get("prompt")
 
                 if not agent_type:
                     return False, "Missing agent_type in payload"
@@ -107,31 +109,31 @@ class AgentBridgeService:
 
                 # Check for dangerous patterns
                 dangerous_patterns = [
-                    r'<script[^>]*>.*?</script>',  # XSS
-                    r'javascript:',               # JavaScript protocol
-                    r'on\w+\s*=',                # Event handlers
-                    r'eval\s*\(',                # Code injection
-                    r'exec\s*\(',                # Code execution
+                    r"<script[^>]*>.*?</script>",  # XSS
+                    r"javascript:",  # JavaScript protocol
+                    r"on\w+\s*=",  # Event handlers
+                    r"eval\s*\(",  # Code injection
+                    r"exec\s*\(",  # Code execution
                 ]
 
                 for pattern in dangerous_patterns:
                     if re.search(pattern, prompt, re.IGNORECASE):
-                        return False, f"Prompt contains potentially dangerous content"
+                        return False, "Prompt contains potentially dangerous content"
 
                 # Validate context if provided
-                context = payload.get('context', {})
+                context = payload.get("context", {})
                 if context and len(context) > self.max_context_items:
                     return False, f"Too many context items (max {self.max_context_items})"
 
                 # Validate depth parameter
-                depth = payload.get('depth', 1)
+                depth = payload.get("depth", 1)
                 if not isinstance(depth, int) or depth < 1 or depth > 5:
                     return False, "Depth must be an integer between 1 and 5"
 
             return True, ""
 
         except Exception as e:
-            return False, f"Validation error: {str(e)}"
+            return False, f"Validation error: {e!s}"
 
     def sanitize_input(self, data: dict) -> dict:
         """
@@ -146,35 +148,35 @@ class AgentBridgeService:
         try:
             sanitized = data.copy()
 
-            if 'payload' in sanitized:
-                payload = sanitized['payload']
+            if "payload" in sanitized:
+                payload = sanitized["payload"]
 
                 # Sanitize prompt if present
-                if 'prompt' in payload:
-                    prompt = str(payload['prompt'])
+                if "prompt" in payload:
+                    prompt = str(payload["prompt"])
                     # Remove HTML tags and suspicious patterns
-                    prompt = re.sub(r'<[^>]+>', '', prompt)
-                    prompt = re.sub(r'javascript:', '', prompt, flags=re.IGNORECASE)
-                    prompt = re.sub(r'on\w+\s*=', '', prompt, flags=re.IGNORECASE)
+                    prompt = re.sub(r"<[^>]+>", "", prompt)
+                    prompt = re.sub(r"javascript:", "", prompt, flags=re.IGNORECASE)
+                    prompt = re.sub(r"on\w+\s*=", "", prompt, flags=re.IGNORECASE)
 
                     # Limit length
                     if len(prompt) > self.max_prompt_length:
-                        prompt = prompt[:self.max_prompt_length] + "... [truncated]"
+                        prompt = prompt[: self.max_prompt_length] + "... [truncated]"
 
-                    payload['prompt'] = prompt
+                    payload["prompt"] = prompt
 
                 # Sanitize context items
-                if 'context' in payload and isinstance(payload['context'], dict):
-                    context = payload['context']
+                if "context" in payload and isinstance(payload["context"], dict):
+                    context = payload["context"]
                     sanitized_context = {}
 
-                    for key, value in list(context.items())[:self.max_context_items]:
+                    for key, value in list(context.items())[: self.max_context_items]:
                         # Clean key and value
-                        clean_key = re.sub(r'[<>"\']', '', str(key))
-                        clean_value = re.sub(r'[<>"\']', '', str(value))
+                        clean_key = re.sub(r'[<>"\']', "", str(key))
+                        clean_value = re.sub(r'[<>"\']', "", str(value))
                         sanitized_context[clean_key] = clean_value
 
-                    payload['context'] = sanitized_context
+                    payload["context"] = sanitized_context
 
             return sanitized
 
@@ -195,19 +197,21 @@ class AgentBridgeService:
         if not self.require_anchor_confirmation:
             return True, ""
 
-        msg_type = data.get('type')
+        msg_type = data.get("type")
 
         # Operations requiring anchor confirmation
-        sensitive_operations = ['invoke_agent']
+        sensitive_operations = ["invoke_agent"]
 
         if msg_type in sensitive_operations:
-            anchor_confirm = data.get('anchor_confirm')
+            anchor_confirm = data.get("anchor_confirm")
 
             if not anchor_confirm:
                 return False, "Anchor confirmation required for agent forwarding"
 
             if anchor_confirm != self.anchor_confirm_token:
-                logger.warning(f"Invalid anchor confirmation token provided: {anchor_confirm[:8]}...")
+                logger.warning(
+                    f"Invalid anchor confirmation token provided: {anchor_confirm[:8]}..."
+                )
                 return False, "Invalid anchor confirmation token"
 
             logger.info(f"Anchor confirmation verified for {msg_type}")
@@ -232,17 +236,14 @@ class AgentBridgeService:
             self.agents_cache = self.hrm_router.list_agents()
 
             return {
-                'success': True,
-                'message': 'SLiM agent system initialized',
-                'agents_count': len(self.agents_cache)
+                "success": True,
+                "message": "SLiM agent system initialized",
+                "agents_count": len(self.agents_cache),
             }
 
         except Exception as e:
             logger.error(f"Failed to initialize SLiM agent system: {e}")
-            return {
-                'success': False,
-                'error': str(e)
-            }
+            return {"success": False, "error": str(e)}
 
     async def invoke_agent(self, agent_type, prompt, depth=1, context=None):
         """Invoke a specific SLiM agent"""
@@ -262,52 +263,38 @@ class AgentBridgeService:
             response = await asyncio.get_event_loop().run_in_executor(None, dispatch_agent)
 
             return {
-                'success': True,
-                'agent_type': agent_type,
-                'response': response,
-                'timestamp': str(asyncio.get_event_loop().time())
+                "success": True,
+                "agent_type": agent_type,
+                "response": response,
+                "timestamp": str(asyncio.get_event_loop().time()),
             }
 
         except Exception as e:
             logger.error(f"Agent invocation failed: {e}")
-            return {
-                'success': False,
-                'error': str(e),
-                'agent_type': agent_type
-            }
+            return {"success": False, "error": str(e), "agent_type": agent_type}
 
     async def get_agents(self):
         """Get list of available agents"""
         try:
             if not self.initialized:
-                return {
-                    'success': False,
-                    'error': 'Agent system not initialized'
-                }
+                return {"success": False, "error": "Agent system not initialized"}
 
             agents = self.hrm_router.list_agents()
 
-            return {
-                'success': True,
-                'agents': agents,
-                'count': len(agents)
-            }
+            return {"success": True, "agents": agents, "count": len(agents)}
 
         except Exception as e:
             logger.error(f"Failed to get agents: {e}")
-            return {
-                'success': False,
-                'error': str(e)
-            }
+            return {"success": False, "error": str(e)}
 
     def send_response(self, response_type, request_id=None, payload=None, error=None):
         """Send JSON response to Node.js"""
         message = {
-            'type': response_type,
-            'request_id': request_id,
-            'payload': payload,
-            'error': error,
-            'timestamp': str(asyncio.get_event_loop().time())
+            "type": response_type,
+            "request_id": request_id,
+            "payload": payload,
+            "error": error,
+            "timestamp": str(asyncio.get_event_loop().time()),
         }
 
         print(json.dumps(message), flush=True)
@@ -319,55 +306,65 @@ class AgentBridgeService:
             is_valid, validation_error = self.validate_input(message)
             if not is_valid:
                 logger.warning(f"Input validation failed: {validation_error}")
-                self.send_response('error', message.get('request_id'), None, f"Validation error: {validation_error}")
+                self.send_response(
+                    "error",
+                    message.get("request_id"),
+                    None,
+                    f"Validation error: {validation_error}",
+                )
                 return
 
             # Check anchor confirmation for sensitive operations
             confirmed, confirm_error = self.check_anchor_confirmation(message)
             if not confirmed:
                 logger.warning(f"Anchor confirmation failed: {confirm_error}")
-                self.send_response('error', message.get('request_id'), None, f"Security error: {confirm_error}")
+                self.send_response(
+                    "error", message.get("request_id"), None, f"Security error: {confirm_error}"
+                )
                 return
 
             # Sanitize input
             sanitized_message = self.sanitize_input(message)
 
             # Process sanitized message
-            msg_type = sanitized_message.get('type')
-            request_id = sanitized_message.get('request_id')
-            payload = sanitized_message.get('payload', {})
+            msg_type = sanitized_message.get("type")
+            request_id = sanitized_message.get("request_id")
+            payload = sanitized_message.get("payload", {})
 
             logger.info(f"Processing validated message: {msg_type}")
 
-            if msg_type == 'init':
-                project_root = payload.get('project_root')
+            if msg_type == "init":
+                project_root = payload.get("project_root")
                 result = await self.initialize(project_root)
-                self.send_response('init_response', request_id, result)
+                self.send_response("init_response", request_id, result)
 
-            elif msg_type == 'invoke_agent':
-                agent_type = payload.get('agent_type')
-                prompt = payload.get('prompt')
-                depth = payload.get('depth', 1)
-                context = payload.get('context', {})
+            elif msg_type == "invoke_agent":
+                agent_type = payload.get("agent_type")
+                prompt = payload.get("prompt")
+                depth = payload.get("depth", 1)
+                context = payload.get("context", {})
 
-                logger.info(f"Forwarding validated request to agent {agent_type} (anchor confirmed)")
+                logger.info(
+                    f"Forwarding validated request to agent {agent_type} (anchor confirmed)"
+                )
                 result = await self.invoke_agent(agent_type, prompt, depth, context)
-                self.send_response('agent_response', request_id, result)
+                self.send_response("agent_response", request_id, result)
 
-            elif msg_type == 'get_agents':
+            elif msg_type == "get_agents":
                 result = await self.get_agents()
-                self.send_response('agent_list', request_id, result)
+                self.send_response("agent_list", request_id, result)
 
-            elif msg_type == 'shutdown':
+            elif msg_type == "shutdown":
                 logger.info("Shutdown requested")
                 sys.exit(0)
 
             else:
-                self.send_response('error', request_id, None, f"Unknown message type: {msg_type}")
+                self.send_response("error", request_id, None, f"Unknown message type: {msg_type}")
 
         except Exception as e:
             logger.error(f"Error handling message: {e}")
-            self.send_response('error', message.get('request_id'), None, str(e))
+            self.send_response("error", message.get("request_id"), None, str(e))
+
 
 async def main():
     """Main event loop for the agent bridge service"""
@@ -376,10 +373,14 @@ async def main():
     bridge = AgentBridgeService()
 
     # Send startup message
-    bridge.send_response('startup', None, {
-        'message': 'Agent Bridge Python Service started',
-        'imports_successful': IMPORTS_SUCCESSFUL
-    })
+    bridge.send_response(
+        "startup",
+        None,
+        {
+            "message": "Agent Bridge Python Service started",
+            "imports_successful": IMPORTS_SUCCESSFUL,
+        },
+    )
 
     # Main message processing loop
     try:
@@ -398,7 +399,7 @@ async def main():
                 await bridge.handle_message(message)
             except json.JSONDecodeError as e:
                 logger.error(f"Invalid JSON received: {e}")
-                bridge.send_response('error', None, None, f"Invalid JSON: {str(e)}")
+                bridge.send_response("error", None, None, f"Invalid JSON: {e!s}")
 
     except KeyboardInterrupt:
         logger.info("Received keyboard interrupt, shutting down...")
@@ -407,5 +408,6 @@ async def main():
     finally:
         logger.info("Agent Bridge Python Service shutdown")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     asyncio.run(main())

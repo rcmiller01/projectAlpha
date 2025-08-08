@@ -10,27 +10,28 @@ Enhanced with security features:
 - Input validation for all configuration and runtime parameters
 """
 
-import json
-import time
-import subprocess
-import psutil
-import logging
-import signal
-import sys
-import os
-import threading
 import hashlib
+import json
+import logging
+import os
 import re
+import signal
+import subprocess
+import sys
+import threading
+import time
+from collections import deque
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, Any, Optional, List
-from dataclasses import dataclass, asdict
-from collections import deque
+from typing import Any, Dict, List, Optional
+
+import psutil
 
 # Enhanced logging configuration
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -48,16 +49,26 @@ boot_lock = threading.Lock()
 
 # Process validation
 ALLOWED_EXECUTABLES = {
-    'python', 'python.exe', 'python3', 'python3.exe',
-    'ollama', 'ollama.exe', 'node', 'node.exe'
+    "python",
+    "python.exe",
+    "python3",
+    "python3.exe",
+    "ollama",
+    "ollama.exe",
+    "node",
+    "node.exe",
 }
 
 # Import quantization tracking with validation
 try:
     from quant_tracking import (
-        QuantLoopResult, save_loop_result,
-        eval_emotion, eval_fluency, get_tracker
+        QuantLoopResult,
+        eval_emotion,
+        eval_fluency,
+        get_tracker,
+        save_loop_result,
     )
+
     TRACKING_AVAILABLE = True
     logger.info("Quantization tracking module loaded successfully")
 except ImportError as e:
@@ -67,9 +78,13 @@ except ImportError as e:
 # Import model judging system with validation
 try:
     from judge_model_quality import (
-        compare_models, swap_out_baseline, archive_old_model,
-        get_current_baseline_info, judge_and_replace_if_better
+        archive_old_model,
+        compare_models,
+        get_current_baseline_info,
+        judge_and_replace_if_better,
+        swap_out_baseline,
     )
+
     JUDGING_AVAILABLE = True
     logger.info("Model judging system loaded successfully")
 except ImportError as e:
@@ -77,14 +92,16 @@ except ImportError as e:
     JUDGING_AVAILABLE = False
 
 # Fix Windows console encoding
-if sys.platform == 'win32':
+if sys.platform == "win32":
     try:
         import codecs
-        if hasattr(sys.stdout, 'buffer'):
-            sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
-            sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+
+        if hasattr(sys.stdout, "buffer"):
+            sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer, "strict")
+            sys.stderr = codecs.getwriter("utf-8")(sys.stderr.buffer, "strict")
     except Exception:
         pass
+
 
 def generate_bootloader_token() -> str:
     """Generate a secure bootloader session token"""
@@ -93,7 +110,8 @@ def generate_bootloader_token() -> str:
     token_string = f"bootloader:{timestamp}:{random_data}"
     return hashlib.sha256(token_string.encode()).hexdigest()[:BOOTLOADER_TOKEN_LENGTH]
 
-def validate_process_command(command: List[str]) -> tuple[bool, str]:
+
+def validate_process_command(command: list[str]) -> tuple[bool, str]:
     """Validate process command for security"""
     try:
         if not command or len(command) == 0:
@@ -106,12 +124,20 @@ def validate_process_command(command: List[str]) -> tuple[bool, str]:
 
         # Check for dangerous arguments
         dangerous_patterns = [
-            r'--exec', r'--eval', r'-e', r'-c',  # Code execution
-            r'rm\s', r'del\s', r'format',        # File deletion
-            r'>&', r'|', r';', r'&&'             # Command chaining
+            r"--exec",
+            r"--eval",
+            r"-e",
+            r"-c",  # Code execution
+            r"rm\s",
+            r"del\s",
+            r"format",  # File deletion
+            r">&",
+            r"|",
+            r";",
+            r"&&",  # Command chaining
         ]
 
-        command_str = ' '.join(command)
+        command_str = " ".join(command)
         for pattern in dangerous_patterns:
             if re.search(pattern, command_str, re.IGNORECASE):
                 return False, f"Dangerous pattern detected: {pattern}"
@@ -124,20 +150,21 @@ def validate_process_command(command: List[str]) -> tuple[bool, str]:
         return True, "Valid"
 
     except Exception as e:
-        logger.error(f"Error validating process command: {str(e)}")
-        return False, f"Validation error: {str(e)}"
+        logger.error(f"Error validating process command: {e!s}")
+        return False, f"Validation error: {e!s}"
 
-def validate_boot_config(config: Dict[str, Any]) -> tuple[bool, str]:
+
+def validate_boot_config(config: dict[str, Any]) -> tuple[bool, str]:
     """Validate bootloader configuration"""
     try:
         # Check required fields
-        required_fields = ['autopilot_enabled', 'idle_threshold']
+        required_fields = ["autopilot_enabled", "idle_threshold"]
         for field in required_fields:
             if field not in config:
                 return False, f"Missing required field: {field}"
 
         # Validate idle threshold
-        idle_threshold = config.get('idle_threshold', 0)
+        idle_threshold = config.get("idle_threshold", 0)
         if not isinstance(idle_threshold, (int, float)):
             return False, "Idle threshold must be a number"
 
@@ -145,32 +172,33 @@ def validate_boot_config(config: Dict[str, Any]) -> tuple[bool, str]:
             return False, "Idle threshold must be between 0 and 100"
 
         # Validate process limits
-        if 'max_processes' in config:
-            max_procs = config['max_processes']
+        if "max_processes" in config:
+            max_procs = config["max_processes"]
             if not isinstance(max_procs, int) or max_procs < 1 or max_procs > MAX_PROCESS_COUNT:
                 return False, f"max_processes must be between 1 and {MAX_PROCESS_COUNT}"
 
         # Validate monitoring intervals
-        if 'monitor_interval' in config:
-            interval = config['monitor_interval']
+        if "monitor_interval" in config:
+            interval = config["monitor_interval"]
             if not isinstance(interval, (int, float)) or interval < 1 or interval > 3600:
                 return False, "monitor_interval must be between 1 and 3600 seconds"
 
         return True, "Valid"
 
     except Exception as e:
-        logger.error(f"Error validating boot config: {str(e)}")
-        return False, f"Validation error: {str(e)}"
+        logger.error(f"Error validating boot config: {e!s}")
+        return False, f"Validation error: {e!s}"
 
-def log_boot_sequence(phase: str, details: Dict[str, Any], status: str = "success"):
+
+def log_boot_sequence(phase: str, details: dict[str, Any], status: str = "success"):
     """Log boot sequence activities"""
     try:
         log_entry = {
-            'timestamp': datetime.now().isoformat(),
-            'phase': phase,
-            'details': details,
-            'status': status,
-            'thread_id': threading.get_ident()
+            "timestamp": datetime.now().isoformat(),
+            "phase": phase,
+            "details": details,
+            "status": status,
+            "thread_id": threading.get_ident(),
         }
 
         boot_sequence_log.append(log_entry)
@@ -181,9 +209,10 @@ def log_boot_sequence(phase: str, details: Dict[str, Any], status: str = "succes
             logger.warning(f"Boot sequence issue: {phase} failed with {status}")
 
     except Exception as e:
-        logger.error(f"Error logging boot sequence: {str(e)}")
+        logger.error(f"Error logging boot sequence: {e!s}")
 
-def monitor_spawned_process(process_id: int, command: List[str], boot_token: str):
+
+def monitor_spawned_process(process_id: int, command: list[str], boot_token: str):
     """Monitor a spawned process for security"""
     try:
         process = psutil.Process(process_id)
@@ -199,7 +228,9 @@ def monitor_spawned_process(process_id: int, command: List[str], boot_token: str
                     logger.warning(f"Process {process_id} using excessive CPU: {cpu_percent}%")
 
                 if memory_mb > 2048:  # 2GB limit
-                    logger.warning(f"Process {process_id} using excessive memory: {memory_mb:.1f}MB")
+                    logger.warning(
+                        f"Process {process_id} using excessive memory: {memory_mb:.1f}MB"
+                    )
 
                 # Check for suspicious behavior
                 children = process.children(recursive=True)
@@ -215,15 +246,17 @@ def monitor_spawned_process(process_id: int, command: List[str], boot_token: str
         if process_id in spawned_processes:
             del spawned_processes[process_id]
 
-        log_boot_sequence("process_terminated", {
-            "process_id": process_id,
-            "command": command[0] if command else "unknown"
-        }, "success")
+        log_boot_sequence(
+            "process_terminated",
+            {"process_id": process_id, "command": command[0] if command else "unknown"},
+            "success",
+        )
 
     except Exception as e:
-        logger.error(f"Error monitoring process {process_id}: {str(e)}")
+        logger.error(f"Error monitoring process {process_id}: {e!s}")
 
-def secure_process_spawn(command: List[str], boot_token: str) -> Optional[subprocess.Popen]:
+
+def secure_process_spawn(command: list[str], boot_token: str) -> Optional[subprocess.Popen]:
     """Securely spawn a process with validation and monitoring"""
     try:
         with boot_lock:
@@ -236,54 +269,50 @@ def secure_process_spawn(command: List[str], boot_token: str) -> Optional[subpro
             is_valid, validation_message = validate_process_command(command)
             if not is_valid:
                 logger.error(f"Invalid process command: {validation_message}")
-                log_boot_sequence("process_spawn", {
-                    "command": command,
-                    "error": validation_message
-                }, "validation_failed")
+                log_boot_sequence(
+                    "process_spawn",
+                    {"command": command, "error": validation_message},
+                    "validation_failed",
+                )
                 return None
 
             # Spawn process
             process = subprocess.Popen(
-                command,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
+                command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
             )
 
             # Track process
             spawned_processes[process.pid] = {
-                'command': command,
-                'start_time': datetime.now(),
-                'boot_token': boot_token
+                "command": command,
+                "start_time": datetime.now(),
+                "boot_token": boot_token,
             }
 
             # Start monitoring thread
             monitor_thread = threading.Thread(
-                target=monitor_spawned_process,
-                args=(process.pid, command, boot_token),
-                daemon=True
+                target=monitor_spawned_process, args=(process.pid, command, boot_token), daemon=True
             )
             monitor_thread.start()
 
-            log_boot_sequence("process_spawn", {
-                "process_id": process.pid,
-                "command": command[0] if command else "unknown"
-            }, "success")
+            log_boot_sequence(
+                "process_spawn",
+                {"process_id": process.pid, "command": command[0] if command else "unknown"},
+                "success",
+            )
 
             logger.info(f"Securely spawned process {process.pid}: {command[0]}")
             return process
 
     except Exception as e:
-        logger.error(f"Error spawning secure process: {str(e)}")
-        log_boot_sequence("process_spawn", {
-            "command": command,
-            "error": str(e)
-        }, "error")
+        logger.error(f"Error spawning secure process: {e!s}")
+        log_boot_sequence("process_spawn", {"command": command, "error": str(e)}, "error")
         return None
+
 
 @dataclass
 class SystemMetrics:
     """System performance metrics with validation"""
+
     cpu_percent: float
     memory_percent: float
     disk_free_gb: float
@@ -298,11 +327,14 @@ class SystemMetrics:
 
         if self.temperature is not None:
             self.temperature = max(-50.0, min(150.0, float(self.temperature)))
+
     idle_duration_minutes: float
+
 
 @dataclass
 class BootloaderStatus:
     """Current bootloader status"""
+
     is_running: bool
     last_check: str
     autopilot_running: bool
@@ -312,6 +344,7 @@ class BootloaderStatus:
     next_scheduled: Optional[str]
     error_count: int
     last_error: Optional[str]
+
 
 class AutopilotBootloader:
     """
@@ -339,14 +372,14 @@ class AutopilotBootloader:
         self.logger.info(f"Mode: {self.config['mode']}")
         self.logger.info(f"Check interval: {self.config['check_interval']}s")
 
-    def _load_config(self) -> Dict[str, Any]:
+    def _load_config(self) -> dict[str, Any]:
         """Load bootloader configuration"""
         try:
-            with open(self.config_path, 'r') as f:
+            with open(self.config_path) as f:
                 config = json.load(f)
 
             # Validate required fields
-            required_fields = ['mode', 'idle_threshold', 'check_interval']
+            required_fields = ["mode", "idle_threshold", "check_interval"]
             for field in required_fields:
                 if field not in config:
                     raise ValueError(f"Missing required config field: {field}")
@@ -361,12 +394,12 @@ class AutopilotBootloader:
                 "check_interval": 300,
                 "max_memory_percent": 70.0,
                 "autopilot_config_path": "emotion_quant_autopilot/autopilot_config.json",
-                "autopilot_script_path": "emotion_quant_autopilot/quant_autopilot.py"
+                "autopilot_script_path": "emotion_quant_autopilot/quant_autopilot.py",
             }
 
     def _setup_logging(self):
         """Setup logging configuration"""
-        log_file = self.config.get('log_file', 'bootloader.log')
+        log_file = self.config.get("log_file", "bootloader.log")
 
         # Create logs directory if it doesn't exist
         log_path = Path(log_file)
@@ -375,14 +408,11 @@ class AutopilotBootloader:
         # Configure logging
         logging.basicConfig(
             level=logging.INFO,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            handlers=[
-                logging.FileHandler(log_file),
-                logging.StreamHandler(sys.stdout)
-            ]
+            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            handlers=[logging.FileHandler(log_file), logging.StreamHandler(sys.stdout)],
         )
 
-        self.logger = logging.getLogger('AutopilotBootloader')
+        self.logger = logging.getLogger("AutopilotBootloader")
 
     def _signal_handler(self, signum, frame):
         """Handle shutdown signals"""
@@ -405,7 +435,7 @@ class AutopilotBootloader:
         try:
             cpu_percent = psutil.cpu_percent(interval=1)
             memory = psutil.virtual_memory()
-            disk = psutil.disk_usage('/')
+            disk = psutil.disk_usage("/")
 
             # Try to get temperature (may not be available on all systems)
             temperature = None
@@ -431,7 +461,7 @@ class AutopilotBootloader:
                 disk_free_gb=disk.free / (1024**3),
                 temperature=temperature,
                 timestamp=datetime.now().isoformat(),
-                idle_duration_minutes=idle_duration
+                idle_duration_minutes=idle_duration,
             )
 
         except Exception as e:
@@ -442,37 +472,41 @@ class AutopilotBootloader:
                 disk_free_gb=0.0,
                 temperature=None,
                 timestamp=datetime.now().isoformat(),
-                idle_duration_minutes=0.0
+                idle_duration_minutes=0.0,
             )
 
     def check_safety_conditions(self, metrics: SystemMetrics) -> bool:
         """Check if it's safe to launch autopilot"""
-        safety = self.config.get('safety_checks', {})
+        safety = self.config.get("safety_checks", {})
 
         # Check disk space
-        min_disk = safety.get('min_free_disk_gb', 20)
+        min_disk = safety.get("min_free_disk_gb", 20)
         if metrics.disk_free_gb < min_disk:
-            self.logger.warning(f"Insufficient disk space: {metrics.disk_free_gb:.1f}GB < {min_disk}GB")
+            self.logger.warning(
+                f"Insufficient disk space: {metrics.disk_free_gb:.1f}GB < {min_disk}GB"
+            )
             return False
 
         # Check temperature
-        max_temp = safety.get('max_cpu_temp_celsius', 80)
+        max_temp = safety.get("max_cpu_temp_celsius", 80)
         if metrics.temperature and metrics.temperature > max_temp:
-            self.logger.warning(f"CPU temperature too high: {metrics.temperature:.1f}°C > {max_temp}°C")
+            self.logger.warning(
+                f"CPU temperature too high: {metrics.temperature:.1f}°C > {max_temp}°C"
+            )
             return False
 
         # Check work hours
-        if safety.get('prevent_during_work_hours', False):
+        if safety.get("prevent_during_work_hours", False):
             now = datetime.now()
-            work_start = datetime.strptime(safety.get('work_hours_start', '09:00'), '%H:%M').time()
-            work_end = datetime.strptime(safety.get('work_hours_end', '17:00'), '%H:%M').time()
+            work_start = datetime.strptime(safety.get("work_hours_start", "09:00"), "%H:%M").time()
+            work_end = datetime.strptime(safety.get("work_hours_end", "17:00"), "%H:%M").time()
 
             if work_start <= now.time() <= work_end:
                 self.logger.info("Preventing launch during work hours")
                 return False
 
         # Check Ollama availability
-        if safety.get('check_ollama_available', True):
+        if safety.get("check_ollama_available", True):
             if not self._check_ollama_available():
                 self.logger.warning("Ollama not available")
                 return False
@@ -483,53 +517,62 @@ class AutopilotBootloader:
         """Check if Ollama is running and available"""
         try:
             import requests
-            response = requests.get('http://localhost:11434/api/tags', timeout=5)
+
+            response = requests.get("http://localhost:11434/api/tags", timeout=5)
             return response.status_code == 200
         except Exception:
             return False
 
     def is_system_idle(self, metrics: SystemMetrics) -> bool:
         """Check if system meets idle criteria"""
-        cpu_threshold = self.config['idle_threshold']
-        memory_threshold = self.config['max_memory_percent']
-        min_idle_duration = self.config.get('min_idle_duration_minutes', 15)
+        cpu_threshold = self.config["idle_threshold"]
+        memory_threshold = self.config["max_memory_percent"]
+        min_idle_duration = self.config.get("min_idle_duration_minutes", 15)
 
         # Check CPU usage
         if metrics.cpu_percent > cpu_threshold:
             if self.idle_start_time:
                 self.idle_start_time = None
-                self.logger.debug(f"CPU usage {metrics.cpu_percent:.1f}% > {cpu_threshold}% - no longer idle")
+                self.logger.debug(
+                    f"CPU usage {metrics.cpu_percent:.1f}% > {cpu_threshold}% - no longer idle"
+                )
             return False
 
         # Check memory usage
         if metrics.memory_percent > memory_threshold:
             if self.idle_start_time:
                 self.idle_start_time = None
-                self.logger.debug(f"Memory usage {metrics.memory_percent:.1f}% > {memory_threshold}% - no longer idle")
+                self.logger.debug(
+                    f"Memory usage {metrics.memory_percent:.1f}% > {memory_threshold}% - no longer idle"
+                )
             return False
 
         # Start tracking idle time
         if not self.idle_start_time:
             self.idle_start_time = datetime.now()
-            self.logger.info(f"System became idle - CPU: {metrics.cpu_percent:.1f}%, Memory: {metrics.memory_percent:.1f}%")
+            self.logger.info(
+                f"System became idle - CPU: {metrics.cpu_percent:.1f}%, Memory: {metrics.memory_percent:.1f}%"
+            )
             return False
 
         # Check if we've been idle long enough
         idle_duration = (datetime.now() - self.idle_start_time).total_seconds() / 60
         if idle_duration >= min_idle_duration:
-            self.logger.info(f"System idle for {idle_duration:.1f} minutes (>= {min_idle_duration})")
+            self.logger.info(
+                f"System idle for {idle_duration:.1f} minutes (>= {min_idle_duration})"
+            )
             return True
 
         return False
 
     def should_launch_cron(self) -> bool:
         """Check if it's time for scheduled launch"""
-        if self.config['mode'] != 'cron':
+        if self.config["mode"] != "cron":
             return False
 
-        cron_time = self.config.get('cron_schedule', '02:00')
+        cron_time = self.config.get("cron_schedule", "02:00")
         try:
-            target_time = datetime.strptime(cron_time, '%H:%M').time()
+            target_time = datetime.strptime(cron_time, "%H:%M").time()
             now = datetime.now()
             current_time = now.time()
 
@@ -550,9 +593,9 @@ class AutopilotBootloader:
 
         # Check for other autopilot processes
         try:
-            for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
-                cmdline = proc.info.get('cmdline', [])
-                if cmdline and 'quant_autopilot.py' in ' '.join(cmdline):
+            for proc in psutil.process_iter(["pid", "name", "cmdline"]):
+                cmdline = proc.info.get("cmdline", [])
+                if cmdline and "quant_autopilot.py" in " ".join(cmdline):
                     self.logger.info(f"Found existing autopilot process: PID {proc.info['pid']}")
                     return True
         except (psutil.NoSuchProcess, psutil.AccessDenied):
@@ -563,8 +606,12 @@ class AutopilotBootloader:
     def launch_autopilot(self) -> bool:
         """Launch the quantization autopilot with tracking"""
         try:
-            autopilot_script = self.config.get('autopilot_script_path', 'emotion_quant_autopilot/quant_autopilot.py')
-            autopilot_config = self.config.get('autopilot_config_path', 'emotion_quant_autopilot/autopilot_config.json')
+            autopilot_script = self.config.get(
+                "autopilot_script_path", "emotion_quant_autopilot/quant_autopilot.py"
+            )
+            autopilot_config = self.config.get(
+                "autopilot_config_path", "emotion_quant_autopilot/autopilot_config.json"
+            )
 
             if not Path(autopilot_script).exists():
                 self.logger.error(f"Autopilot script not found: {autopilot_script}")
@@ -579,11 +626,7 @@ class AutopilotBootloader:
             loop_id = f"loop_{loop_start_time.strftime('%Y%m%d_%H%M%S')}_{self.launch_count + 1}"
 
             # Launch autopilot as background process
-            cmd = [
-                sys.executable, autopilot_script,
-                '--config', autopilot_config,
-                'start'
-            ]
+            cmd = [sys.executable, autopilot_script, "--config", autopilot_config, "start"]
 
             self.logger.info(f"Launching autopilot: {' '.join(cmd)} (Loop ID: {loop_id})")
 
@@ -591,10 +634,7 @@ class AutopilotBootloader:
             start_metrics = self.get_system_metrics()
 
             self.autopilot_process = subprocess.Popen(
-                cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                stdin=subprocess.DEVNULL
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL
             )
 
             self.launch_count += 1
@@ -606,7 +646,7 @@ class AutopilotBootloader:
                 tracking_thread = threading.Thread(
                     target=self._track_quantization_loop,
                     args=(loop_id, loop_start_time, start_metrics),
-                    daemon=True
+                    daemon=True,
                 )
                 tracking_thread.start()
                 self.logger.info(f"Started tracking thread for loop {loop_id}")
@@ -619,7 +659,9 @@ class AutopilotBootloader:
             self.logger.error(f"Failed to launch autopilot: {e}")
             return False
 
-    def _track_quantization_loop(self, loop_id: str, start_time: datetime, start_metrics: SystemMetrics):
+    def _track_quantization_loop(
+        self, loop_id: str, start_time: datetime, start_metrics: SystemMetrics
+    ):
         """Track a quantization loop and record results"""
         if not TRACKING_AVAILABLE:
             return
@@ -650,7 +692,9 @@ class AutopilotBootloader:
             # Get process exit code
             exit_code = self.autopilot_process.returncode if self.autopilot_process else -1
 
-            self.logger.info(f"Loop {loop_id} completed in {duration_seconds:.1f}s with exit code {exit_code}")
+            self.logger.info(
+                f"Loop {loop_id} completed in {duration_seconds:.1f}s with exit code {exit_code}"
+            )
 
             # Look for generated model files to evaluate
             model_path = self._find_latest_model_file()
@@ -658,7 +702,7 @@ class AutopilotBootloader:
 
             # Evaluate model quality if model file found
             emotional_score = 0.5  # Default fallback
-            token_quality = 0.5    # Default fallback
+            token_quality = 0.5  # Default fallback
             size_mb = 0.0
 
             if model_path and Path(model_path).exists():
@@ -691,7 +735,9 @@ class AutopilotBootloader:
                 cpu_avg_percent=sum(cpu_samples) / len(cpu_samples) if cpu_samples else 0,
                 sentiment_variance=abs(emotional_score - 0.7) if emotional_score > 0 else 0,
                 coherence_score=token_quality * 0.9,  # Approximation based on token quality
-                creativity_index=min(0.95, emotional_score * 1.1)  # Creativity correlates with emotion
+                creativity_index=min(
+                    0.95, emotional_score * 1.1
+                ),  # Creativity correlates with emotion
             )
 
             # Save the result
@@ -729,10 +775,14 @@ class AutopilotBootloader:
                                 # Perform the replacement
                                 try:
                                     swap_out_baseline(model_path)
-                                    self.logger.info("🎉 New core model accepted and baseline updated!")
+                                    self.logger.info(
+                                        "🎉 New core model accepted and baseline updated!"
+                                    )
 
                                     # Log successful replacement
-                                    self._log_model_replacement(loop_id, model_path, baseline_path, comparison_result)
+                                    self._log_model_replacement(
+                                        loop_id, model_path, baseline_path, comparison_result
+                                    )
 
                                 except Exception as e:
                                     self.logger.error(f"❌ Failed to replace baseline model: {e}")
@@ -746,12 +796,18 @@ class AutopilotBootloader:
                                 )
                         else:
                             # No baseline exists, set this as the first baseline
-                            if emotional_score > 0.7 and token_quality > 0.65:  # Basic quality threshold
-                                self.logger.info(f"🆕 No baseline model found, setting new baseline: {model_path}")
+                            if (
+                                emotional_score > 0.7 and token_quality > 0.65
+                            ):  # Basic quality threshold
+                                self.logger.info(
+                                    f"🆕 No baseline model found, setting new baseline: {model_path}"
+                                )
                                 swap_out_baseline(model_path)
                                 self.logger.info("✅ Initial baseline model established!")
                             else:
-                                self.logger.info(f"📋 Model quality too low to establish as baseline")
+                                self.logger.info(
+                                    "📋 Model quality too low to establish as baseline"
+                                )
 
                     except Exception as e:
                         self.logger.error(f"❌ Error during model quality evaluation: {e}")
@@ -779,14 +835,14 @@ class AutopilotBootloader:
                 "*.safetensors",
                 "models/*.gguf",
                 "output/*.gguf",
-                "emotion_quant_autopilot/*.gguf"
+                "emotion_quant_autopilot/*.gguf",
             ]
 
             latest_file = None
             latest_time = 0
 
             for pattern in search_patterns:
-                for model_file in Path('.').glob(pattern):
+                for model_file in Path().glob(pattern):
                     if model_file.is_file():
                         mtime = model_file.stat().st_mtime
                         if mtime > latest_time:
@@ -799,7 +855,13 @@ class AutopilotBootloader:
             self.logger.warning(f"Error finding model files: {e}")
             return None
 
-    def _log_model_replacement(self, loop_id: str, new_model_path: str, old_baseline_path: str, comparison_result: Dict[str, Any]):
+    def _log_model_replacement(
+        self,
+        loop_id: str,
+        new_model_path: str,
+        old_baseline_path: str,
+        comparison_result: dict[str, Any],
+    ):
         """Log model replacement event with detailed metrics"""
         try:
             replacement_log = {
@@ -809,19 +871,21 @@ class AutopilotBootloader:
                 "new_model": {
                     "path": new_model_path,
                     "name": Path(new_model_path).name,
-                    "size_mb": Path(new_model_path).stat().st_size / (1024 * 1024) if Path(new_model_path).exists() else 0
+                    "size_mb": Path(new_model_path).stat().st_size / (1024 * 1024)
+                    if Path(new_model_path).exists()
+                    else 0,
                 },
                 "old_baseline": {
                     "path": old_baseline_path,
-                    "name": Path(old_baseline_path).name if old_baseline_path else "none"
+                    "name": Path(old_baseline_path).name if old_baseline_path else "none",
                 },
                 "quality_gains": {
                     "emotionality": comparison_result.get("emotionality_gain", 0),
                     "fluency": comparison_result.get("fluency_gain", 0),
                     "size_reduction": comparison_result.get("size_reduction", 0),
                     "speed_improvement": comparison_result.get("speed_improvement", 0),
-                    "confidence": comparison_result.get("confidence_score", 0)
-                }
+                    "confidence": comparison_result.get("confidence_score", 0),
+                },
             }
 
             # Save to replacement log file
@@ -830,14 +894,14 @@ class AutopilotBootloader:
 
             # Load existing log or create new
             if log_file.exists():
-                with open(log_file, 'r') as f:
+                with open(log_file) as f:
                     replacements = json.load(f)
             else:
                 replacements = {"replacements": []}
 
             replacements["replacements"].append(replacement_log)
 
-            with open(log_file, 'w') as f:
+            with open(log_file, "w") as f:
                 json.dump(replacements, f, indent=2)
 
             self.logger.info(f"📝 Model replacement logged to {log_file}")
@@ -848,7 +912,9 @@ class AutopilotBootloader:
     def update_status(self, metrics: SystemMetrics):
         """Update bootloader status file"""
         try:
-            status_file = self.config.get('monitoring', {}).get('status_file', 'bootloader_status.json')
+            status_file = self.config.get("monitoring", {}).get(
+                "status_file", "bootloader_status.json"
+            )
 
             status = BootloaderStatus(
                 is_running=self.running,
@@ -859,10 +925,10 @@ class AutopilotBootloader:
                 current_metrics=metrics,
                 next_scheduled=None,  # TODO: Calculate next scheduled time
                 error_count=self.error_count,
-                last_error=self.last_error
+                last_error=self.last_error,
             )
 
-            with open(status_file, 'w') as f:
+            with open(status_file, "w") as f:
                 json.dump(asdict(status), f, indent=2, default=str)
 
         except Exception as e:
@@ -874,9 +940,11 @@ class AutopilotBootloader:
             # Get current system metrics
             metrics = self.get_system_metrics()
 
-            self.logger.debug(f"System metrics - CPU: {metrics.cpu_percent:.1f}%, "
-                            f"Memory: {metrics.memory_percent:.1f}%, "
-                            f"Disk: {metrics.disk_free_gb:.1f}GB")
+            self.logger.debug(
+                f"System metrics - CPU: {metrics.cpu_percent:.1f}%, "
+                f"Memory: {metrics.memory_percent:.1f}%, "
+                f"Disk: {metrics.disk_free_gb:.1f}GB"
+            )
 
             # Update status
             self.update_status(metrics)
@@ -895,17 +963,17 @@ class AutopilotBootloader:
             should_launch = False
             reason = ""
 
-            if self.config['mode'] == 'idle':
+            if self.config["mode"] == "idle":
                 if self.is_system_idle(metrics):
                     should_launch = True
                     reason = f"System idle (CPU: {metrics.cpu_percent:.1f}%, Memory: {metrics.memory_percent:.1f}%)"
 
-            elif self.config['mode'] == 'cron':
+            elif self.config["mode"] == "cron":
                 if self.should_launch_cron():
                     should_launch = True
                     reason = f"Scheduled time reached: {self.config['cron_schedule']}"
 
-            elif self.config['mode'] == 'manual':
+            elif self.config["mode"] == "manual":
                 self.logger.debug("Manual mode - waiting for external trigger")
                 return
 
@@ -933,7 +1001,7 @@ class AutopilotBootloader:
                 self.run_check_cycle()
 
                 # Sleep until next check
-                time.sleep(self.config['check_interval'])
+                time.sleep(self.config["check_interval"])
 
         except KeyboardInterrupt:
             self.logger.info("Received keyboard interrupt")
@@ -942,44 +1010,45 @@ class AutopilotBootloader:
         finally:
             self.logger.info("Autopilot Bootloader stopped")
 
-    def status_report(self) -> Dict[str, Any]:
+    def status_report(self) -> dict[str, Any]:
         """Get current status report"""
         metrics = self.get_system_metrics()
 
         return {
-            'bootloader': {
-                'running': self.running,
-                'mode': self.config['mode'],
-                'check_interval': self.config['check_interval'],
-                'launch_count': self.launch_count,
-                'error_count': self.error_count,
-                'last_error': self.last_error
+            "bootloader": {
+                "running": self.running,
+                "mode": self.config["mode"],
+                "check_interval": self.config["check_interval"],
+                "launch_count": self.launch_count,
+                "error_count": self.error_count,
+                "last_error": self.last_error,
             },
-            'system': asdict(metrics),
-            'autopilot': {
-                'running': self.is_autopilot_running(),
-                'process_id': self.autopilot_process.pid if self.autopilot_process else None
+            "system": asdict(metrics),
+            "autopilot": {
+                "running": self.is_autopilot_running(),
+                "process_id": self.autopilot_process.pid if self.autopilot_process else None,
             },
-            'conditions': {
-                'is_idle': self.is_system_idle(metrics),
-                'safety_ok': self.check_safety_conditions(metrics),
-                'cron_ready': self.should_launch_cron() if self.config['mode'] == 'cron' else False
-            }
+            "conditions": {
+                "is_idle": self.is_system_idle(metrics),
+                "safety_ok": self.check_safety_conditions(metrics),
+                "cron_ready": self.should_launch_cron() if self.config["mode"] == "cron" else False,
+            },
         }
+
 
 def main():
     """Main entry point"""
     import argparse
 
-    parser = argparse.ArgumentParser(description='Autopilot Bootloader - Autonomous Launch System')
-    parser.add_argument('--config', default='bootloader_config.json',
-                       help='Path to bootloader configuration file')
-    parser.add_argument('--status', action='store_true',
-                       help='Show current status and exit')
-    parser.add_argument('--launch-now', action='store_true',
-                       help='Launch autopilot immediately (bypass conditions)')
-    parser.add_argument('--stop', action='store_true',
-                       help='Stop any running autopilot processes')
+    parser = argparse.ArgumentParser(description="Autopilot Bootloader - Autonomous Launch System")
+    parser.add_argument(
+        "--config", default="bootloader_config.json", help="Path to bootloader configuration file"
+    )
+    parser.add_argument("--status", action="store_true", help="Show current status and exit")
+    parser.add_argument(
+        "--launch-now", action="store_true", help="Launch autopilot immediately (bypass conditions)"
+    )
+    parser.add_argument("--stop", action="store_true", help="Stop any running autopilot processes")
 
     args = parser.parse_args()
 
@@ -1004,10 +1073,10 @@ def main():
         if args.stop:
             # Stop running autopilot processes
             print("Stopping autopilot processes...")
-            for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+            for proc in psutil.process_iter(["pid", "name", "cmdline"]):
                 try:
-                    cmdline = proc.info.get('cmdline', [])
-                    if cmdline and 'quant_autopilot.py' in ' '.join(cmdline):
+                    cmdline = proc.info.get("cmdline", [])
+                    if cmdline and "quant_autopilot.py" in " ".join(cmdline):
                         print(f"Terminating autopilot process: PID {proc.info['pid']}")
                         proc.terminate()
                         proc.wait(timeout=10)
@@ -1021,6 +1090,7 @@ def main():
     except Exception as e:
         print(f"Fatal error: {e}")
         return 1
+
 
 if __name__ == "__main__":
     exit(main())

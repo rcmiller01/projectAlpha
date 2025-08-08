@@ -4,10 +4,12 @@
 Tests persona manifestos, routing changes, and behavioral adaptation
 """
 
-import requests
 import json
 import time
 from datetime import datetime
+
+import requests
+
 
 class PersonaInstructionQA:
     """Targeted tests for the Persona Instruction Manager"""
@@ -39,20 +41,20 @@ class PersonaInstructionQA:
 
             personas = {}
             for manifesto in manifestos:
-                persona_id = manifesto.get('id', 'unknown')
-                name = manifesto.get('name', 'Unknown')
-                description = manifesto.get('description', 'No description')
-                is_active = manifesto.get('is_active', False)
+                persona_id = manifesto.get("id", "unknown")
+                name = manifesto.get("name", "Unknown")
+                description = manifesto.get("description", "No description")
+                is_active = manifesto.get("is_active", False)
 
                 active_indicator = "🎯" if is_active else "  "
                 print(f"   {active_indicator} {name} ({persona_id})")
                 print(f"      📝 {description}")
 
                 personas[persona_id] = {
-                    'name': name,
-                    'description': description,
-                    'is_active': is_active,
-                    'full_data': manifesto
+                    "name": name,
+                    "description": description,
+                    "is_active": is_active,
+                    "full_data": manifesto,
                 }
 
             return personas
@@ -67,8 +69,8 @@ class PersonaInstructionQA:
         response = self.make_request("POST", f"/api/personas/activate/{persona_id}")
         if response and response.status_code == 200:
             data = response.json()
-            activated_id = data.get('activated_persona', '')
-            message = data.get('message', '')
+            activated_id = data.get("activated_persona", "")
+            message = data.get("message", "")
 
             print(f"   ✅ Activation response: {message}")
 
@@ -79,7 +81,9 @@ class PersonaInstructionQA:
                 print(f"   ❌ Activation mismatch: expected {persona_id}, got {activated_id}")
                 return False
         else:
-            print(f"   ❌ Failed to activate persona: {response.status_code if response else 'no response'}")
+            print(
+                f"   ❌ Failed to activate persona: {response.status_code if response else 'no response'}"
+            )
             return False
 
     def get_active_persona_instructions(self):
@@ -90,17 +94,13 @@ class PersonaInstructionQA:
         if response and response.status_code == 200:
             data = response.json()
 
-            name = data.get('name', 'Unknown')
-            instructions = data.get('instructions', {})
+            name = data.get("name", "Unknown")
+            instructions = data.get("instructions", {})
 
             print(f"✅ Active persona: {name}")
             print(f"   📝 Instruction sections: {list(instructions.keys())}")
 
-            return {
-                'name': name,
-                'instructions': instructions,
-                'full_data': data
-            }
+            return {"name": name, "instructions": instructions, "full_data": data}
         else:
             print("❌ Failed to get active instructions")
             return None
@@ -112,12 +112,11 @@ class PersonaInstructionQA:
         responses = {}
 
         for persona_id, persona_data in personas_to_test.items():
-            persona_name = persona_data['name']
+            persona_name = persona_data["name"]
             print(f"   🎭 Testing {persona_name}...")
 
             # Activate persona
             if self.test_persona_activation(persona_id, persona_name):
-
                 # Wait for activation to take effect
                 time.sleep(1)
 
@@ -125,23 +124,23 @@ class PersonaInstructionQA:
                 chat_data = {
                     "message": self.test_prompt,
                     "session_id": f"{self.test_session_id}_{persona_id}",
-                    "persona": persona_id
+                    "persona": persona_id,
                 }
 
                 response = self.make_request("POST", "/api/chat", json=chat_data)
                 if response and response.status_code == 200:
                     data = response.json()
-                    response_text = data.get('response', '')
-                    handler = data.get('handler', 'unknown')
-                    persona_used = data.get('persona_used', 'unknown')
+                    response_text = data.get("response", "")
+                    handler = data.get("handler", "unknown")
+                    persona_used = data.get("persona_used", "unknown")
 
                     responses[persona_id] = {
-                        'name': persona_name,
-                        'response': response_text,
-                        'handler': handler,
-                        'persona_used': persona_used,
-                        'length': len(response_text),
-                        'word_count': len(response_text.split())
+                        "name": persona_name,
+                        "response": response_text,
+                        "handler": handler,
+                        "persona_used": persona_used,
+                        "length": len(response_text),
+                        "word_count": len(response_text.split()),
                     }
 
                     print(f"      ✅ Response: {len(response_text)} chars, Handler: {handler}")
@@ -164,34 +163,58 @@ class PersonaInstructionQA:
         analysis = {}
 
         for persona_id, response_data in responses.items():
-            name = response_data['name']
-            text = response_data['response'].lower()
-            word_count = response_data['word_count']
+            name = response_data["name"]
+            text = response_data["response"].lower()
+            word_count = response_data["word_count"]
 
             # Analyze tone/style indicators
             characteristics = {
-                'empathetic_words': sum(1 for word in ['feel', 'understand', 'support', 'help', 'care'] if word in text),
-                'technical_words': sum(1 for word in ['code', 'debug', 'function', 'algorithm', 'syntax'] if word in text),
-                'analytical_words': sum(1 for word in ['analyze', 'evaluate', 'assess', 'examine', 'consider'] if word in text),
-                'motivational_words': sum(1 for word in ['achieve', 'succeed', 'overcome', 'persist', 'goal'] if word in text),
-                'creative_words': sum(1 for word in ['creative', 'innovative', 'imagine', 'explore', 'artistic'] if word in text),
-                'question_count': text.count('?'),
-                'exclamation_count': text.count('!'),
-                'word_count': word_count,
-                'formality_score': sum(1 for word in ['furthermore', 'however', 'consequently', 'therefore'] if word in text)
+                "empathetic_words": sum(
+                    1 for word in ["feel", "understand", "support", "help", "care"] if word in text
+                ),
+                "technical_words": sum(
+                    1
+                    for word in ["code", "debug", "function", "algorithm", "syntax"]
+                    if word in text
+                ),
+                "analytical_words": sum(
+                    1
+                    for word in ["analyze", "evaluate", "assess", "examine", "consider"]
+                    if word in text
+                ),
+                "motivational_words": sum(
+                    1
+                    for word in ["achieve", "succeed", "overcome", "persist", "goal"]
+                    if word in text
+                ),
+                "creative_words": sum(
+                    1
+                    for word in ["creative", "innovative", "imagine", "explore", "artistic"]
+                    if word in text
+                ),
+                "question_count": text.count("?"),
+                "exclamation_count": text.count("!"),
+                "word_count": word_count,
+                "formality_score": sum(
+                    1
+                    for word in ["furthermore", "however", "consequently", "therefore"]
+                    if word in text
+                ),
             }
 
             analysis[persona_id] = {
-                'name': name,
-                'characteristics': characteristics,
-                'response_sample': response_data['response'][:200] + "..." if len(response_data['response']) > 200 else response_data['response']
+                "name": name,
+                "characteristics": characteristics,
+                "response_sample": response_data["response"][:200] + "..."
+                if len(response_data["response"]) > 200
+                else response_data["response"],
             }
 
         # Display analysis
         print("\n📈 Persona Characteristic Analysis:")
         for persona_id, data in analysis.items():
-            name = data['name']
-            chars = data['characteristics']
+            name = data["name"]
+            chars = data["characteristics"]
             print(f"\n   🎭 {name}:")
             print(f"      💭 Empathetic words: {chars['empathetic_words']}")
             print(f"      ⚡ Technical words: {chars['technical_words']}")
@@ -203,16 +226,20 @@ class PersonaInstructionQA:
             print(f"      ❗ Exclamations: {chars['exclamation_count']}")
 
         # Check for meaningful differences
-        word_counts = [data['characteristics']['word_count'] for data in analysis.values()]
-        empathy_scores = [data['characteristics']['empathetic_words'] for data in analysis.values()]
-        technical_scores = [data['characteristics']['technical_words'] for data in analysis.values()]
+        word_counts = [data["characteristics"]["word_count"] for data in analysis.values()]
+        empathy_scores = [data["characteristics"]["empathetic_words"] for data in analysis.values()]
+        technical_scores = [
+            data["characteristics"]["technical_words"] for data in analysis.values()
+        ]
 
         # Calculate variance to see if personas differ
         word_count_variance = max(word_counts) - min(word_counts) if word_counts else 0
         empathy_variance = max(empathy_scores) - min(empathy_scores) if empathy_scores else 0
-        technical_variance = max(technical_scores) - min(technical_scores) if technical_scores else 0
+        technical_variance = (
+            max(technical_scores) - min(technical_scores) if technical_scores else 0
+        )
 
-        print(f"\n📊 Variance Analysis:")
+        print("\n📊 Variance Analysis:")
         print(f"   📝 Word count variance: {word_count_variance}")
         print(f"   💭 Empathy score variance: {empathy_variance}")
         print(f"   ⚡ Technical score variance: {technical_variance}")
@@ -240,7 +267,7 @@ class PersonaInstructionQA:
         routing_results = {}
 
         for persona_id, persona_data in personas_to_test.items():
-            persona_name = persona_data['name']
+            persona_name = persona_data["name"]
             print(f"   🎯 Testing routing for {persona_name}...")
 
             # Activate persona
@@ -251,21 +278,21 @@ class PersonaInstructionQA:
                 chat_data = {
                     "message": routing_test_prompt,
                     "session_id": f"{self.test_session_id}_routing_{persona_id}",
-                    "persona": persona_id
+                    "persona": persona_id,
                 }
 
                 response = self.make_request("POST", "/api/chat", json=chat_data)
                 if response and response.status_code == 200:
                     data = response.json()
-                    handler = data.get('handler', 'unknown')
-                    routing_reason = data.get('routing_reason', '')
-                    persona_used = data.get('persona_used', 'unknown')
+                    handler = data.get("handler", "unknown")
+                    routing_reason = data.get("routing_reason", "")
+                    persona_used = data.get("persona_used", "unknown")
 
                     routing_results[persona_id] = {
-                        'name': persona_name,
-                        'handler': handler,
-                        'routing_reason': routing_reason,
-                        'persona_used': persona_used
+                        "name": persona_name,
+                        "handler": handler,
+                        "routing_reason": routing_reason,
+                        "persona_used": persona_used,
                     }
 
                     print(f"      ✅ Handler: {handler}, Reason: {routing_reason}")
@@ -273,10 +300,10 @@ class PersonaInstructionQA:
                     print(f"      ❌ Routing test failed for {persona_name}")
 
         # Analyze routing differences
-        handlers_used = [result['handler'] for result in routing_results.values()]
+        handlers_used = [result["handler"] for result in routing_results.values()]
         unique_handlers = set(handlers_used)
 
-        print(f"\n📊 Routing Analysis:")
+        print("\n📊 Routing Analysis:")
         print(f"   🤖 Handlers used: {list(unique_handlers)}")
         print(f"   🔄 Total unique routes: {len(unique_handlers)}")
 
@@ -284,7 +311,10 @@ class PersonaInstructionQA:
             print(f"   🎭 {result['name']}: {result['handler']}")
 
         # Consider routing successful if we see different handlers or different reasoning
-        return len(unique_handlers) > 1 or len(set(result['routing_reason'] for result in routing_results.values())) > 1
+        return (
+            len(unique_handlers) > 1
+            or len(set(result["routing_reason"] for result in routing_results.values())) > 1
+        )
 
     def test_runtime_persona_modification(self):
         """Test modifying a persona at runtime"""
@@ -299,14 +329,14 @@ class PersonaInstructionQA:
             "routing_preferences": {
                 "dolphin_bias": 0.9,
                 "openrouter_threshold": 0.8,
-                "n8n_threshold": 0.7
+                "n8n_threshold": 0.7,
             },
             "prompt_style": {
                 "tone": "extremely enthusiastic and energetic",
                 "personality_traits": ["energetic", "optimistic", "helpful"],
                 "conversation_style": "Use lots of exclamation points and positive language!",
-                "prefix": "As your super enthusiastic coding buddy, "
-            }
+                "prefix": "As your super enthusiastic coding buddy, ",
+            },
         }
 
         # Create the persona
@@ -322,24 +352,30 @@ class PersonaInstructionQA:
                 chat_data = {
                     "message": "Help me with a simple Python function",
                     "session_id": f"{self.test_session_id}_custom",
-                    "persona": "qa_test_persona"
+                    "persona": "qa_test_persona",
                 }
 
                 response = self.make_request("POST", "/api/chat", json=chat_data)
                 if response and response.status_code == 200:
                     data = response.json()
-                    original_response = data.get('response', '')
-                    exclamation_count_original = original_response.count('!')
+                    original_response = data.get("response", "")
+                    exclamation_count_original = original_response.count("!")
 
                     print(f"   ✅ Original response: {exclamation_count_original} exclamations")
 
                     # Now modify the persona (make it very formal)
                     modified_persona = custom_persona.copy()
                     modified_persona["prompt_style"]["tone"] = "extremely formal and academic"
-                    modified_persona["prompt_style"]["conversation_style"] = "Use formal language with no exclamation points or casual expressions."
-                    modified_persona["prompt_style"]["prefix"] = "As your formal academic assistant, "
+                    modified_persona["prompt_style"][
+                        "conversation_style"
+                    ] = "Use formal language with no exclamation points or casual expressions."
+                    modified_persona["prompt_style"][
+                        "prefix"
+                    ] = "As your formal academic assistant, "
 
-                    modify_response = self.make_request("POST", "/api/personas/create", json=modified_persona)
+                    modify_response = self.make_request(
+                        "POST", "/api/personas/create", json=modified_persona
+                    )
                     if modify_response and modify_response.status_code == 200:
                         print("   ✅ Persona modified successfully")
 
@@ -347,13 +383,17 @@ class PersonaInstructionQA:
                         if self.test_persona_activation("qa_test_persona", "QA Test Persona"):
                             time.sleep(1)
 
-                            modified_response = self.make_request("POST", "/api/chat", json=chat_data)
+                            modified_response = self.make_request(
+                                "POST", "/api/chat", json=chat_data
+                            )
                             if modified_response and modified_response.status_code == 200:
                                 modified_data = modified_response.json()
-                                new_response = modified_data.get('response', '')
-                                exclamation_count_new = new_response.count('!')
+                                new_response = modified_data.get("response", "")
+                                exclamation_count_new = new_response.count("!")
 
-                                print(f"   ✅ Modified response: {exclamation_count_new} exclamations")
+                                print(
+                                    f"   ✅ Modified response: {exclamation_count_new} exclamations"
+                                )
 
                                 # Check if behavior actually changed
                                 if exclamation_count_original > exclamation_count_new:
@@ -392,7 +432,7 @@ class PersonaInstructionQA:
             "instruction_retrieval": False,
             "response_differences": False,
             "routing_adjustments": False,
-            "runtime_modification": False
+            "runtime_modification": False,
         }
 
         # Step 1: Get available manifestos
@@ -409,7 +449,7 @@ class PersonaInstructionQA:
         # Step 2: Test persona activation
         activation_results = []
         for persona_id, persona_data in test_personas.items():
-            result = self.test_persona_activation(persona_id, persona_data['name'])
+            result = self.test_persona_activation(persona_id, persona_data["name"])
             activation_results.append(result)
 
         test_results["persona_activation"] = any(activation_results)
@@ -438,7 +478,9 @@ class PersonaInstructionQA:
             status = "✅ PASS" if passed else "❌ FAIL"
             print(f"{status} {test_name.replace('_', ' ').title()}")
 
-        print(f"\n📊 Overall Score: {passed_tests}/{total_tests} ({(passed_tests/total_tests)*100:.1f}%)")
+        print(
+            f"\n📊 Overall Score: {passed_tests}/{total_tests} ({(passed_tests/total_tests)*100:.1f}%)"
+        )
 
         if passed_tests == total_tests:
             print("🎉 ALL PERSONA INSTRUCTION TESTS PASSED!")
@@ -449,6 +491,7 @@ class PersonaInstructionQA:
 
         return test_results
 
+
 def main():
     """Run the persona instruction QA suite"""
     print("🎭 Starting Persona Instruction Manager QA Script...")
@@ -458,6 +501,7 @@ def main():
     results = qa.run_persona_instruction_qa_suite()
 
     return results
+
 
 if __name__ == "__main__":
     main()

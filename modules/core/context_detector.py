@@ -5,10 +5,11 @@ Analyzes user input to determine interaction characteristics and adaptive focus
 without requiring manual mode switching from the user.
 """
 
-import re
-from typing import Dict, List, Any, Optional, Tuple
-from datetime import datetime
 import asyncio
+import re
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
+
 
 class ContextDetector:
     """
@@ -21,90 +22,244 @@ class ContextDetector:
         self.creative_indicators = self._initialize_creative_indicators()
         self.crisis_indicators = self._initialize_crisis_indicators()
 
-    def _initialize_emotional_indicators(self) -> Dict[str, List[str]]:
+    def _initialize_emotional_indicators(self) -> dict[str, list[str]]:
         """Initialize emotional context indicators"""
         return {
             "high_emotional_need": [
-                "feeling", "feel", "heart", "love", "afraid", "scared", "lonely", "overwhelmed",
-                "anxious", "depressed", "sad", "hurt", "pain", "crying", "tears", "emotional",
-                "vulnerable", "need you", "help me", "support", "comfort", "understand"
+                "feeling",
+                "feel",
+                "heart",
+                "love",
+                "afraid",
+                "scared",
+                "lonely",
+                "overwhelmed",
+                "anxious",
+                "depressed",
+                "sad",
+                "hurt",
+                "pain",
+                "crying",
+                "tears",
+                "emotional",
+                "vulnerable",
+                "need you",
+                "help me",
+                "support",
+                "comfort",
+                "understand",
             ],
             "relationship_focused": [
-                "relationship", "together", "close", "intimate", "connect", "connection",
-                "bond", "trust", "care", "caring", "love", "affection", "attachment"
+                "relationship",
+                "together",
+                "close",
+                "intimate",
+                "connect",
+                "connection",
+                "bond",
+                "trust",
+                "care",
+                "caring",
+                "love",
+                "affection",
+                "attachment",
             ],
             "stress_indicators": [
-                "stress", "stressed", "pressure", "overwhelmed", "burned out", "exhausted",
-                "can't handle", "too much", "breaking down", "falling apart"
+                "stress",
+                "stressed",
+                "pressure",
+                "overwhelmed",
+                "burned out",
+                "exhausted",
+                "can't handle",
+                "too much",
+                "breaking down",
+                "falling apart",
             ],
             "positive_emotional": [
-                "happy", "joy", "excited", "grateful", "thankful", "proud", "accomplished",
-                "celebrating", "amazing", "wonderful", "beautiful", "love this"
-            ]
+                "happy",
+                "joy",
+                "excited",
+                "grateful",
+                "thankful",
+                "proud",
+                "accomplished",
+                "celebrating",
+                "amazing",
+                "wonderful",
+                "beautiful",
+                "love this",
+            ],
         }
 
-    def _initialize_technical_indicators(self) -> Dict[str, List[str]]:
+    def _initialize_technical_indicators(self) -> dict[str, list[str]]:
         """Initialize technical context indicators"""
         return {
             "code_related": [
-                "code", "programming", "function", "variable", "class", "method", "API",
-                "database", "sql", "python", "javascript", "html", "css", "react", "node",
-                "debug", "error", "bug", "syntax", "compile", "deploy", "git", "github"
+                "code",
+                "programming",
+                "function",
+                "variable",
+                "class",
+                "method",
+                "API",
+                "database",
+                "sql",
+                "python",
+                "javascript",
+                "html",
+                "css",
+                "react",
+                "node",
+                "debug",
+                "error",
+                "bug",
+                "syntax",
+                "compile",
+                "deploy",
+                "git",
+                "github",
             ],
             "problem_solving": [
-                "problem", "issue", "error", "bug", "not working", "broken", "fix", "solve",
-                "debug", "troubleshoot", "help with", "figure out", "stuck on"
+                "problem",
+                "issue",
+                "error",
+                "bug",
+                "not working",
+                "broken",
+                "fix",
+                "solve",
+                "debug",
+                "troubleshoot",
+                "help with",
+                "figure out",
+                "stuck on",
             ],
             "learning_technical": [
-                "learn", "tutorial", "how to", "explain", "understand", "concept",
-                "documentation", "example", "practice", "study", "course"
+                "learn",
+                "tutorial",
+                "how to",
+                "explain",
+                "understand",
+                "concept",
+                "documentation",
+                "example",
+                "practice",
+                "study",
+                "course",
             ],
             "project_management": [
-                "project", "deadline", "timeline", "planning", "organize", "structure",
-                "architecture", "design", "requirements", "specifications"
-            ]
+                "project",
+                "deadline",
+                "timeline",
+                "planning",
+                "organize",
+                "structure",
+                "architecture",
+                "design",
+                "requirements",
+                "specifications",
+            ],
         }
 
-    def _initialize_creative_indicators(self) -> Dict[str, List[str]]:
+    def _initialize_creative_indicators(self) -> dict[str, list[str]]:
         """Initialize creative context indicators"""
         return {
             "artistic_creation": [
-                "write", "writing", "create", "creative", "art", "artistic", "poem", "poetry",
-                "story", "novel", "song", "music", "paint", "draw", "design", "craft"
+                "write",
+                "writing",
+                "create",
+                "creative",
+                "art",
+                "artistic",
+                "poem",
+                "poetry",
+                "story",
+                "novel",
+                "song",
+                "music",
+                "paint",
+                "draw",
+                "design",
+                "craft",
             ],
             "inspiration_seeking": [
-                "inspiration", "inspire", "ideas", "brainstorm", "imagine", "dream",
-                "vision", "possibility", "potential", "explore", "experiment"
+                "inspiration",
+                "inspire",
+                "ideas",
+                "brainstorm",
+                "imagine",
+                "dream",
+                "vision",
+                "possibility",
+                "potential",
+                "explore",
+                "experiment",
             ],
             "creative_blocks": [
-                "blocked", "stuck", "can't create", "no ideas", "uninspired",
-                "creative block", "writer's block", "empty", "blank"
+                "blocked",
+                "stuck",
+                "can't create",
+                "no ideas",
+                "uninspired",
+                "creative block",
+                "writer's block",
+                "empty",
+                "blank",
             ],
             "collaboration": [
-                "collaborate", "together", "co-create", "partner", "work with",
-                "help me create", "create together", "artistic partner"
-            ]
+                "collaborate",
+                "together",
+                "co-create",
+                "partner",
+                "work with",
+                "help me create",
+                "create together",
+                "artistic partner",
+            ],
         }
 
-    def _initialize_crisis_indicators(self) -> Dict[str, List[str]]:
+    def _initialize_crisis_indicators(self) -> dict[str, list[str]]:
         """Initialize crisis-level indicators requiring immediate attention"""
         return {
             "severe_distress": [
-                "can't go on", "want to die", "kill myself", "end it all", "suicide",
-                "self-harm", "hurt myself", "not worth living", "hopeless", "no point"
+                "can't go on",
+                "want to die",
+                "kill myself",
+                "end it all",
+                "suicide",
+                "self-harm",
+                "hurt myself",
+                "not worth living",
+                "hopeless",
+                "no point",
             ],
             "panic_anxiety": [
-                "panic attack", "can't breathe", "heart racing", "going crazy",
-                "losing control", "feel like dying", "terror", "overwhelming fear"
+                "panic attack",
+                "can't breathe",
+                "heart racing",
+                "going crazy",
+                "losing control",
+                "feel like dying",
+                "terror",
+                "overwhelming fear",
             ],
             "dissociation": [
-                "not real", "floating", "outside myself", "watching myself",
-                "disconnected", "numb", "empty", "void", "nothing matters"
-            ]
+                "not real",
+                "floating",
+                "outside myself",
+                "watching myself",
+                "disconnected",
+                "numb",
+                "empty",
+                "void",
+                "nothing matters",
+            ],
         }
 
-    async def analyze_interaction(self, user_input: str, context: Dict[str, Any],
-                                conversation_history: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def analyze_interaction(
+        self, user_input: str, context: dict[str, Any], conversation_history: list[dict[str, Any]]
+    ) -> dict[str, Any]:
         """
         Analyze user interaction to determine characteristics and adaptive focus
         """
@@ -119,7 +274,7 @@ class ContextDetector:
             "conversation_flow": "natural",
             "emotional_trajectory": "stable",
             "technical_context": "none",
-            "adaptive_recommendations": {}
+            "adaptive_recommendations": {},
         }
 
         # Crisis assessment first (highest priority)
@@ -161,7 +316,9 @@ class ContextDetector:
 
         return analysis
 
-    async def _assess_crisis_level(self, user_input: str, context: Dict[str, Any]) -> Dict[str, Any]:
+    async def _assess_crisis_level(
+        self, user_input: str, context: dict[str, Any]
+    ) -> dict[str, Any]:
         """Assess if this is a crisis-level interaction requiring immediate support"""
 
         user_input_lower = user_input.lower()
@@ -193,10 +350,12 @@ class ContextDetector:
             "level": level,
             "score": crisis_score,
             "detected_types": detected_crisis_types,
-            "immediate_support_needed": level in ["high", "medium"]
+            "immediate_support_needed": level in ["high", "medium"],
         }
 
-    def _analyze_emotional_content(self, user_input: str, context: Dict[str, Any]) -> Dict[str, Any]:
+    def _analyze_emotional_content(
+        self, user_input: str, context: dict[str, Any]
+    ) -> dict[str, Any]:
         """Analyze emotional content and needs"""
 
         user_input_lower = user_input.lower()
@@ -226,10 +385,12 @@ class ContextDetector:
             "score": emotional_score,
             "detected_categories": detected_emotions,
             "needs_emotional_support": priority in ["high", "medium"],
-            "relationship_focus": "relationship_focused" in detected_emotions
+            "relationship_focus": "relationship_focused" in detected_emotions,
         }
 
-    def _analyze_technical_content(self, user_input: str, context: Dict[str, Any]) -> Dict[str, Any]:
+    def _analyze_technical_content(
+        self, user_input: str, context: dict[str, Any]
+    ) -> dict[str, Any]:
         """Analyze technical content and assistance needs"""
 
         user_input_lower = user_input.lower()
@@ -247,7 +408,7 @@ class ContextDetector:
                 detected_categories.append(tech_category)
 
         # Check for code snippets or technical patterns
-        if re.search(r'```|`.*`|\b\w+\(\)|def \w+|class \w+|import \w+', user_input):
+        if re.search(r"```|`.*`|\b\w+\(\)|def \w+|class \w+|import \w+", user_input):
             technical_score += 2.0
             detected_categories.append("code_snippet_present")
 
@@ -264,10 +425,11 @@ class ContextDetector:
             "score": technical_score,
             "detected_categories": detected_categories,
             "needs_technical_help": priority in ["high", "medium"],
-            "is_coding_session": "code_related" in detected_categories or "code_snippet_present" in detected_categories
+            "is_coding_session": "code_related" in detected_categories
+            or "code_snippet_present" in detected_categories,
         }
 
-    def _analyze_creative_content(self, user_input: str, context: Dict[str, Any]) -> Dict[str, Any]:
+    def _analyze_creative_content(self, user_input: str, context: dict[str, Any]) -> dict[str, Any]:
         """Analyze creative content and artistic needs"""
 
         user_input_lower = user_input.lower()
@@ -298,22 +460,26 @@ class ContextDetector:
             "detected_categories": detected_categories,
             "needs_creative_support": priority in ["high", "medium"],
             "has_creative_block": "creative_blocks" in detected_categories,
-            "wants_collaboration": "collaboration" in detected_categories
+            "wants_collaboration": "collaboration" in detected_categories,
         }
 
-    def _determine_primary_focus(self, emotional_analysis: Dict, technical_analysis: Dict,
-                                creative_analysis: Dict) -> str:
+    def _determine_primary_focus(
+        self, emotional_analysis: dict, technical_analysis: dict, creative_analysis: dict
+    ) -> str:
         """Determine the primary focus for this interaction"""
 
         priorities = {
             "emotional": emotional_analysis["score"],
             "technical": technical_analysis["score"],
-            "creative": creative_analysis["score"]
+            "creative": creative_analysis["score"],
         }
 
         # Check for integrated needs (multiple high priorities)
-        high_priority_count = sum(1 for analysis in [emotional_analysis, technical_analysis, creative_analysis]
-                                if analysis["priority"] == "high")
+        high_priority_count = sum(
+            1
+            for analysis in [emotional_analysis, technical_analysis, creative_analysis]
+            if analysis["priority"] == "high"
+        )
 
         if high_priority_count > 1:
             return "integrated_support"
@@ -333,8 +499,13 @@ class ContextDetector:
         else:
             return "general_conversation"
 
-    def _detect_specific_needs(self, user_input: str, emotional_analysis: Dict,
-                             technical_analysis: Dict, creative_analysis: Dict) -> List[str]:
+    def _detect_specific_needs(
+        self,
+        user_input: str,
+        emotional_analysis: dict,
+        technical_analysis: dict,
+        creative_analysis: dict,
+    ) -> list[str]:
         """Detect specific user needs for this interaction"""
 
         needs = []
@@ -374,20 +545,20 @@ class ContextDetector:
 
         return needs
 
-    def _analyze_conversation_flow(self, user_input: str, conversation_history: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _analyze_conversation_flow(
+        self, user_input: str, conversation_history: list[dict[str, Any]]
+    ) -> dict[str, Any]:
         """Analyze conversation flow and emotional trajectory"""
 
         if not conversation_history:
-            return {
-                "conversation_flow": "new_conversation",
-                "emotional_trajectory": "establishing"
-            }
+            return {"conversation_flow": "new_conversation", "emotional_trajectory": "establishing"}
 
         recent_interactions = conversation_history[-3:]
 
         # Analyze emotional trajectory
-        emotional_priorities = [interaction.get("emotional_priority", "medium")
-                              for interaction in recent_interactions]
+        emotional_priorities = [
+            interaction.get("emotional_priority", "medium") for interaction in recent_interactions
+        ]
 
         if len(set(emotional_priorities)) == 1 and emotional_priorities[0] == "high":
             emotional_trajectory = "consistently_high_emotional_need"
@@ -399,8 +570,9 @@ class ContextDetector:
             emotional_trajectory = "stable"
 
         # Analyze conversation flow
-        primary_focuses = [interaction.get("primary_focus", "general")
-                         for interaction in recent_interactions]
+        primary_focuses = [
+            interaction.get("primary_focus", "general") for interaction in recent_interactions
+        ]
 
         if len(set(primary_focuses)) == 1:
             conversation_flow = f"sustained_{primary_focuses[0]}"
@@ -412,18 +584,23 @@ class ContextDetector:
         return {
             "conversation_flow": conversation_flow,
             "emotional_trajectory": emotional_trajectory,
-            "recent_focus_pattern": primary_focuses
+            "recent_focus_pattern": primary_focuses,
         }
 
-    def _generate_adaptive_recommendations(self, analysis: Dict, emotional_analysis: Dict,
-                                         technical_analysis: Dict, creative_analysis: Dict) -> Dict[str, Any]:
+    def _generate_adaptive_recommendations(
+        self,
+        analysis: dict,
+        emotional_analysis: dict,
+        technical_analysis: dict,
+        creative_analysis: dict,
+    ) -> dict[str, Any]:
         """Generate recommendations for adaptive response approach"""
 
         recommendations = {
             "response_tone": "warm_and_supportive",
             "interaction_style": "natural_and_caring",
             "priority_balance": {},
-            "special_considerations": []
+            "special_considerations": [],
         }
 
         # Determine response tone based on primary focus
@@ -444,7 +621,7 @@ class ContextDetector:
         recommendations["priority_balance"] = {
             "emotional": emotional_analysis["priority"],
             "technical": technical_analysis["priority"],
-            "creative": creative_analysis["priority"]
+            "creative": creative_analysis["priority"],
         }
 
         # Special considerations

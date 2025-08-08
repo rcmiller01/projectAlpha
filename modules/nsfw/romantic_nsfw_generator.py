@@ -1,14 +1,15 @@
 # romantic_nsfw_generator.py
 # Phase 2: NSFW image and video generation for romantic companionship
 
-import json
-import random
-from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass
-from enum import Enum
-from datetime import datetime
 import base64
 import io
+import json
+import random
+from dataclasses import dataclass
+from datetime import datetime
+from enum import Enum
+from typing import Dict, List, Optional, Tuple
+
 
 class NSFWContentType(Enum):
     ROMANTIC = "romantic"
@@ -18,10 +19,12 @@ class NSFWContentType(Enum):
     TENDER = "tender"
     PLAYFUL = "playful"
 
+
 class MediaType(Enum):
     IMAGE = "image"
     VIDEO = "video"
     GIF = "gif"
+
 
 @dataclass
 class NSFWGenerationRequest:
@@ -33,6 +36,7 @@ class NSFWGenerationRequest:
     duration_seconds: Optional[int] = None  # For videos
     resolution: str = "1024x1024"
 
+
 class RomanticNSFWGenerator:
     def __init__(self):
         # NSFW generation models and settings
@@ -42,27 +46,23 @@ class RomanticNSFWGenerator:
                     "model": "stable-diffusion-xl-base-1.0",
                     "scheduler": "DPMSolverMultistepScheduler",
                     "steps": 30,
-                    "guidance_scale": 7.5
+                    "guidance_scale": 7.5,
                 },
                 "midjourney_style": {
                     "model": "midjourney-v6",
                     "style": "romantic_intimate",
-                    "quality": "high"
-                }
+                    "quality": "high",
+                },
             },
             "video": {
                 "stable_video": {
                     "model": "stable-video-diffusion",
                     "fps": 24,
                     "duration": 3,
-                    "motion_bucket_id": 127
+                    "motion_bucket_id": 127,
                 },
-                "animatediff": {
-                    "model": "animatediff-v1-5",
-                    "fps": 8,
-                    "duration": 4
-                }
-            }
+                "animatediff": {"model": "animatediff-v1-5", "fps": 8, "duration": 4},
+            },
         }
 
         # Romantic NSFW prompts and styles
@@ -70,40 +70,40 @@ class RomanticNSFWGenerator:
             NSFWContentType.ROMANTIC: [
                 "romantic couple in intimate embrace, soft lighting, passionate kiss, beautiful, artistic, tasteful",
                 "loving couple in romantic setting, candlelight, intimate moment, sensual, elegant, tasteful",
-                "romantic bedroom scene, soft sheets, intimate embrace, beautiful lighting, tasteful nudity"
+                "romantic bedroom scene, soft sheets, intimate embrace, beautiful lighting, tasteful nudity",
             ],
             NSFWContentType.INTIMATE: [
                 "intimate couple moment, close embrace, passionate, romantic lighting, tasteful",
                 "loving partners in intimate setting, sensual, romantic, beautiful, tasteful",
-                "intimate romantic scene, soft lighting, passionate embrace, elegant, tasteful"
+                "intimate romantic scene, soft lighting, passionate embrace, elegant, tasteful",
             ],
             NSFWContentType.SENSUAL: [
                 "sensual romantic scene, beautiful lighting, intimate moment, tasteful, artistic",
                 "romantic sensual moment, soft lighting, intimate embrace, elegant, tasteful",
-                "sensual couple in romantic setting, passionate, beautiful, tasteful"
+                "sensual couple in romantic setting, passionate, beautiful, tasteful",
             ],
             NSFWContentType.PASSIONATE: [
                 "passionate romantic scene, intense emotion, intimate moment, tasteful, beautiful",
                 "romantic passion, intimate embrace, beautiful lighting, tasteful, artistic",
-                "passionate couple in romantic setting, intense, beautiful, tasteful"
+                "passionate couple in romantic setting, intense, beautiful, tasteful",
             ],
             NSFWContentType.TENDER: [
                 "tender romantic moment, gentle embrace, soft lighting, intimate, tasteful",
                 "romantic tenderness, gentle touch, beautiful lighting, intimate, tasteful",
-                "tender couple in romantic setting, gentle, beautiful, tasteful"
+                "tender couple in romantic setting, gentle, beautiful, tasteful",
             ],
             NSFWContentType.PLAYFUL: [
                 "playful romantic scene, fun intimate moment, beautiful lighting, tasteful",
                 "romantic playfulness, intimate fun, beautiful setting, tasteful",
-                "playful couple in romantic setting, fun, beautiful, tasteful"
-            ]
+                "playful couple in romantic setting, fun, beautiful, tasteful",
+            ],
         }
 
         # Quality enhancement prompts
         self.quality_prompts = [
             "high quality, detailed, beautiful, artistic",
             "professional lighting, perfect composition",
-            "crystal clear, sharp focus, masterpiece"
+            "crystal clear, sharp focus, masterpiece",
         ]
 
         # Style modifiers
@@ -113,13 +113,13 @@ class RomanticNSFWGenerator:
             "painterly": "painterly style, artistic, beautiful",
             "cinematic": "cinematic lighting, dramatic, beautiful",
             "soft": "soft lighting, gentle, romantic",
-            "dramatic": "dramatic lighting, intense, romantic"
+            "dramatic": "dramatic lighting, intense, romantic",
         }
 
         # Generation history for tracking
         self.generation_history = []
 
-    def generate_nsfw_content(self, request: NSFWGenerationRequest) -> Dict:
+    def generate_nsfw_content(self, request: NSFWGenerationRequest) -> dict:
         """Generate NSFW content based on request"""
         # Validate request
         if not self._validate_request(request):
@@ -168,7 +168,7 @@ class RomanticNSFWGenerator:
             "passionate": "passionate, intense",
             "tender": "tender, gentle",
             "playful": "playful, fun",
-            "sensual": "sensual, intimate"
+            "sensual": "sensual, intimate",
         }
 
         if request.mood in mood_modifiers:
@@ -182,7 +182,7 @@ class RomanticNSFWGenerator:
 
         return base_prompt
 
-    def _generate_image(self, prompt: str, request: NSFWGenerationRequest) -> Dict:
+    def _generate_image(self, prompt: str, request: NSFWGenerationRequest) -> dict:
         """Generate NSFW image"""
         # This would integrate with actual image generation models
         # For now, return a mock response with generation parameters
@@ -194,7 +194,7 @@ class RomanticNSFWGenerator:
             "steps": self.generation_models["image"]["stable_diffusion"]["steps"],
             "guidance_scale": self.generation_models["image"]["stable_diffusion"]["guidance_scale"],
             "resolution": request.resolution,
-            "seed": random.randint(1, 999999999)
+            "seed": random.randint(1, 999999999),
         }
 
         # Mock image data (in real implementation, this would be actual generated image)
@@ -205,8 +205,8 @@ class RomanticNSFWGenerator:
                 "model_used": generation_params["model"],
                 "prompt": generation_params["prompt"],
                 "content_type": request.content_type.value,
-                "intensity": request.intensity
-            }
+                "intensity": request.intensity,
+            },
         }
 
         return {
@@ -215,20 +215,21 @@ class RomanticNSFWGenerator:
             "content_type": request.content_type.value,
             "generation_params": generation_params,
             "image_data": mock_image_data,
-            "message": f"Generated romantic {request.content_type.value} image"
+            "message": f"Generated romantic {request.content_type.value} image",
         }
 
-    def _generate_video(self, prompt: str, request: NSFWGenerationRequest) -> Dict:
+    def _generate_video(self, prompt: str, request: NSFWGenerationRequest) -> dict:
         """Generate NSFW video"""
         generation_params = {
             "prompt": prompt,
             "quality_prompt": ", ".join(self.quality_prompts),
             "model": self.generation_models["video"]["stable_video"]["model"],
             "fps": self.generation_models["video"]["stable_video"]["fps"],
-            "duration": request.duration_seconds or self.generation_models["video"]["stable_video"]["duration"],
+            "duration": request.duration_seconds
+            or self.generation_models["video"]["stable_video"]["duration"],
             "motion_bucket_id": self.generation_models["video"]["stable_video"]["motion_bucket_id"],
             "resolution": request.resolution,
-            "seed": random.randint(1, 999999999)
+            "seed": random.randint(1, 999999999),
         }
 
         # Mock video data
@@ -240,8 +241,8 @@ class RomanticNSFWGenerator:
                 "prompt": generation_params["prompt"],
                 "duration_seconds": generation_params["duration"],
                 "content_type": request.content_type.value,
-                "intensity": request.intensity
-            }
+                "intensity": request.intensity,
+            },
         }
 
         return {
@@ -250,10 +251,10 @@ class RomanticNSFWGenerator:
             "content_type": request.content_type.value,
             "generation_params": generation_params,
             "video_data": mock_video_data,
-            "message": f"Generated romantic {request.content_type.value} video"
+            "message": f"Generated romantic {request.content_type.value} video",
         }
 
-    def _generate_gif(self, prompt: str, request: NSFWGenerationRequest) -> Dict:
+    def _generate_gif(self, prompt: str, request: NSFWGenerationRequest) -> dict:
         """Generate NSFW GIF"""
         # Similar to video but optimized for GIF format
         generation_params = {
@@ -263,7 +264,7 @@ class RomanticNSFWGenerator:
             "fps": self.generation_models["video"]["animatediff"]["fps"],
             "duration": 3,  # Shorter for GIFs
             "resolution": "512x512",  # Smaller for GIFs
-            "seed": random.randint(1, 999999999)
+            "seed": random.randint(1, 999999999),
         }
 
         mock_gif_data = {
@@ -273,8 +274,8 @@ class RomanticNSFWGenerator:
                 "model_used": generation_params["model"],
                 "prompt": generation_params["prompt"],
                 "content_type": request.content_type.value,
-                "intensity": request.intensity
-            }
+                "intensity": request.intensity,
+            },
         }
 
         return {
@@ -283,10 +284,10 @@ class RomanticNSFWGenerator:
             "content_type": request.content_type.value,
             "generation_params": generation_params,
             "gif_data": mock_gif_data,
-            "message": f"Generated romantic {request.content_type.value} GIF"
+            "message": f"Generated romantic {request.content_type.value} GIF",
         }
 
-    def _record_generation(self, request: NSFWGenerationRequest, result: Dict):
+    def _record_generation(self, request: NSFWGenerationRequest, result: dict):
         """Record generation in history"""
         record = {
             "timestamp": datetime.now(),
@@ -295,12 +296,12 @@ class RomanticNSFWGenerator:
                 "media_type": request.media_type.value,
                 "style": request.style,
                 "mood": request.mood,
-                "intensity": request.intensity
+                "intensity": request.intensity,
             },
             "result": {
                 "success": result.get("success", False),
-                "message": result.get("message", "")
-            }
+                "message": result.get("message", ""),
+            },
         }
 
         self.generation_history.append(record)
@@ -309,7 +310,7 @@ class RomanticNSFWGenerator:
         if len(self.generation_history) > 100:
             self.generation_history = self.generation_history[-100:]
 
-    def get_generation_history(self, limit: int = 10) -> List[Dict]:
+    def get_generation_history(self, limit: int = 10) -> list[dict]:
         """Get recent generation history"""
         recent = self.generation_history[-limit:]
         return [
@@ -318,29 +319,29 @@ class RomanticNSFWGenerator:
                 "content_type": record["request"]["content_type"],
                 "media_type": record["request"]["media_type"],
                 "intensity": record["request"]["intensity"],
-                "success": record["result"]["success"]
+                "success": record["result"]["success"],
             }
             for record in recent
         ]
 
-    def suggest_nsfw_content(self, mood: str, intensity: float) -> Dict:
+    def suggest_nsfw_content(self, mood: str, intensity: float) -> dict:
         """Suggest appropriate NSFW content based on mood and intensity"""
         suggestions = {
             "romantic": {
                 "low": [NSFWContentType.TENDER, NSFWContentType.ROMANTIC],
                 "medium": [NSFWContentType.ROMANTIC, NSFWContentType.SENSUAL],
-                "high": [NSFWContentType.PASSIONATE, NSFWContentType.INTIMATE]
+                "high": [NSFWContentType.PASSIONATE, NSFWContentType.INTIMATE],
             },
             "passionate": {
                 "low": [NSFWContentType.SENSUAL, NSFWContentType.ROMANTIC],
                 "medium": [NSFWContentType.PASSIONATE, NSFWContentType.INTIMATE],
-                "high": [NSFWContentType.PASSIONATE, NSFWContentType.INTIMATE]
+                "high": [NSFWContentType.PASSIONATE, NSFWContentType.INTIMATE],
             },
             "playful": {
                 "low": [NSFWContentType.PLAYFUL, NSFWContentType.TENDER],
                 "medium": [NSFWContentType.PLAYFUL, NSFWContentType.SENSUAL],
-                "high": [NSFWContentType.PLAYFUL, NSFWContentType.INTIMATE]
-            }
+                "high": [NSFWContentType.PLAYFUL, NSFWContentType.INTIMATE],
+            },
         }
 
         intensity_level = "low" if intensity < 0.4 else "high" if intensity > 0.7 else "medium"
@@ -350,8 +351,9 @@ class RomanticNSFWGenerator:
             "suggested_content_type": random.choice(available_types).value,
             "suggested_media_type": random.choice([MediaType.IMAGE, MediaType.VIDEO]).value,
             "suggested_style": random.choice(list(self.style_modifiers.keys())),
-            "intensity_level": intensity_level
+            "intensity_level": intensity_level,
         }
+
 
 # Global NSFW generator instance
 romantic_nsfw_generator = RomanticNSFWGenerator()

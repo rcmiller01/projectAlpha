@@ -3,9 +3,9 @@
 Test script for emotion_loop_core.py with real anchor settings.
 """
 
-import sys
-import os
 import logging
+import os
+import sys
 
 # Add the project root to the path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -16,7 +16,7 @@ try:
         QuantizationCandidate,
         load_anchor_weights,
         run_emotional_test,
-        run_emotional_test_suite
+        run_emotional_test_suite,
     )
 
     def test_anchor_weights_loading():
@@ -28,7 +28,12 @@ try:
         print(f"✅ Loaded weights: {weights}")
 
         # Verify weights structure
-        expected_keys = {'persona_continuity', 'expression_accuracy', 'response_depth', 'memory_alignment'}
+        expected_keys = {
+            "persona_continuity",
+            "expression_accuracy",
+            "response_depth",
+            "memory_alignment",
+        }
         actual_keys = set(weights.keys())
 
         if expected_keys == actual_keys:
@@ -95,7 +100,7 @@ try:
         custom_prompts = [
             "How do you handle loss?",
             "What brings you joy?",
-            "How do you find peace?"
+            "How do you find peace?",
         ]
 
         results = run_emotional_test_suite(candidates, custom_prompts)
@@ -103,7 +108,7 @@ try:
         if results and len(results) == len(candidates):
             print("✅ Emotional test suite completed successfully")
             for name, scores in results.items():
-                avg = scores.get('average', 0)
+                avg = scores.get("average", 0)
                 print(f"   {name}: average score {avg:.3f}")
             return True
         else:
@@ -116,8 +121,12 @@ try:
 
         manager = EmotionLoopManager()
         candidates = [
-            QuantizationCandidate(name="save_test_q6", size_gb=12.5, file_path="models/save_test_q6.bin"),
-            QuantizationCandidate(name="save_test_q4", size_gb=8.8, file_path="models/save_test_q4.bin"),
+            QuantizationCandidate(
+                name="save_test_q6", size_gb=12.5, file_path="models/save_test_q6.bin"
+            ),
+            QuantizationCandidate(
+                name="save_test_q4", size_gb=8.8, file_path="models/save_test_q4.bin"
+            ),
         ]
 
         # Evaluate candidates
@@ -131,15 +140,17 @@ try:
 
                 # Verify file exists
                 import os
+
                 if os.path.exists(results_file):
                     print("✅ Results file exists on disk")
 
                     # Verify contents
                     import json
-                    with open(results_file, 'r') as f:
+
+                    with open(results_file) as f:
                         data = json.load(f)
 
-                    if 'selected' in data and 'candidates' in data:
+                    if "selected" in data and "candidates" in data:
                         print("✅ Results file contains expected structure")
                         return True
                     else:
@@ -161,10 +172,11 @@ try:
         print("\n📁 Testing Config File Integration...")
 
         import json
-        config_path = 'config/anchor_settings.json'
+
+        config_path = "config/anchor_settings.json"
 
         try:
-            with open(config_path, 'r') as f:
+            with open(config_path) as f:
                 config = json.load(f)
             print(f"✅ Config file loaded from {config_path}")
             print(f"   Current signature: {config.get('signature', 'Unknown')}")
@@ -172,7 +184,7 @@ try:
             print(f"   Last updated: {config.get('last_updated', 'Never')}")
 
             # Verify weights match
-            file_weights = config.get('weights', {})
+            file_weights = config.get("weights", {})
             loaded_weights = load_anchor_weights(config_path)
 
             if file_weights == loaded_weights:
@@ -204,7 +216,7 @@ try:
         print("🎯 Test Summary:")
         print(f"   Anchor weights loaded: {'✅' if weights else '❌'}")
         print(f"   Best candidate selected: {'✅' if best_candidate else '❌'}")
-        print(f"   Config integration: ✅")
+        print("   Config integration: ✅")
         print(f"   Emotional test suite: {'✅' if emotional_tests_ok else '❌'}")
         print(f"   Results saving: {'✅' if results_saving_ok else '❌'}")
         print("\n💬 Next steps:")
@@ -218,4 +230,5 @@ except ImportError as e:
 except Exception as e:
     print(f"❌ Unexpected error: {e}")
     import traceback
+
     traceback.print_exc()

@@ -11,20 +11,21 @@ Enhanced with security features:
 - Comprehensive audit logging for all bridge activities
 """
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends, Request, Header
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-import aiosqlite
-import os
+import asyncio
 import hashlib
+import json
+import logging
+import os
 import re
 import time
-import asyncio
-import logging
-import json
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
 from collections import defaultdict, deque
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+
+import aiosqlite
+from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, validator
 
 # Enhanced logging configuration
@@ -53,10 +54,10 @@ security = HTTPBearer()
 
 # Import House of Minds components with validation
 try:
+    from house_of_minds.config_manager import ConfigManager
+    from house_of_minds.intent_classifier import IntentClassifier
     from house_of_minds.main import HouseOfMinds
     from house_of_minds.model_router import ModelRouter
-    from house_of_minds.intent_classifier import IntentClassifier
-    from house_of_minds.config_manager import ConfigManager
     HOM_AVAILABLE = True
     logger.info("House of Minds components loaded successfully")
 except ImportError as e:

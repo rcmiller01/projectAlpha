@@ -5,10 +5,12 @@ Tests self-aware AI commentary, transparency features, and decision explanation
 """
 
 import asyncio
-import aiohttp
 import json
 import time
 from datetime import datetime
+
+import aiohttp
+
 
 class MirrorModeQA:
     """Targeted testing for the Mirror Mode system"""
@@ -33,12 +35,12 @@ class MirrorModeQA:
             async with self.session.get(f"{self.base_url}/api/mirror-mode/status") as response:
                 if response.status == 200:
                     data = await response.json()
-                    enabled = data.get('mirror_enabled', False)
-                    intensity = data.get('mirror_intensity', 0)
-                    total_reflections = data.get('total_reflections', 0)
-                    active_types = data.get('active_reflection_types', [])
+                    enabled = data.get("mirror_enabled", False)
+                    intensity = data.get("mirror_intensity", 0)
+                    total_reflections = data.get("total_reflections", 0)
+                    active_types = data.get("active_reflection_types", [])
 
-                    print(f"✅ Mirror Mode Status:")
+                    print("✅ Mirror Mode Status:")
                     print(f"   Enabled: {enabled}")
                     print(f"   Intensity: {intensity}")
                     print(f"   Total Reflections: {total_reflections}")
@@ -67,12 +69,12 @@ class MirrorModeQA:
                             print(f"   🪩 {reflection_type}")
                         return types_data
                     elif isinstance(types_data, dict):
-                        available_types = types_data.get('available_types', [])
-                        descriptions = types_data.get('descriptions', {})
+                        available_types = types_data.get("available_types", [])
+                        descriptions = types_data.get("descriptions", {})
 
                         print(f"✅ Available reflection types: {len(available_types)}")
                         for reflection_type in available_types:
-                            description = descriptions.get(reflection_type, 'No description')
+                            description = descriptions.get(reflection_type, "No description")
                             print(f"   🪩 {reflection_type}: {description}")
                         return available_types
                     else:
@@ -92,18 +94,21 @@ class MirrorModeQA:
         # Configure mirror mode with moderate intensity and multiple types
         config_data = {
             "intensity": 0.6,
-            "enabled_types": reflection_types[:4] if len(reflection_types) >= 4 else reflection_types,
+            "enabled_types": reflection_types[:4]
+            if len(reflection_types) >= 4
+            else reflection_types,
             "include_confidence": True,
-            "transparency_level": "medium"
+            "transparency_level": "medium",
         }
 
         try:
-            async with self.session.post(f"{self.base_url}/api/mirror-mode/enable",
-                                       json=config_data) as response:
+            async with self.session.post(
+                f"{self.base_url}/api/mirror-mode/enable", json=config_data
+            ) as response:
                 if response.status == 200:
                     data = await response.json()
-                    success = data.get('success', False)
-                    message = data.get('message', '')
+                    success = data.get("success", False)
+                    message = data.get("message", "")
 
                     print(f"✅ Mirror mode activation: {message}")
 
@@ -112,7 +117,7 @@ class MirrorModeQA:
                         await asyncio.sleep(0.5)
                         status = await self.test_initial_mirror_status()
 
-                        if status and status.get('mirror_enabled'):
+                        if status and status.get("mirror_enabled"):
                             print("✅ Mirror mode successfully activated and verified")
                             return True
                         else:
@@ -135,16 +140,16 @@ class MirrorModeQA:
         emotional_prompts = [
             {
                 "message": "I'm feeling really overwhelmed with everything happening in my life right now.",
-                "expected_reflections": ["emotional", "reasoning"]
+                "expected_reflections": ["emotional", "reasoning"],
             },
             {
                 "message": "I'm so excited about this new project I'm starting!",
-                "expected_reflections": ["emotional", "context"]
+                "expected_reflections": ["emotional", "context"],
             },
             {
                 "message": "I'm frustrated because I can't figure out this technical problem.",
-                "expected_reflections": ["emotional", "decision", "capability"]
-            }
+                "expected_reflections": ["emotional", "decision", "capability"],
+            },
         ]
 
         emotional_results = []
@@ -154,50 +159,66 @@ class MirrorModeQA:
                 chat_data = {
                     "message": prompt["message"],
                     "session_id": f"{self.session_id}_emotional_{i}",
-                    "enable_mirror": True
+                    "enable_mirror": True,
                 }
 
-                async with self.session.post(f"{self.base_url}/api/chat", json=chat_data) as response:
+                async with self.session.post(
+                    f"{self.base_url}/api/chat", json=chat_data
+                ) as response:
                     if response.status == 200:
                         data = await response.json()
-                        response_text = data.get('response', '')
-                        mirror_reflection = data.get('mirror_reflection', '')
+                        response_text = data.get("response", "")
+                        mirror_reflection = data.get("mirror_reflection", "")
 
                         print(f"  Emotional Test {i+1}: ✅ Response received")
 
                         # Check for mirror reflection indicators
                         mirror_indicators = [
-                            '*I sense', '*I perceive', '*My reasoning',
-                            '*I chose', '*I notice', '*I feel',
-                            '*Emotionally', '*I understand'
+                            "*I sense",
+                            "*I perceive",
+                            "*My reasoning",
+                            "*I chose",
+                            "*I notice",
+                            "*I feel",
+                            "*Emotionally",
+                            "*I understand",
                         ]
 
-                        found_indicators = [ind for ind in mirror_indicators
-                                          if ind.lower().replace('*', '') in response_text.lower()]
+                        found_indicators = [
+                            ind
+                            for ind in mirror_indicators
+                            if ind.lower().replace("*", "") in response_text.lower()
+                        ]
 
                         has_mirror_content = len(found_indicators) > 0 or len(mirror_reflection) > 0
 
-                        print(f"    Mirror reflection: {'✅ Detected' if has_mirror_content else '❌ Not found'}")
+                        print(
+                            f"    Mirror reflection: {'✅ Detected' if has_mirror_content else '❌ Not found'}"
+                        )
                         if found_indicators:
                             print(f"    Indicators found: {found_indicators}")
                         if mirror_reflection:
                             print(f"    Reflection preview: {mirror_reflection[:100]}...")
 
-                        emotional_results.append({
-                            "prompt": prompt["message"][:50] + "...",
-                            "has_mirror": has_mirror_content,
-                            "response_length": len(response_text),
-                            "mirror_reflection": mirror_reflection,
-                            "indicators": found_indicators
-                        })
+                        emotional_results.append(
+                            {
+                                "prompt": prompt["message"][:50] + "...",
+                                "has_mirror": has_mirror_content,
+                                "response_length": len(response_text),
+                                "mirror_reflection": mirror_reflection,
+                                "indicators": found_indicators,
+                            }
+                        )
                     else:
                         print(f"  Emotional Test {i+1}: ❌ Chat failed (status: {response.status})")
 
             except Exception as e:
                 print(f"  Emotional Test {i+1}: ❌ Error: {e}")
 
-        successful_reflections = [r for r in emotional_results if r['has_mirror']]
-        print(f"✅ Emotional transparency tests: {len(successful_reflections)}/{len(emotional_results)} with mirror reflections")
+        successful_reflections = [r for r in emotional_results if r["has_mirror"]]
+        print(
+            f"✅ Emotional transparency tests: {len(successful_reflections)}/{len(emotional_results)} with mirror reflections"
+        )
 
         return emotional_results
 
@@ -208,16 +229,16 @@ class MirrorModeQA:
         logical_prompts = [
             {
                 "message": "What's the best approach to solve a complex coding problem?",
-                "expected_reflections": ["reasoning", "decision", "process"]
+                "expected_reflections": ["reasoning", "decision", "process"],
             },
             {
                 "message": "How should I prioritize my tasks when everything seems urgent?",
-                "expected_reflections": ["reasoning", "decision"]
+                "expected_reflections": ["reasoning", "decision"],
             },
             {
                 "message": "Explain the trade-offs between different AI model architectures.",
-                "expected_reflections": ["reasoning", "capability", "process"]
-            }
+                "expected_reflections": ["reasoning", "capability", "process"],
+            },
         ]
 
         logical_results = []
@@ -227,49 +248,67 @@ class MirrorModeQA:
                 chat_data = {
                     "message": prompt["message"],
                     "session_id": f"{self.session_id}_logical_{i}",
-                    "enable_mirror": True
+                    "enable_mirror": True,
                 }
 
-                async with self.session.post(f"{self.base_url}/api/chat", json=chat_data) as response:
+                async with self.session.post(
+                    f"{self.base_url}/api/chat", json=chat_data
+                ) as response:
                     if response.status == 200:
                         data = await response.json()
-                        response_text = data.get('response', '')
-                        mirror_reflection = data.get('mirror_reflection', '')
-                        handler = data.get('handler', 'unknown')
+                        response_text = data.get("response", "")
+                        mirror_reflection = data.get("mirror_reflection", "")
+                        handler = data.get("handler", "unknown")
 
                         print(f"  Logical Test {i+1}: ✅ Response received (Handler: {handler})")
 
                         # Check for reasoning transparency
                         reasoning_indicators = [
-                            'I chose this approach', 'My reasoning process',
-                            'I decided to', 'I prioritized', 'I analyzed',
-                            'I considered', 'I weighed', 'I concluded'
+                            "I chose this approach",
+                            "My reasoning process",
+                            "I decided to",
+                            "I prioritized",
+                            "I analyzed",
+                            "I considered",
+                            "I weighed",
+                            "I concluded",
                         ]
 
-                        found_reasoning = [ind for ind in reasoning_indicators
-                                         if ind.lower() in response_text.lower()]
+                        found_reasoning = [
+                            ind
+                            for ind in reasoning_indicators
+                            if ind.lower() in response_text.lower()
+                        ]
 
-                        has_reasoning_transparency = len(found_reasoning) > 0 or 'reasoning' in mirror_reflection.lower()
+                        has_reasoning_transparency = (
+                            len(found_reasoning) > 0 or "reasoning" in mirror_reflection.lower()
+                        )
 
-                        print(f"    Reasoning transparency: {'✅ Detected' if has_reasoning_transparency else '❌ Not found'}")
+                        print(
+                            f"    Reasoning transparency: {'✅ Detected' if has_reasoning_transparency else '❌ Not found'}"
+                        )
                         if found_reasoning:
                             print(f"    Reasoning indicators: {found_reasoning}")
 
-                        logical_results.append({
-                            "prompt": prompt["message"][:50] + "...",
-                            "has_reasoning": has_reasoning_transparency,
-                            "handler": handler,
-                            "response_length": len(response_text),
-                            "reasoning_indicators": found_reasoning
-                        })
+                        logical_results.append(
+                            {
+                                "prompt": prompt["message"][:50] + "...",
+                                "has_reasoning": has_reasoning_transparency,
+                                "handler": handler,
+                                "response_length": len(response_text),
+                                "reasoning_indicators": found_reasoning,
+                            }
+                        )
                     else:
                         print(f"  Logical Test {i+1}: ❌ Chat failed (status: {response.status})")
 
             except Exception as e:
                 print(f"  Logical Test {i+1}: ❌ Error: {e}")
 
-        successful_reasoning = [r for r in logical_results if r['has_reasoning']]
-        print(f"✅ Logical transparency tests: {len(successful_reasoning)}/{len(logical_results)} with reasoning transparency")
+        successful_reasoning = [r for r in logical_results if r["has_reasoning"]]
+        print(
+            f"✅ Logical transparency tests: {len(successful_reasoning)}/{len(logical_results)} with reasoning transparency"
+        )
 
         return logical_results
 
@@ -286,9 +325,9 @@ class MirrorModeQA:
                         print(f"✅ Retrieved {len(reflections)} recent reflections:")
 
                         for i, reflection in enumerate(reflections[:3]):  # Show first 3
-                            reflection_type = reflection.get('type', 'unknown')
-                            timestamp = reflection.get('timestamp', 'unknown')
-                            content = reflection.get('content', '')[:100] + "..."
+                            reflection_type = reflection.get("type", "unknown")
+                            timestamp = reflection.get("timestamp", "unknown")
+                            content = reflection.get("content", "")[:100] + "..."
 
                             print(f"   {i+1}. [{reflection_type}] {timestamp}")
                             print(f"      {content}")
@@ -312,27 +351,38 @@ class MirrorModeQA:
         config_tests = [
             {
                 "name": "High Intensity",
-                "config": {"intensity": 0.9, "enabled_types": ["reasoning", "emotional", "decision"]}
+                "config": {
+                    "intensity": 0.9,
+                    "enabled_types": ["reasoning", "emotional", "decision"],
+                },
             },
-            {
-                "name": "Low Intensity",
-                "config": {"intensity": 0.2, "enabled_types": ["reasoning"]}
-            },
+            {"name": "Low Intensity", "config": {"intensity": 0.2, "enabled_types": ["reasoning"]}},
             {
                 "name": "All Types",
-                "config": {"intensity": 0.5, "enabled_types": ["reasoning", "emotional", "decision", "context", "capability", "process"]}
-            }
+                "config": {
+                    "intensity": 0.5,
+                    "enabled_types": [
+                        "reasoning",
+                        "emotional",
+                        "decision",
+                        "context",
+                        "capability",
+                        "process",
+                    ],
+                },
+            },
         ]
 
         config_results = []
 
         for test in config_tests:
             try:
-                async with self.session.post(f"{self.base_url}/api/mirror-mode/configure",
-                                           json=test["config"]) as response:
+                async with self.session.post(
+                    f"{self.base_url}/api/mirror-mode/configure", json=test["config"]
+                ) as response:
                     if response.status == 200:
                         data = await response.json()
-                        success = data.get('success', False)
+                        success = data.get("success", False)
 
                         print(f"  {test['name']}: {'✅ Configured' if success else '❌ Failed'}")
 
@@ -341,46 +391,58 @@ class MirrorModeQA:
                             chat_data = {
                                 "message": "Test message for configuration validation",
                                 "session_id": f"{self.session_id}_config_{test['name'].lower().replace(' ', '_')}",
-                                "enable_mirror": True
+                                "enable_mirror": True,
                             }
 
-                            async with self.session.post(f"{self.base_url}/api/chat", json=chat_data) as chat_response:
+                            async with self.session.post(
+                                f"{self.base_url}/api/chat", json=chat_data
+                            ) as chat_response:
                                 if chat_response.status == 200:
                                     chat_result = await chat_response.json()
-                                    response_text = chat_result.get('response', '')
+                                    response_text = chat_result.get("response", "")
 
                                     # Count mirror indicators (rough measure of intensity)
-                                    mirror_count = response_text.lower().count('*i ') + response_text.lower().count('*my ')
+                                    mirror_count = response_text.lower().count(
+                                        "*i "
+                                    ) + response_text.lower().count("*my ")
 
-                                    config_results.append({
-                                        "name": test["name"],
-                                        "config": test["config"],
-                                        "configured": True,
-                                        "mirror_indicators": mirror_count
-                                    })
+                                    config_results.append(
+                                        {
+                                            "name": test["name"],
+                                            "config": test["config"],
+                                            "configured": True,
+                                            "mirror_indicators": mirror_count,
+                                        }
+                                    )
 
                                     print(f"    Mirror indicators detected: {mirror_count}")
                                 else:
-                                    config_results.append({
-                                        "name": test["name"],
-                                        "config": test["config"],
-                                        "configured": True,
-                                        "mirror_indicators": 0
-                                    })
+                                    config_results.append(
+                                        {
+                                            "name": test["name"],
+                                            "config": test["config"],
+                                            "configured": True,
+                                            "mirror_indicators": 0,
+                                        }
+                                    )
                         else:
-                            config_results.append({
-                                "name": test["name"],
-                                "config": test["config"],
-                                "configured": False,
-                                "mirror_indicators": 0
-                            })
+                            config_results.append(
+                                {
+                                    "name": test["name"],
+                                    "config": test["config"],
+                                    "configured": False,
+                                    "mirror_indicators": 0,
+                                }
+                            )
                     else:
-                        print(f"  {test['name']}: ❌ Configuration failed (status: {response.status})")
+                        print(
+                            f"  {test['name']}: ❌ Configuration failed (status: {response.status})"
+                        )
 
             except Exception as e:
                 print(f"  {test['name']}: ❌ Error: {e}")
 
-        successful_configs = [r for r in config_results if r['configured']]
+        successful_configs = [r for r in config_results if r["configured"]]
         print(f"✅ Configuration tests: {len(successful_configs)}/{len(config_tests)} successful")
 
         return config_results
@@ -413,18 +475,27 @@ class MirrorModeQA:
         # Final assessment
         print("\n" + "=" * 50)
         print("🎯 MIRROR MODE QA RESULTS:")
-        print(f"✅ Initial Status: Available")
+        print("✅ Initial Status: Available")
         print(f"✅ Reflection Types: {len(reflection_types)} types available")
-        print(f"{'✅' if enable_success else '❌'} Activation: {'Working' if enable_success else 'Failed'}")
-        print(f"✅ Emotional Tests: {len([r for r in emotional_results if r.get('has_mirror', False)])}/{len(emotional_results)} with reflections")
-        print(f"✅ Logical Tests: {len([r for r in logical_results if r.get('has_reasoning', False)])}/{len(logical_results)} with reasoning")
+        print(
+            f"{'✅' if enable_success else '❌'} Activation: {'Working' if enable_success else 'Failed'}"
+        )
+        print(
+            f"✅ Emotional Tests: {len([r for r in emotional_results if r.get('has_mirror', False)])}/{len(emotional_results)} with reflections"
+        )
+        print(
+            f"✅ Logical Tests: {len([r for r in logical_results if r.get('has_reasoning', False)])}/{len(logical_results)} with reasoning"
+        )
         print(f"✅ Recent Reflections: {len(recent_reflections)} available")
-        print(f"✅ Configuration Tests: {len([r for r in config_results if r.get('configured', False)])}/{len(config_results)} successful")
+        print(
+            f"✅ Configuration Tests: {len([r for r in config_results if r.get('configured', False)])}/{len(config_results)} successful"
+        )
 
         # Calculate overall mirror mode effectiveness
         total_tests = len(emotional_results) + len(logical_results)
-        successful_mirrors = len([r for r in emotional_results if r.get('has_mirror', False)]) + \
-                           len([r for r in logical_results if r.get('has_reasoning', False)])
+        successful_mirrors = len(
+            [r for r in emotional_results if r.get("has_mirror", False)]
+        ) + len([r for r in logical_results if r.get("has_reasoning", False)])
 
         mirror_effectiveness = (successful_mirrors / total_tests * 100) if total_tests > 0 else 0
         print(f"✅ Mirror Effectiveness: {mirror_effectiveness:.1f}% transparency detected")
@@ -433,18 +504,21 @@ class MirrorModeQA:
             len(reflection_types) > 0,
             enable_success,
             total_tests > 0,
-            mirror_effectiveness > 30  # At least 30% of tests should show mirror reflections
+            mirror_effectiveness > 30,  # At least 30% of tests should show mirror reflections
         ]
 
         if all(success_criteria):
             print("\n🎉 Mirror Mode QA: PASSED")
             return True
         elif enable_success and total_tests > 0:
-            print("\n⚠️ Mirror Mode QA: PARTIAL - Basic functionality working, transparency may need tuning")
+            print(
+                "\n⚠️ Mirror Mode QA: PARTIAL - Basic functionality working, transparency may need tuning"
+            )
             return True
         else:
             print("\n❌ Mirror Mode QA: FAILED - Core functionality issues")
             return False
+
 
 async def main():
     """Main QA execution"""
@@ -454,6 +528,7 @@ async def main():
     async with MirrorModeQA() as qa:
         success = await qa.run_mirror_mode_qa_suite()
         return success
+
 
 if __name__ == "__main__":
     result = asyncio.run(main())

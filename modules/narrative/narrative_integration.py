@@ -7,15 +7,18 @@ to provide seamless autonomous storytelling and emotional presence.
 
 import asyncio
 import logging
-from typing import Dict, Any, Optional, Callable
+from collections.abc import Callable
 from datetime import datetime
+from typing import Any, Dict, Optional
+
+from modules.dreams.dream_module import DreamModule
 
 # Import modules
 from modules.narrative.narrative_agency import NarrativeAgency, get_narrative_agency
-from modules.dreams.dream_module import DreamModule
 from modules.presence.unified_broadcast import UnifiedEmotionalBroadcast
 
 logger = logging.getLogger(__name__)
+
 
 class NarrativeIntegration:
     """
@@ -34,7 +37,7 @@ class NarrativeIntegration:
         self.is_running = False
 
         # Callbacks
-        self.delivery_callbacks: Dict[str, Callable] = {}
+        self.delivery_callbacks: dict[str, Callable] = {}
 
         # Configuration
         self.config = {
@@ -42,7 +45,7 @@ class NarrativeIntegration:
             "enable_emotional_sync": True,
             "delivery_methods": ["whisper", "message", "voice", "visual"],
             "max_daily_narratives": 5,
-            "min_idle_time_minutes": 15
+            "min_idle_time_minutes": 15,
         }
 
     async def initialize(self, dream_module=None, emotional_broadcaster=None, memory_manager=None):
@@ -64,7 +67,7 @@ class NarrativeIntegration:
             self.narrative_agency.set_dependencies(
                 dream_module=self.dream_module,
                 memory_manager=self.memory_manager,
-                emotional_broadcaster=self.emotional_broadcaster
+                emotional_broadcaster=self.emotional_broadcaster,
             )
 
             # Apply configuration
@@ -93,37 +96,37 @@ class NarrativeIntegration:
         """Set up default delivery callbacks for different methods"""
 
         # Whisper delivery (soft, ambient)
-        async def whisper_delivery(content: Dict[str, Any]):
+        async def whisper_delivery(content: dict[str, Any]):
             logger.info(f"🗣️ Whisper: {content.get('text', '')[:50]}...")
 
             # If voice integration is available, use it
-            if hasattr(self, '_voice_whisper'):
+            if hasattr(self, "_voice_whisper"):
                 await self._voice_whisper(content)
             else:
                 # Default: log the whisper
                 print(f"[Whisper] {content.get('text', '')}")
 
         # Message delivery (text-based)
-        async def message_delivery(content: Dict[str, Any]):
+        async def message_delivery(content: dict[str, Any]):
             logger.info(f"💬 Message: {content.get('text', '')[:50]}...")
             print(f"[Message] {content.get('text', '')}")
 
         # Voice delivery (spoken narrative)
-        async def voice_delivery(content: Dict[str, Any]):
+        async def voice_delivery(content: dict[str, Any]):
             logger.info(f"🎤 Voice: {content.get('text', '')[:50]}...")
 
             # If TTS is available, use it
-            if hasattr(self, '_text_to_speech'):
+            if hasattr(self, "_text_to_speech"):
                 await self._text_to_speech(content)
             else:
                 print(f"[Voice] {content.get('text', '')}")
 
         # Visual delivery (for dreams/imagery)
-        async def visual_delivery(content: Dict[str, Any]):
+        async def visual_delivery(content: dict[str, Any]):
             logger.info(f"🎨 Visual: {content.get('description', 'Visual content')}")
 
             # If image generation is available, use it
-            if hasattr(self, '_generate_visual'):
+            if hasattr(self, "_generate_visual"):
                 await self._generate_visual(content)
             else:
                 print(f"[Visual] {content.get('description', 'Visual narrative')}")
@@ -232,7 +235,7 @@ class NarrativeIntegration:
             elif not self.narrative_agency.monitoring_active:
                 issues.append("narrative_monitoring_inactive")
 
-            if self.dream_module and not hasattr(self.dream_module, 'check_delivery_conditions'):
+            if self.dream_module and not hasattr(self.dream_module, "check_delivery_conditions"):
                 issues.append("dream_module_incomplete")
 
             if issues:
@@ -252,7 +255,7 @@ class NarrativeIntegration:
         if self.narrative_agency:
             self.narrative_agency.update_emotional_state(emotion, intensity)
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Get comprehensive system status"""
 
         status = {
@@ -263,8 +266,8 @@ class NarrativeIntegration:
                 "narrative_agency": self.narrative_agency is not None,
                 "dream_module": self.dream_module is not None,
                 "emotional_broadcaster": self.emotional_broadcaster is not None,
-                "memory_manager": self.memory_manager is not None
-            }
+                "memory_manager": self.memory_manager is not None,
+            },
         }
 
         # Add narrative agency status if available
@@ -292,7 +295,9 @@ class NarrativeIntegration:
                 self.narrative_agency.min_idle_time_minutes = kwargs["min_idle_time_minutes"]
 
     # Manual trigger methods
-    async def trigger_dream_delivery(self, emotion: Optional[str] = None, intensity: Optional[float] = None):
+    async def trigger_dream_delivery(
+        self, emotion: Optional[str] = None, intensity: Optional[float] = None
+    ):
         """Manually trigger dream delivery"""
 
         if not self.is_initialized or not self.narrative_agency:
@@ -339,8 +344,10 @@ class NarrativeIntegration:
             # Store for later registration
             self.delivery_callbacks[delivery_method] = callback
 
+
 # Global integration instance
 narrative_integration = None
+
 
 def get_narrative_integration() -> NarrativeIntegration:
     """Get or create global narrative integration instance"""
@@ -349,14 +356,17 @@ def get_narrative_integration() -> NarrativeIntegration:
         narrative_integration = NarrativeIntegration()
     return narrative_integration
 
-async def initialize_narrative_system(dream_module=None, emotional_broadcaster=None, memory_manager=None):
+
+async def initialize_narrative_system(
+    dream_module=None, emotional_broadcaster=None, memory_manager=None
+):
     """Initialize the complete narrative system"""
 
     integration = get_narrative_integration()
     success = await integration.initialize(
         dream_module=dream_module,
         emotional_broadcaster=emotional_broadcaster,
-        memory_manager=memory_manager
+        memory_manager=memory_manager,
     )
 
     if success:
@@ -365,6 +375,7 @@ async def initialize_narrative_system(dream_module=None, emotional_broadcaster=N
         logger.error("❌ Failed to initialize narrative system")
 
     return integration if success else None
+
 
 if __name__ == "__main__":
     """Test the narrative integration"""

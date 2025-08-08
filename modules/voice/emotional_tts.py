@@ -2,16 +2,18 @@
 # Advanced emotional TTS integration with Tacotron/FastPitch
 
 import json
-import time
 import threading
-from typing import Dict, List, Optional, Tuple
+import time
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
 import numpy as np
 import torch
 import torchaudio
-from pathlib import Path
+
 
 class EmotionType(Enum):
     LOVE = "love"
@@ -25,11 +27,13 @@ class EmotionType(Enum):
     SURPRISE = "surprise"
     NEUTRAL = "neutral"
 
+
 class PersonaVoice(Enum):
     MIA = "mia"
     SOLENE = "solene"
     LYRA = "lyra"
     DOC = "doc"
+
 
 @dataclass
 class VoiceParameters:
@@ -40,6 +44,7 @@ class VoiceParameters:
     breathiness: float = 0.0  # 0.0 to 1.0
     warmth: float = 0.5  # 0.0 to 1.0
 
+
 @dataclass
 class EmotionalTTSConfig:
     model_path: str
@@ -48,6 +53,7 @@ class EmotionalTTSConfig:
     sample_rate: int = 22050
     hop_length: int = 256
     win_length: int = 1024
+
 
 class EmotionalTTS:
     def __init__(self):
@@ -69,10 +75,10 @@ class EmotionalTTS:
             device="cuda" if torch.cuda.is_available() else "cpu",
             sample_rate=22050,
             hop_length=256,
-            win_length=1024
+            win_length=1024,
         )
 
-    def _load_persona_voices(self) -> Dict[PersonaVoice, Dict]:
+    def _load_persona_voices(self) -> dict[PersonaVoice, dict]:
         """Load persona-specific voice characteristics"""
         return {
             PersonaVoice.MIA: {
@@ -81,7 +87,7 @@ class EmotionalTTS:
                 "energy": 1.0,
                 "warmth": 0.8,  # Warm, affectionate
                 "breathiness": 0.1,
-                "emotion_modulation": "high"
+                "emotion_modulation": "high",
             },
             PersonaVoice.SOLENE: {
                 "base_pitch": -2.0,  # Slightly lower
@@ -89,7 +95,7 @@ class EmotionalTTS:
                 "energy": 0.8,
                 "warmth": 0.6,  # More mysterious
                 "breathiness": 0.2,
-                "emotion_modulation": "medium"
+                "emotion_modulation": "medium",
             },
             PersonaVoice.LYRA: {
                 "base_pitch": 2.0,  # Higher, ethereal
@@ -97,7 +103,7 @@ class EmotionalTTS:
                 "energy": 1.2,
                 "warmth": 0.4,  # More ethereal
                 "breathiness": 0.3,
-                "emotion_modulation": "very_high"
+                "emotion_modulation": "very_high",
             },
             PersonaVoice.DOC: {
                 "base_pitch": -1.0,  # Professional
@@ -105,11 +111,11 @@ class EmotionalTTS:
                 "energy": 0.9,
                 "warmth": 0.3,  # More neutral
                 "breathiness": 0.0,
-                "emotion_modulation": "low"
-            }
+                "emotion_modulation": "low",
+            },
         }
 
-    def _load_emotion_mappings(self) -> Dict[EmotionType, VoiceParameters]:
+    def _load_emotion_mappings(self) -> dict[EmotionType, VoiceParameters]:
         """Load emotion-to-voice parameter mappings"""
         return {
             EmotionType.LOVE: VoiceParameters(
@@ -118,7 +124,7 @@ class EmotionalTTS:
                 energy=1.2,
                 emotion_intensity=0.8,
                 breathiness=0.2,
-                warmth=0.9
+                warmth=0.9,
             ),
             EmotionType.PASSION: VoiceParameters(
                 pitch_shift=2.0,
@@ -126,7 +132,7 @@ class EmotionalTTS:
                 energy=1.5,
                 emotion_intensity=1.0,
                 breathiness=0.3,
-                warmth=0.8
+                warmth=0.8,
             ),
             EmotionType.TENDERNESS: VoiceParameters(
                 pitch_shift=-0.5,
@@ -134,7 +140,7 @@ class EmotionalTTS:
                 energy=0.8,
                 emotion_intensity=0.7,
                 breathiness=0.1,
-                warmth=1.0
+                warmth=1.0,
             ),
             EmotionType.EXCITEMENT: VoiceParameters(
                 pitch_shift=1.5,
@@ -142,7 +148,7 @@ class EmotionalTTS:
                 energy=1.3,
                 emotion_intensity=0.9,
                 breathiness=0.1,
-                warmth=0.7
+                warmth=0.7,
             ),
             EmotionType.CALM: VoiceParameters(
                 pitch_shift=-1.0,
@@ -150,7 +156,7 @@ class EmotionalTTS:
                 energy=0.6,
                 emotion_intensity=0.4,
                 breathiness=0.0,
-                warmth=0.8
+                warmth=0.8,
             ),
             EmotionType.SADNESS: VoiceParameters(
                 pitch_shift=-2.0,
@@ -158,7 +164,7 @@ class EmotionalTTS:
                 energy=0.5,
                 emotion_intensity=0.6,
                 breathiness=0.2,
-                warmth=0.6
+                warmth=0.6,
             ),
             EmotionType.ANGER: VoiceParameters(
                 pitch_shift=1.0,
@@ -166,7 +172,7 @@ class EmotionalTTS:
                 energy=1.4,
                 emotion_intensity=0.9,
                 breathiness=0.0,
-                warmth=0.3
+                warmth=0.3,
             ),
             EmotionType.FEAR: VoiceParameters(
                 pitch_shift=-0.5,
@@ -174,7 +180,7 @@ class EmotionalTTS:
                 energy=0.7,
                 emotion_intensity=0.8,
                 breathiness=0.4,
-                warmth=0.4
+                warmth=0.4,
             ),
             EmotionType.SURPRISE: VoiceParameters(
                 pitch_shift=2.5,
@@ -182,7 +188,7 @@ class EmotionalTTS:
                 energy=1.3,
                 emotion_intensity=0.9,
                 breathiness=0.1,
-                warmth=0.6
+                warmth=0.6,
             ),
             EmotionType.NEUTRAL: VoiceParameters(
                 pitch_shift=0.0,
@@ -190,8 +196,8 @@ class EmotionalTTS:
                 energy=1.0,
                 emotion_intensity=0.5,
                 breathiness=0.0,
-                warmth=0.5
-            )
+                warmth=0.5,
+            ),
         }
 
     def _initialize_models(self):
@@ -226,7 +232,7 @@ class EmotionalTTS:
             return {
                 "model": "tacotron2_emotional",
                 "status": "loaded",
-                "device": self.config.device
+                "device": self.config.device,
             }
 
         except Exception as e:
@@ -241,11 +247,7 @@ class EmotionalTTS:
             # Simulate vocoder loading
             time.sleep(1)
 
-            return {
-                "model": "waveglow_vocoder",
-                "status": "loaded",
-                "device": self.config.device
-            }
+            return {"model": "waveglow_vocoder", "status": "loaded", "device": self.config.device}
 
         except Exception as e:
             print(f"[EmotionalTTS] Error loading vocoder: {e}")
@@ -256,8 +258,9 @@ class EmotionalTTS:
         print("[EmotionalTTS] Using fallback TTS system")
         self.is_initialized = True
 
-    def synthesize_speech(self, text: str, persona: PersonaVoice, emotion: EmotionType,
-                         intensity: float = 0.5) -> Optional[bytes]:
+    def synthesize_speech(
+        self, text: str, persona: PersonaVoice, emotion: EmotionType, intensity: float = 0.5
+    ) -> Optional[bytes]:
         """Synthesize emotional speech"""
         if not self.is_initialized:
             print("[EmotionalTTS] Models not yet initialized")
@@ -294,8 +297,9 @@ class EmotionalTTS:
             print(f"[EmotionalTTS] Error synthesizing speech: {e}")
             return None
 
-    def _combine_parameters(self, persona_config: Dict, emotion_params: VoiceParameters,
-                           intensity: float) -> VoiceParameters:
+    def _combine_parameters(
+        self, persona_config: dict, emotion_params: VoiceParameters, intensity: float
+    ) -> VoiceParameters:
         """Combine persona and emotion parameters"""
         # Base parameters from persona
         base_pitch = persona_config["base_pitch"]
@@ -324,7 +328,7 @@ class EmotionalTTS:
             energy=final_energy,
             emotion_intensity=intensity,
             breathiness=final_breathiness,
-            warmth=final_warmth
+            warmth=final_warmth,
         )
 
     def _preprocess_text(self, text: str, emotion: EmotionType) -> str:
@@ -340,7 +344,7 @@ class EmotionalTTS:
             EmotionType.ANGER: "<angry>",
             EmotionType.FEAR: "<fear>",
             EmotionType.SURPRISE: "<surprised>",
-            EmotionType.NEUTRAL: "<neutral>"
+            EmotionType.NEUTRAL: "<neutral>",
         }
 
         marker = emotion_markers.get(emotion, "<neutral>")
@@ -383,8 +387,9 @@ class EmotionalTTS:
 
         return mel_spectrogram
 
-    def _apply_emotional_modifications(self, mel_spectrogram: np.ndarray,
-                                     params: VoiceParameters) -> np.ndarray:
+    def _apply_emotional_modifications(
+        self, mel_spectrogram: np.ndarray, params: VoiceParameters
+    ) -> np.ndarray:
         """Apply emotional modifications to mel-spectrogram"""
         modified_mel = mel_spectrogram.copy()
 
@@ -432,29 +437,33 @@ class EmotionalTTS:
 
         return audio_bytes
 
-    def get_voice_status(self) -> Dict:
+    def get_voice_status(self) -> dict:
         """Get TTS system status"""
         return {
             "initialized": self.is_initialized,
             "models_loaded": {
                 "tacotron2": self.models.get("tacotron2") is not None,
-                "vocoder": self.models.get("vocoder") is not None
+                "vocoder": self.models.get("vocoder") is not None,
             },
             "device": self.config.device,
             "persona_voices": list(self.persona_voices.keys()),
             "emotions": list(self.emotion_mappings.keys()),
-            "sample_rate": self.config.sample_rate
+            "sample_rate": self.config.sample_rate,
         }
+
 
 # Global emotional TTS instance
 emotional_tts = EmotionalTTS()
+
 
 def get_emotional_tts() -> EmotionalTTS:
     """Get the global emotional TTS instance"""
     return emotional_tts
 
-def synthesize_emotional_speech(text: str, persona: str, emotion: str,
-                               intensity: float = 0.5) -> Optional[bytes]:
+
+def synthesize_emotional_speech(
+    text: str, persona: str, emotion: str, intensity: float = 0.5
+) -> Optional[bytes]:
     """Synthesize emotional speech with convenience function"""
     try:
         persona_enum = PersonaVoice(persona)
@@ -465,6 +474,7 @@ def synthesize_emotional_speech(text: str, persona: str, emotion: str,
         print(f"[EmotionalTTS] Error in convenience function: {e}")
         return None
 
-def get_tts_status() -> Dict:
+
+def get_tts_status() -> dict:
     """Get TTS system status"""
     return emotional_tts.get_voice_status()

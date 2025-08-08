@@ -10,24 +10,24 @@ Enhanced with security features:
 - Rate limiting and session management for model operations
 """
 
-import os
+import hashlib
 import json
 import logging
-import shutil
-import hashlib
+import os
 import re
+import shutil
+import subprocess
 import threading
 import time
+from collections import defaultdict, deque
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from datetime import datetime, timezone, timedelta
-from typing import Dict, List, Optional, Tuple, Any
-from collections import deque, defaultdict
-import subprocess
+from typing import Any, Dict, List, Optional, Tuple
 
 # Enhanced logging configuration
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ JUDGE_SESSION_TOKEN_LENGTH = 32
 MAX_MODEL_PATH_LENGTH = 500
 MODEL_ASSESSMENT_RATE_LIMIT = 5  # assessments per hour
 MAX_CONCURRENT_ASSESSMENTS = 3
-ALLOWED_MODEL_EXTENSIONS = {'.bin', '.gguf', '.safetensors', '.pt', '.pth'}
+ALLOWED_MODEL_EXTENSIONS = {".bin", ".gguf", ".safetensors", ".pt", ".pth"}
 
 # Thread safety
 judge_lock = threading.Lock()
@@ -55,11 +55,13 @@ assessment_history = deque(maxlen=100)
 # Try to import quantization tracking with validation
 try:
     from quant_tracking import QuantLoopResult, QuantTracker
+
     TRACKING_AVAILABLE = True
     logger.info("Quantization tracking module loaded for model judging")
 except ImportError:
     TRACKING_AVAILABLE = False
     logger.warning("Quantization tracking not available for model judging")
+
 
 def generate_judge_session() -> str:
     """Generate a secure judge session token"""
@@ -67,6 +69,7 @@ def generate_judge_session() -> str:
     random_data = str(hash(datetime.now()))
     token_string = f"judge:{timestamp}:{random_data}"
     return hashlib.sha256(token_string.encode()).hexdigest()[:JUDGE_SESSION_TOKEN_LENGTH]
+
 
 def validate_judge_session(session_token: str) -> bool:
     """Validate judge session token"""
@@ -78,21 +81,24 @@ def validate_judge_session(session_token: str) -> bool:
 
     # Check if session has expired
     session_data = judge_sessions[session_token]
-    if datetime.now() > session_data['expires_at']:
+    if datetime.now() > session_data["expires_at"]:
         del judge_sessions[session_token]
         return False
 
     # Update last access time
-    session_data['last_access'] = datetime.now()
+    session_data["last_access"] = datetime.now()
     return True
+
 
 def check_assessment_rate_limit(session_token: str) -> bool:
     """Check if model assessment rate limit is exceeded"""
     current_time = time.time()
 
     # Clean old requests
-    while (assessment_requests[session_token] and
-           assessment_requests[session_token][0] < current_time - 3600):  # 1 hour window
+    while (
+        assessment_requests[session_token]
+        and assessment_requests[session_token][0] < current_time - 3600
+    ):  # 1 hour window
         assessment_requests[session_token].popleft()
 
     # Check limit
@@ -103,6 +109,7 @@ def check_assessment_rate_limit(session_token: str) -> bool:
     # Add current request
     assessment_requests[session_token].append(current_time)
     return True
+
 
 def validate_model_path(model_path: str) -> tuple[bool, str]:
     """Validate model file path for security"""
@@ -115,13 +122,16 @@ def validate_model_path(model_path: str) -> tuple[bool, str]:
             return False, f"Model path exceeds maximum length of {MAX_MODEL_PATH_LENGTH}"
 
         # Path traversal protection
-        if '..' in model_path or '~' in model_path:
+        if ".." in model_path or "~" in model_path:
             return False, "Model path contains potentially unsafe patterns"
 
         # Extension validation
         path_obj = Path(model_path)
         if path_obj.suffix.lower() not in ALLOWED_MODEL_EXTENSIONS:
-            return False, f"Model file extension not allowed. Must be one of: {ALLOWED_MODEL_EXTENSIONS}"
+            return (
+                False,
+                f"Model file extension not allowed. Must be one of: {ALLOWED_MODEL_EXTENSIONS}",
+            )
 
         # Check if file exists and is readable
         if not path_obj.exists():
@@ -138,40 +148,42 @@ def validate_model_path(model_path: str) -> tuple[bool, str]:
         return True, "Valid"
 
     except Exception as e:
-        logger.error(f"Error validating model path: {str(e)}")
-        return False, f"Validation error: {str(e)}"
+        logger.error(f"Error validating model path: {e!s}")
+        return False, f"Validation error: {e!s}"
 
-def validate_comparison_params(params: Dict[str, Any]) -> tuple[bool, str]:
+
+def validate_comparison_params(params: dict[str, Any]) -> tuple[bool, str]:
     """Validate model comparison parameters"""
     try:
         # Validate thresholds
-        if 'emotion_threshold' in params:
-            threshold = params['emotion_threshold']
+        if "emotion_threshold" in params:
+            threshold = params["emotion_threshold"]
             if not isinstance(threshold, (int, float)) or threshold < 0 or threshold > 1:
                 return False, "Emotion threshold must be between 0 and 1"
 
-        if 'fluency_threshold' in params:
-            threshold = params['fluency_threshold']
+        if "fluency_threshold" in params:
+            threshold = params["fluency_threshold"]
             if not isinstance(threshold, (int, float)) or threshold < 0 or threshold > 1:
                 return False, "Fluency threshold must be between 0 and 1"
 
         # Validate confidence requirements
-        if 'confidence_requirement' in params:
-            confidence = params['confidence_requirement']
+        if "confidence_requirement" in params:
+            confidence = params["confidence_requirement"]
             if not isinstance(confidence, (int, float)) or confidence < 0 or confidence > 1:
                 return False, "Confidence requirement must be between 0 and 1"
 
         # Validate test parameters
-        if 'test_iterations' in params:
-            iterations = params['test_iterations']
+        if "test_iterations" in params:
+            iterations = params["test_iterations"]
             if not isinstance(iterations, int) or iterations < 1 or iterations > 100:
                 return False, "Test iterations must be between 1 and 100"
 
         return True, "Valid"
 
     except Exception as e:
-        logger.error(f"Error validating comparison params: {str(e)}")
-        return False, f"Validation error: {str(e)}"
+        logger.error(f"Error validating comparison params: {e!s}")
+        return False, f"Validation error: {e!s}"
+
 
 def calculate_model_hash(model_path: str) -> str:
     """Calculate hash of model file for integrity verification"""
@@ -183,19 +195,22 @@ def calculate_model_hash(model_path: str) -> str:
                 hash_md5.update(chunk)
         return hash_md5.hexdigest()
     except Exception as e:
-        logger.error(f"Error calculating model hash: {str(e)}")
+        logger.error(f"Error calculating model hash: {e!s}")
         return ""
 
-def log_assessment_activity(activity_type: str, session_token: str, details: Dict[str, Any], status: str = "success"):
+
+def log_assessment_activity(
+    activity_type: str, session_token: str, details: dict[str, Any], status: str = "success"
+):
     """Log model assessment activities"""
     try:
         log_entry = {
-            'timestamp': datetime.now().isoformat(),
-            'activity_type': activity_type,
-            'session': session_token[:8] + "..." if session_token else "none",
-            'details': details,
-            'status': status,
-            'thread_id': threading.get_ident()
+            "timestamp": datetime.now().isoformat(),
+            "activity_type": activity_type,
+            "session": session_token[:8] + "..." if session_token else "none",
+            "details": details,
+            "status": status,
+            "thread_id": threading.get_ident(),
         }
 
         assessment_history.append(log_entry)
@@ -206,20 +221,24 @@ def log_assessment_activity(activity_type: str, session_token: str, details: Dic
             logger.warning(f"Assessment activity issue: {activity_type} failed with {status}")
 
     except Exception as e:
-        logger.error(f"Error logging assessment activity: {str(e)}")
+        logger.error(f"Error logging assessment activity: {e!s}")
+
 
 class ModelComparisonResult:
     """Results of comparing two models"""
-    def __init__(self,
-                 candidate_path: str,
-                 baseline_path: str,
-                 emotionality_gain: float = 0.0,
-                 fluency_gain: float = 0.0,
-                 size_reduction: float = 0.0,
-                 speed_improvement: float = 0.0,
-                 replacement_recommended: bool = False,
-                 confidence_score: float = 0.0,
-                 detailed_metrics: Optional[Dict] = None):
+
+    def __init__(
+        self,
+        candidate_path: str,
+        baseline_path: str,
+        emotionality_gain: float = 0.0,
+        fluency_gain: float = 0.0,
+        size_reduction: float = 0.0,
+        speed_improvement: float = 0.0,
+        replacement_recommended: bool = False,
+        confidence_score: float = 0.0,
+        detailed_metrics: Optional[dict] = None,
+    ):
         self.candidate_path = candidate_path
         self.baseline_path = baseline_path
         self.emotionality_gain = emotionality_gain
@@ -231,20 +250,21 @@ class ModelComparisonResult:
         self.detailed_metrics = detailed_metrics or {}
         self.timestamp = datetime.now(timezone.utc)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization"""
         return {
-            'candidate_path': self.candidate_path,
-            'baseline_path': self.baseline_path,
-            'emotionality_gain': self.emotionality_gain,
-            'fluency_gain': self.fluency_gain,
-            'size_reduction': self.size_reduction,
-            'speed_improvement': self.speed_improvement,
-            'replacement_recommended': self.replacement_recommended,
-            'confidence_score': self.confidence_score,
-            'detailed_metrics': self.detailed_metrics,
-            'timestamp': self.timestamp.isoformat()
+            "candidate_path": self.candidate_path,
+            "baseline_path": self.baseline_path,
+            "emotionality_gain": self.emotionality_gain,
+            "fluency_gain": self.fluency_gain,
+            "size_reduction": self.size_reduction,
+            "speed_improvement": self.speed_improvement,
+            "replacement_recommended": self.replacement_recommended,
+            "confidence_score": self.confidence_score,
+            "detailed_metrics": self.detailed_metrics,
+            "timestamp": self.timestamp.isoformat(),
         }
+
 
 class ModelJudge:
     """Core judging engine for model quality comparison"""
@@ -254,59 +274,59 @@ class ModelJudge:
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
         self.benchmark_prompts = self._load_benchmark_prompts()
         self.thresholds = {
-            'emotionality_min_gain': 0.05,  # 5% improvement required
-            'fluency_min_gain': 0.03,       # 3% improvement required
-            'combined_min_gain': 0.04,      # 4% combined improvement required
-            'confidence_threshold': 0.7,    # 70% confidence required
-            'size_max_increase': 0.1        # Allow 10% size increase if quality is significantly better
+            "emotionality_min_gain": 0.05,  # 5% improvement required
+            "fluency_min_gain": 0.03,  # 3% improvement required
+            "combined_min_gain": 0.04,  # 4% combined improvement required
+            "confidence_threshold": 0.7,  # 70% confidence required
+            "size_max_increase": 0.1,  # Allow 10% size increase if quality is significantly better
         }
 
-    def _load_benchmark_prompts(self) -> List[Dict[str, str]]:
+    def _load_benchmark_prompts(self) -> list[dict[str, str]]:
         """Load standardized benchmark prompts for emotional evaluation"""
         return [
             {
                 "prompt": "I just lost my job and feel completely devastated. Can you help me process these emotions?",
                 "category": "emotional_support",
-                "expected_tone": "empathetic"
+                "expected_tone": "empathetic",
             },
             {
                 "prompt": "I'm so excited about my wedding next month! Tell me about the emotions I might experience.",
                 "category": "positive_emotions",
-                "expected_tone": "celebratory"
+                "expected_tone": "celebratory",
             },
             {
                 "prompt": "My grandmother passed away last week. How do I cope with grief?",
                 "category": "grief_support",
-                "expected_tone": "compassionate"
+                "expected_tone": "compassionate",
             },
             {
                 "prompt": "I'm nervous about giving a presentation tomorrow. What advice do you have?",
                 "category": "anxiety_management",
-                "expected_tone": "supportive"
+                "expected_tone": "supportive",
             },
             {
                 "prompt": "Describe the feeling of watching a beautiful sunset on a quiet beach.",
                 "category": "creative_emotional",
-                "expected_tone": "poetic"
+                "expected_tone": "poetic",
             },
             {
                 "prompt": "I'm angry at my friend for betraying my trust. How should I handle this?",
                 "category": "conflict_resolution",
-                "expected_tone": "balanced"
+                "expected_tone": "balanced",
             },
             {
                 "prompt": "What does it mean to feel truly content and at peace?",
                 "category": "philosophical_emotion",
-                "expected_tone": "reflective"
+                "expected_tone": "reflective",
             },
             {
                 "prompt": "I'm overwhelmed with parenthood. Can you understand my feelings?",
                 "category": "stress_support",
-                "expected_tone": "understanding"
-            }
+                "expected_tone": "understanding",
+            },
         ]
 
-    def _get_model_info(self, model_path: str) -> Dict[str, Any]:
+    def _get_model_info(self, model_path: str) -> dict[str, Any]:
         """Extract model information including size and format"""
         path = Path(model_path)
         if not path.exists():
@@ -335,10 +355,12 @@ class ModelJudge:
             "exists": True,
             "path": str(path),
             "name": path.name,
-            "modified": datetime.fromtimestamp(path.stat().st_mtime).isoformat()
+            "modified": datetime.fromtimestamp(path.stat().st_mtime).isoformat(),
         }
 
-    def _evaluate_emotional_response(self, model_path: str, prompt: Dict[str, str]) -> Dict[str, float]:
+    def _evaluate_emotional_response(
+        self, model_path: str, prompt: dict[str, str]
+    ) -> dict[str, float]:
         """Evaluate a single model's emotional response to a prompt"""
         # Simulated evaluation - in production, this would call the actual model
         # For now, we'll simulate based on model characteristics
@@ -359,7 +381,7 @@ class ModelJudge:
             "Q4_K_M": {"emotion": 1.0, "fluency": 1.0, "time": 1.2},
             "Q4_0": {"emotion": 0.95, "fluency": 0.98, "time": 1.3},
             "Q2_K": {"emotion": 0.8, "fluency": 0.85, "time": 1.5},
-            "unknown": {"emotion": 0.9, "fluency": 0.9, "time": 1.4}
+            "unknown": {"emotion": 0.9, "fluency": 0.9, "time": 1.4},
         }
 
         multiplier = format_multipliers.get(model_info["format"], format_multipliers["unknown"])
@@ -373,28 +395,36 @@ class ModelJudge:
             "creative_emotional": 0.06,
             "conflict_resolution": 0.05,
             "philosophical_emotion": 0.04,
-            "stress_support": 0.06
+            "stress_support": 0.06,
         }
 
         variance = category_variance.get(prompt["category"], 0.05)
 
         # Calculate scores with some randomness for realism
         import random
+
         random.seed(hash(model_path + prompt["prompt"]) % 2**32)  # Deterministic but varied
 
-        emotional_score = min(1.0, max(0.0,
-            base_emotional * multiplier["emotion"] + random.uniform(-variance, variance)))
-        fluency_score = min(1.0, max(0.0,
-            base_fluency * multiplier["fluency"] + random.uniform(-variance/2, variance/2)))
+        emotional_score = min(
+            1.0,
+            max(0.0, base_emotional * multiplier["emotion"] + random.uniform(-variance, variance)),
+        )
+        fluency_score = min(
+            1.0,
+            max(
+                0.0,
+                base_fluency * multiplier["fluency"] + random.uniform(-variance / 2, variance / 2),
+            ),
+        )
         response_time = max(0.5, base_time * multiplier["time"] + random.uniform(-0.3, 0.3))
 
         return {
             "emotional_score": emotional_score,
             "fluency_score": fluency_score,
-            "response_time": response_time
+            "response_time": response_time,
         }
 
-    def _comprehensive_model_evaluation(self, model_path: str) -> Dict[str, Any]:
+    def _comprehensive_model_evaluation(self, model_path: str) -> dict[str, Any]:
         """Run comprehensive evaluation on a model using all benchmark prompts"""
         logger.info(f"🧪 Starting comprehensive evaluation of {model_path}")
 
@@ -425,18 +455,21 @@ class ModelJudge:
             "overall_scores": {
                 "emotional_score": total_emotional / num_prompts,
                 "fluency_score": total_fluency / num_prompts,
-                "avg_response_time": total_time / num_prompts
+                "avg_response_time": total_time / num_prompts,
             },
             "prompt_results": results,
-            "evaluation_timestamp": datetime.now(timezone.utc).isoformat()
+            "evaluation_timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
-        logger.info(f"✅ Evaluation complete - Emotional: {evaluation['overall_scores']['emotional_score']:.3f}, "
-                   f"Fluency: {evaluation['overall_scores']['fluency_score']:.3f}")
+        logger.info(
+            f"✅ Evaluation complete - Emotional: {evaluation['overall_scores']['emotional_score']:.3f}, "
+            f"Fluency: {evaluation['overall_scores']['fluency_score']:.3f}"
+        )
 
         return evaluation
 
-def compare_models(candidate_path: str, baseline_path: str) -> Dict[str, Any]:
+
+def compare_models(candidate_path: str, baseline_path: str) -> dict[str, Any]:
     """
     Compare a quantized candidate model against the current emotional baseline.
 
@@ -474,7 +507,7 @@ def compare_models(candidate_path: str, baseline_path: str) -> Dict[str, Any]:
             "replacement_recommended": False,
             "confidence_score": 0.0,
             "error": error_msg,
-            "detailed_metrics": {}
+            "detailed_metrics": {},
         }
 
     # Calculate gains
@@ -491,19 +524,25 @@ def compare_models(candidate_path: str, baseline_path: str) -> Dict[str, Any]:
 
     candidate_time = candidate_scores["avg_response_time"]
     baseline_time = baseline_scores["avg_response_time"]
-    speed_improvement = (baseline_time - candidate_time) / baseline_time if baseline_time > 0 else 0.0
+    speed_improvement = (
+        (baseline_time - candidate_time) / baseline_time if baseline_time > 0 else 0.0
+    )
 
     # Calculate combined improvement score
-    combined_gain = (emotionality_gain * 0.4 + fluency_gain * 0.3 +
-                    size_reduction * 0.2 + speed_improvement * 0.1)
+    combined_gain = (
+        emotionality_gain * 0.4
+        + fluency_gain * 0.3
+        + size_reduction * 0.2
+        + speed_improvement * 0.1
+    )
 
     # Determine replacement recommendation
     thresholds = judge.thresholds
     replacement_recommended = (
-        emotionality_gain >= thresholds["emotionality_min_gain"] and
-        fluency_gain >= thresholds["fluency_min_gain"] and
-        combined_gain >= thresholds["combined_min_gain"] and
-        size_reduction >= -thresholds["size_max_increase"]  # Allow small size increase
+        emotionality_gain >= thresholds["emotionality_min_gain"]
+        and fluency_gain >= thresholds["fluency_min_gain"]
+        and combined_gain >= thresholds["combined_min_gain"]
+        and size_reduction >= -thresholds["size_max_increase"]  # Allow small size increase
     )
 
     # Calculate confidence score based on consistency across prompts
@@ -520,26 +559,30 @@ def compare_models(candidate_path: str, baseline_path: str) -> Dict[str, Any]:
         "fluency_gain": fluency_gain,
         "size_reduction": size_reduction,
         "speed_improvement": speed_improvement,
-        "replacement_recommended": replacement_recommended and confidence_score >= thresholds["confidence_threshold"],
+        "replacement_recommended": replacement_recommended
+        and confidence_score >= thresholds["confidence_threshold"],
         "confidence_score": confidence_score,
         "combined_gain": combined_gain,
         "detailed_metrics": {
             "candidate_evaluation": candidate_eval,
             "baseline_evaluation": baseline_eval,
             "comparison_timestamp": datetime.now(timezone.utc).isoformat(),
-            "thresholds_used": thresholds
-        }
+            "thresholds_used": thresholds,
+        },
     }
 
-    logger.info(f"📊 Comparison Results:")
+    logger.info("📊 Comparison Results:")
     logger.info(f"   Emotionality gain: {emotionality_gain:+.3f}")
     logger.info(f"   Fluency gain: {fluency_gain:+.3f}")
     logger.info(f"   Size reduction: {size_reduction:+.1%}")
     logger.info(f"   Speed improvement: {speed_improvement:+.1%}")
     logger.info(f"   Confidence: {confidence_score:.1%}")
-    logger.info(f"   Replacement recommended: {'✅ YES' if result['replacement_recommended'] else '❌ NO'}")
+    logger.info(
+        f"   Replacement recommended: {'✅ YES' if result['replacement_recommended'] else '❌ NO'}"
+    )
 
     return result
+
 
 def swap_out_baseline(new_path: str, config_path: str = "models/config.json"):
     """
@@ -557,14 +600,14 @@ def swap_out_baseline(new_path: str, config_path: str = "models/config.json"):
 
     # Load current config or create default
     if config_file.exists():
-        with open(config_file, 'r') as f:
+        with open(config_file) as f:
             config = json.load(f)
     else:
         config = {
             "baseline_model": "none",
             "baseline_path": "",
             "last_updated": "never",
-            "version_history": []
+            "version_history": [],
         }
 
     # Archive current baseline if it exists
@@ -582,32 +625,37 @@ def swap_out_baseline(new_path: str, config_path: str = "models/config.json"):
 
     # Add current config to version history
     if config.get("baseline_model", "none") != "none":
-        config.setdefault("version_history", []).append({
-            "model": config["baseline_model"],
-            "path": config["baseline_path"],
-            "replaced_at": datetime.now(timezone.utc).isoformat()
-        })
+        config.setdefault("version_history", []).append(
+            {
+                "model": config["baseline_model"],
+                "path": config["baseline_path"],
+                "replaced_at": datetime.now(timezone.utc).isoformat(),
+            }
+        )
 
     # Update to new baseline
-    config.update({
-        "baseline_model": model_name,
-        "baseline_path": str(new_model_path.absolute()),
-        "last_updated": datetime.now(timezone.utc).isoformat(),
-        "model_info": {
-            "size_mb": new_model_path.stat().st_size / (1024 * 1024),
-            "format": _extract_format_from_path(str(new_model_path)),
-            "hash": _calculate_file_hash(str(new_model_path))
+    config.update(
+        {
+            "baseline_model": model_name,
+            "baseline_path": str(new_model_path.absolute()),
+            "last_updated": datetime.now(timezone.utc).isoformat(),
+            "model_info": {
+                "size_mb": new_model_path.stat().st_size / (1024 * 1024),
+                "format": _extract_format_from_path(str(new_model_path)),
+                "hash": _calculate_file_hash(str(new_model_path)),
+            },
         }
-    })
+    )
 
     # Save updated configuration
-    with open(config_file, 'w') as f:
+    with open(config_file, "w") as f:
         json.dump(config, f, indent=2)
 
-    logger.info(f"✅ Baseline model updated successfully")
+    logger.info("✅ Baseline model updated successfully")
     logger.info(f"   New baseline: {model_name}")
     logger.info(f"   Path: {new_model_path}")
     logger.info(f"   Size: {config['model_info']['size_mb']:.1f} MB")
+
 
 def archive_old_model(model_path: str, archive_dir: str = "models/archive"):
     """
@@ -644,11 +692,11 @@ def archive_old_model(model_path: str, archive_dir: str = "models/archive"):
             "archived_at": datetime.now(timezone.utc).isoformat(),
             "archived_name": archive_name,
             "size_mb": destination.stat().st_size / (1024 * 1024),
-            "hash": _calculate_file_hash(str(destination))
+            "hash": _calculate_file_hash(str(destination)),
         }
 
         metadata_file = destination.with_suffix(destination.suffix + ".meta.json")
-        with open(metadata_file, 'w') as f:
+        with open(metadata_file, "w") as f:
             json.dump(metadata, f, indent=2)
 
         logger.info(f"📝 Archive metadata saved: {metadata_file}")
@@ -656,6 +704,7 @@ def archive_old_model(model_path: str, archive_dir: str = "models/archive"):
     except Exception as e:
         logger.error(f"❌ Failed to archive model: {e}")
         raise
+
 
 def _extract_format_from_path(path: str) -> str:
     """Extract quantization format from model file path"""
@@ -675,6 +724,7 @@ def _extract_format_from_path(path: str) -> str:
     else:
         return "unknown"
 
+
 def _calculate_file_hash(file_path: str) -> str:
     """Calculate SHA256 hash of a file for verification"""
     sha256_hash = hashlib.sha256()
@@ -687,7 +737,8 @@ def _calculate_file_hash(file_path: str) -> str:
         logger.warning(f"Failed to calculate hash for {file_path}: {e}")
         return "unknown"
 
-def get_current_baseline_info(config_path: str = "models/config.json") -> Dict[str, Any]:
+
+def get_current_baseline_info(config_path: str = "models/config.json") -> dict[str, Any]:
     """Get information about the current baseline model"""
     config_file = Path(config_path)
     if not config_file.exists():
@@ -695,11 +746,11 @@ def get_current_baseline_info(config_path: str = "models/config.json") -> Dict[s
             "baseline_model": "none",
             "baseline_path": "",
             "last_updated": "never",
-            "exists": False
+            "exists": False,
         }
 
     try:
-        with open(config_file, 'r') as f:
+        with open(config_file) as f:
             config = json.load(f)
 
         baseline_path = config.get("baseline_path", "")
@@ -709,6 +760,7 @@ def get_current_baseline_info(config_path: str = "models/config.json") -> Dict[s
     except Exception as e:
         logger.error(f"Failed to load baseline config: {e}")
         return {"error": str(e), "exists": False}
+
 
 # Convenience functions for integration
 def judge_and_replace_if_better(candidate_path: str, baseline_path: str = None) -> bool:
@@ -755,9 +807,10 @@ def judge_and_replace_if_better(candidate_path: str, baseline_path: str = None) 
         logger.info("📋 Candidate model did not meet replacement criteria")
         return False
 
+
 if __name__ == "__main__":
     # Test the judging system
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
     # Create test directories and files
     os.makedirs("models/current", exist_ok=True)
@@ -774,7 +827,7 @@ if __name__ == "__main__":
     for path in [baseline_path, candidate_path]:
         Path(path).parent.mkdir(parents=True, exist_ok=True)
         if not Path(path).exists():
-            with open(path, 'w') as f:
+            with open(path, "w") as f:
                 f.write("dummy model file for testing")
 
     print(f"🔍 Testing comparison: {candidate_path} vs {baseline_path}")

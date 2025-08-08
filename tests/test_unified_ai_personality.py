@@ -3,18 +3,20 @@ Unit tests for the unified AI personality components.
 Tests goodbye manager, mood style profiles, and ritual hooks.
 """
 
-import pytest
 import asyncio
-from datetime import datetime
-from unittest.mock import Mock, patch
+import os
 
 # Import the components we're testing
 import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'backend'))
+from datetime import datetime
+from unittest.mock import Mock, patch
+
+import pytest
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "backend"))
 
 from goodbye_manager import GoodbyeManager, GoodbyeType
-from mood_style_profiles import MoodStyleProfile, get_style_profile, DEFAULT_PROFILES
+from mood_style_profiles import DEFAULT_PROFILES, MoodStyleProfile, get_style_profile
 from ritual_hooks import RitualEngine
 
 
@@ -26,8 +28,7 @@ class TestGoodbyeManager:
         self.mock_emotion_manager = Mock()
         self.mock_connection_tracker = Mock()
         self.goodbye_manager = GoodbyeManager(
-            self.mock_emotion_manager,
-            self.mock_connection_tracker
+            self.mock_emotion_manager, self.mock_connection_tracker
         )
 
     def test_determine_goodbye_type_low_bond(self):
@@ -99,7 +100,7 @@ class TestGoodbyeManager:
         self.mock_emotion_manager.get_current_mood.return_value = "calm"
         self.mock_connection_tracker.get_bond_depth.return_value = 0.7
 
-        with patch('builtins.print') as mock_print:
+        with patch("builtins.print") as mock_print:
             result = self.goodbye_manager.handle_shutdown(600)
 
             assert "message" in result
@@ -216,7 +217,7 @@ class TestRitualEngine:
         assert len(prompts) >= 3  # Should have multiple options
         for prompt in prompts:
             assert len(prompt) > 10  # Should be meaningful sentences
-            assert prompt.endswith('?')  # Should be questions
+            assert prompt.endswith("?")  # Should be questions
 
 
 class TestIntegration:

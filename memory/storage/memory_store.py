@@ -6,15 +6,17 @@ JSONL (for human readability) and SQLite (for fast querying) backends.
 """
 
 import asyncio
-import aiosqlite
 import json
 import logging
-from typing import Dict, Any, List, Optional, Tuple, Union
-from datetime import datetime, date, timedelta
-from pathlib import Path
 import os
+from datetime import date, datetime, timedelta
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+import aiosqlite
 
 logger = logging.getLogger(__name__)
+
 
 class MemoryStore:
     """
@@ -24,16 +26,16 @@ class MemoryStore:
     storage backends with automatic data synchronization.
     """
 
-    def __init__(self, storage_path: str = "memory_data", config: Optional[Dict[str, Any]] = None):
+    def __init__(self, storage_path: str = "memory_data", config: Optional[dict[str, Any]] = None):
         """Initialize the memory store."""
         self.storage_path = Path(storage_path)
         self.config = config or {}
 
         # Storage configuration
-        self.use_sqlite = self.config.get('use_sqlite', True)
-        self.use_jsonl = self.config.get('use_jsonl', True)
-        self.auto_backup = self.config.get('auto_backup', True)
-        self.max_jsonl_file_size = self.config.get('max_jsonl_file_size', 50 * 1024 * 1024)  # 50MB
+        self.use_sqlite = self.config.get("use_sqlite", True)
+        self.use_jsonl = self.config.get("use_jsonl", True)
+        self.auto_backup = self.config.get("auto_backup", True)
+        self.max_jsonl_file_size = self.config.get("max_jsonl_file_size", 50 * 1024 * 1024)  # 50MB
 
         # File paths
         self.sqlite_path = self.storage_path / "true_recall.db"
@@ -76,7 +78,8 @@ class MemoryStore:
         """Initialize SQLite database and create tables."""
         async with aiosqlite.connect(str(self.sqlite_path)) as db:
             # Create events table
-            await db.execute("""
+            await db.execute(
+                """
                 CREATE TABLE IF NOT EXISTS events (
                     id TEXT PRIMARY KEY,
                     timestamp TEXT NOT NULL,
@@ -91,7 +94,8 @@ class MemoryStore:
                     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
                     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
                 )
-            """)
+            """
+            )
 
             # Create indexes for performance
             await db.execute("CREATE INDEX IF NOT EXISTS idx_events_timestamp ON events(timestamp)")
@@ -101,33 +105,39 @@ class MemoryStore:
             await db.execute("CREATE INDEX IF NOT EXISTS idx_events_created ON events(created_at)")
 
             # Create daily summaries table
-            await db.execute("""
+            await db.execute(
+                """
                 CREATE TABLE IF NOT EXISTS daily_reflections (
                     date TEXT PRIMARY KEY,
                     reflection_data TEXT NOT NULL,  -- JSON object
                     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
                     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
                 )
-            """)
+            """
+            )
 
             # Create weekly summaries table
-            await db.execute("""
+            await db.execute(
+                """
                 CREATE TABLE IF NOT EXISTS weekly_reflections (
                     week_start TEXT PRIMARY KEY,
                     reflection_data TEXT NOT NULL,  -- JSON object
                     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
                     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
                 )
-            """)
+            """
+            )
 
             # Create metadata table for store configuration
-            await db.execute("""
+            await db.execute(
+                """
                 CREATE TABLE IF NOT EXISTS store_metadata (
                     key TEXT PRIMARY KEY,
                     value TEXT NOT NULL,
                     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
                 )
-            """)
+            """
+            )
 
             await db.commit()
             logger.info("🗄️ SQLite database initialized")
@@ -145,7 +155,7 @@ class MemoryStore:
 
         logger.info(f"📝 JSONL storage initialized: {self._current_jsonl_file}")
 
-    async def store_event(self, event_data: Dict[str, Any]) -> bool:
+    async def store_event(self, event_data: dict[str, Any]) -> bool:
         """
         Store a memory event in the configured backends.
 
@@ -173,28 +183,31 @@ class MemoryStore:
             logger.error(f"❌ Failed to store event: {e}")
             return False
 
-    async def _store_event_sqlite(self, event_data: Dict[str, Any]) -> bool:
+    async def _store_event_sqlite(self, event_data: dict[str, Any]) -> bool:
         """Store event in SQLite database."""
         try:
             async with aiosqlite.connect(str(self.sqlite_path)) as db:
-                await db.execute("""
+                await db.execute(
+                    """
                     INSERT OR REPLACE INTO events
                     (id, timestamp, actor, event_type, content, tone, emotion_tags,
                      salience, related_ids, metadata, updated_at)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    event_data['id'],
-                    event_data['timestamp'],
-                    event_data['actor'],
-                    event_data['event_type'],
-                    event_data['content'],
-                    event_data.get('tone', ''),
-                    json.dumps(event_data.get('emotion_tags', [])),
-                    event_data['salience'],
-                    json.dumps(event_data.get('related_ids', [])),
-                    json.dumps(event_data.get('metadata', {})),
-                    datetime.now().isoformat()
-                ))
+                """,
+                    (
+                        event_data["id"],
+                        event_data["timestamp"],
+                        event_data["actor"],
+                        event_data["event_type"],
+                        event_data["content"],
+                        event_data.get("tone", ""),
+                        json.dumps(event_data.get("emotion_tags", [])),
+                        event_data["salience"],
+                        json.dumps(event_data.get("related_ids", [])),
+                        json.dumps(event_data.get("metadata", {})),
+                        datetime.now().isoformat(),
+                    ),
+                )
                 await db.commit()
 
             return True
@@ -203,16 +216,16 @@ class MemoryStore:
             logger.error(f"❌ SQLite storage failed: {e}")
             return False
 
-    async def _store_event_jsonl(self, event_data: Dict[str, Any]) -> bool:
+    async def _store_event_jsonl(self, event_data: dict[str, Any]) -> bool:
         """Store event in JSONL file."""
         try:
             # Check if we need to rotate the file
             await self._check_jsonl_rotation()
 
             # Write event to JSONL file
-            with open(self._current_jsonl_file, 'a', encoding='utf-8') as f:
+            with open(self._current_jsonl_file, "a", encoding="utf-8") as f:
                 json.dump(event_data, f, ensure_ascii=False)
-                f.write('\n')
+                f.write("\n")
 
             # Update file size tracking
             self._jsonl_file_size += len(json.dumps(event_data, ensure_ascii=False)) + 1
@@ -231,24 +244,26 @@ class MemoryStore:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
             today = date.today()
-            self._current_jsonl_file = self.jsonl_path / f"events_{today.isoformat()}_{timestamp}.jsonl"
+            self._current_jsonl_file = (
+                self.jsonl_path / f"events_{today.isoformat()}_{timestamp}.jsonl"
+            )
             self._jsonl_file_size = 0
 
             logger.info(f"🔄 Rotated JSONL file: {old_file} -> {self._current_jsonl_file}")
 
     async def retrieve_events(
         self,
-        event_ids: Optional[List[str]] = None,
-        time_range: Optional[Tuple[datetime, datetime]] = None,
+        event_ids: Optional[list[str]] = None,
+        time_range: Optional[tuple[datetime, datetime]] = None,
         actor: Optional[str] = None,
         event_type: Optional[str] = None,
         min_salience: Optional[float] = None,
-        emotion_tags: Optional[List[str]] = None,
+        emotion_tags: Optional[list[str]] = None,
         limit: Optional[int] = None,
         offset: int = 0,
-        order_by: str = 'timestamp',
-        order_desc: bool = True
-    ) -> List[Dict[str, Any]]:
+        order_by: str = "timestamp",
+        order_desc: bool = True,
+    ) -> list[dict[str, Any]]:
         """
         Retrieve events from storage with flexible filtering.
 
@@ -270,13 +285,29 @@ class MemoryStore:
         try:
             if self.use_sqlite:
                 return await self._retrieve_events_sqlite(
-                    event_ids, time_range, actor, event_type, min_salience,
-                    emotion_tags, limit, offset, order_by, order_desc
+                    event_ids,
+                    time_range,
+                    actor,
+                    event_type,
+                    min_salience,
+                    emotion_tags,
+                    limit,
+                    offset,
+                    order_by,
+                    order_desc,
                 )
             elif self.use_jsonl:
                 return await self._retrieve_events_jsonl(
-                    event_ids, time_range, actor, event_type, min_salience,
-                    emotion_tags, limit, offset, order_by, order_desc
+                    event_ids,
+                    time_range,
+                    actor,
+                    event_type,
+                    min_salience,
+                    emotion_tags,
+                    limit,
+                    offset,
+                    order_by,
+                    order_desc,
                 )
             else:
                 logger.warning("⚠️ No storage backend configured for retrieval")
@@ -287,9 +318,18 @@ class MemoryStore:
             return []
 
     async def _retrieve_events_sqlite(
-        self, event_ids, time_range, actor, event_type, min_salience,
-        emotion_tags, limit, offset, order_by, order_desc
-    ) -> List[Dict[str, Any]]:
+        self,
+        event_ids,
+        time_range,
+        actor,
+        event_type,
+        min_salience,
+        emotion_tags,
+        limit,
+        offset,
+        order_by,
+        order_desc,
+    ) -> list[dict[str, Any]]:
         """Retrieve events from SQLite database."""
         try:
             query_parts = ["SELECT * FROM events WHERE 1=1"]
@@ -297,7 +337,7 @@ class MemoryStore:
 
             # Build query based on filters
             if event_ids:
-                placeholders = ','.join(['?' for _ in event_ids])
+                placeholders = ",".join(["?" for _ in event_ids])
                 query_parts.append(f"AND id IN ({placeholders})")
                 params.extend(event_ids)
 
@@ -348,9 +388,9 @@ class MemoryStore:
                         event_dict = dict(zip(columns, row))
 
                         # Parse JSON fields
-                        event_dict['emotion_tags'] = json.loads(event_dict['emotion_tags'] or '[]')
-                        event_dict['related_ids'] = json.loads(event_dict['related_ids'] or '[]')
-                        event_dict['metadata'] = json.loads(event_dict['metadata'] or '{}')
+                        event_dict["emotion_tags"] = json.loads(event_dict["emotion_tags"] or "[]")
+                        event_dict["related_ids"] = json.loads(event_dict["related_ids"] or "[]")
+                        event_dict["metadata"] = json.loads(event_dict["metadata"] or "{}")
 
                         events.append(event_dict)
 
@@ -361,16 +401,25 @@ class MemoryStore:
             return []
 
     async def _retrieve_events_jsonl(
-        self, event_ids, time_range, actor, event_type, min_salience,
-        emotion_tags, limit, offset, order_by, order_desc
-    ) -> List[Dict[str, Any]]:
+        self,
+        event_ids,
+        time_range,
+        actor,
+        event_type,
+        min_salience,
+        emotion_tags,
+        limit,
+        offset,
+        order_by,
+        order_desc,
+    ) -> list[dict[str, Any]]:
         """Retrieve events from JSONL files."""
         try:
             events = []
 
             # Read all JSONL files in the events directory
             for jsonl_file in self.jsonl_path.glob("events_*.jsonl"):
-                with open(jsonl_file, 'r', encoding='utf-8') as f:
+                with open(jsonl_file, encoding="utf-8") as f:
                     for line in f:
                         try:
                             event = json.loads(line.strip())
@@ -382,42 +431,42 @@ class MemoryStore:
             filtered_events = []
             for event in events:
                 # Event ID filter
-                if event_ids and event.get('id') not in event_ids:
+                if event_ids and event.get("id") not in event_ids:
                     continue
 
                 # Time range filter
                 if time_range:
-                    event_time = datetime.fromisoformat(event['timestamp'])
+                    event_time = datetime.fromisoformat(event["timestamp"])
                     if not (time_range[0] <= event_time <= time_range[1]):
                         continue
 
                 # Actor filter
-                if actor and event.get('actor') != actor:
+                if actor and event.get("actor") != actor:
                     continue
 
                 # Event type filter
-                if event_type and event.get('event_type') != event_type:
+                if event_type and event.get("event_type") != event_type:
                     continue
 
                 # Salience filter
-                if min_salience is not None and event.get('salience', 0) < min_salience:
+                if min_salience is not None and event.get("salience", 0) < min_salience:
                     continue
 
                 # Emotion tags filter
                 if emotion_tags:
-                    event_emotions = event.get('emotion_tags', [])
+                    event_emotions = event.get("emotion_tags", [])
                     if not any(emotion in event_emotions for emotion in emotion_tags):
                         continue
 
                 filtered_events.append(event)
 
             # Sort events
-            if order_by in ['timestamp', 'salience']:
+            if order_by in ["timestamp", "salience"]:
                 reverse = order_desc
-                if order_by == 'timestamp':
-                    filtered_events.sort(key=lambda e: e.get('timestamp', ''), reverse=reverse)
+                if order_by == "timestamp":
+                    filtered_events.sort(key=lambda e: e.get("timestamp", ""), reverse=reverse)
                 else:
-                    filtered_events.sort(key=lambda e: e.get('salience', 0), reverse=reverse)
+                    filtered_events.sort(key=lambda e: e.get("salience", 0), reverse=reverse)
 
             # Apply offset and limit
             start_idx = offset
@@ -429,7 +478,9 @@ class MemoryStore:
             logger.error(f"❌ JSONL retrieval failed: {e}")
             return []
 
-    async def store_reflection(self, reflection_type: str, date_key: str, reflection_data: Dict[str, Any]) -> bool:
+    async def store_reflection(
+        self, reflection_type: str, date_key: str, reflection_data: dict[str, Any]
+    ) -> bool:
         """
         Store a reflection summary (daily, weekly, etc.).
 
@@ -449,15 +500,18 @@ class MemoryStore:
             table_name = f"{reflection_type}_reflections"
 
             async with aiosqlite.connect(str(self.sqlite_path)) as db:
-                await db.execute(f"""
+                await db.execute(
+                    f"""
                     INSERT OR REPLACE INTO {table_name}
                     (date, reflection_data, updated_at)
                     VALUES (?, ?, ?)
-                """, (
-                    date_key,
-                    json.dumps(reflection_data, ensure_ascii=False),
-                    datetime.now().isoformat()
-                ))
+                """,
+                    (
+                        date_key,
+                        json.dumps(reflection_data, ensure_ascii=False),
+                        datetime.now().isoformat(),
+                    ),
+                )
                 await db.commit()
 
             logger.info(f"📔 Stored {reflection_type} reflection for {date_key}")
@@ -467,7 +521,9 @@ class MemoryStore:
             logger.error(f"❌ Failed to store {reflection_type} reflection: {e}")
             return False
 
-    async def retrieve_reflection(self, reflection_type: str, date_key: str) -> Optional[Dict[str, Any]]:
+    async def retrieve_reflection(
+        self, reflection_type: str, date_key: str
+    ) -> Optional[dict[str, Any]]:
         """
         Retrieve a reflection summary.
 
@@ -486,9 +542,12 @@ class MemoryStore:
             table_name = f"{reflection_type}_reflections"
 
             async with aiosqlite.connect(str(self.sqlite_path)) as db:
-                async with db.execute(f"""
+                async with db.execute(
+                    f"""
                     SELECT reflection_data FROM {table_name} WHERE date = ?
-                """, (date_key,)) as cursor:
+                """,
+                    (date_key,),
+                ) as cursor:
                     row = await cursor.fetchone()
 
                     if row:
@@ -500,19 +559,16 @@ class MemoryStore:
             logger.error(f"❌ Failed to retrieve {reflection_type} reflection: {e}")
             return None
 
-    async def get_storage_stats(self) -> Dict[str, Any]:
+    async def get_storage_stats(self) -> dict[str, Any]:
         """Get statistics about the storage system."""
         try:
             stats = {
-                'storage_path': str(self.storage_path),
-                'backends_enabled': {
-                    'sqlite': self.use_sqlite,
-                    'jsonl': self.use_jsonl
-                },
-                'total_events': 0,
-                'daily_reflections': 0,
-                'weekly_reflections': 0,
-                'storage_size_mb': 0
+                "storage_path": str(self.storage_path),
+                "backends_enabled": {"sqlite": self.use_sqlite, "jsonl": self.use_jsonl},
+                "total_events": 0,
+                "daily_reflections": 0,
+                "weekly_reflections": 0,
+                "storage_size_mb": 0,
             }
 
             if self.use_sqlite and self.sqlite_path.exists():
@@ -520,39 +576,38 @@ class MemoryStore:
                     # Count events
                     async with db.execute("SELECT COUNT(*) FROM events") as cursor:
                         row = await cursor.fetchone()
-                        stats['total_events'] = row[0] if row else 0
+                        stats["total_events"] = row[0] if row else 0
 
                     # Count daily reflections
                     async with db.execute("SELECT COUNT(*) FROM daily_reflections") as cursor:
                         row = await cursor.fetchone()
-                        stats['daily_reflections'] = row[0] if row else 0
+                        stats["daily_reflections"] = row[0] if row else 0
 
                     # Count weekly reflections
                     async with db.execute("SELECT COUNT(*) FROM weekly_reflections") as cursor:
                         row = await cursor.fetchone()
-                        stats['weekly_reflections'] = row[0] if row else 0
+                        stats["weekly_reflections"] = row[0] if row else 0
 
                 # SQLite file size
-                stats['sqlite_size_mb'] = self.sqlite_path.stat().st_size / (1024 * 1024)
+                stats["sqlite_size_mb"] = self.sqlite_path.stat().st_size / (1024 * 1024)
 
             if self.use_jsonl and self.jsonl_path.exists():
                 # Count JSONL files and size
                 jsonl_files = list(self.jsonl_path.glob("events_*.jsonl"))
                 jsonl_size = sum(f.stat().st_size for f in jsonl_files)
-                stats['jsonl_files'] = len(jsonl_files)
-                stats['jsonl_size_mb'] = jsonl_size / (1024 * 1024)
+                stats["jsonl_files"] = len(jsonl_files)
+                stats["jsonl_size_mb"] = jsonl_size / (1024 * 1024)
 
             # Total storage size
-            stats['storage_size_mb'] = sum([
-                stats.get('sqlite_size_mb', 0),
-                stats.get('jsonl_size_mb', 0)
-            ])
+            stats["storage_size_mb"] = sum(
+                [stats.get("sqlite_size_mb", 0), stats.get("jsonl_size_mb", 0)]
+            )
 
             return stats
 
         except Exception as e:
             logger.error(f"❌ Failed to get storage stats: {e}")
-            return {'error': str(e)}
+            return {"error": str(e)}
 
     async def backup_data(self, backup_name: Optional[str] = None) -> bool:
         """Create a backup of all memory data."""
@@ -570,6 +625,7 @@ class MemoryStore:
             # Backup SQLite database
             if self.use_sqlite and self.sqlite_path.exists():
                 import shutil
+
                 backup_db_path = backup_dir / "true_recall.db"
                 shutil.copy2(self.sqlite_path, backup_db_path)
                 logger.info(f"📦 Backed up SQLite database to {backup_db_path}")
@@ -577,6 +633,7 @@ class MemoryStore:
             # Backup JSONL files
             if self.use_jsonl and self.jsonl_path.exists():
                 import shutil
+
                 backup_events_path = backup_dir / "events"
                 shutil.copytree(self.jsonl_path, backup_events_path, dirs_exist_ok=True)
                 logger.info(f"📦 Backed up JSONL files to {backup_events_path}")
@@ -596,14 +653,20 @@ class MemoryStore:
             if self.use_sqlite:
                 async with aiosqlite.connect(str(self.sqlite_path)) as db:
                     # Delete old events
-                    await db.execute("""
+                    await db.execute(
+                        """
                         DELETE FROM events WHERE timestamp < ?
-                    """, (cutoff_date.isoformat(),))
+                    """,
+                        (cutoff_date.isoformat(),),
+                    )
 
                     # Delete old reflections
-                    await db.execute("""
+                    await db.execute(
+                        """
                         DELETE FROM daily_reflections WHERE date < ?
-                    """, (cutoff_date.date().isoformat(),))
+                    """,
+                        (cutoff_date.date().isoformat(),),
+                    )
 
                     await db.commit()
 
@@ -637,6 +700,7 @@ class MemoryStore:
 
         except Exception as e:
             logger.error(f"❌ Failed to close memory store: {e}")
+
 
 # Convenience functions for quick access
 async def create_memory_store(storage_path: str = "memory_data", **config) -> MemoryStore:

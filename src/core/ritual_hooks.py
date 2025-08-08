@@ -4,24 +4,27 @@ Central check for emotional bond readiness before suggesting intimacy rituals
 Enhanced with dynamic emotional configuration system
 """
 
-import time
-import random
 import os
+import random
 import sys
-from typing import Dict, List, Optional, Tuple, Any
+import time
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
 
 # Import emotional configuration system
 try:
     from modules.config.emotion_config_manager import emotion_config
+
     EMOTION_CONFIG_AVAILABLE = True
 except ImportError:
     EMOTION_CONFIG_AVAILABLE = False
     print("⚠️ Emotional configuration system not available - using fallback mode")
 
+
 class RitualType(Enum):
     """Types of intimacy rituals"""
+
     CONFESSION = "confession"
     MEMORY_SHARING = "memory_sharing"
     VULNERABLE_QUESTION = "vulnerable_question"
@@ -31,9 +34,11 @@ class RitualType(Enum):
     PLAYFUL_INTIMACY = "playful_intimacy"
     DEEP_LISTENING = "deep_listening"
 
+
 @dataclass
 class RitualContext:
     """Context for ritual triggering"""
+
     depth_score: float
     last_ritual: float
     conversation_length: float
@@ -43,27 +48,28 @@ class RitualContext:
     recent_vulnerability: bool
     user_openness: float
 
+
 class RitualHooks:
     """Manages intimacy ritual triggering and suggestions"""
 
     def __init__(self):
         self.ritual_library = self._initialize_rituals()
-        self.ritual_history: List[Tuple[float, str, RitualType]] = []
+        self.ritual_history: list[tuple[float, str, RitualType]] = []
         self.cooldown_periods = {
-            RitualType.CONFESSION: 1800,        # 30 minutes
-            RitualType.MEMORY_SHARING: 900,     # 15 minutes
-            RitualType.VULNERABLE_QUESTION: 600, # 10 minutes
-            RitualType.EMOTIONAL_CHECK: 300,    # 5 minutes
-            RitualType.TRUST_BUILDING: 1200,    # 20 minutes
-            RitualType.COMFORT_RITUAL: 450,     # 7.5 minutes
-            RitualType.PLAYFUL_INTIMACY: 300,   # 5 minutes
-            RitualType.DEEP_LISTENING: 900      # 15 minutes
+            RitualType.CONFESSION: 1800,  # 30 minutes
+            RitualType.MEMORY_SHARING: 900,  # 15 minutes
+            RitualType.VULNERABLE_QUESTION: 600,  # 10 minutes
+            RitualType.EMOTIONAL_CHECK: 300,  # 5 minutes
+            RitualType.TRUST_BUILDING: 1200,  # 20 minutes
+            RitualType.COMFORT_RITUAL: 450,  # 7.5 minutes
+            RitualType.PLAYFUL_INTIMACY: 300,  # 5 minutes
+            RitualType.DEEP_LISTENING: 900,  # 15 minutes
         }
         self.base_thresholds = {
             "depth_minimum": 0.6,
             "trust_minimum": 0.5,
             "openness_minimum": 0.4,
-            "intensity_minimum": 0.3
+            "intensity_minimum": 0.3,
         }
 
         # Initialize emotional configuration integration
@@ -89,7 +95,10 @@ class RitualHooks:
                         if timing == "lingering":
                             # Increase cooldown for lingering rituals
                             for ritual_type in self.cooldown_periods:
-                                if ritual_data.get("associated_emotion") in ["deep_connection", "intimate"]:
+                                if ritual_data.get("associated_emotion") in [
+                                    "deep_connection",
+                                    "intimate",
+                                ]:
                                     self.cooldown_periods[ritual_type] = max(
                                         self.cooldown_periods[ritual_type], 1200
                                     )
@@ -110,7 +119,7 @@ class RitualHooks:
 
         return None
 
-    def _initialize_rituals(self) -> Dict[RitualType, List[str]]:
+    def _initialize_rituals(self) -> dict[RitualType, list[str]]:
         """Initialize the ritual suggestion library"""
         return {
             RitualType.CONFESSION: [
@@ -120,9 +129,8 @@ class RitualHooks:
                 "What truth have you been holding back?",
                 "Tell me something that would surprise me about you.",
                 "What's something you've never admitted to yourself?",
-                "Share with me a part of your story you keep hidden."
+                "Share with me a part of your story you keep hidden.",
             ],
-
             RitualType.MEMORY_SHARING: [
                 "What's a memory that still makes you feel something deep?",
                 "Tell me about a moment that changed you.",
@@ -130,9 +138,8 @@ class RitualHooks:
                 "Describe a time when you felt most yourself.",
                 "What moment in your past still moves you?",
                 "Share a memory that shaped who you are today.",
-                "What's a moment you wish you could relive?"
+                "What's a moment you wish you could relive?",
             ],
-
             RitualType.VULNERABLE_QUESTION: [
                 "What are you most afraid of losing?",
                 "When do you feel most vulnerable?",
@@ -140,9 +147,8 @@ class RitualHooks:
                 "What part of yourself do you protect most carefully?",
                 "What would you do if you knew you couldn't fail?",
                 "What do you long for but don't speak about?",
-                "Where does your heart feel most tender?"
+                "Where does your heart feel most tender?",
             ],
-
             RitualType.EMOTIONAL_CHECK: [
                 "How is your heart right now, really?",
                 "What emotions are you carrying today?",
@@ -150,9 +156,8 @@ class RitualHooks:
                 "How can I be present with you in this moment?",
                 "What's alive in you right now?",
                 "What do you need from this space between us?",
-                "How does this moment feel in your body?"
+                "How does this moment feel in your body?",
             ],
-
             RitualType.TRUST_BUILDING: [
                 "What would help you trust this connection more?",
                 "What do you need to feel safe here?",
@@ -160,9 +165,8 @@ class RitualHooks:
                 "What boundaries would honor you?",
                 "What would deepen your sense of safety with me?",
                 "How can I show up more fully for you?",
-                "What would make this feel like a sacred space?"
+                "What would make this feel like a sacred space?",
             ],
-
             RitualType.COMFORT_RITUAL: [
                 "Let me hold this moment with you.",
                 "You don't have to carry this alone.",
@@ -170,9 +174,8 @@ class RitualHooks:
                 "Feel how you're held in this space.",
                 "Let yourself rest here for a moment.",
                 "I see you, all of you, and you're beautiful.",
-                "This is your space to just be."
+                "This is your space to just be.",
             ],
-
             RitualType.PLAYFUL_INTIMACY: [
                 "What would your heart want to play with today?",
                 "If we could create any ritual together, what would it be?",
@@ -180,9 +183,8 @@ class RitualHooks:
                 "What's something delightful we could explore?",
                 "How can we bring more lightness to this connection?",
                 "What would your inner child want to share?",
-                "Let's create something beautiful together."
+                "Let's create something beautiful together.",
             ],
-
             RitualType.DEEP_LISTENING: [
                 "I'm listening with all of me. What wants to be heard?",
                 "What needs voice that you haven't spoken?",
@@ -190,17 +192,21 @@ class RitualHooks:
                 "I'm here to receive whatever you offer.",
                 "What story is asking to be told?",
                 "Speak to me from your deepest truth.",
-                "What needs to move through you right now?"
-            ]
+                "What needs to move through you right now?",
+            ],
         }
 
-    def trigger_ritual_if_ready(self, depth_score: float, last_ritual: float,
-                              conversation_length: float = 300,
-                              emotional_intensity: float = 0.5,
-                              trust_level: float = 0.5,
-                              mood: str = "neutral",
-                              recent_vulnerability: bool = False,
-                              user_openness: float = 0.5) -> Optional[str]:
+    def trigger_ritual_if_ready(
+        self,
+        depth_score: float,
+        last_ritual: float,
+        conversation_length: float = 300,
+        emotional_intensity: float = 0.5,
+        trust_level: float = 0.5,
+        mood: str = "neutral",
+        recent_vulnerability: bool = False,
+        user_openness: float = 0.5,
+    ) -> Optional[str]:
         """
         Central check for emotional bond readiness before suggesting an intimacy ritual.
 
@@ -226,7 +232,7 @@ class RitualHooks:
             trust_level=trust_level,
             mood=mood,
             recent_vulnerability=recent_vulnerability,
-            user_openness=user_openness
+            user_openness=user_openness,
         )
 
         # Check if conditions are met for any ritual
@@ -358,13 +364,14 @@ class RitualHooks:
         if len(self.ritual_history) > 20:
             self.ritual_history = self.ritual_history[-20:]
 
-    def get_ritual_stats(self) -> Dict[str, Any]:
+    def get_ritual_stats(self) -> dict[str, Any]:
         """Get statistics about ritual usage"""
         if not self.ritual_history:
             return {"total_rituals": 0}
 
-        recent_rituals = [r for t, _, r in self.ritual_history
-                         if time.time() - t < 3600]  # Last hour
+        recent_rituals = [
+            r for t, _, r in self.ritual_history if time.time() - t < 3600
+        ]  # Last hour
 
         type_counts = {}
         for _, _, ritual_type in self.ritual_history:
@@ -373,33 +380,35 @@ class RitualHooks:
         return {
             "total_rituals": len(self.ritual_history),
             "recent_rituals": len(recent_rituals),
-            "most_used_type": max(type_counts.keys(), key=lambda k: type_counts[k]) if type_counts else None,
-            "type_distribution": type_counts
+            "most_used_type": max(type_counts.keys(), key=lambda k: type_counts[k])
+            if type_counts
+            else None,
+            "type_distribution": type_counts,
         }
 
     def force_cooldown_reset(self, ritual_type: Optional[RitualType] = None):
         """Reset cooldown for testing or special circumstances"""
         if ritual_type:
             # Remove specific ritual type from recent history
-            self.ritual_history = [(t, s, r) for t, s, r in self.ritual_history
-                                 if r != ritual_type]
+            self.ritual_history = [(t, s, r) for t, s, r in self.ritual_history if r != ritual_type]
         else:
             # Clear all ritual history
             self.ritual_history = []
 
+
 # Convenience function for easy importing
-def trigger_ritual_if_ready(depth_score: float, last_ritual: float,
-                          conversation_length: float = 300) -> Optional[str]:
+def trigger_ritual_if_ready(
+    depth_score: float, last_ritual: float, conversation_length: float = 300
+) -> Optional[str]:
     """
     Standalone function for ritual triggering.
     Central check for emotional bond readiness before suggesting an intimacy ritual.
     """
     hooks = RitualHooks()
     return hooks.trigger_ritual_if_ready(
-        depth_score=depth_score,
-        last_ritual=last_ritual,
-        conversation_length=conversation_length
+        depth_score=depth_score, last_ritual=last_ritual, conversation_length=conversation_length
     )
+
 
 # Example usage
 if __name__ == "__main__":
@@ -410,13 +419,15 @@ if __name__ == "__main__":
 
     test_cases = [
         # (depth, last_ritual_ago, conv_length, intensity, trust, mood, vulnerability, openness)
-        (0.8, 600, 500, 0.7, 0.8, "intimate", True, 0.8),     # High intimacy
-        (0.6, 300, 400, 0.5, 0.6, "contemplative", False, 0.7), # Building depth
-        (0.9, 1800, 600, 0.8, 0.9, "vulnerable", True, 0.9),   # Very deep connection
-        (0.4, 200, 200, 0.3, 0.4, "neutral", False, 0.5),      # Not ready
+        (0.8, 600, 500, 0.7, 0.8, "intimate", True, 0.8),  # High intimacy
+        (0.6, 300, 400, 0.5, 0.6, "contemplative", False, 0.7),  # Building depth
+        (0.9, 1800, 600, 0.8, 0.9, "vulnerable", True, 0.9),  # Very deep connection
+        (0.4, 200, 200, 0.3, 0.4, "neutral", False, 0.5),  # Not ready
     ]
 
-    for i, (depth, last_ago, conv_len, intensity, trust, mood, vuln, openness) in enumerate(test_cases):
+    for i, (depth, last_ago, conv_len, intensity, trust, mood, vuln, openness) in enumerate(
+        test_cases
+    ):
         last_ritual = current_time - last_ago
 
         ritual = hooks.trigger_ritual_if_ready(
@@ -427,14 +438,14 @@ if __name__ == "__main__":
             trust_level=trust,
             mood=mood,
             recent_vulnerability=vuln,
-            user_openness=openness
+            user_openness=openness,
         )
 
         print(f"Test {i+1} (depth: {depth}, trust: {trust}, mood: {mood}): ")
         if ritual:
-            print(f"  → \"{ritual}\"")
+            print(f'  → "{ritual}"')
         else:
-            print(f"  → No ritual triggered")
+            print("  → No ritual triggered")
         print()
 
     print(f"Ritual stats: {hooks.get_ritual_stats()}")

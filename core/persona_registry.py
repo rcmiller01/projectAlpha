@@ -1,16 +1,19 @@
 import asyncio
 import logging
-from typing import Dict, Any
-from modules.database.database_interface import create_database_interface, DatabaseInterface
+from typing import Any, Dict
+
+from modules.database.database_interface import DatabaseInterface, create_database_interface
 
 logger = logging.getLogger(__name__)
 
-def load_personas() -> Dict[str, Any]:
+
+def load_personas() -> dict[str, Any]:
     """Load persona definitions from the unified database interface."""
     loop = asyncio.get_event_loop()
     return loop.run_until_complete(_load_personas_async())
 
-async def _load_personas_async() -> Dict[str, Any]:
+
+async def _load_personas_async() -> dict[str, Any]:
     """Async implementation of persona loading"""
     try:
         # Create database interface
@@ -28,8 +31,8 @@ async def _load_personas_async() -> Dict[str, Any]:
                 "description": "Mia is the creative and emotional persona, focused on artistic expression and deep emotional connection.",
                 "preferences": {
                     "communication_style": "warm_and_expressive",
-                    "interaction_focus": "emotional_and_creative"
-                }
+                    "interaction_focus": "emotional_and_creative",
+                },
             },
             "solene": {
                 "_id": "solene_default",
@@ -39,9 +42,9 @@ async def _load_personas_async() -> Dict[str, Any]:
                 "description": "Solene is the analytical and supportive persona, focused on structured thinking and practical guidance.",
                 "preferences": {
                     "communication_style": "clear_and_structured",
-                    "interaction_focus": "problem_solving_and_support"
-                }
-            }
+                    "interaction_focus": "problem_solving_and_support",
+                },
+            },
         }
 
         logger.info(f"Loaded {len(personas)} personas from registry")
@@ -55,6 +58,6 @@ async def _load_personas_async() -> Dict[str, Any]:
                 "_id": "default_persona",
                 "name": "default",
                 "personality": "balanced, helpful, adaptive",
-                "traits": ["balanced", "helpful", "adaptive"]
+                "traits": ["balanced", "helpful", "adaptive"],
             }
         }

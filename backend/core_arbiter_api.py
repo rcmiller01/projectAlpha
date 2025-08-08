@@ -6,31 +6,37 @@ Flask API endpoints for integrating CoreArbiter with the existing system.
 Enhanced with RBAC, token masking, and comprehensive audit logging.
 """
 
-from flask import Flask, request, jsonify, g
-from flask_cors import CORS
 import asyncio
+import hashlib
 import json
 import logging
-import sys
-from datetime import datetime
-from pathlib import Path
-import traceback
-import hashlib
 import os
+import sys
+import traceback
+from datetime import datetime
 from functools import wraps
-from typing import Dict, Any, Optional
+from pathlib import Path
+from typing import Any, Dict, Optional
+
+from flask import Flask, g, jsonify, request
+from flask_cors import CORS
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
+from backend.common.retry import NetworkError, ServiceUnavailableError, retry_arbiter_call
+
 # Import security utilities
 from backend.common.security import (
-    require_scope, validate_json_schema, audit_action,
-    mask_token, extract_token, get_token_type, create_request_context
+    audit_action,
+    create_request_context,
+    extract_token,
+    get_token_type,
+    mask_token,
+    require_scope,
+    validate_json_schema,
 )
-from backend.common.retry import retry_arbiter_call, NetworkError, ServiceUnavailableError
-
 from core.core_arbiter import CoreArbiter, WeightingStrategy
 
 # Setup logging

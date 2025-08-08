@@ -8,9 +8,11 @@ import json
 
 try:
     import aiohttp
+
     AIOHTTP_AVAILABLE = True
 except ImportError:
     AIOHTTP_AVAILABLE = False
+
 
 async def test_chat_with_advanced_features():
     print("Testing chat with advanced features...")
@@ -25,16 +27,16 @@ async def test_chat_with_advanced_features():
             chat_data = {
                 "message": "I need help organizing my daily tasks. What's your advice?",
                 "session_id": "test_qa_session",
-                "persona": "coach"
+                "persona": "coach",
             }
 
             async with session.post("http://localhost:8000/api/chat", json=chat_data) as response:
                 if response.status == 200:
                     data = await response.json()
 
-                    response_text = data.get('response', '')
-                    handler = data.get('handler', 'unknown')
-                    persona_used = data.get('persona_used', 'unknown')
+                    response_text = data.get("response", "")
+                    handler = data.get("handler", "unknown")
+                    persona_used = data.get("persona_used", "unknown")
 
                     print("SUCCESS: Chat with persona")
                     print(f"  Handler: {handler}")
@@ -50,6 +52,7 @@ async def test_chat_with_advanced_features():
     except Exception as e:
         print(f"ERROR: {e}")
         return False
+
 
 if __name__ == "__main__":
     result = asyncio.run(test_chat_with_advanced_features())

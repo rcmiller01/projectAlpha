@@ -4,12 +4,13 @@ Emotion Quantization Autopilot - Setup and Installation Script
 Prepares the system for autonomous quantization execution
 """
 
-import os
-import sys
 import json
+import os
 import subprocess
+import sys
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
+
 
 def check_python_version() -> bool:
     """Check if Python version is 3.10+"""
@@ -21,7 +22,8 @@ def check_python_version() -> bool:
         print(f"❌ Python {version.major}.{version.minor}.{version.micro} - Requires Python 3.10+")
         return False
 
-def check_dependencies() -> Dict[str, bool]:
+
+def check_dependencies() -> dict[str, bool]:
     """Check if required Python packages are installed"""
     required_packages = [
         "psutil",
@@ -46,7 +48,16 @@ def check_dependencies() -> Dict[str, bool]:
     print("🔍 Checking required dependencies...")
     for package in required_packages:
         try:
-            if package in ["sqlite3", "pathlib", "logging", "threading", "subprocess", "json", "uuid", "datetime"]:
+            if package in [
+                "sqlite3",
+                "pathlib",
+                "logging",
+                "threading",
+                "subprocess",
+                "json",
+                "uuid",
+                "datetime",
+            ]:
                 # These are built-in modules
                 __import__(package)
                 results[package] = True
@@ -71,7 +82,8 @@ def check_dependencies() -> Dict[str, bool]:
 
     return results
 
-def install_missing_packages(missing_packages: List[str]) -> bool:
+
+def install_missing_packages(missing_packages: list[str]) -> bool:
     """Install missing Python packages"""
     if not missing_packages:
         return True
@@ -80,12 +92,22 @@ def install_missing_packages(missing_packages: List[str]) -> bool:
 
     try:
         for package in missing_packages:
-            if package in ["sqlite3", "pathlib", "logging", "threading", "subprocess", "json", "uuid", "datetime"]:
+            if package in [
+                "sqlite3",
+                "pathlib",
+                "logging",
+                "threading",
+                "subprocess",
+                "json",
+                "uuid",
+                "datetime",
+            ]:
                 continue  # Skip built-in modules
 
             print(f"   Installing {package}...")
-            subprocess.run([sys.executable, "-m", "pip", "install", package],
-                         check=True, capture_output=True)
+            subprocess.run(
+                [sys.executable, "-m", "pip", "install", package], check=True, capture_output=True
+            )
             print(f"   ✅ {package} installed")
 
         return True
@@ -93,6 +115,7 @@ def install_missing_packages(missing_packages: List[str]) -> bool:
     except subprocess.CalledProcessError as e:
         print(f"   ❌ Failed to install packages: {e}")
         return False
+
 
 def create_directory_structure() -> bool:
     """Create necessary directory structure"""
@@ -116,6 +139,7 @@ def create_directory_structure() -> bool:
         print(f"   ❌ Failed to create directories: {e}")
         return False
 
+
 def validate_config_file() -> bool:
     """Validate autopilot configuration file"""
     config_path = Path("emotion_quant_autopilot/autopilot_config.json")
@@ -127,7 +151,7 @@ def validate_config_file() -> bool:
         return False
 
     try:
-        with open(config_path, 'r') as f:
+        with open(config_path) as f:
             config = json.load(f)
 
         # Check required keys
@@ -138,7 +162,7 @@ def validate_config_file() -> bool:
             "preferred_base_models",
             "quantization_methods",
             "output_paths",
-            "safety_limits"
+            "safety_limits",
         ]
 
         missing_keys = []
@@ -171,7 +195,8 @@ def validate_config_file() -> bool:
         print(f"   ❌ Error validating configuration: {e}")
         return False
 
-def check_existing_components() -> Dict[str, bool]:
+
+def check_existing_components() -> dict[str, bool]:
     """Check if existing quantization components are available"""
     components = {
         "emotional_dataset_builder.py": Path("emotional_dataset_builder.py"),
@@ -192,6 +217,7 @@ def check_existing_components() -> Dict[str, bool]:
             print(f"   ❌ {name} - NOT FOUND")
 
     return results
+
 
 def create_emergency_stop_instructions() -> None:
     """Create emergency stop file and instructions"""
@@ -237,7 +263,7 @@ TROUBLESHOOTING:
 """
 
     try:
-        with open(instructions_file, 'w') as f:
+        with open(instructions_file, "w") as f:
             f.write(instructions)
 
         print(f"   ✅ Emergency stop instructions created: {instructions_file}")
@@ -246,9 +272,10 @@ TROUBLESHOOTING:
     except Exception as e:
         print(f"   ❌ Failed to create emergency stop instructions: {e}")
 
+
 def create_systemd_service_template() -> None:
     """Create systemd service template for Linux systems"""
-    if os.name != 'posix':
+    if os.name != "posix":
         return  # Skip on non-Unix systems
 
     service_template = """[Unit]
@@ -282,7 +309,7 @@ WantedBy=multi-user.target
     service_file = Path("emotion_quant_autopilot/quantization-autopilot.service")
 
     try:
-        with open(service_file, 'w') as f:
+        with open(service_file, "w") as f:
             f.write(service_template)
 
         print(f"\n🔧 Systemd service template created: {service_file}")
@@ -291,6 +318,7 @@ WantedBy=multi-user.target
     except Exception as e:
         print(f"   ❌ Failed to create systemd service template: {e}")
 
+
 def run_basic_tests() -> bool:
     """Run basic functionality tests"""
     print("\n🧪 Running basic tests...")
@@ -298,7 +326,7 @@ def run_basic_tests() -> bool:
     try:
         # Test idle monitor import
         sys.path.append("emotion_quant_autopilot")
-        from idle_monitor import IdleMonitor, IdleConfig
+        from idle_monitor import IdleConfig, IdleMonitor
 
         # Create test idle monitor
         config = IdleConfig(min_idle_minutes=1, check_interval_seconds=1)
@@ -310,7 +338,7 @@ def run_basic_tests() -> bool:
         print("   ✅ Idle monitor test passed")
 
         # Test autopilot import
-        from quant_autopilot import QuantizationAutopilot, AutopilotDatabase
+        from quant_autopilot import AutopilotDatabase, QuantizationAutopilot
 
         # Test database initialization
         db = AutopilotDatabase("emotion_quant_autopilot/test_autopilot.db")
@@ -328,6 +356,7 @@ def run_basic_tests() -> bool:
         print(f"   ❌ Basic tests failed: {e}")
         return False
 
+
 def main():
     """Main setup function"""
     print("🚀 Emotion Quantization Autopilot Setup")
@@ -340,11 +369,12 @@ def main():
 
     # Step 2: Check dependencies
     dependencies = check_dependencies()
-    missing_required = [pkg for pkg, available in dependencies.items()
-                       if not available and pkg in ["psutil"]]
+    missing_required = [
+        pkg for pkg, available in dependencies.items() if not available and pkg in ["psutil"]
+    ]
 
     if missing_required:
-        print(f"\n📦 Installing missing required packages...")
+        print("\n📦 Installing missing required packages...")
         if not install_missing_packages(missing_required):
             print("\n❌ Setup failed: Could not install required packages")
             return 1
@@ -388,6 +418,7 @@ def main():
     print("\n🚨 Emergency stop: touch emotion_quant_autopilot/EMERGENCY_STOP")
 
     return 0
+
 
 if __name__ == "__main__":
     exit(main())

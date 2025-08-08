@@ -9,11 +9,14 @@ Generalized for production use — no name-specific references.
 """
 
 from datetime import datetime
-from typing import Dict, List, Any, Optional
-from utils.emotion_tools import calculate_resonance_score
-from symbol_memory_engine import SymbolMemoryEngine
+from typing import Any, Dict, List, Optional
+
 from drift_journal_api import log_symbolic_shift
+from symbol_memory_engine import SymbolMemoryEngine
+
 from core.core_arbiter import register_evolution_vector
+from utils.emotion_tools import calculate_resonance_score
+
 
 class SymbolicEvolution:
     def __init__(self, memory_engine: SymbolMemoryEngine):
@@ -23,7 +26,7 @@ class SymbolicEvolution:
             "tone": "gentle",
             "tempo": "measured",
             "emphasis": "internal",
-            "symbol_bias": ["mirror", "thread", "pulse"]
+            "symbol_bias": ["mirror", "thread", "pulse"],
         }
         # Mirror validation settings
         self.mirror_validation_enabled = True
@@ -46,7 +49,7 @@ class SymbolicEvolution:
             "tone": self._evolve_tone(),
             "symbol_bias": self.memory_engine.get_most_recent_symbols(limit=3),
             "tempo": self.symbol_style["tempo"],
-            "emphasis": self.symbol_style["emphasis"]
+            "emphasis": self.symbol_style["emphasis"],
         }
 
         # Validate through Mirror if enabled
@@ -66,15 +69,19 @@ class SymbolicEvolution:
                 return self.symbol_style
             else:
                 # Store for manual review if validation failed
-                self.pending_validations.append({
-                    "proposed_style": proposed_style,
-                    "validation_result": validation_result,
-                    "timestamp": datetime.now().isoformat(),
-                    "status": "pending_review"
-                })
+                self.pending_validations.append(
+                    {
+                        "proposed_style": proposed_style,
+                        "validation_result": validation_result,
+                        "timestamp": datetime.now().isoformat(),
+                        "status": "pending_review",
+                    }
+                )
 
-                return {"error": "Symbolic evolution rejected by Mirror validation",
-                       "details": validation_result}
+                return {
+                    "error": "Symbolic evolution rejected by Mirror validation",
+                    "details": validation_result,
+                }
         else:
             # Apply without validation
             self.symbol_style.update(proposed_style)
@@ -85,7 +92,7 @@ class SymbolicEvolution:
 
             return self.symbol_style
 
-    def validate_symbolic_evolution(self, proposed_style: Dict[str, Any]) -> Dict[str, Any]:
+    def validate_symbolic_evolution(self, proposed_style: dict[str, Any]) -> dict[str, Any]:
         """
         Validate evolved symbols through Mirror or equivalent validator.
 
@@ -102,7 +109,7 @@ class SymbolicEvolution:
                 "timestamp": datetime.now().isoformat(),
                 "validation_score": 0.0,
                 "issues": [],
-                "recommendations": []
+                "recommendations": [],
             }
 
             # Validate tone evolution
@@ -134,7 +141,9 @@ class SymbolicEvolution:
             if validation_result["validation_score"] >= self.validation_threshold:
                 validation_result["approved"] = True
             else:
-                validation_result["recommendations"].append("Consider adjusting symbolic elements for better coherence")
+                validation_result["recommendations"].append(
+                    "Consider adjusting symbolic elements for better coherence"
+                )
 
             return validation_result
 
@@ -143,17 +152,17 @@ class SymbolicEvolution:
                 "approved": False,
                 "validator": "mirror",
                 "error": str(e),
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
-    def get_validation_status(self) -> Dict[str, Any]:
+    def get_validation_status(self) -> dict[str, Any]:
         """Get current validation status and pending reviews."""
         return {
             "mirror_validation_enabled": self.mirror_validation_enabled,
             "validation_threshold": self.validation_threshold,
             "pending_validations": len(self.pending_validations),
             "last_shift": self.last_shift.isoformat(),
-            "current_style": self.symbol_style
+            "current_style": self.symbol_style,
         }
 
     def approve_pending_validation(self, validation_index: int) -> bool:

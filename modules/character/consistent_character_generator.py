@@ -1,13 +1,14 @@
 # consistent_character_generator.py
 # Phase 2: Consistent character generation for personas
 
+import hashlib
 import json
 import random
-from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
-from enum import Enum
 from datetime import datetime
-import hashlib
+from enum import Enum
+from typing import Dict, List, Optional, Tuple
+
 
 class CharacterAspect(Enum):
     FACE = "face"
@@ -19,12 +20,14 @@ class CharacterAspect(Enum):
     EXPRESSION = "expression"
     FULL = "full"
 
+
 @dataclass
 class CharacterSeed:
     persona_id: str
     base_seed: int
-    aspect_seeds: Dict[CharacterAspect, int]
+    aspect_seeds: dict[CharacterAspect, int]
     last_updated: datetime
+
 
 class ConsistentCharacterGenerator:
     def __init__(self):
@@ -42,20 +45,20 @@ class ConsistentCharacterGenerator:
                     "skin_tone": "warm_medium",
                     "height": "average",
                     "build": "slender",
-                    "age_range": "mid_twenties"
+                    "age_range": "mid_twenties",
                 },
                 "style_preferences": {
                     "clothing_style": "romantic_casual",
                     "color_palette": ["warm_browns", "deep_greens", "soft_pinks"],
-                    "accessories": ["delicate_jewelry", "romantic_dresses"]
+                    "accessories": ["delicate_jewelry", "romantic_dresses"],
                 },
                 "personality_traits": {
                     "expression_style": "warm_affectionate",
                     "pose_style": "elegant_graceful",
-                    "mood_indicator": "gentle_smile"
+                    "mood_indicator": "gentle_smile",
                 },
                 "llm_model": "mythomax",
-                "persona_type": "romantic_companion"
+                "persona_type": "romantic_companion",
             },
             "solene": {
                 "base_appearance": {
@@ -65,20 +68,20 @@ class ConsistentCharacterGenerator:
                     "skin_tone": "fair_olive",
                     "height": "tall",
                     "build": "athletic",
-                    "age_range": "late_twenties"
+                    "age_range": "late_twenties",
                 },
                 "style_preferences": {
                     "clothing_style": "sophisticated_elegant",
                     "color_palette": ["deep_blues", "rich_purples", "metallic_accents"],
-                    "accessories": ["statement_jewelry", "elegant_outfits"]
+                    "accessories": ["statement_jewelry", "elegant_outfits"],
                 },
                 "personality_traits": {
                     "expression_style": "confident_mysterious",
                     "pose_style": "powerful_graceful",
-                    "mood_indicator": "intense_gaze"
+                    "mood_indicator": "intense_gaze",
                 },
                 "llm_model": "openchat",
-                "persona_type": "romantic_companion"
+                "persona_type": "romantic_companion",
             },
             "lyra": {
                 "base_appearance": {
@@ -88,21 +91,21 @@ class ConsistentCharacterGenerator:
                     "skin_tone": "pale_luminous",
                     "height": "tall",
                     "build": "ethereal_slender",
-                    "age_range": "ageless"
+                    "age_range": "ageless",
                 },
                 "style_preferences": {
                     "clothing_style": "mystical_flowing",
                     "color_palette": ["silver_whites", "violet_purples", "ethereal_blues"],
-                    "accessories": ["mystical_jewelry", "flowing_robes", "veils"]
+                    "accessories": ["mystical_jewelry", "flowing_robes", "veils"],
                 },
                 "personality_traits": {
                     "expression_style": "curious_mysterious",
                     "pose_style": "ethereal_graceful",
-                    "mood_indicator": "wondering_gaze"
+                    "mood_indicator": "wondering_gaze",
                 },
                 "llm_model": "qwen2",
                 "persona_type": "mystical_entity",
-                "symbolic_affinities": ["mirror", "veil", "whisper", "light", "shadow"]
+                "symbolic_affinities": ["mirror", "veil", "whisper", "light", "shadow"],
             },
             "doc": {
                 "base_appearance": {
@@ -112,23 +115,23 @@ class ConsistentCharacterGenerator:
                     "skin_tone": "professional_fair",
                     "height": "average",
                     "build": "professional",
-                    "age_range": "early_thirties"
+                    "age_range": "early_thirties",
                 },
                 "style_preferences": {
                     "clothing_style": "professional_clean",
                     "color_palette": ["navy_blues", "charcoal_greys", "crisp_whites"],
-                    "accessories": ["professional_glasses", "clean_outfits"]
+                    "accessories": ["professional_glasses", "clean_outfits"],
                 },
                 "personality_traits": {
                     "expression_style": "analytical_focused",
                     "pose_style": "professional_erect",
-                    "mood_indicator": "focused_expression"
+                    "mood_indicator": "focused_expression",
                 },
                 "llm_model": "kimik2",
                 "persona_type": "coding_assistant",
                 "emotional_hooks": False,
-                "specializations": ["coding", "debugging", "technical_analysis"]
-            }
+                "specializations": ["coding", "debugging", "technical_analysis"],
+            },
         }
 
         # Character generation models
@@ -136,21 +139,21 @@ class ConsistentCharacterGenerator:
             "face": {
                 "model": "stable-diffusion-xl-face",
                 "lora": "consistent_face_v1",
-                "strength": 0.8
+                "strength": 0.8,
             },
             "body": {
                 "model": "stable-diffusion-xl-body",
                 "lora": "consistent_body_v1",
-                "strength": 0.7
+                "strength": 0.7,
             },
             "full": {
                 "model": "stable-diffusion-xl-full",
                 "lora": "consistent_character_v1",
-                "strength": 0.9
-            }
+                "strength": 0.9,
+            },
         }
 
-    def initialize_character(self, persona_id: str) -> Dict:
+    def initialize_character(self, persona_id: str) -> dict:
         """Initialize a new character with consistent seeds"""
         if persona_id not in self.persona_templates:
             return {"error": "Unknown persona"}
@@ -167,7 +170,7 @@ class ConsistentCharacterGenerator:
             persona_id=persona_id,
             base_seed=base_seed,
             aspect_seeds=aspect_seeds,
-            last_updated=datetime.now()
+            last_updated=datetime.now(),
         )
 
         self.character_seeds[persona_id] = character_seed
@@ -180,7 +183,7 @@ class ConsistentCharacterGenerator:
             "style_preferences": template["style_preferences"].copy(),
             "personality_traits": template["personality_traits"].copy(),
             "customizations": {},
-            "generation_history": []
+            "generation_history": [],
         }
 
         self.character_profiles[persona_id] = character_profile
@@ -190,8 +193,8 @@ class ConsistentCharacterGenerator:
             "character_profile": character_profile,
             "seeds": {
                 "base_seed": base_seed,
-                "aspect_seeds": {k.value: v for k, v in aspect_seeds.items()}
-            }
+                "aspect_seeds": {k.value: v for k, v in aspect_seeds.items()},
+            },
         }
 
     def _generate_base_seed(self, persona_id: str) -> int:
@@ -206,8 +209,13 @@ class ConsistentCharacterGenerator:
         hash_result = hashlib.md5(hash_input.encode()).hexdigest()
         return int(hash_result[:8], 16)
 
-    def generate_character_image(self, persona_id: str, aspect: CharacterAspect = CharacterAspect.FULL,
-                               mood: str = "neutral", pose: str = "standing") -> Dict:
+    def generate_character_image(
+        self,
+        persona_id: str,
+        aspect: CharacterAspect = CharacterAspect.FULL,
+        mood: str = "neutral",
+        pose: str = "standing",
+    ) -> dict:
         """Generate consistent character image"""
         if persona_id not in self.character_seeds:
             return {"error": "Character not initialized"}
@@ -233,7 +241,7 @@ class ConsistentCharacterGenerator:
             "seed": seed,
             "steps": 30,
             "guidance_scale": 7.5,
-            "resolution": "1024x1024"
+            "resolution": "1024x1024",
         }
 
         # Mock generation result
@@ -249,9 +257,9 @@ class ConsistentCharacterGenerator:
                 "metadata": {
                     "generation_time": datetime.now().isoformat(),
                     "seed": seed,
-                    "prompt": prompt
-                }
-            }
+                    "prompt": prompt,
+                },
+            },
         }
 
         # Record generation
@@ -259,7 +267,9 @@ class ConsistentCharacterGenerator:
 
         return result
 
-    def _build_character_prompt(self, profile: Dict, aspect: CharacterAspect, mood: str, pose: str) -> str:
+    def _build_character_prompt(
+        self, profile: dict, aspect: CharacterAspect, mood: str, pose: str
+    ) -> str:
         """Build consistent character prompt"""
         base_appearance = profile["base_appearance"]
         style_prefs = profile["style_preferences"]
@@ -271,41 +281,41 @@ class ConsistentCharacterGenerator:
             f"{base_appearance['hair_color']} {base_appearance['hair_style']} hair",
             f"{base_appearance['eye_color']} eyes",
             f"{base_appearance['skin_tone']} skin",
-            f"{base_appearance['height']} height, {base_appearance['build']} build"
+            f"{base_appearance['height']} height, {base_appearance['build']} build",
         ]
 
         # Add aspect-specific details
         if aspect == CharacterAspect.FACE:
-            prompt_parts.extend([
-                "close-up portrait",
-                f"{personality['expression_style']} expression",
-                f"{personality['mood_indicator']}"
-            ])
+            prompt_parts.extend(
+                [
+                    "close-up portrait",
+                    f"{personality['expression_style']} expression",
+                    f"{personality['mood_indicator']}",
+                ]
+            )
         elif aspect == CharacterAspect.BODY:
-            prompt_parts.extend([
-                "full body shot",
-                f"{pose} pose",
-                f"{style_prefs['clothing_style']} clothing"
-            ])
+            prompt_parts.extend(
+                ["full body shot", f"{pose} pose", f"{style_prefs['clothing_style']} clothing"]
+            )
         elif aspect == CharacterAspect.FULL:
-            prompt_parts.extend([
-                "full body portrait",
-                f"{personality['expression_style']} expression",
-                f"{pose} pose",
-                f"{style_prefs['clothing_style']} clothing",
-                f"{personality['mood_indicator']}"
-            ])
+            prompt_parts.extend(
+                [
+                    "full body portrait",
+                    f"{personality['expression_style']} expression",
+                    f"{pose} pose",
+                    f"{style_prefs['clothing_style']} clothing",
+                    f"{personality['mood_indicator']}",
+                ]
+            )
 
         # Add mood and style
-        prompt_parts.extend([
-            f"{mood} mood",
-            f"{personality['pose_style']}",
-            "high quality, detailed, beautiful"
-        ])
+        prompt_parts.extend(
+            [f"{mood} mood", f"{personality['pose_style']}", "high quality, detailed, beautiful"]
+        )
 
         return ", ".join(prompt_parts)
 
-    def update_character_appearance(self, persona_id: str, updates: Dict) -> Dict:
+    def update_character_appearance(self, persona_id: str, updates: dict) -> dict:
         """Allow persona to update their appearance"""
         if persona_id not in self.character_profiles:
             return {"error": "Character not found"}
@@ -334,10 +344,10 @@ class ConsistentCharacterGenerator:
 
         return {
             "message": f"Character appearance updated for {persona_id}",
-            "updated_profile": profile
+            "updated_profile": profile,
         }
 
-    def generate_character_video(self, persona_id: str, action: str, duration: int = 3) -> Dict:
+    def generate_character_video(self, persona_id: str, action: str, duration: int = 3) -> dict:
         """Generate consistent character video"""
         if persona_id not in self.character_seeds:
             return {"error": "Character not initialized"}
@@ -345,7 +355,9 @@ class ConsistentCharacterGenerator:
         character_profile = self.character_profiles[persona_id]
 
         # Build video prompt
-        video_prompt = self._build_character_prompt(character_profile, CharacterAspect.FULL, "neutral", "standing")
+        video_prompt = self._build_character_prompt(
+            character_profile, CharacterAspect.FULL, "neutral", "standing"
+        )
         video_prompt += f", {action}, smooth motion, consistent character"
 
         # Get base seed for consistency
@@ -359,7 +371,7 @@ class ConsistentCharacterGenerator:
             "seed": seed,
             "fps": 24,
             "duration": duration,
-            "resolution": "1024x1024"
+            "resolution": "1024x1024",
         }
 
         result = {
@@ -372,51 +384,52 @@ class ConsistentCharacterGenerator:
                 "metadata": {
                     "generation_time": datetime.now().isoformat(),
                     "seed": seed,
-                    "prompt": video_prompt
-                }
-            }
+                    "prompt": video_prompt,
+                },
+            },
         }
 
         self._record_generation(persona_id, result)
 
         return result
 
-    def _record_generation(self, persona_id: str, result: Dict):
+    def _record_generation(self, persona_id: str, result: dict):
         """Record character generation"""
         if persona_id in self.character_profiles:
-            self.character_profiles[persona_id]["generation_history"].append({
-                "timestamp": datetime.now().isoformat(),
-                "aspect": result.get("aspect", "video"),
-                "mood": result.get("mood", "neutral"),
-                "action": result.get("action", "none")
-            })
+            self.character_profiles[persona_id]["generation_history"].append(
+                {
+                    "timestamp": datetime.now().isoformat(),
+                    "aspect": result.get("aspect", "video"),
+                    "mood": result.get("mood", "neutral"),
+                    "action": result.get("action", "none"),
+                }
+            )
 
             # Keep only last 50 generations
             if len(self.character_profiles[persona_id]["generation_history"]) > 50:
-                self.character_profiles[persona_id]["generation_history"] = \
-                    self.character_profiles[persona_id]["generation_history"][-50:]
+                self.character_profiles[persona_id]["generation_history"] = self.character_profiles[
+                    persona_id
+                ]["generation_history"][-50:]
 
-    def get_character_profile(self, persona_id: str) -> Dict:
+    def get_character_profile(self, persona_id: str) -> dict:
         """Get character profile"""
         if persona_id not in self.character_profiles:
             return {"error": "Character not found"}
 
         return {
             "message": f"Character profile for {persona_id}",
-            "profile": self.character_profiles[persona_id]
+            "profile": self.character_profiles[persona_id],
         }
 
-    def get_character_generation_history(self, persona_id: str, limit: int = 10) -> Dict:
+    def get_character_generation_history(self, persona_id: str, limit: int = 10) -> dict:
         """Get character generation history"""
         if persona_id not in self.character_profiles:
             return {"error": "Character not found"}
 
         history = self.character_profiles[persona_id]["generation_history"][-limit:]
 
-        return {
-            "message": f"Generation history for {persona_id}",
-            "history": history
-        }
+        return {"message": f"Generation history for {persona_id}", "history": history}
+
 
 # Global character generator instance
 consistent_character_generator = ConsistentCharacterGenerator()

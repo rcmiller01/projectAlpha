@@ -5,14 +5,20 @@ Production-ready persistent database implementation for the unified companion sy
 """
 
 import logging
-from typing import Dict, List, Any, Optional
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.errors import DuplicateKeyError, PyMongoError
 
 from .database_interface import (
-    DatabaseInterface, UserProfile, InteractionRecord, SessionRecord,
-    PsychologicalState, MemoryFragment, EmotionalRiskEntry
+    DatabaseInterface,
+    EmotionalRiskEntry,
+    InteractionRecord,
+    MemoryFragment,
+    PsychologicalState,
+    SessionRecord,
+    UserProfile,
 )
 
 
@@ -37,7 +43,7 @@ class MongoDatabase:
             "memory_fragments": "memory_fragments",
             "emotional_patterns": "emotional_patterns",
             "crisis_logs": "crisis_logs",
-            "emotional_risk": "emotional_risk"
+            "emotional_risk": "emotional_risk",
         }
 
     async def initialize(self) -> None:
@@ -47,7 +53,7 @@ class MongoDatabase:
             self.db = self.client[self.database_name]
 
             # Test connection
-            await self.client.admin.command('ping')
+            await self.client.admin.command("ping")
             self.logger.info(f"Connected to MongoDB: {self.database_name}")
 
             # Create indexes for performance
@@ -64,39 +70,39 @@ class MongoDatabase:
             await self.db[self.collections["users"]].create_index("user_id", unique=True)
 
             # Interactions
-            await self.db[self.collections["interactions"]].create_index([
-                ("user_id", 1), ("timestamp", -1)
-            ])
+            await self.db[self.collections["interactions"]].create_index(
+                [("user_id", 1), ("timestamp", -1)]
+            )
             await self.db[self.collections["interactions"]].create_index("session_id")
 
             # Sessions
-            await self.db[self.collections["sessions"]].create_index([
-                ("user_id", 1), ("start_time", -1)
-            ])
+            await self.db[self.collections["sessions"]].create_index(
+                [("user_id", 1), ("start_time", -1)]
+            )
 
             # Psychological states
-            await self.db[self.collections["psychological_states"]].create_index([
-                ("user_id", 1), ("timestamp", -1)
-            ])
+            await self.db[self.collections["psychological_states"]].create_index(
+                [("user_id", 1), ("timestamp", -1)]
+            )
 
             # Memory fragments
-            await self.db[self.collections["memory_fragments"]].create_index([
-                ("user_id", 1), ("importance_score", -1)
-            ])
-            await self.db[self.collections["memory_fragments"]].create_index([
-                ("user_id", 1), ("memory_type", 1)
-            ])
+            await self.db[self.collections["memory_fragments"]].create_index(
+                [("user_id", 1), ("importance_score", -1)]
+            )
+            await self.db[self.collections["memory_fragments"]].create_index(
+                [("user_id", 1), ("memory_type", 1)]
+            )
             await self.db[self.collections["memory_fragments"]].create_index("tags")
 
             # Crisis logs
-            await self.db[self.collections["crisis_logs"]].create_index([
-                ("user_id", 1), ("timestamp", -1)
-            ])
+            await self.db[self.collections["crisis_logs"]].create_index(
+                [("user_id", 1), ("timestamp", -1)]
+            )
 
             # Emotional risk registry
-            await self.db[self.collections["emotional_risk"]].create_index([
-                ("user_id", 1), ("timestamp", -1)
-            ])
+            await self.db[self.collections["emotional_risk"]].create_index(
+                [("user_id", 1), ("timestamp", -1)]
+            )
 
             self.logger.info("Database indexes created successfully")
 
@@ -129,13 +135,12 @@ class MongoDatabase:
             self.logger.error(f"Error getting user profile: {e}")
             return None
 
-    async def update_user_profile(self, user_id: str, updates: Dict[str, Any]) -> bool:
+    async def update_user_profile(self, user_id: str, updates: dict[str, Any]) -> bool:
         """Update user profile"""
         try:
             updates["last_active"] = datetime.now().isoformat()
             result = await self.db[self.collections["users"]].update_one(
-                {"user_id": user_id},
-                {"$set": updates}
+                {"user_id": user_id}, {"$set": updates}
             )
             return result.modified_count > 0
         except Exception as e:
@@ -151,12 +156,17 @@ class MongoDatabase:
             self.logger.error(f"Error saving interaction: {e}")
             return False
 
-    async def get_recent_interactions(self, user_id: str, limit: int = 20) -> List[InteractionRecord]:
+    async def get_recent_interactions(
+        self, user_id: str, limit: int = 20
+    ) -> list[InteractionRecord]:
         """Get recent interactions for a user"""
         try:
-            cursor = self.db[self.collections["interactions"]].find(
-                {"user_id": user_id}
-            ).sort("timestamp", -1).limit(limit)
+            cursor = (
+                self.db[self.collections["interactions"]]
+                .find({"user_id": user_id})
+                .sort("timestamp", -1)
+                .limit(limit)
+            )
 
             interactions = []
             async for doc in cursor:
@@ -181,8 +191,7 @@ class MongoDatabase:
         """Get latest psychological state for user"""
         try:
             doc = await self.db[self.collections["psychological_states"]].find_one(
-                {"user_id": user_id},
-                sort=[("timestamp", -1)]
+                {"user_id": user_id}, sort=[("timestamp", -1)]
             )
             if doc:
                 doc.pop("_id", None)
@@ -201,8 +210,13 @@ class MongoDatabase:
             self.logger.error(f"Error saving memory fragment: {e}")
             return False
 
-    async def get_relevant_memories(self, user_id: str, memory_type: Optional[str] = None,
-                                  tags: Optional[List[str]] = None, limit: int = 10) -> List[MemoryFragment]:
+    async def get_relevant_memories(
+        self,
+        user_id: str,
+        memory_type: Optional[str] = None,
+        tags: Optional[list[str]] = None,
+        limit: int = 10,
+    ) -> list[MemoryFragment]:
         """Get relevant memory fragments for context"""
         try:
             query = {"user_id": user_id}
@@ -213,9 +227,12 @@ class MongoDatabase:
             if tags:
                 query["tags"] = {"$in": tags}
 
-            cursor = self.db[self.collections["memory_fragments"]].find(query).sort(
-                "importance_score", -1
-            ).limit(limit)
+            cursor = (
+                self.db[self.collections["memory_fragments"]]
+                .find(query)
+                .sort("importance_score", -1)
+                .limit(limit)
+            )
 
             memories = []
             async for doc in cursor:
@@ -234,15 +251,15 @@ class MongoDatabase:
                 {"memory_id": memory_id},
                 {
                     "$set": {"last_accessed": datetime.now().isoformat()},
-                    "$inc": {"access_count": 1}
-                }
+                    "$inc": {"access_count": 1},
+                },
             )
             return result.modified_count > 0
         except Exception as e:
             self.logger.error(f"Error updating memory access: {e}")
             return False
 
-    async def log_crisis_event(self, user_id: str, crisis_data: Dict[str, Any]) -> bool:
+    async def log_crisis_event(self, user_id: str, crisis_data: dict[str, Any]) -> bool:
         """Log crisis intervention event"""
         try:
             crisis_log = {
@@ -254,25 +271,28 @@ class MongoDatabase:
                 "intervention_taken": crisis_data.get("intervention_taken"),
                 "user_input": crisis_data.get("user_input"),
                 "system_response": crisis_data.get("system_response"),
-                "follow_up_needed": crisis_data.get("follow_up_needed", False)
+                "follow_up_needed": crisis_data.get("follow_up_needed", False),
             }
 
             await self.db[self.collections["crisis_logs"]].insert_one(crisis_log)
-            self.logger.warning(f"Crisis event logged for user {user_id}: {crisis_data.get('level')}")
+            self.logger.warning(
+                f"Crisis event logged for user {user_id}: {crisis_data.get('level')}"
+            )
             return True
         except Exception as e:
             self.logger.error(f"Error logging crisis event: {e}")
             return False
 
-    async def get_crisis_history(self, user_id: str, days: int = 30) -> List[Dict[str, Any]]:
+    async def get_crisis_history(self, user_id: str, days: int = 30) -> list[dict[str, Any]]:
         """Get crisis intervention history"""
         try:
             start_date = datetime.now() - timedelta(days=days)
 
-            cursor = self.db[self.collections["crisis_logs"]].find({
-                "user_id": user_id,
-                "timestamp": {"$gte": start_date.isoformat()}
-            }).sort("timestamp", -1)
+            cursor = (
+                self.db[self.collections["crisis_logs"]]
+                .find({"user_id": user_id, "timestamp": {"$gte": start_date.isoformat()}})
+                .sort("timestamp", -1)
+            )
 
             crisis_logs = []
             async for doc in cursor:
@@ -293,14 +313,19 @@ class MongoDatabase:
             self.logger.error(f"Error logging emotional risk: {e}")
             return False
 
-    async def get_emotional_risk_history(self, user_id: str, limit: int = 20) -> List[EmotionalRiskEntry]:
+    async def get_emotional_risk_history(
+        self, user_id: str, limit: int = 20
+    ) -> list[EmotionalRiskEntry]:
         """Retrieve emotional risk history"""
         try:
-            cursor = self.db[self.collections["emotional_risk"]].find({"user_id": user_id}).sort(
-                "timestamp", -1
-            ).limit(limit)
+            cursor = (
+                self.db[self.collections["emotional_risk"]]
+                .find({"user_id": user_id})
+                .sort("timestamp", -1)
+                .limit(limit)
+            )
 
-            entries: List[EmotionalRiskEntry] = []
+            entries: list[EmotionalRiskEntry] = []
             async for doc in cursor:
                 doc.pop("_id", None)
                 entries.append(EmotionalRiskEntry.from_dict(doc))
@@ -310,7 +335,7 @@ class MongoDatabase:
             self.logger.error(f"Error retrieving emotional risk history: {e}")
             return []
 
-    async def save_emotional_pattern(self, user_id: str, pattern_data: Dict[str, Any]) -> bool:
+    async def save_emotional_pattern(self, user_id: str, pattern_data: dict[str, Any]) -> bool:
         """Save long-term emotional pattern analysis"""
         try:
             pattern_doc = {
@@ -321,7 +346,7 @@ class MongoDatabase:
                 "attachment_indicators": pattern_data.get("attachment_indicators", {}),
                 "stress_patterns": pattern_data.get("stress_patterns", {}),
                 "growth_indicators": pattern_data.get("growth_indicators", {}),
-                "recommendations": pattern_data.get("recommendations", [])
+                "recommendations": pattern_data.get("recommendations", []),
             }
 
             await self.db[self.collections["emotional_patterns"]].insert_one(pattern_doc)
@@ -330,12 +355,15 @@ class MongoDatabase:
             self.logger.error(f"Error saving emotional pattern: {e}")
             return False
 
-    async def get_emotional_patterns(self, user_id: str, limit: int = 10) -> List[Dict[str, Any]]:
+    async def get_emotional_patterns(self, user_id: str, limit: int = 10) -> list[dict[str, Any]]:
         """Get long-term emotional patterns for user"""
         try:
-            cursor = self.db[self.collections["emotional_patterns"]].find(
-                {"user_id": user_id}
-            ).sort("timestamp", -1).limit(limit)
+            cursor = (
+                self.db[self.collections["emotional_patterns"]]
+                .find({"user_id": user_id})
+                .sort("timestamp", -1)
+                .limit(limit)
+            )
 
             patterns = []
             async for doc in cursor:
@@ -347,24 +375,23 @@ class MongoDatabase:
             self.logger.error(f"Error getting emotional patterns: {e}")
             return []
 
-    async def cleanup_old_data(self, days_to_keep: int = 90) -> Dict[str, int]:
+    async def cleanup_old_data(self, days_to_keep: int = 90) -> dict[str, int]:
         """Clean up old interaction data while preserving important memories"""
         try:
             cutoff_date = datetime.now() - timedelta(days=days_to_keep)
             cutoff_iso = cutoff_date.isoformat()
 
             # Clean up old interactions (keep recent and crisis-related)
-            interaction_result = await self.db[self.collections["interactions"]].delete_many({
-                "timestamp": {"$lt": cutoff_iso},
-                "interaction_type": {"$ne": "crisis_support"}
-            })
+            interaction_result = await self.db[self.collections["interactions"]].delete_many(
+                {"timestamp": {"$lt": cutoff_iso}, "interaction_type": {"$ne": "crisis_support"}}
+            )
 
             # Clean up old psychological states (keep monthly snapshots)
             # This is more complex - we'd keep one state per month for long-term tracking
 
             return {
                 "interactions_cleaned": interaction_result.deleted_count,
-                "cleanup_date": cutoff_iso
+                "cleanup_date": cutoff_iso,
             }
         except Exception as e:
             self.logger.error(f"Error during cleanup: {e}")

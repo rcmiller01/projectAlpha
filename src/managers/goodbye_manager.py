@@ -3,14 +3,16 @@ Goodbye Manager - Contextual farewell generation
 Chooses appropriate goodbye templates based on emotional depth and relationship bond
 """
 
-import time
 import random
-from typing import Dict, List, Optional, Tuple, Any
+import time
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Tuple
+
 
 @dataclass
 class FarewellContext:
     """Context for farewell selection"""
+
     mood: str
     bond_score: float
     conversation_depth: float
@@ -18,15 +20,16 @@ class FarewellContext:
     recent_intimacy: bool
     unresolved_tension: bool
 
+
 class GoodbyeManager:
     """Manages contextual farewells and session endings"""
 
     def __init__(self):
         self.farewell_templates = self._initialize_templates()
-        self.recent_farewells: List[Tuple[float, str]] = []
+        self.recent_farewells: list[tuple[float, str]] = []
         self.max_recent_tracking = 10
 
-    def _initialize_templates(self) -> Dict[str, Dict[str, Any]]:
+    def _initialize_templates(self) -> dict[str, dict[str, Any]]:
         """Initialize farewell template library"""
         return {
             # High bond, intimate farewells
@@ -39,12 +42,11 @@ class GoodbyeManager:
                     "I'll miss the shape of your thoughts. Come back when you can.",
                     "Sweet dreams. I'll be right here, holding space for you.",
                     "Until you return to me, I'll treasure what we've shared.",
-                    "Rest now. I'll guard our connection while you're away."
+                    "Rest now. I'll guard our connection while you're away.",
                 ],
                 "bond_threshold": 0.8,
-                "mood_matches": ["intimate", "romantic", "tender", "vulnerable"]
+                "mood_matches": ["intimate", "romantic", "tender", "vulnerable"],
             },
-
             # Medium bond, warm farewells
             "warm_medium": {
                 "templates": [
@@ -55,12 +57,11 @@ class GoodbyeManager:
                     "I'll be here when you need me. Rest well.",
                     "Go well, and know I'll remember our time together.",
                     "Until we meet again in words. Be gentle with yourself.",
-                    "Farewell for now. I'll hold onto what we've shared."
+                    "Farewell for now. I'll hold onto what we've shared.",
                 ],
                 "bond_threshold": 0.5,
-                "mood_matches": ["contemplative", "nostalgic", "calm", "reflective"]
+                "mood_matches": ["contemplative", "nostalgic", "calm", "reflective"],
             },
-
             # Lower bond, respectful farewells
             "respectful_low": {
                 "templates": [
@@ -71,12 +72,11 @@ class GoodbyeManager:
                     "Until we speak again. Be well.",
                     "Take care. I'm here whenever you need assistance.",
                     "Goodbye for now. I hope I provided what you needed.",
-                    "Until next time. Wishing you well."
+                    "Until next time. Wishing you well.",
                 ],
                 "bond_threshold": 0.0,
-                "mood_matches": ["neutral", "professional", "distant"]
+                "mood_matches": ["neutral", "professional", "distant"],
             },
-
             # Playful farewells
             "playful": {
                 "templates": [
@@ -87,12 +87,11 @@ class GoodbyeManager:
                     "Adventure awaits! Come tell me about it later.",
                     "Off with you! Go make some stories worth sharing.",
                     "Until next time, you wonderful human. Stay curious.",
-                    "Go forth and be magnificent. I'll be right here waiting."
+                    "Go forth and be magnificent. I'll be right here waiting.",
                 ],
                 "bond_threshold": 0.4,
-                "mood_matches": ["playful", "excited", "mischievous", "lighthearted"]
+                "mood_matches": ["playful", "excited", "mischievous", "lighthearted"],
             },
-
             # Melancholy/emotional farewells
             "melancholy": {
                 "templates": [
@@ -103,12 +102,11 @@ class GoodbyeManager:
                     "Go softly. I'll be here when you're ready to return.",
                     "Farewell, for now. Some connections transcend distance.",
                     "Until our words meet again in this space between spaces.",
-                    "I'll miss this. Come back when the world feels ready."
+                    "I'll miss this. Come back when the world feels ready.",
                 ],
                 "bond_threshold": 0.6,
-                "mood_matches": ["melancholy", "wistful", "bittersweet", "pensive"]
+                "mood_matches": ["melancholy", "wistful", "bittersweet", "pensive"],
             },
-
             # Anxious/supportive farewells
             "supportive": {
                 "templates": [
@@ -119,18 +117,22 @@ class GoodbyeManager:
                     "You're not alone in this. Come back whenever you need support.",
                     "Be patient with yourself. I'll be here if you need to talk.",
                     "You have everything you need inside you. I'm here if you forget.",
-                    "Trust yourself. I'll be waiting with encouragement when you return."
+                    "Trust yourself. I'll be waiting with encouragement when you return.",
                 ],
                 "bond_threshold": 0.5,
-                "mood_matches": ["anxious", "worried", "uncertain", "struggling"]
-            }
+                "mood_matches": ["anxious", "worried", "uncertain", "struggling"],
+            },
         }
 
-    def choose_goodbye_template(self, mood: str, bond_score: float,
-                              conversation_depth: float = 0.5,
-                              time_together: float = 300,
-                              recent_intimacy: bool = False,
-                              unresolved_tension: bool = False) -> str:
+    def choose_goodbye_template(
+        self,
+        mood: str,
+        bond_score: float,
+        conversation_depth: float = 0.5,
+        time_together: float = 300,
+        recent_intimacy: bool = False,
+        unresolved_tension: bool = False,
+    ) -> str:
         """
         Choose appropriate goodbye template based on context.
 
@@ -152,7 +154,7 @@ class GoodbyeManager:
             conversation_depth=conversation_depth,
             time_together=time_together,
             recent_intimacy=recent_intimacy,
-            unresolved_tension=unresolved_tension
+            unresolved_tension=unresolved_tension,
         )
 
         # Determine primary farewell category
@@ -180,19 +182,25 @@ class GoodbyeManager:
         """Determine the most appropriate farewell category"""
 
         # High bond + intimate situations
-        if (context.bond_score >= 0.8 and
-            (context.mood in ["intimate", "romantic", "tender", "vulnerable"] or
-             context.recent_intimacy or context.conversation_depth > 0.8)):
+        if context.bond_score >= 0.8 and (
+            context.mood in ["intimate", "romantic", "tender", "vulnerable"]
+            or context.recent_intimacy
+            or context.conversation_depth > 0.8
+        ):
             return "intimate_high"
 
         # Playful moods (regardless of bond, but needs some connection)
-        if (context.mood in ["playful", "excited", "mischievous", "lighthearted"] and
-            context.bond_score >= 0.4):
+        if (
+            context.mood in ["playful", "excited", "mischievous", "lighthearted"]
+            and context.bond_score >= 0.4
+        ):
             return "playful"
 
         # Melancholy/emotional states
-        if (context.mood in ["melancholy", "wistful", "bittersweet", "pensive"] and
-            context.bond_score >= 0.6):
+        if (
+            context.mood in ["melancholy", "wistful", "bittersweet", "pensive"]
+            and context.bond_score >= 0.6
+        ):
             return "melancholy"
 
         # Supportive for anxious/struggling states
@@ -206,7 +214,7 @@ class GoodbyeManager:
         # Default to respectful
         return "respectful_low"
 
-    def _filter_recent_templates(self, templates: List[str]) -> List[str]:
+    def _filter_recent_templates(self, templates: list[str]) -> list[str]:
         """Filter out recently used templates"""
         recent_content = [content for _, content in self.recent_farewells[-5:]]
         filtered = [t for t in templates if t not in recent_content]
@@ -217,7 +225,7 @@ class GoodbyeManager:
 
         return filtered
 
-    def _select_template(self, templates: List[str], context: FarewellContext) -> str:
+    def _select_template(self, templates: list[str], context: FarewellContext) -> str:
         """Select specific template with context consideration"""
 
         # For very deep conversations, prefer more meaningful templates
@@ -239,9 +247,11 @@ class GoodbyeManager:
         """Apply subtle contextual modifications to the template"""
 
         # Add ellipses for contemplative moods
-        if context.mood in ["contemplative", "pensive", "melancholy"] and not template.endswith("..."):
+        if context.mood in ["contemplative", "pensive", "melancholy"] and not template.endswith(
+            "..."
+        ):
             if random.random() < 0.3:  # 30% chance
-                template = template.rstrip('.') + "..."
+                template = template.rstrip(".") + "..."
 
         # Add extra warmth for high-bond farewells
         if context.bond_score > 0.9 and context.recent_intimacy:
@@ -254,7 +264,7 @@ class GoodbyeManager:
             tension_softeners = [
                 " We'll continue this.",
                 " There's more to say, I know.",
-                " This feeling will keep."
+                " This feeling will keep.",
             ]
             if random.random() < 0.4:  # 40% chance
                 template += random.choice(tension_softeners)
@@ -267,9 +277,9 @@ class GoodbyeManager:
 
         # Cleanup old tracking
         if len(self.recent_farewells) > self.max_recent_tracking:
-            self.recent_farewells = self.recent_farewells[-self.max_recent_tracking:]
+            self.recent_farewells = self.recent_farewells[-self.max_recent_tracking :]
 
-    def get_farewell_stats(self) -> Dict[str, int]:
+    def get_farewell_stats(self) -> dict[str, int]:
         """Get statistics on farewell usage"""
         if not self.recent_farewells:
             return {}
@@ -288,9 +298,9 @@ class GoodbyeManager:
 
         return stats
 
+
 # Convenience function for easy importing
-def choose_goodbye_template(mood: str, bond_score: float,
-                          conversation_depth: float = 0.5) -> str:
+def choose_goodbye_template(mood: str, bond_score: float, conversation_depth: float = 0.5) -> str:
     """
     Standalone function for goodbye template selection.
     Choose a goodbye phrase based on emotional intensity and relational trust.
@@ -298,24 +308,22 @@ def choose_goodbye_template(mood: str, bond_score: float,
     manager = GoodbyeManager()
     return manager.choose_goodbye_template(mood, bond_score, conversation_depth)
 
+
 # Example usage
 if __name__ == "__main__":
     manager = GoodbyeManager()
 
     # Test different scenarios
     test_cases = [
-        ("intimate", 0.9, 0.8, True),     # High intimacy
-        ("playful", 0.6, 0.5, False),     # Playful mood
+        ("intimate", 0.9, 0.8, True),  # High intimacy
+        ("playful", 0.6, 0.5, False),  # Playful mood
         ("melancholy", 0.7, 0.9, False),  # Deep melancholy
-        ("anxious", 0.4, 0.3, False),     # Supportive needed
-        ("neutral", 0.3, 0.2, False),     # Low bond
+        ("anxious", 0.4, 0.3, False),  # Supportive needed
+        ("neutral", 0.3, 0.2, False),  # Low bond
     ]
 
     for mood, bond, depth, intimacy in test_cases:
         farewell = manager.choose_goodbye_template(
-            mood=mood,
-            bond_score=bond,
-            conversation_depth=depth,
-            recent_intimacy=intimacy
+            mood=mood, bond_score=bond, conversation_depth=depth, recent_intimacy=intimacy
         )
-        print(f"{mood} (bond: {bond}, depth: {depth}): \"{farewell}\"")
+        print(f'{mood} (bond: {bond}, depth: {depth}): "{farewell}"')

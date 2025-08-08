@@ -2,14 +2,16 @@
 # Enhanced romantic memory engine with relationship feedback loops
 
 import json
-import time
 import threading
-from typing import Dict, List, Optional, Tuple, Any
-from dataclasses import dataclass, asdict
+import time
+from collections import defaultdict
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
+
 import numpy as np
-from collections import defaultdict
+
 
 class MemoryType(Enum):
     EMOTIONAL_MOMENT = "emotional_moment"
@@ -21,12 +23,14 @@ class MemoryType(Enum):
     GROWTH_MOMENT = "growth_moment"
     ROMANTIC_GESTURE = "romantic_gesture"
 
+
 class EmotionalIntensity(Enum):
     SUBTLE = 0.2
     MILD = 0.4
     MODERATE = 0.6
     STRONG = 0.8
     INTENSE = 1.0
+
 
 @dataclass
 class RomanticMemory:
@@ -35,16 +39,17 @@ class RomanticMemory:
     title: str
     description: str
     emotional_intensity: float
-    emotions: List[str]
-    personas_involved: List[str]
+    emotions: list[str]
+    personas_involved: list[str]
     timestamp: datetime
-    context: Dict[str, Any]
+    context: dict[str, Any]
     relationship_impact: float  # -1.0 to 1.0
-    tags: List[str]
+    tags: list[str]
     importance_score: float  # 0.0 to 1.0
     last_recalled: Optional[datetime] = None
     recall_count: int = 0
     decay_rate: float = 0.1
+
 
 @dataclass
 class RelationshipPattern:
@@ -54,6 +59,7 @@ class RelationshipPattern:
     last_occurrence: datetime
     trend: str  # "increasing", "decreasing", "stable"
     impact_score: float
+
 
 class RomanticMemoryEngine:
     def __init__(self):
@@ -69,7 +75,7 @@ class RomanticMemoryEngine:
         self.is_running = True
         threading.Thread(target=self._background_processing, daemon=True).start()
 
-    def _load_decay_rates(self) -> Dict[MemoryType, float]:
+    def _load_decay_rates(self) -> dict[MemoryType, float]:
         """Load memory decay rates by type"""
         return {
             MemoryType.EMOTIONAL_MOMENT: 0.05,  # Slow decay for emotional moments
@@ -79,48 +85,56 @@ class RomanticMemoryEngine:
             MemoryType.SHARED_ACTIVITY: 0.06,  # Moderate decay
             MemoryType.CONFLICT_RESOLUTION: 0.04,  # Slow decay for resolutions
             MemoryType.GROWTH_MOMENT: 0.03,  # Very slow decay for growth
-            MemoryType.ROMANTIC_GESTURE: 0.07  # Moderate decay
+            MemoryType.ROMANTIC_GESTURE: 0.07,  # Moderate decay
         }
 
-    def _load_pattern_rules(self) -> Dict[str, Dict]:
+    def _load_pattern_rules(self) -> dict[str, dict]:
         """Load pattern detection rules"""
         return {
             "emotional_escalation": {
                 "description": "Detect when emotional intensity increases over time",
                 "threshold": 0.3,
                 "time_window": timedelta(days=7),
-                "min_occurrences": 3
+                "min_occurrences": 3,
             },
             "conflict_patterns": {
                 "description": "Detect recurring conflict themes",
                 "threshold": 0.5,
                 "time_window": timedelta(days=30),
-                "min_occurrences": 2
+                "min_occurrences": 2,
             },
             "intimacy_growth": {
                 "description": "Detect increasing intimacy levels",
                 "threshold": 0.2,
                 "time_window": timedelta(days=14),
-                "min_occurrences": 5
+                "min_occurrences": 5,
             },
             "communication_improvement": {
                 "description": "Detect improving communication patterns",
                 "threshold": 0.25,
                 "time_window": timedelta(days=21),
-                "min_occurrences": 4
+                "min_occurrences": 4,
             },
             "romantic_consistency": {
                 "description": "Detect consistent romantic behavior",
                 "threshold": 0.4,
                 "time_window": timedelta(days=10),
-                "min_occurrences": 6
-            }
+                "min_occurrences": 6,
+            },
         }
 
-    def store_romantic_memory(self, memory_type: str, title: str, description: str,
-                            emotional_intensity: float, emotions: List[str],
-                            personas_involved: List[str], context: Dict[str, Any],
-                            relationship_impact: float = 0.0, tags: List[str] = None) -> str:
+    def store_romantic_memory(
+        self,
+        memory_type: str,
+        title: str,
+        description: str,
+        emotional_intensity: float,
+        emotions: list[str],
+        personas_involved: list[str],
+        context: dict[str, Any],
+        relationship_impact: float = 0.0,
+        tags: list[str] = None,
+    ) -> str:
         """Store a new romantic memory"""
         try:
             memory_id = f"romantic_{int(time.time())}_{len(self.memories)}"
@@ -144,7 +158,7 @@ class RomanticMemoryEngine:
                 relationship_impact=relationship_impact,
                 tags=tags or [],
                 importance_score=importance_score,
-                decay_rate=self.memory_decay_rates.get(MemoryType(memory_type), 0.1)
+                decay_rate=self.memory_decay_rates.get(MemoryType(memory_type), 0.1),
             )
 
             # Store memory
@@ -164,8 +178,9 @@ class RomanticMemoryEngine:
             print(f"[RomanticMemory] Error storing memory: {e}")
             return None
 
-    def _calculate_importance_score(self, emotional_intensity: float,
-                                  relationship_impact: float, memory_type: str) -> float:
+    def _calculate_importance_score(
+        self, emotional_intensity: float, relationship_impact: float, memory_type: str
+    ) -> float:
         """Calculate memory importance score"""
         # Base score from emotional intensity
         base_score = emotional_intensity * 0.4
@@ -182,7 +197,7 @@ class RomanticMemoryEngine:
             "growth_moment": 0.7,
             "romantic_gesture": 0.5,
             "conversation_highlight": 0.4,
-            "shared_activity": 0.3
+            "shared_activity": 0.3,
         }
 
         type_score = type_importance.get(memory_type, 0.5) * 0.3
@@ -206,27 +221,33 @@ class RomanticMemoryEngine:
             if emotion not in self.emotional_trends:
                 self.emotional_trends[emotion] = []
 
-            self.emotional_trends[emotion].append({
-                "intensity": memory.emotional_intensity,
-                "timestamp": memory.timestamp,
-                "memory_id": memory.id
-            })
+            self.emotional_trends[emotion].append(
+                {
+                    "intensity": memory.emotional_intensity,
+                    "timestamp": memory.timestamp,
+                    "memory_id": memory.id,
+                }
+            )
 
     def _update_relationship_patterns(self, memory: RomanticMemory):
         """Update relationship pattern detection"""
         # Track relationship impact over time
-        self.relationship_metrics["impact"].append({
-            "value": memory.relationship_impact,
-            "timestamp": memory.timestamp,
-            "memory_id": memory.id
-        })
+        self.relationship_metrics["impact"].append(
+            {
+                "value": memory.relationship_impact,
+                "timestamp": memory.timestamp,
+                "memory_id": memory.id,
+            }
+        )
 
         # Track emotional intensity trends
-        self.relationship_metrics["emotional_intensity"].append({
-            "value": memory.emotional_intensity,
-            "timestamp": memory.timestamp,
-            "memory_id": memory.id
-        })
+        self.relationship_metrics["emotional_intensity"].append(
+            {
+                "value": memory.emotional_intensity,
+                "timestamp": memory.timestamp,
+                "memory_id": memory.id,
+            }
+        )
 
     def _update_interaction_patterns(self, memory: RomanticMemory):
         """Update interaction pattern detection"""
@@ -235,15 +256,18 @@ class RomanticMemoryEngine:
             if persona not in self.relationship_metrics:
                 self.relationship_metrics[persona] = []
 
-            self.relationship_metrics[persona].append({
-                "memory_type": memory.memory_type.value,
-                "intensity": memory.emotional_intensity,
-                "timestamp": memory.timestamp,
-                "memory_id": memory.id
-            })
+            self.relationship_metrics[persona].append(
+                {
+                    "memory_type": memory.memory_type.value,
+                    "intensity": memory.emotional_intensity,
+                    "timestamp": memory.timestamp,
+                    "memory_id": memory.id,
+                }
+            )
 
-    def recall_memories(self, emotion: str = None, persona: str = None,
-                       memory_type: str = None, limit: int = 10) -> List[RomanticMemory]:
+    def recall_memories(
+        self, emotion: str = None, persona: str = None, memory_type: str = None, limit: int = 10
+    ) -> list[RomanticMemory]:
         """Recall memories based on criteria"""
         try:
             # Apply memory decay
@@ -253,28 +277,18 @@ class RomanticMemoryEngine:
             filtered_memories = self.memories.copy()
 
             if emotion:
-                filtered_memories = [
-                    m for m in filtered_memories
-                    if emotion in m.emotions
-                ]
+                filtered_memories = [m for m in filtered_memories if emotion in m.emotions]
 
             if persona:
-                filtered_memories = [
-                    m for m in filtered_memories
-                    if persona in m.personas_involved
-                ]
+                filtered_memories = [m for m in filtered_memories if persona in m.personas_involved]
 
             if memory_type:
                 filtered_memories = [
-                    m for m in filtered_memories
-                    if m.memory_type.value == memory_type
+                    m for m in filtered_memories if m.memory_type.value == memory_type
                 ]
 
             # Sort by importance and recency
-            filtered_memories.sort(
-                key=lambda x: (x.importance_score, x.timestamp),
-                reverse=True
-            )
+            filtered_memories.sort(key=lambda x: (x.importance_score, x.timestamp), reverse=True)
 
             # Update recall statistics
             for memory in filtered_memories[:limit]:
@@ -297,7 +311,7 @@ class RomanticMemoryEngine:
                 decay_factor = memory.decay_rate * time_since_recall
                 memory.importance_score = max(0.1, memory.importance_score - decay_factor)
 
-    def detect_relationship_patterns(self) -> Dict[str, RelationshipPattern]:
+    def detect_relationship_patterns(self) -> dict[str, RelationshipPattern]:
         """Detect patterns in relationship data"""
         patterns = {}
 
@@ -343,7 +357,7 @@ class RomanticMemoryEngine:
                 average_intensity=np.mean(recent_intensities),
                 last_occurrence=datetime.now(),
                 trend="increasing",
-                impact_score=trend
+                impact_score=trend,
             )
 
         return None
@@ -351,8 +365,7 @@ class RomanticMemoryEngine:
     def _detect_conflict_patterns(self) -> Optional[RelationshipPattern]:
         """Detect conflict resolution patterns"""
         conflict_memories = [
-            m for m in self.memories
-            if m.memory_type == MemoryType.CONFLICT_RESOLUTION
+            m for m in self.memories if m.memory_type == MemoryType.CONFLICT_RESOLUTION
         ]
 
         if len(conflict_memories) < 2:
@@ -369,7 +382,7 @@ class RomanticMemoryEngine:
                 average_intensity=np.mean([m.emotional_intensity for m in conflict_memories]),
                 last_occurrence=conflict_memories[-1].timestamp,
                 trend="improving",
-                impact_score=len(resolutions) / len(conflict_memories)
+                impact_score=len(resolutions) / len(conflict_memories),
             )
 
         return None
@@ -377,7 +390,8 @@ class RomanticMemoryEngine:
     def _detect_intimacy_growth(self) -> Optional[RelationshipPattern]:
         """Detect intimacy growth patterns"""
         intimate_memories = [
-            m for m in self.memories
+            m
+            for m in self.memories
             if m.memory_type in [MemoryType.INTIMATE_INTERACTION, MemoryType.ROMANTIC_GESTURE]
         ]
 
@@ -396,7 +410,7 @@ class RomanticMemoryEngine:
                 average_intensity=np.mean(intensities),
                 last_occurrence=recent_intimate[-1].timestamp,
                 trend="increasing",
-                impact_score=trend
+                impact_score=trend,
             )
 
         return None
@@ -404,8 +418,7 @@ class RomanticMemoryEngine:
     def _detect_communication_improvement(self) -> Optional[RelationshipPattern]:
         """Detect communication improvement patterns"""
         communication_memories = [
-            m for m in self.memories
-            if m.memory_type == MemoryType.CONVERSATION_HIGHLIGHT
+            m for m in self.memories if m.memory_type == MemoryType.CONVERSATION_HIGHLIGHT
         ]
 
         if len(communication_memories) < 4:
@@ -423,7 +436,7 @@ class RomanticMemoryEngine:
                 average_intensity=np.mean([m.emotional_intensity for m in recent_comm]),
                 last_occurrence=recent_comm[-1].timestamp,
                 trend="improving",
-                impact_score=trend
+                impact_score=trend,
             )
 
         return None
@@ -431,8 +444,7 @@ class RomanticMemoryEngine:
     def _detect_romantic_consistency(self) -> Optional[RelationshipPattern]:
         """Detect romantic consistency patterns"""
         romantic_memories = [
-            m for m in self.memories
-            if m.memory_type == MemoryType.ROMANTIC_GESTURE
+            m for m in self.memories if m.memory_type == MemoryType.ROMANTIC_GESTURE
         ]
 
         if len(romantic_memories) < 6:
@@ -443,7 +455,7 @@ class RomanticMemoryEngine:
         time_gaps = []
 
         for i in range(1, len(recent_romantic)):
-            gap = (recent_romantic[i].timestamp - recent_romantic[i-1].timestamp).days
+            gap = (recent_romantic[i].timestamp - recent_romantic[i - 1].timestamp).days
             time_gaps.append(gap)
 
         if time_gaps:
@@ -456,12 +468,12 @@ class RomanticMemoryEngine:
                     average_intensity=np.mean([m.emotional_intensity for m in recent_romantic]),
                     last_occurrence=recent_romantic[-1].timestamp,
                     trend="stable",
-                    impact_score=consistency_score
+                    impact_score=consistency_score,
                 )
 
         return None
 
-    def _calculate_trend(self, values: List[float]) -> float:
+    def _calculate_trend(self, values: list[float]) -> float:
         """Calculate trend in a list of values"""
         if len(values) < 2:
             return 0.0
@@ -479,7 +491,7 @@ class RomanticMemoryEngine:
 
         return normalized_trend
 
-    def generate_relationship_insights(self) -> Dict[str, Any]:
+    def generate_relationship_insights(self) -> dict[str, Any]:
         """Generate comprehensive relationship insights"""
         try:
             # Detect patterns
@@ -502,16 +514,20 @@ class RomanticMemoryEngine:
                 "memory_stats": {
                     "total_memories": len(self.memories),
                     "memory_types": self._get_memory_type_distribution(),
-                    "average_importance": np.mean([m.importance_score for m in self.memories]) if self.memories else 0.0,
-                    "recent_activity": len([m for m in self.memories if (datetime.now() - m.timestamp).days < 7])
-                }
+                    "average_importance": np.mean([m.importance_score for m in self.memories])
+                    if self.memories
+                    else 0.0,
+                    "recent_activity": len(
+                        [m for m in self.memories if (datetime.now() - m.timestamp).days < 7]
+                    ),
+                },
             }
 
         except Exception as e:
             print(f"[RomanticMemory] Error generating insights: {e}")
             return {}
 
-    def _calculate_health_metrics(self) -> Dict[str, float]:
+    def _calculate_health_metrics(self) -> dict[str, float]:
         """Calculate relationship health metrics"""
         if not self.memories:
             return {}
@@ -525,32 +541,51 @@ class RomanticMemoryEngine:
             "emotional_intensity": np.mean([m.emotional_intensity for m in recent_memories]),
             "relationship_impact": np.mean([m.relationship_impact for m in recent_memories]),
             "memory_importance": np.mean([m.importance_score for m in recent_memories]),
-            "positive_interactions": len([m for m in recent_memories if m.relationship_impact > 0]) / len(recent_memories),
-            "intimate_moments": len([m for m in recent_memories if m.memory_type in [MemoryType.INTIMATE_INTERACTION, MemoryType.ROMANTIC_GESTURE]]) / len(recent_memories)
+            "positive_interactions": len([m for m in recent_memories if m.relationship_impact > 0])
+            / len(recent_memories),
+            "intimate_moments": len(
+                [
+                    m
+                    for m in recent_memories
+                    if m.memory_type
+                    in [MemoryType.INTIMATE_INTERACTION, MemoryType.ROMANTIC_GESTURE]
+                ]
+            )
+            / len(recent_memories),
         }
 
         return metrics
 
-    def _generate_recommendations(self, patterns: Dict, health_metrics: Dict) -> List[str]:
+    def _generate_recommendations(self, patterns: dict, health_metrics: dict) -> list[str]:
         """Generate relationship recommendations based on patterns and metrics"""
         recommendations = []
 
         # Pattern-based recommendations
         if "emotional_escalation" in patterns and patterns["emotional_escalation"]:
-            recommendations.append("Consider discussing the increasing emotional intensity to ensure both partners are comfortable")
+            recommendations.append(
+                "Consider discussing the increasing emotional intensity to ensure both partners are comfortable"
+            )
 
         if "conflict_patterns" in patterns and patterns["conflict_patterns"]:
-            recommendations.append("Focus on conflict resolution skills and consider relationship counseling")
+            recommendations.append(
+                "Focus on conflict resolution skills and consider relationship counseling"
+            )
 
         if "intimacy_growth" in patterns and patterns["intimacy_growth"]:
-            recommendations.append("Continue nurturing the growing intimacy through shared experiences")
+            recommendations.append(
+                "Continue nurturing the growing intimacy through shared experiences"
+            )
 
         if "communication_improvement" in patterns and patterns["communication_improvement"]:
-            recommendations.append("Maintain the improved communication patterns and consider regular check-ins")
+            recommendations.append(
+                "Maintain the improved communication patterns and consider regular check-ins"
+            )
 
         # Health-based recommendations
         if health_metrics.get("positive_interactions", 0) < 0.7:
-            recommendations.append("Work on increasing positive interactions and reducing negative patterns")
+            recommendations.append(
+                "Work on increasing positive interactions and reducing negative patterns"
+            )
 
         if health_metrics.get("intimate_moments", 0) < 0.3:
             recommendations.append("Consider planning more intimate moments and romantic gestures")
@@ -560,7 +595,7 @@ class RomanticMemoryEngine:
 
         return recommendations
 
-    def _analyze_emotional_trends(self) -> Dict[str, Any]:
+    def _analyze_emotional_trends(self) -> dict[str, Any]:
         """Analyze emotional trends over time"""
         analysis = {}
 
@@ -571,12 +606,12 @@ class RomanticMemoryEngine:
                     "frequency": len(trend_data),
                     "average_intensity": np.mean(intensities),
                     "trend": self._calculate_trend(intensities),
-                    "last_occurrence": trend_data[-1]["timestamp"]
+                    "last_occurrence": trend_data[-1]["timestamp"],
                 }
 
         return analysis
 
-    def _get_memory_type_distribution(self) -> Dict[str, int]:
+    def _get_memory_type_distribution(self) -> dict[str, int]:
         """Get distribution of memory types"""
         distribution = defaultdict(int)
 
@@ -597,7 +632,9 @@ class RomanticMemoryEngine:
 
                 # Clean up old memories (keep last 1000)
                 if len(self.memories) > 1000:
-                    self.memories = sorted(self.memories, key=lambda x: x.importance_score, reverse=True)[:1000]
+                    self.memories = sorted(
+                        self.memories, key=lambda x: x.importance_score, reverse=True
+                    )[:1000]
 
                 time.sleep(3600)  # Run every hour
 
@@ -605,40 +642,64 @@ class RomanticMemoryEngine:
                 print(f"[RomanticMemory] Background processing error: {e}")
                 time.sleep(300)  # Wait 5 minutes on error
 
-    def get_memory_summary(self) -> Dict[str, Any]:
+    def get_memory_summary(self) -> dict[str, Any]:
         """Get summary of romantic memory system"""
         return {
             "total_memories": len(self.memories),
             "memory_types": self._get_memory_type_distribution(),
             "patterns_detected": len([p for p in self.patterns.values() if p is not None]),
-            "average_importance": np.mean([m.importance_score for m in self.memories]) if self.memories else 0.0,
-            "recent_memories": len([m for m in self.memories if (datetime.now() - m.timestamp).days < 7]),
-            "system_status": "active" if self.is_running else "inactive"
+            "average_importance": np.mean([m.importance_score for m in self.memories])
+            if self.memories
+            else 0.0,
+            "recent_memories": len(
+                [m for m in self.memories if (datetime.now() - m.timestamp).days < 7]
+            ),
+            "system_status": "active" if self.is_running else "inactive",
         }
+
 
 # Global romantic memory engine instance
 romantic_memory_engine = RomanticMemoryEngine()
+
 
 def get_romantic_memory_engine() -> RomanticMemoryEngine:
     """Get the global romantic memory engine instance"""
     return romantic_memory_engine
 
-def store_romantic_memory(memory_type: str, title: str, description: str,
-                         emotional_intensity: float, emotions: List[str],
-                         personas_involved: List[str], context: Dict[str, Any] = None,
-                         relationship_impact: float = 0.0, tags: List[str] = None) -> str:
+
+def store_romantic_memory(
+    memory_type: str,
+    title: str,
+    description: str,
+    emotional_intensity: float,
+    emotions: list[str],
+    personas_involved: list[str],
+    context: dict[str, Any] = None,
+    relationship_impact: float = 0.0,
+    tags: list[str] = None,
+) -> str:
     """Store romantic memory with convenience function"""
     return romantic_memory_engine.store_romantic_memory(
-        memory_type, title, description, emotional_intensity, emotions,
-        personas_involved, context or {}, relationship_impact, tags
+        memory_type,
+        title,
+        description,
+        emotional_intensity,
+        emotions,
+        personas_involved,
+        context or {},
+        relationship_impact,
+        tags,
     )
 
-def recall_romantic_memories(emotion: str = None, persona: str = None,
-                           memory_type: str = None, limit: int = 10) -> List[Dict]:
+
+def recall_romantic_memories(
+    emotion: str = None, persona: str = None, memory_type: str = None, limit: int = 10
+) -> list[dict]:
     """Recall romantic memories with convenience function"""
     memories = romantic_memory_engine.recall_memories(emotion, persona, memory_type, limit)
     return [asdict(memory) for memory in memories]
 
-def get_relationship_insights() -> Dict[str, Any]:
+
+def get_relationship_insights() -> dict[str, Any]:
     """Get relationship insights with convenience function"""
     return romantic_memory_engine.generate_relationship_insights()

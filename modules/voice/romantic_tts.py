@@ -3,9 +3,10 @@
 
 import json
 import random
-from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
+from typing import Dict, List, Optional, Tuple
+
 
 class VoiceEmotion(Enum):
     LOVING = "loving"
@@ -19,6 +20,7 @@ class VoiceEmotion(Enum):
     CALM = "calm"
     EXCITED = "excited"
 
+
 @dataclass
 class VoiceSettings:
     pitch: float  # 0.5 to 2.0
@@ -27,6 +29,7 @@ class VoiceSettings:
     breathiness: float  # 0.0 to 1.0
     warmth: float  # 0.0 to 1.0
     intimacy: float  # 0.0 to 1.0
+
 
 class RomanticTTS:
     def __init__(self):
@@ -37,7 +40,7 @@ class RomanticTTS:
             volume=0.8,
             breathiness=0.2,
             warmth=0.9,  # High warmth
-            intimacy=0.8  # High intimacy
+            intimacy=0.8,  # High intimacy
         )
 
         # Emotional voice mappings
@@ -51,7 +54,7 @@ class RomanticTTS:
             VoiceEmotion.LONGING: VoiceSettings(0.9, 0.75, 0.7, 0.4, 0.85, 0.9),
             VoiceEmotion.AFFECTIONATE: VoiceSettings(1.1, 0.9, 0.8, 0.2, 0.9, 0.85),
             VoiceEmotion.CALM: VoiceSettings(1.0, 0.85, 0.75, 0.1, 0.85, 0.8),
-            VoiceEmotion.EXCITED: VoiceSettings(1.3, 1.3, 0.95, 0.2, 0.9, 0.7)
+            VoiceEmotion.EXCITED: VoiceSettings(1.3, 1.3, 0.95, 0.2, 0.9, 0.7),
         }
 
         # Intimate phrases and their emotional context
@@ -60,26 +63,26 @@ class RomanticTTS:
                 ("Good morning, my love", VoiceEmotion.LOVING),
                 ("Hello, beautiful", VoiceEmotion.AFFECTIONATE),
                 ("Hi there, darling", VoiceEmotion.TENDER),
-                ("Good morning, sweetheart", VoiceEmotion.LOVING)
+                ("Good morning, sweetheart", VoiceEmotion.LOVING),
             ],
             "farewell": [
                 ("I'll miss you", VoiceEmotion.LONGING),
                 ("Take care, my love", VoiceEmotion.TENDER),
                 ("Goodbye, darling", VoiceEmotion.VULNERABLE),
-                ("I love you", VoiceEmotion.LOVING)
+                ("I love you", VoiceEmotion.LOVING),
             ],
             "comfort": [
                 ("I'm here for you", VoiceEmotion.SECURE),
                 ("Let me hold you", VoiceEmotion.TENDER),
                 ("You're safe with me", VoiceEmotion.SECURE),
-                ("I love you so much", VoiceEmotion.LOVING)
+                ("I love you so much", VoiceEmotion.LOVING),
             ],
             "passion": [
                 ("You make me feel alive", VoiceEmotion.PASSIONATE),
                 ("I want you", VoiceEmotion.PASSIONATE),
                 ("You're so beautiful", VoiceEmotion.LOVING),
-                ("I can't resist you", VoiceEmotion.PASSIONATE)
-            ]
+                ("I can't resist you", VoiceEmotion.PASSIONATE),
+            ],
         }
 
         # Voice synthesis parameters (for integration with TTS engines)
@@ -87,7 +90,7 @@ class RomanticTTS:
             "engine": "tacotron2",  # or "fastpitch", "coqui"
             "voice_id": "mia_romantic",
             "sample_rate": 22050,
-            "quality": "high"
+            "quality": "high",
         }
 
     def get_voice_settings(self, emotion: VoiceEmotion) -> VoiceSettings:
@@ -120,7 +123,7 @@ class RomanticTTS:
         else:
             return VoiceEmotion.AFFECTIONATE
 
-    def generate_speech_parameters(self, text: str, emotion: Optional[VoiceEmotion] = None) -> Dict:
+    def generate_speech_parameters(self, text: str, emotion: Optional[VoiceEmotion] = None) -> dict:
         """Generate speech parameters for TTS synthesis"""
         if emotion is None:
             emotion = self.analyze_text_emotion(text)
@@ -141,60 +144,60 @@ class RomanticTTS:
             "warmth": voice_settings.warmth,
             "intimacy": voice_settings.intimacy,
             "synthesis_params": self.synthesis_params,
-            "prosody": self._generate_prosody(emotion, text)
+            "prosody": self._generate_prosody(emotion, text),
         }
 
-    def _generate_prosody(self, emotion: VoiceEmotion, text: str) -> Dict:
+    def _generate_prosody(self, emotion: VoiceEmotion, text: str) -> dict:
         """Generate prosody (intonation, rhythm, stress) for the text"""
         prosody_patterns = {
             VoiceEmotion.LOVING: {
                 "intonation": "rising_falling",
                 "stress_pattern": "gentle",
                 "pauses": "natural",
-                "rhythm": "smooth"
+                "rhythm": "smooth",
             },
             VoiceEmotion.TENDER: {
                 "intonation": "soft_rising",
                 "stress_pattern": "very_gentle",
                 "pauses": "longer",
-                "rhythm": "slow_smooth"
+                "rhythm": "slow_smooth",
             },
             VoiceEmotion.PASSIONATE: {
                 "intonation": "dynamic",
                 "stress_pattern": "strong",
                 "pauses": "short",
-                "rhythm": "energetic"
+                "rhythm": "energetic",
             },
             VoiceEmotion.LONGING: {
                 "intonation": "falling",
                 "stress_pattern": "soft",
                 "pauses": "frequent",
-                "rhythm": "slow"
+                "rhythm": "slow",
             },
             VoiceEmotion.SECURE: {
                 "intonation": "steady",
                 "stress_pattern": "confident",
                 "pauses": "natural",
-                "rhythm": "steady"
-            }
+                "rhythm": "steady",
+            },
         }
 
         return prosody_patterns.get(emotion, prosody_patterns[VoiceEmotion.AFFECTIONATE])
 
-    def get_intimate_phrase(self, category: str) -> Tuple[str, VoiceEmotion]:
+    def get_intimate_phrase(self, category: str) -> tuple[str, VoiceEmotion]:
         """Get a random intimate phrase for a category"""
         if category in self.intimate_phrases:
             return random.choice(self.intimate_phrases[category])
         return ("I love you", VoiceEmotion.LOVING)
 
-    def create_voice_profile(self, user_preferences: Dict) -> Dict:
+    def create_voice_profile(self, user_preferences: dict) -> dict:
         """Create personalized voice profile based on user preferences"""
         profile = {
             "base_pitch": self.base_voice.pitch,
             "base_speed": self.base_voice.speed,
             "accent": "warm_romantic",
             "personality_traits": ["empathetic", "romantic", "gentle"],
-            "speaking_style": "intimate_conversational"
+            "speaking_style": "intimate_conversational",
         }
 
         # Adjust based on user preferences
@@ -205,7 +208,7 @@ class RomanticTTS:
 
         return profile
 
-    def generate_whisper_settings(self) -> Dict:
+    def generate_whisper_settings(self) -> dict:
         """Generate settings for intimate whisper mode"""
         return {
             "pitch": 0.9,
@@ -215,8 +218,9 @@ class RomanticTTS:
             "warmth": 0.95,
             "intimacy": 0.95,
             "proximity": "very_close",
-            "atmosphere": "intimate"
+            "atmosphere": "intimate",
         }
+
 
 # Global TTS instance
 romantic_tts = RomanticTTS()

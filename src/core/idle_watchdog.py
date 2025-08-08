@@ -17,9 +17,9 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 import psutil
+from trigger_self_train import trigger_self_training
 
 from core.mirror_mode import get_mirror_mode_manager
-from trigger_self_train import trigger_self_training
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -42,7 +42,9 @@ class IdleWatchdog:
         self.emotion_loop_instance: Optional[Any] = None
         self.pause_emotion_on_idle = True  # Configuration flag
 
-        logger.info(f"IdleWatchdog initialized with {idle_minutes}min threshold and emotion loop pause enabled")
+        logger.info(
+            f"IdleWatchdog initialized with {idle_minutes}min threshold and emotion loop pause enabled"
+        )
 
     def mark_active(self) -> None:
         """Record a user activity event and resume emotion loop if paused."""
@@ -73,7 +75,7 @@ class IdleWatchdog:
 
         try:
             # Try to pause the emotion loop instance if available
-            if self.emotion_loop_instance and hasattr(self.emotion_loop_instance, 'pause'):
+            if self.emotion_loop_instance and hasattr(self.emotion_loop_instance, "pause"):
                 await self.emotion_loop_instance.pause()
                 self.emotion_loop_paused = True
                 self.emotion_loop_pause_time = datetime.now()
@@ -83,6 +85,7 @@ class IdleWatchdog:
             # Alternative: Try to import and pause emotion loop directly
             try:
                 from core.emotion_loop_core import pause_emotion_loop
+
                 success = await pause_emotion_loop()
                 if success:
                     self.emotion_loop_paused = True
@@ -93,7 +96,7 @@ class IdleWatchdog:
                 logger.debug("Direct emotion loop pause not available")
 
             # Fallback: Use environment variable or global flag
-            os.environ['EMOTION_LOOP_PAUSED'] = 'true'
+            os.environ["EMOTION_LOOP_PAUSED"] = "true"
             self.emotion_loop_paused = True
             self.emotion_loop_pause_time = datetime.now()
             logger.info("Emotion loop paused via environment flag")
@@ -120,7 +123,7 @@ class IdleWatchdog:
                 pause_duration = datetime.now() - self.emotion_loop_pause_time
 
             # Try to resume the emotion loop instance if available
-            if self.emotion_loop_instance and hasattr(self.emotion_loop_instance, 'resume'):
+            if self.emotion_loop_instance and hasattr(self.emotion_loop_instance, "resume"):
                 await self.emotion_loop_instance.resume()
                 self.emotion_loop_paused = False
                 self.emotion_loop_pause_time = None
@@ -130,18 +133,21 @@ class IdleWatchdog:
             # Alternative: Try to resume emotion loop directly
             try:
                 from core.emotion_loop_core import resume_emotion_loop
+
                 success = await resume_emotion_loop()
                 if success:
                     self.emotion_loop_paused = False
                     self.emotion_loop_pause_time = None
-                    logger.info(f"Emotion loop resumed via direct core resume after {pause_duration}")
+                    logger.info(
+                        f"Emotion loop resumed via direct core resume after {pause_duration}"
+                    )
                     return True
             except ImportError:
                 logger.debug("Direct emotion loop resume not available")
 
             # Fallback: Clear environment variable
-            if 'EMOTION_LOOP_PAUSED' in os.environ:
-                del os.environ['EMOTION_LOOP_PAUSED']
+            if "EMOTION_LOOP_PAUSED" in os.environ:
+                del os.environ["EMOTION_LOOP_PAUSED"]
 
             self.emotion_loop_paused = False
             self.emotion_loop_pause_time = None
@@ -157,9 +163,11 @@ class IdleWatchdog:
         status = {
             "emotion_loop_paused": self.emotion_loop_paused,
             "pause_enabled": self.pause_emotion_on_idle,
-            "pause_time": self.emotion_loop_pause_time.isoformat() if self.emotion_loop_pause_time else None,
+            "pause_time": self.emotion_loop_pause_time.isoformat()
+            if self.emotion_loop_pause_time
+            else None,
             "pause_duration_seconds": None,
-            "has_emotion_loop_instance": self.emotion_loop_instance is not None
+            "has_emotion_loop_instance": self.emotion_loop_instance is not None,
         }
 
         if self.emotion_loop_paused and self.emotion_loop_pause_time:
@@ -189,7 +197,7 @@ class IdleWatchdog:
             "Idle check → %.0f seconds idle | CPU %.1f%% | Emotion loop paused: %s",
             idle_duration.total_seconds(),
             cpu_usage,
-            self.emotion_loop_paused
+            self.emotion_loop_paused,
         )
 
         # Check if we should pause emotion loop during idle period
@@ -217,7 +225,7 @@ class IdleWatchdog:
             "current_idle_seconds": idle_duration.total_seconds(),
             "is_idle": idle_duration >= self.idle_threshold,
             "last_active_time": self.last_active_time.isoformat(),
-            "check_interval_seconds": CHECK_INTERVAL_SECONDS
+            "check_interval_seconds": CHECK_INTERVAL_SECONDS,
         }
 
         # Add emotion loop status

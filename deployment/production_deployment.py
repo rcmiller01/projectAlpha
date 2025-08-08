@@ -4,30 +4,30 @@ Production Deployment Script for Emotionally Intelligent AI Companion System
 Handles comprehensive deployment preparation, configuration, and launch
 """
 
-import os
-import sys
 import json
-import subprocess
+import logging
+import os
 import shutil
-import yaml
+import subprocess
+import sys
+from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Any
-import docker
+from typing import Any, Dict, List, Optional
+
 import psutil
 import requests
-from datetime import datetime
-import logging
+import yaml
+
+import docker
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('deployment.log'),
-        logging.StreamHandler()
-    ]
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[logging.FileHandler("deployment.log"), logging.StreamHandler()],
 )
 logger = logging.getLogger(__name__)
+
 
 class ProductionDeployer:
     """Comprehensive production deployment orchestrator"""
@@ -39,12 +39,12 @@ class ProductionDeployer:
         self.deployment_root = Path(__file__).parent.parent
         self.backup_dir = self.deployment_root / "backups"
 
-    def load_deployment_config(self) -> Dict[str, Any]:
+    def load_deployment_config(self) -> dict[str, Any]:
         """Load production deployment configuration"""
         try:
             config_file = self.deployment_root / self.config_path
             if config_file.exists():
-                with open(config_file, 'r') as f:
+                with open(config_file) as f:
                     return yaml.safe_load(f)
             else:
                 return self.create_default_config()
@@ -52,7 +52,7 @@ class ProductionDeployer:
             logger.error(f"Failed to load config: {e}")
             return self.create_default_config()
 
-    def create_default_config(self) -> Dict[str, Any]:
+    def create_default_config(self) -> dict[str, Any]:
         """Create default production configuration"""
         return {
             "deployment": {
@@ -60,49 +60,33 @@ class ProductionDeployer:
                 "domain": "ai-companion.example.com",
                 "ssl_enabled": True,
                 "backup_enabled": True,
-                "monitoring_enabled": True
+                "monitoring_enabled": True,
             },
             "services": {
-                "frontend": {
-                    "port": 3000,
-                    "replicas": 2,
-                    "health_check": "/health"
-                },
-                "backend": {
-                    "port": 8000,
-                    "replicas": 3,
-                    "health_check": "/api/health"
-                },
-                "mongodb": {
-                    "port": 27017,
-                    "replicas": 1,
-                    "data_volume": "/data/mongodb"
-                },
-                "nginx": {
-                    "port": 80,
-                    "ssl_port": 443,
-                    "replicas": 1
-                }
+                "frontend": {"port": 3000, "replicas": 2, "health_check": "/health"},
+                "backend": {"port": 8000, "replicas": 3, "health_check": "/api/health"},
+                "mongodb": {"port": 27017, "replicas": 1, "data_volume": "/data/mongodb"},
+                "nginx": {"port": 80, "ssl_port": 443, "replicas": 1},
             },
             "security": {
                 "ssl_certificate_path": "/etc/ssl/certs/ai-companion.crt",
                 "ssl_key_path": "/etc/ssl/private/ai-companion.key",
                 "firewall_enabled": True,
                 "rate_limiting": True,
-                "cors_origins": ["https://ai-companion.example.com"]
+                "cors_origins": ["https://ai-companion.example.com"],
             },
             "monitoring": {
                 "prometheus": True,
                 "grafana": True,
                 "log_aggregation": True,
-                "alerts": True
+                "alerts": True,
             },
             "backup": {
                 "schedule": "0 2 * * *",  # Daily at 2 AM
                 "retention_days": 30,
                 "s3_bucket": "ai-companion-backups",
-                "encryption": True
-            }
+                "encryption": True,
+            },
         }
 
     def check_system_requirements(self) -> bool:
@@ -120,7 +104,7 @@ class ProductionDeployer:
             logger.info(f"✅ Memory: {memory_gb:.1f}GB")
 
         # Check available disk space (minimum 50GB)
-        disk_usage = psutil.disk_usage('/')
+        disk_usage = psutil.disk_usage("/")
         disk_gb = disk_usage.free / (1024**3)
         if disk_gb < 50:
             logger.error(f"❌ Insufficient disk space: {disk_gb:.1f}GB (minimum 50GB required)")
@@ -142,7 +126,9 @@ class ProductionDeployer:
             logger.error(f"❌ Python version too old: {python_version} (minimum 3.8 required)")
             requirements_met = False
         else:
-            logger.info(f"✅ Python: {python_version.major}.{python_version.minor}.{python_version.micro}")
+            logger.info(
+                f"✅ Python: {python_version.major}.{python_version.minor}.{python_version.micro}"
+            )
 
         return requirements_met
 
@@ -155,44 +141,37 @@ class ProductionDeployer:
             "NODE_ENV": "production",
             "PYTHON_ENV": "production",
             "DEBUG": "false",
-
             # Database
             "MONGODB_URI": "mongodb://mongodb:27017/ai_companion_prod",
             "MONGODB_DATABASE": "ai_companion_prod",
-
             # API Configuration
             "API_BASE_URL": f"https://{self.config['deployment']['domain']}/api",
             "FRONTEND_URL": f"https://{self.config['deployment']['domain']}",
-
             # Security
             "JWT_SECRET": self.generate_secure_key(),
             "ENCRYPTION_KEY": self.generate_secure_key(),
             "SESSION_SECRET": self.generate_secure_key(),
-
             # External APIs (placeholder - to be configured)
             "OPENAI_API_KEY": "${OPENAI_API_KEY}",
             "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}",
             "ELEVENLABS_API_KEY": "${ELEVENLABS_API_KEY}",
             "TWILIO_ACCOUNT_SID": "${TWILIO_ACCOUNT_SID}",
             "TWILIO_AUTH_TOKEN": "${TWILIO_AUTH_TOKEN}",
-
             # Performance
             "MAX_WORKERS": str(psutil.cpu_count()),
             "REDIS_URL": "redis://redis:6379/0",
-
             # Monitoring
             "PROMETHEUS_ENABLED": "true",
             "LOG_LEVEL": "info",
-
             # Features
             "CREATIVE_DISCOVERY_ENABLED": "true",
             "VOICE_SYNTHESIS_ENABLED": "true",
             "SMS_INTEGRATION_ENABLED": "true",
-            "BIOMETRIC_INTEGRATION_ENABLED": "true"
+            "BIOMETRIC_INTEGRATION_ENABLED": "true",
         }
 
         env_file_path = self.deployment_root / ".env.production"
-        with open(env_file_path, 'w') as f:
+        with open(env_file_path, "w") as f:
             for key, value in env_vars.items():
                 f.write(f"{key}={value}\n")
 
@@ -200,7 +179,7 @@ class ProductionDeployer:
 
         # Create template for secrets
         secrets_template_path = self.deployment_root / ".env.secrets.template"
-        with open(secrets_template_path, 'w') as f:
+        with open(secrets_template_path, "w") as f:
             f.write("# Production Secrets - Replace with actual values\n")
             f.write("OPENAI_API_KEY=your_openai_key_here\n")
             f.write("ANTHROPIC_API_KEY=your_anthropic_key_here\n")
@@ -214,8 +193,9 @@ class ProductionDeployer:
         """Generate cryptographically secure random key"""
         import secrets
         import string
+
         alphabet = string.ascii_letters + string.digits
-        return ''.join(secrets.choice(alphabet) for _ in range(length))
+        return "".join(secrets.choice(alphabet) for _ in range(length))
 
     def create_docker_compose_production(self):
         """Generate production-ready docker-compose.yml"""
@@ -229,131 +209,117 @@ class ProductionDeployer:
                     "container_name": "ai_companion_nginx",
                     "ports": [
                         f"{self.config['services']['nginx']['port']}:80",
-                        f"{self.config['services']['nginx']['ssl_port']}:443"
+                        f"{self.config['services']['nginx']['ssl_port']}:443",
                     ],
                     "volumes": [
                         "./nginx/nginx.conf:/etc/nginx/nginx.conf:ro",
                         "./nginx/ssl:/etc/ssl:ro",
-                        "./frontend/dist:/usr/share/nginx/html:ro"
+                        "./frontend/dist:/usr/share/nginx/html:ro",
                     ],
                     "depends_on": ["frontend", "backend"],
                     "restart": "unless-stopped",
-                    "networks": ["ai_companion_network"]
+                    "networks": ["ai_companion_network"],
                 },
                 "frontend": {
-                    "build": {
-                        "context": "./frontend",
-                        "dockerfile": "Dockerfile.production"
-                    },
+                    "build": {"context": "./frontend", "dockerfile": "Dockerfile.production"},
                     "container_name": "ai_companion_frontend",
-                    "expose": [str(self.config['services']['frontend']['port'])],
-                    "environment": [
-                        "NODE_ENV=production"
-                    ],
+                    "expose": [str(self.config["services"]["frontend"]["port"])],
+                    "environment": ["NODE_ENV=production"],
                     "restart": "unless-stopped",
                     "networks": ["ai_companion_network"],
                     "healthcheck": {
-                        "test": ["CMD", "curl", "-f", f"http://localhost:{self.config['services']['frontend']['port']}/health"],
+                        "test": [
+                            "CMD",
+                            "curl",
+                            "-f",
+                            f"http://localhost:{self.config['services']['frontend']['port']}/health",
+                        ],
                         "interval": "30s",
                         "timeout": "10s",
-                        "retries": 3
-                    }
+                        "retries": 3,
+                    },
                 },
                 "backend": {
-                    "build": {
-                        "context": "./backend",
-                        "dockerfile": "Dockerfile.production"
-                    },
+                    "build": {"context": "./backend", "dockerfile": "Dockerfile.production"},
                     "container_name": "ai_companion_backend",
-                    "expose": [str(self.config['services']['backend']['port'])],
+                    "expose": [str(self.config["services"]["backend"]["port"])],
                     "env_file": [".env.production", ".env.secrets"],
                     "volumes": [
                         "./data/uploads:/app/uploads",
                         "./data/generated_content:/app/generated_content",
-                        "./logs:/app/logs"
+                        "./logs:/app/logs",
                     ],
                     "depends_on": ["mongodb", "redis"],
                     "restart": "unless-stopped",
                     "networks": ["ai_companion_network"],
                     "healthcheck": {
-                        "test": ["CMD", "curl", "-f", f"http://localhost:{self.config['services']['backend']['port']}/api/health"],
+                        "test": [
+                            "CMD",
+                            "curl",
+                            "-f",
+                            f"http://localhost:{self.config['services']['backend']['port']}/api/health",
+                        ],
                         "interval": "30s",
                         "timeout": "10s",
-                        "retries": 3
-                    }
+                        "retries": 3,
+                    },
                 },
                 "mongodb": {
                     "image": "mongo:6.0",
                     "container_name": "ai_companion_mongodb",
-                    "expose": [str(self.config['services']['mongodb']['port'])],
+                    "expose": [str(self.config["services"]["mongodb"]["port"])],
                     "environment": [
                         "MONGO_INITDB_ROOT_USERNAME=admin",
                         "MONGO_INITDB_ROOT_PASSWORD=${MONGODB_ROOT_PASSWORD}",
-                        "MONGO_INITDB_DATABASE=ai_companion_prod"
+                        "MONGO_INITDB_DATABASE=ai_companion_prod",
                     ],
                     "volumes": [
                         "./data/mongodb:/data/db",
-                        "./mongodb/init:/docker-entrypoint-initdb.d"
+                        "./mongodb/init:/docker-entrypoint-initdb.d",
                     ],
                     "restart": "unless-stopped",
                     "networks": ["ai_companion_network"],
-                    "command": ["mongod", "--auth", "--bind_ip_all"]
+                    "command": ["mongod", "--auth", "--bind_ip_all"],
                 },
                 "redis": {
                     "image": "redis:7-alpine",
                     "container_name": "ai_companion_redis",
                     "expose": ["6379"],
-                    "volumes": [
-                        "./data/redis:/data"
-                    ],
+                    "volumes": ["./data/redis:/data"],
                     "restart": "unless-stopped",
                     "networks": ["ai_companion_network"],
-                    "command": ["redis-server", "--appendonly", "yes"]
-                }
+                    "command": ["redis-server", "--appendonly", "yes"],
+                },
             },
-            "networks": {
-                "ai_companion_network": {
-                    "driver": "bridge"
-                }
-            },
-            "volumes": {
-                "mongodb_data": None,
-                "redis_data": None,
-                "uploads_data": None
-            }
+            "networks": {"ai_companion_network": {"driver": "bridge"}},
+            "volumes": {"mongodb_data": None, "redis_data": None, "uploads_data": None},
         }
 
         # Add monitoring services if enabled
-        if self.config['monitoring']['prometheus']:
-            compose_config['services']['prometheus'] = {
+        if self.config["monitoring"]["prometheus"]:
+            compose_config["services"]["prometheus"] = {
                 "image": "prom/prometheus:latest",
                 "container_name": "ai_companion_prometheus",
                 "ports": ["9090:9090"],
-                "volumes": [
-                    "./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro"
-                ],
+                "volumes": ["./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro"],
                 "restart": "unless-stopped",
-                "networks": ["ai_companion_network"]
+                "networks": ["ai_companion_network"],
             }
 
-        if self.config['monitoring']['grafana']:
-            compose_config['services']['grafana'] = {
+        if self.config["monitoring"]["grafana"]:
+            compose_config["services"]["grafana"] = {
                 "image": "grafana/grafana:latest",
                 "container_name": "ai_companion_grafana",
                 "ports": ["3001:3000"],
-                "environment": [
-                    "GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}"
-                ],
-                "volumes": [
-                    "./monitoring/grafana:/var/lib/grafana"
-                ],
+                "environment": ["GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}"],
+                "volumes": ["./monitoring/grafana:/var/lib/grafana"],
                 "restart": "unless-stopped",
-                "networks": ["ai_companion_network"]
+                "networks": ["ai_companion_network"],
             }
 
         # Write production docker-compose file
         compose_file_path = self.deployment_root / "docker-compose.production.yml"
-        with open(compose_file_path, 'w') as f:
+        with open(compose_file_path, "w") as f:
             yaml.dump(compose_config, f, default_flow_style=False, indent=2)
 
         logger.info(f"✅ Production Docker Compose created: {compose_file_path}")
@@ -514,7 +480,7 @@ http {{
 """
 
         nginx_config_path = nginx_dir / "nginx.conf"
-        with open(nginx_config_path, 'w') as f:
+        with open(nginx_config_path, "w") as f:
             f.write(nginx_config.strip())
 
         logger.info(f"✅ Nginx configuration created: {nginx_config_path}")
@@ -545,7 +511,7 @@ CMD ["nginx", "-g", "daemon off;"]
 
         frontend_docker_path = self.deployment_root / "frontend" / "Dockerfile.production"
         frontend_docker_path.parent.mkdir(exist_ok=True)
-        with open(frontend_docker_path, 'w') as f:
+        with open(frontend_docker_path, "w") as f:
             f.write(frontend_dockerfile.strip())
 
         # Backend production Dockerfile
@@ -584,7 +550,7 @@ CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--worker-class", "
 
         backend_docker_path = self.deployment_root / "backend" / "Dockerfile.production"
         backend_docker_path.parent.mkdir(exist_ok=True)
-        with open(backend_docker_path, 'w') as f:
+        with open(backend_docker_path, "w") as f:
             f.write(backend_dockerfile.strip())
 
         logger.info("✅ Production Dockerfiles created")
@@ -598,42 +564,25 @@ CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--worker-class", "
 
         # Prometheus configuration
         prometheus_config = {
-            "global": {
-                "scrape_interval": "15s",
-                "evaluation_interval": "15s"
-            },
+            "global": {"scrape_interval": "15s", "evaluation_interval": "15s"},
             "rule_files": [],
             "scrape_configs": [
                 {
                     "job_name": "ai-companion-backend",
-                    "static_configs": [
-                        {"targets": ["backend:8000"]}
-                    ],
-                    "metrics_path": "/api/metrics"
+                    "static_configs": [{"targets": ["backend:8000"]}],
+                    "metrics_path": "/api/metrics",
                 },
                 {
                     "job_name": "ai-companion-frontend",
-                    "static_configs": [
-                        {"targets": ["frontend:3000"]}
-                    ]
+                    "static_configs": [{"targets": ["frontend:3000"]}],
                 },
-                {
-                    "job_name": "mongodb",
-                    "static_configs": [
-                        {"targets": ["mongodb:27017"]}
-                    ]
-                },
-                {
-                    "job_name": "redis",
-                    "static_configs": [
-                        {"targets": ["redis:6379"]}
-                    ]
-                }
-            ]
+                {"job_name": "mongodb", "static_configs": [{"targets": ["mongodb:27017"]}]},
+                {"job_name": "redis", "static_configs": [{"targets": ["redis:6379"]}]},
+            ],
         }
 
         prometheus_config_path = monitoring_dir / "prometheus.yml"
-        with open(prometheus_config_path, 'w') as f:
+        with open(prometheus_config_path, "w") as f:
             yaml.dump(prometheus_config, f, default_flow_style=False)
 
         logger.info("✅ Monitoring configuration created")
@@ -688,7 +637,7 @@ echo "Backup completed: $BACKUP_NAME.tar.gz"
 
         backup_script_path = self.deployment_root / "scripts" / "backup.sh"
         backup_script_path.parent.mkdir(exist_ok=True)
-        with open(backup_script_path, 'w') as f:
+        with open(backup_script_path, "w") as f:
             f.write(backup_script.strip())
 
         backup_script_path.chmod(0o755)
@@ -749,7 +698,7 @@ echo "🌐 Application available at: https://$(grep FRONTEND_URL .env.production
 """
 
         deploy_script_path = scripts_dir / "deploy.sh"
-        with open(deploy_script_path, 'w') as f:
+        with open(deploy_script_path, "w") as f:
             f.write(deploy_script.strip())
         deploy_script_path.chmod(0o755)
 
@@ -781,7 +730,7 @@ echo "✅ Update completed successfully!"
 """
 
         update_script_path = scripts_dir / "update.sh"
-        with open(update_script_path, 'w') as f:
+        with open(update_script_path, "w") as f:
             f.write(update_script.strip())
         update_script_path.chmod(0o755)
 
@@ -813,7 +762,7 @@ docker-compose -f docker-compose.production.yml logs --tail=10 backend
 """
 
         status_script_path = scripts_dir / "status.sh"
-        with open(status_script_path, 'w') as f:
+        with open(status_script_path, "w") as f:
             f.write(status_script.strip())
         status_script_path.chmod(0o755)
 
@@ -855,7 +804,7 @@ echo "🔒 Firewall configured successfully"
 """
 
         firewall_script_path = security_dir / "setup_firewall.sh"
-        with open(firewall_script_path, 'w') as f:
+        with open(firewall_script_path, "w") as f:
             f.write(firewall_script.strip())
         firewall_script_path.chmod(0o755)
 
@@ -880,7 +829,7 @@ echo "⚠️  This is a self-signed certificate. Use Let's Encrypt for productio
 """
 
         ssl_script_path = security_dir / "setup_ssl.sh"
-        with open(ssl_script_path, 'w') as f:
+        with open(ssl_script_path, "w") as f:
             f.write(ssl_script.strip())
         ssl_script_path.chmod(0o755)
 
@@ -911,7 +860,14 @@ echo "⚠️  This is a self-signed certificate. Use Let's Encrypt for productio
             self.create_security_configurations()
 
             # Create data directories
-            data_dirs = ["data/mongodb", "data/redis", "data/uploads", "data/generated_content", "logs", "backups"]
+            data_dirs = [
+                "data/mongodb",
+                "data/redis",
+                "data/uploads",
+                "data/generated_content",
+                "logs",
+                "backups",
+            ]
             for dir_path in data_dirs:
                 (self.deployment_root / dir_path).mkdir(parents=True, exist_ok=True)
 
@@ -927,6 +883,7 @@ echo "⚠️  This is a self-signed certificate. Use Let's Encrypt for productio
         except Exception as e:
             logger.error(f"❌ Deployment preparation failed: {e}")
             return False
+
 
 def main():
     """Main deployment function"""
@@ -946,6 +903,7 @@ def main():
             print("Usage: python production_deployment.py [check|config|docker|deploy]")
     else:
         deployer.run_full_deployment()
+
 
 if __name__ == "__main__":
     main()

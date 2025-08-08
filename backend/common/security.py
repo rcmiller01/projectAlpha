@@ -11,8 +11,9 @@ import uuid
 from datetime import datetime
 from functools import wraps
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Set
-from flask import request, jsonify, g
+from typing import Any, Dict, List, Optional, Set
+
+from flask import g, jsonify, request
 
 logger = logging.getLogger(__name__)
 
@@ -27,17 +28,32 @@ AUDIT_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 # Token scopes and permissions
 TOKEN_SCOPES = {
-    'admin': {'identity:read', 'identity:write', 'beliefs:read', 'beliefs:write', 'ephemeral:read', 'ephemeral:write', 'system:admin'},
-    'system': {'beliefs:read', 'beliefs:write', 'ephemeral:read', 'ephemeral:write', 'system:operate'},
-    'user': {'ephemeral:read', 'ephemeral:write', 'user:basic'},
+    "admin": {
+        "identity:read",
+        "identity:write",
+        "beliefs:read",
+        "beliefs:write",
+        "ephemeral:read",
+        "ephemeral:write",
+        "system:admin",
+    },
+    "system": {
+        "beliefs:read",
+        "beliefs:write",
+        "ephemeral:read",
+        "ephemeral:write",
+        "system:operate",
+    },
+    "user": {"ephemeral:read", "ephemeral:write", "user:basic"},
 }
 
 # Layer protection mappings
 LAYER_PERMISSIONS = {
-    'identity': {'admin'},
-    'beliefs': {'admin', 'system'},
-    'ephemeral': {'admin', 'system', 'user'},
+    "identity": {"admin"},
+    "beliefs": {"admin", "system"},
+    "ephemeral": {"admin", "system", "user"},
 }
+
 
 def mask_token(token: Optional[str]) -> str:
     """
@@ -55,6 +71,7 @@ def mask_token(token: Optional[str]) -> str:
         return "***"
     return f"***{token[-4:]}"
 
+
 def get_token_type(token: str) -> Optional[str]:
     """
     Determine token type from token string.
@@ -69,18 +86,19 @@ def get_token_type(token: str) -> Optional[str]:
         return None
 
     if token.startswith(ADMIN_TOKEN_PREFIX):
-        return 'admin'
+        return "admin"
     elif token.startswith(SYSTEM_TOKEN_PREFIX):
-        return 'system'
+        return "system"
     elif token.startswith(USER_TOKEN_PREFIX):
-        return 'user'
+        return "user"
 
     # Legacy token checking
-    admin_key = os.getenv('ADMIN_MASTER_KEY')
+    admin_key = os.getenv("ADMIN_MASTER_KEY")
     if admin_key and token == admin_key:
-        return 'admin'
+        return "admin"
 
     return None
+
 
 def is_admin(token: str) -> bool:
     """
@@ -92,9 +110,10 @@ def is_admin(token: str) -> bool:
     Returns:
         True if token is admin
     """
-    return get_token_type(token) == 'admin'
+    return get_token_type(token) == "admin"
 
-def get_token_scopes(token: str) -> Set[str]:
+
+def get_token_scopes(token: str) -> set[str]:
     """
     Get scopes for a given token.
 
@@ -109,6 +128,7 @@ def get_token_scopes(token: str) -> Set[str]:
         return set()
     return TOKEN_SCOPES.get(token_type, set())
 
+
 def has_scope(token: str, required_scope: str) -> bool:
     """
     Check if token has required scope.
@@ -122,6 +142,7 @@ def has_scope(token: str, required_scope: str) -> bool:
     """
     token_scopes = get_token_scopes(token)
     return required_scope in token_scopes
+
 
 def can_access_layer(token: str, layer: str) -> bool:
     """
@@ -141,6 +162,7 @@ def can_access_layer(token: str, layer: str) -> bool:
     allowed_types = LAYER_PERMISSIONS.get(layer, set())
     return token_type in allowed_types
 
+
 def extract_token() -> Optional[str]:
     """
     Extract token from request headers or query parameters.
@@ -149,22 +171,23 @@ def extract_token() -> Optional[str]:
         Token string or None
     """
     # Check Authorization header
-    auth_header = request.headers.get('Authorization')
+    auth_header = request.headers.get("Authorization")
     if auth_header:
-        if auth_header.startswith('Bearer '):
+        if auth_header.startswith("Bearer "):
             return auth_header[7:]
-        elif auth_header.startswith('Token '):
+        elif auth_header.startswith("Token "):
             return auth_header[6:]
 
     # Check X-API-Key header
-    api_key = request.headers.get('X-API-Key')
+    api_key = request.headers.get("X-API-Key")
     if api_key:
         return api_key
 
     # Check query parameter
-    return request.args.get('token') or request.args.get('api_key')
+    return request.args.get("token") or request.args.get("api_key")
 
-def require_scope(required_scopes: List[str]):
+
+def require_scope(required_scopes: list[str]):
     """
     Decorator to require specific scopes for API access.
 
@@ -174,6 +197,7 @@ def require_scope(required_scopes: List[str]):
     Returns:
         Decorator function
     """
+
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
@@ -182,52 +206,57 @@ def require_scope(required_scopes: List[str]):
 
             # Log access attempt
             audit_entry = {
-                'timestamp': datetime.utcnow().isoformat(),
-                'request_id': request_id,
-                'route': request.endpoint,
-                'method': request.method,
-                'actor': mask_token(token),
-                'action': 'access_attempt',
-                'required_scopes': required_scopes,
-                'success': False,
-                'ip': request.remote_addr,
+                "timestamp": datetime.utcnow().isoformat(),
+                "request_id": request_id,
+                "route": request.endpoint,
+                "method": request.method,
+                "actor": mask_token(token),
+                "action": "access_attempt",
+                "required_scopes": required_scopes,
+                "success": False,
+                "ip": request.remote_addr,
             }
 
             if not token:
-                audit_entry['error'] = 'no_token'
+                audit_entry["error"] = "no_token"
                 log_audit_entry(audit_entry)
-                return jsonify({'error': 'Authentication required', 'request_id': request_id}), 401
+                return jsonify({"error": "Authentication required", "request_id": request_id}), 401
 
             # Check if token has any of the required scopes
             token_scopes = get_token_scopes(token)
             has_required_scope = any(has_scope(token, scope) for scope in required_scopes)
 
             if not has_required_scope:
-                audit_entry['error'] = 'insufficient_scope'
-                audit_entry['token_scopes'] = list(token_scopes)
+                audit_entry["error"] = "insufficient_scope"
+                audit_entry["token_scopes"] = list(token_scopes)
                 log_audit_entry(audit_entry)
-                return jsonify({
-                    'error': 'Insufficient permissions',
-                    'required_scopes': required_scopes,
-                    'request_id': request_id
-                }), 403
+                return jsonify(
+                    {
+                        "error": "Insufficient permissions",
+                        "required_scopes": required_scopes,
+                        "request_id": request_id,
+                    }
+                ), 403
 
             # Success
-            audit_entry['success'] = True
-            audit_entry['token_type'] = get_token_type(token)
+            audit_entry["success"] = True
+            audit_entry["token_type"] = get_token_type(token)
             log_audit_entry(audit_entry)
 
             # Add request context for use in the endpoint
             g.security_context = {
-                'token': token,
-                'token_type': get_token_type(token),
-                'scopes': token_scopes,
-                'request_id': request_id,
+                "token": token,
+                "token_type": get_token_type(token),
+                "scopes": token_scopes,
+                "request_id": request_id,
             }
 
             return f(*args, **kwargs)
+
         return decorated_function
+
     return decorator
+
 
 def require_layer_access(layer: str):
     """
@@ -239,6 +268,7 @@ def require_layer_access(layer: str):
     Returns:
         Decorator function
     """
+
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
@@ -247,50 +277,55 @@ def require_layer_access(layer: str):
 
             # Log access attempt
             audit_entry = {
-                'timestamp': datetime.utcnow().isoformat(),
-                'request_id': request_id,
-                'route': request.endpoint,
-                'method': request.method,
-                'actor': mask_token(token),
-                'action': 'layer_access',
-                'layer': layer,
-                'success': False,
-                'ip': request.remote_addr,
+                "timestamp": datetime.utcnow().isoformat(),
+                "request_id": request_id,
+                "route": request.endpoint,
+                "method": request.method,
+                "actor": mask_token(token),
+                "action": "layer_access",
+                "layer": layer,
+                "success": False,
+                "ip": request.remote_addr,
             }
 
             if not token:
-                audit_entry['error'] = 'no_token'
+                audit_entry["error"] = "no_token"
                 log_audit_entry(audit_entry)
-                return jsonify({'error': 'Authentication required', 'request_id': request_id}), 401
+                return jsonify({"error": "Authentication required", "request_id": request_id}), 401
 
             if not can_access_layer(token, layer):
-                audit_entry['error'] = 'layer_access_denied'
-                audit_entry['token_type'] = get_token_type(token)
+                audit_entry["error"] = "layer_access_denied"
+                audit_entry["token_type"] = get_token_type(token)
                 log_audit_entry(audit_entry)
-                return jsonify({
-                    'error': f'Access denied to {layer} layer',
-                    'required_permission': LAYER_PERMISSIONS.get(layer, []),
-                    'request_id': request_id
-                }), 403
+                return jsonify(
+                    {
+                        "error": f"Access denied to {layer} layer",
+                        "required_permission": LAYER_PERMISSIONS.get(layer, []),
+                        "request_id": request_id,
+                    }
+                ), 403
 
             # Success
-            audit_entry['success'] = True
-            audit_entry['token_type'] = get_token_type(token)
+            audit_entry["success"] = True
+            audit_entry["token_type"] = get_token_type(token)
             log_audit_entry(audit_entry)
 
             # Add request context
             g.security_context = {
-                'token': token,
-                'token_type': get_token_type(token),
-                'layer': layer,
-                'request_id': request_id,
+                "token": token,
+                "token_type": get_token_type(token),
+                "layer": layer,
+                "request_id": request_id,
             }
 
             return f(*args, **kwargs)
+
         return decorated_function
+
     return decorator
 
-def validate_json_schema(schema: Dict[str, Any], allow_unknown: bool = False):
+
+def validate_json_schema(schema: dict[str, Any], allow_unknown: bool = False):
     """
     Decorator to validate JSON payload against schema.
 
@@ -301,68 +336,76 @@ def validate_json_schema(schema: Dict[str, Any], allow_unknown: bool = False):
     Returns:
         Decorator function
     """
+
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            request_id = getattr(g, 'security_context', {}).get('request_id', str(uuid.uuid4()))
+            request_id = getattr(g, "security_context", {}).get("request_id", str(uuid.uuid4()))
 
             if not request.is_json:
                 audit_entry = {
-                    'timestamp': datetime.utcnow().isoformat(),
-                    'request_id': request_id,
-                    'route': request.endpoint,
-                    'method': request.method,
-                    'action': 'validation_error',
-                    'error': 'not_json',
-                    'success': False,
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "request_id": request_id,
+                    "route": request.endpoint,
+                    "method": request.method,
+                    "action": "validation_error",
+                    "error": "not_json",
+                    "success": False,
                 }
                 log_audit_entry(audit_entry)
-                return jsonify({'error': 'Content-Type must be application/json', 'request_id': request_id}), 400
+                return jsonify(
+                    {"error": "Content-Type must be application/json", "request_id": request_id}
+                ), 400
 
             try:
                 data = request.get_json()
             except Exception as e:
                 audit_entry = {
-                    'timestamp': datetime.utcnow().isoformat(),
-                    'request_id': request_id,
-                    'route': request.endpoint,
-                    'method': request.method,
-                    'action': 'validation_error',
-                    'error': 'invalid_json',
-                    'details': str(e),
-                    'success': False,
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "request_id": request_id,
+                    "route": request.endpoint,
+                    "method": request.method,
+                    "action": "validation_error",
+                    "error": "invalid_json",
+                    "details": str(e),
+                    "success": False,
                 }
                 log_audit_entry(audit_entry)
-                return jsonify({'error': 'Invalid JSON payload', 'request_id': request_id}), 400
+                return jsonify({"error": "Invalid JSON payload", "request_id": request_id}), 400
 
             # Basic schema validation
             validation_errors = validate_payload(data, schema, allow_unknown)
             if validation_errors:
                 audit_entry = {
-                    'timestamp': datetime.utcnow().isoformat(),
-                    'request_id': request_id,
-                    'route': request.endpoint,
-                    'method': request.method,
-                    'action': 'validation_error',
-                    'error': 'schema_validation',
-                    'validation_errors': validation_errors,
-                    'success': False,
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "request_id": request_id,
+                    "route": request.endpoint,
+                    "method": request.method,
+                    "action": "validation_error",
+                    "error": "schema_validation",
+                    "validation_errors": validation_errors,
+                    "success": False,
                 }
                 log_audit_entry(audit_entry)
-                return jsonify({
-                    'error': 'Validation failed',
-                    'validation_errors': validation_errors,
-                    'request_id': request_id
-                }), 400
+                return jsonify(
+                    {
+                        "error": "Validation failed",
+                        "validation_errors": validation_errors,
+                        "request_id": request_id,
+                    }
+                ), 400
 
             # Add validated data to request context
             g.validated_data = data
 
             return f(*args, **kwargs)
+
         return decorated_function
+
     return decorator
 
-def validate_payload(data: Any, schema: Dict[str, Any], allow_unknown: bool = False) -> List[str]:
+
+def validate_payload(data: Any, schema: dict[str, Any], allow_unknown: bool = False) -> list[str]:
     """
     Validate payload against simple schema.
 
@@ -377,60 +420,61 @@ def validate_payload(data: Any, schema: Dict[str, Any], allow_unknown: bool = Fa
     errors = []
 
     if not isinstance(data, dict):
-        return ['Payload must be a JSON object']
+        return ["Payload must be a JSON object"]
 
     # Check required fields
-    required_fields = schema.get('required', [])
+    required_fields = schema.get("required", [])
     for field in required_fields:
         if field not in data:
-            errors.append(f'Missing required field: {field}')
+            errors.append(f"Missing required field: {field}")
 
     # Check field types and constraints
-    properties = schema.get('properties', {})
+    properties = schema.get("properties", {})
     for field, value in data.items():
         if field not in properties:
             if not allow_unknown:
-                errors.append(f'Unknown field: {field}')
+                errors.append(f"Unknown field: {field}")
             continue
 
         field_schema = properties[field]
-        field_type = field_schema.get('type')
+        field_type = field_schema.get("type")
 
         # Type checking
-        if field_type == 'string' and not isinstance(value, str):
-            errors.append(f'Field {field} must be a string')
-        elif field_type == 'integer' and not isinstance(value, int):
-            errors.append(f'Field {field} must be an integer')
-        elif field_type == 'number' and not isinstance(value, (int, float)):
-            errors.append(f'Field {field} must be a number')
-        elif field_type == 'boolean' and not isinstance(value, bool):
-            errors.append(f'Field {field} must be a boolean')
-        elif field_type == 'array' and not isinstance(value, list):
-            errors.append(f'Field {field} must be an array')
-        elif field_type == 'object' and not isinstance(value, dict):
-            errors.append(f'Field {field} must be an object')
+        if field_type == "string" and not isinstance(value, str):
+            errors.append(f"Field {field} must be a string")
+        elif field_type == "integer" and not isinstance(value, int):
+            errors.append(f"Field {field} must be an integer")
+        elif field_type == "number" and not isinstance(value, (int, float)):
+            errors.append(f"Field {field} must be a number")
+        elif field_type == "boolean" and not isinstance(value, bool):
+            errors.append(f"Field {field} must be a boolean")
+        elif field_type == "array" and not isinstance(value, list):
+            errors.append(f"Field {field} must be an array")
+        elif field_type == "object" and not isinstance(value, dict):
+            errors.append(f"Field {field} must be an object")
 
         # String constraints
-        if field_type == 'string' and isinstance(value, str):
-            min_length = field_schema.get('minLength')
-            max_length = field_schema.get('maxLength')
-            pattern = field_schema.get('pattern')
+        if field_type == "string" and isinstance(value, str):
+            min_length = field_schema.get("minLength")
+            max_length = field_schema.get("maxLength")
+            pattern = field_schema.get("pattern")
 
             if min_length and len(value) < min_length:
-                errors.append(f'Field {field} must be at least {min_length} characters')
+                errors.append(f"Field {field} must be at least {min_length} characters")
             if max_length and len(value) > max_length:
-                errors.append(f'Field {field} must be at most {max_length} characters')
+                errors.append(f"Field {field} must be at most {max_length} characters")
             if pattern and not re.match(pattern, value):
-                errors.append(f'Field {field} does not match required pattern')
+                errors.append(f"Field {field} does not match required pattern")
 
         # Enum validation
-        enum_values = field_schema.get('enum')
+        enum_values = field_schema.get("enum")
         if enum_values and value not in enum_values:
-            errors.append(f'Field {field} must be one of: {enum_values}')
+            errors.append(f"Field {field} must be one of: {enum_values}")
 
     return errors
 
-def log_audit_entry(entry: Dict[str, Any]) -> None:
+
+def log_audit_entry(entry: dict[str, Any]) -> None:
     """
     Log audit entry to append-only audit log.
 
@@ -438,11 +482,12 @@ def log_audit_entry(entry: Dict[str, Any]) -> None:
         entry: Audit entry to log
     """
     try:
-        with open(AUDIT_LOG_PATH, 'a', encoding='utf-8') as f:
-            json.dump(entry, f, separators=(',', ':'))
-            f.write('\n')
+        with open(AUDIT_LOG_PATH, "a", encoding="utf-8") as f:
+            json.dump(entry, f, separators=(",", ":"))
+            f.write("\n")
     except Exception as e:
         logger.error(f"Failed to write audit log: {e}")
+
 
 def audit_action(action: str, **kwargs) -> None:
     """
@@ -452,23 +497,24 @@ def audit_action(action: str, **kwargs) -> None:
         action: Action description
         **kwargs: Additional audit data
     """
-    request_id = getattr(g, 'security_context', {}).get('request_id', str(uuid.uuid4()))
-    token = getattr(g, 'security_context', {}).get('token')
+    request_id = getattr(g, "security_context", {}).get("request_id", str(uuid.uuid4()))
+    token = getattr(g, "security_context", {}).get("token")
 
     audit_entry = {
-        'timestamp': datetime.utcnow().isoformat(),
-        'request_id': request_id,
-        'route': request.endpoint,
-        'method': request.method,
-        'actor': mask_token(token),
-        'action': action,
-        'ip': request.remote_addr,
-        **kwargs
+        "timestamp": datetime.utcnow().isoformat(),
+        "request_id": request_id,
+        "route": request.endpoint,
+        "method": request.method,
+        "actor": mask_token(token),
+        "action": action,
+        "ip": request.remote_addr,
+        **kwargs,
     }
 
     log_audit_entry(audit_entry)
 
-def create_request_context() -> Dict[str, Any]:
+
+def create_request_context() -> dict[str, Any]:
     """
     Create request context for logging.
 
@@ -476,9 +522,9 @@ def create_request_context() -> Dict[str, Any]:
         Request context dictionary
     """
     return {
-        'request_id': str(uuid.uuid4()),
-        'timestamp': datetime.utcnow().isoformat(),
-        'route': request.endpoint,
-        'method': request.method,
-        'ip': request.remote_addr,
+        "request_id": str(uuid.uuid4()),
+        "timestamp": datetime.utcnow().isoformat(),
+        "route": request.endpoint,
+        "method": request.method,
+        "ip": request.remote_addr,
     }

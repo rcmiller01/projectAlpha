@@ -5,11 +5,13 @@ Tests real-time monitoring, performance tracking, and health assessment
 """
 
 import asyncio
-import aiohttp
 import json
 import time
-import psutil
 from datetime import datetime
+
+import aiohttp
+import psutil
+
 
 class SystemMetricsQA:
     """Targeted testing for the System Metrics system"""
@@ -35,20 +37,20 @@ class SystemMetricsQA:
                 if response.status == 200:
                     data = await response.json()
 
-                    system_metrics = data.get('system', {})
-                    application_metrics = data.get('application', {})
-                    timestamp = data.get('timestamp', 'unknown')
+                    system_metrics = data.get("system", {})
+                    application_metrics = data.get("application", {})
+                    timestamp = data.get("timestamp", "unknown")
 
                     print(f"✅ Real-time metrics retrieved (timestamp: {timestamp})")
 
                     # Validate system metrics
                     if system_metrics:
-                        cpu_percent = system_metrics.get('cpu_percent', 0)
-                        memory_percent = system_metrics.get('memory_percent', 0)
-                        disk_percent = system_metrics.get('disk_percent', 0)
-                        uptime_hours = system_metrics.get('uptime_hours', 0)
+                        cpu_percent = system_metrics.get("cpu_percent", 0)
+                        memory_percent = system_metrics.get("memory_percent", 0)
+                        disk_percent = system_metrics.get("disk_percent", 0)
+                        uptime_hours = system_metrics.get("uptime_hours", 0)
 
-                        print(f"   System Metrics:")
+                        print("   System Metrics:")
                         print(f"     CPU Usage: {cpu_percent:.1f}%")
                         print(f"     Memory Usage: {memory_percent:.1f}%")
                         print(f"     Disk Usage: {disk_percent:.1f}%")
@@ -56,10 +58,10 @@ class SystemMetricsQA:
 
                         # Validate realistic values
                         metrics_valid = (
-                            0 <= cpu_percent <= 100 and
-                            0 <= memory_percent <= 100 and
-                            0 <= disk_percent <= 100 and
-                            uptime_hours >= 0
+                            0 <= cpu_percent <= 100
+                            and 0 <= memory_percent <= 100
+                            and 0 <= disk_percent <= 100
+                            and uptime_hours >= 0
                         )
 
                         if metrics_valid:
@@ -69,11 +71,11 @@ class SystemMetricsQA:
 
                     # Validate application metrics
                     if application_metrics:
-                        active_sessions = application_metrics.get('active_sessions', 0)
-                        total_requests = application_metrics.get('total_requests', 0)
-                        avg_response_time = application_metrics.get('avg_response_time_ms', 0)
+                        active_sessions = application_metrics.get("active_sessions", 0)
+                        total_requests = application_metrics.get("total_requests", 0)
+                        avg_response_time = application_metrics.get("avg_response_time_ms", 0)
 
-                        print(f"   Application Metrics:")
+                        print("   Application Metrics:")
                         print(f"     Active Sessions: {active_sessions}")
                         print(f"     Total Requests: {total_requests}")
                         print(f"     Avg Response Time: {avg_response_time:.1f}ms")
@@ -99,10 +101,10 @@ class SystemMetricsQA:
                         print(f"✅ Model usage data for {len(models_data)} models:")
 
                         for model_id, stats in models_data.items():
-                            total_requests = stats.get('total_requests', 0)
-                            avg_response_time = stats.get('avg_response_time_ms', 0)
-                            success_rate = stats.get('success_rate', 0)
-                            last_used = stats.get('last_used', 'Never')
+                            total_requests = stats.get("total_requests", 0)
+                            avg_response_time = stats.get("avg_response_time_ms", 0)
+                            success_rate = stats.get("success_rate", 0)
+                            last_used = stats.get("last_used", "Never")
 
                             print(f"   🤖 {model_id}:")
                             print(f"      Requests: {total_requests}")
@@ -130,34 +132,34 @@ class SystemMetricsQA:
                 if response.status == 200:
                     health_data = await response.json()
 
-                    status = health_data.get('status', 'unknown')
-                    health_score = health_data.get('health_score', 0)
-                    components = health_data.get('components', {})
-                    alerts = health_data.get('alerts', [])
-                    timestamp = health_data.get('timestamp', 'unknown')
+                    status = health_data.get("status", "unknown")
+                    health_score = health_data.get("health_score", 0)
+                    components = health_data.get("components", {})
+                    alerts = health_data.get("alerts", [])
+                    timestamp = health_data.get("timestamp", "unknown")
 
-                    print(f"✅ Health Assessment:")
+                    print("✅ Health Assessment:")
                     print(f"   Overall Status: {status}")
                     print(f"   Health Score: {health_score:.2f}/1.0")
                     print(f"   Timestamp: {timestamp}")
 
                     # Show component health
                     if components:
-                        print(f"   Component Health:")
+                        print("   Component Health:")
                         for component, component_health in components.items():
-                            health_status = component_health.get('status', 'unknown')
-                            component_score = component_health.get('score', 0)
+                            health_status = component_health.get("status", "unknown")
+                            component_score = component_health.get("score", 0)
                             print(f"     {component}: {health_status} ({component_score:.2f})")
 
                     # Show alerts
                     if alerts:
                         print(f"   Active Alerts: {len(alerts)}")
                         for i, alert in enumerate(alerts[:3]):  # Show first 3
-                            severity = alert.get('severity', 'unknown')
-                            message = alert.get('message', 'No message')
+                            severity = alert.get("severity", "unknown")
+                            message = alert.get("message", "No message")
                             print(f"     {i+1}. [{severity}] {message}")
                     else:
-                        print(f"   ✅ No active alerts")
+                        print("   ✅ No active alerts")
 
                     return health_data
                 else:
@@ -179,19 +181,17 @@ class SystemMetricsQA:
             chat_data = {
                 "message": f"Load test message {i+1} - please respond briefly",
                 "session_id": f"{self.session_id}_load_{i}",
-                "persona": "companion"
+                "persona": "companion",
             }
 
-            task = asyncio.create_task(
-                self.make_chat_request(chat_data, f"Load Request {i+1}")
-            )
+            task = asyncio.create_task(self.make_chat_request(chat_data, f"Load Request {i+1}"))
             load_tasks.append(task)
 
         # Execute load requests
         print("   Generating load with 5 concurrent requests...")
         load_results = await asyncio.gather(*load_tasks, return_exceptions=True)
 
-        successful_requests = [r for r in load_results if isinstance(r, dict) and r.get('success')]
+        successful_requests = [r for r in load_results if isinstance(r, dict) and r.get("success")]
         print(f"   ✅ Load generation: {len(successful_requests)}/5 requests successful")
 
         # Wait a moment for metrics to update
@@ -205,7 +205,7 @@ class SystemMetricsQA:
             # Verify metrics updated
             total_requests = 0
             for model_stats in updated_models.values():
-                total_requests += model_stats.get('total_requests', 0)
+                total_requests += model_stats.get("total_requests", 0)
 
             print(f"   ✅ Post-load total requests across all models: {total_requests}")
 
@@ -213,7 +213,7 @@ class SystemMetricsQA:
                 "load_requests": len(successful_requests),
                 "updated_metrics": updated_metrics,
                 "updated_models": updated_models,
-                "total_model_requests": total_requests
+                "total_model_requests": total_requests,
             }
         else:
             print("   ❌ Could not verify metrics after load test")
@@ -228,21 +228,13 @@ class SystemMetricsQA:
                     return {
                         "success": True,
                         "name": request_name,
-                        "handler": data.get('handler', 'unknown'),
-                        "response_length": len(data.get('response', ''))
+                        "handler": data.get("handler", "unknown"),
+                        "response_length": len(data.get("response", "")),
                     }
                 else:
-                    return {
-                        "success": False,
-                        "name": request_name,
-                        "status": response.status
-                    }
+                    return {"success": False, "name": request_name, "status": response.status}
         except Exception as e:
-            return {
-                "success": False,
-                "name": request_name,
-                "error": str(e)
-            }
+            return {"success": False, "name": request_name, "error": str(e)}
 
     async def test_historical_metrics(self):
         """Test historical metrics data"""
@@ -258,19 +250,23 @@ class SystemMetricsQA:
 
                         if history_data:
                             # Show recent entries
-                            recent_entries = history_data[-3:] if len(history_data) >= 3 else history_data
+                            recent_entries = (
+                                history_data[-3:] if len(history_data) >= 3 else history_data
+                            )
 
-                            print(f"   Recent entries:")
+                            print("   Recent entries:")
                             for i, entry in enumerate(recent_entries):
-                                timestamp = entry.get('timestamp', 'unknown')
-                                cpu = entry.get('cpu_percent', 0)
-                                memory = entry.get('memory_percent', 0)
-                                print(f"     {i+1}. {timestamp}: CPU {cpu:.1f}%, Memory {memory:.1f}%")
+                                timestamp = entry.get("timestamp", "unknown")
+                                cpu = entry.get("cpu_percent", 0)
+                                memory = entry.get("memory_percent", 0)
+                                print(
+                                    f"     {i+1}. {timestamp}: CPU {cpu:.1f}%, Memory {memory:.1f}%"
+                                )
 
                         return history_data
                     elif isinstance(history_data, dict):
-                        time_series = history_data.get('time_series', [])
-                        summary = history_data.get('summary', {})
+                        time_series = history_data.get("time_series", [])
+                        summary = history_data.get("summary", {})
 
                         print(f"✅ Historical metrics: {len(time_series)} data points")
                         if summary:
@@ -300,9 +296,11 @@ class SystemMetricsQA:
                         print(f"✅ Current alerts: {len(alerts_data)}")
 
                         # Categorize alerts by severity
-                        critical_alerts = [a for a in alerts_data if a.get('severity') == 'critical']
-                        warning_alerts = [a for a in alerts_data if a.get('severity') == 'warning']
-                        info_alerts = [a for a in alerts_data if a.get('severity') == 'info']
+                        critical_alerts = [
+                            a for a in alerts_data if a.get("severity") == "critical"
+                        ]
+                        warning_alerts = [a for a in alerts_data if a.get("severity") == "warning"]
+                        info_alerts = [a for a in alerts_data if a.get("severity") == "info"]
 
                         print(f"   🔴 Critical: {len(critical_alerts)}")
                         print(f"   🟡 Warning: {len(warning_alerts)}")
@@ -310,15 +308,15 @@ class SystemMetricsQA:
 
                         # Show critical alerts
                         for alert in critical_alerts[:2]:
-                            message = alert.get('message', 'No message')
-                            timestamp = alert.get('timestamp', 'unknown')
+                            message = alert.get("message", "No message")
+                            timestamp = alert.get("timestamp", "unknown")
                             print(f"     🔴 {timestamp}: {message}")
 
                         return alerts_data
                     elif isinstance(alerts_data, dict):
-                        total_alerts = alerts_data.get('total_alerts', 0)
-                        alerts_by_severity = alerts_data.get('by_severity', {})
-                        recent_alerts = alerts_data.get('recent_alerts', [])
+                        total_alerts = alerts_data.get("total_alerts", 0)
+                        alerts_by_severity = alerts_data.get("by_severity", {})
+                        recent_alerts = alerts_data.get("recent_alerts", [])
 
                         print(f"✅ Total alerts: {total_alerts}")
                         print(f"   By severity: {alerts_by_severity}")
@@ -344,31 +342,33 @@ class SystemMetricsQA:
                 if response.status == 200:
                     summary_data = await response.json()
 
-                    print(f"✅ Metrics Summary:")
+                    print("✅ Metrics Summary:")
 
                     # Show system overview
-                    system_overview = summary_data.get('system_overview', {})
+                    system_overview = summary_data.get("system_overview", {})
                     if system_overview:
-                        print(f"   System Overview:")
+                        print("   System Overview:")
                         for key, value in system_overview.items():
                             print(f"     {key}: {value}")
 
                     # Show performance stats
-                    performance = summary_data.get('performance', {})
+                    performance = summary_data.get("performance", {})
                     if performance:
-                        print(f"   Performance Stats:")
+                        print("   Performance Stats:")
                         for key, value in performance.items():
                             print(f"     {key}: {value}")
 
                     # Show usage statistics
-                    usage_stats = summary_data.get('usage_statistics', {})
+                    usage_stats = summary_data.get("usage_statistics", {})
                     if usage_stats:
-                        print(f"   Usage Statistics:")
+                        print("   Usage Statistics:")
                         for key, value in usage_stats.items():
                             if isinstance(value, (int, float)):
                                 print(f"     {key}: {value}")
                             else:
-                                print(f"     {key}: {len(value) if hasattr(value, '__len__') else value}")
+                                print(
+                                    f"     {key}: {len(value) if hasattr(value, '__len__') else value}"
+                                )
 
                     return summary_data
                 else:
@@ -386,9 +386,11 @@ class SystemMetricsQA:
             # Get local system metrics
             local_cpu = psutil.cpu_percent(interval=1)
             local_memory = psutil.virtual_memory().percent
-            local_disk = psutil.disk_usage('/').percent if hasattr(psutil.disk_usage('/'), 'percent') else 0
+            local_disk = (
+                psutil.disk_usage("/").percent if hasattr(psutil.disk_usage("/"), "percent") else 0
+            )
 
-            print(f"   Local System Readings:")
+            print("   Local System Readings:")
             print(f"     CPU: {local_cpu:.1f}%")
             print(f"     Memory: {local_memory:.1f}%")
             print(f"     Disk: {local_disk:.1f}%")
@@ -396,13 +398,13 @@ class SystemMetricsQA:
             # Get reported metrics
             reported_metrics = await self.test_realtime_metrics()
 
-            if reported_metrics and 'system' in reported_metrics:
-                system_metrics = reported_metrics['system']
-                reported_cpu = system_metrics.get('cpu_percent', 0)
-                reported_memory = system_metrics.get('memory_percent', 0)
-                reported_disk = system_metrics.get('disk_percent', 0)
+            if reported_metrics and "system" in reported_metrics:
+                system_metrics = reported_metrics["system"]
+                reported_cpu = system_metrics.get("cpu_percent", 0)
+                reported_memory = system_metrics.get("memory_percent", 0)
+                reported_disk = system_metrics.get("disk_percent", 0)
 
-                print(f"   Reported Metrics:")
+                print("   Reported Metrics:")
                 print(f"     CPU: {reported_cpu:.1f}%")
                 print(f"     Memory: {reported_memory:.1f}%")
                 print(f"     Disk: {reported_disk:.1f}%")
@@ -412,15 +414,21 @@ class SystemMetricsQA:
                 memory_diff = abs(local_memory - reported_memory)
                 disk_diff = abs(local_disk - reported_disk)
 
-                print(f"   Accuracy Check:")
+                print("   Accuracy Check:")
                 print(f"     CPU difference: {cpu_diff:.1f}% {'✅' if cpu_diff < 10 else '⚠️'}")
-                print(f"     Memory difference: {memory_diff:.1f}% {'✅' if memory_diff < 5 else '⚠️'}")
+                print(
+                    f"     Memory difference: {memory_diff:.1f}% {'✅' if memory_diff < 5 else '⚠️'}"
+                )
                 print(f"     Disk difference: {disk_diff:.1f}% {'✅' if disk_diff < 5 else '⚠️'}")
 
                 return {
                     "local": {"cpu": local_cpu, "memory": local_memory, "disk": local_disk},
-                    "reported": {"cpu": reported_cpu, "memory": reported_memory, "disk": reported_disk},
-                    "differences": {"cpu": cpu_diff, "memory": memory_diff, "disk": disk_diff}
+                    "reported": {
+                        "cpu": reported_cpu,
+                        "memory": reported_memory,
+                        "disk": reported_disk,
+                    },
+                    "differences": {"cpu": cpu_diff, "memory": memory_diff, "disk": disk_diff},
                 }
             else:
                 print("   ❌ Could not compare - no reported metrics available")
@@ -452,12 +460,16 @@ class SystemMetricsQA:
         # Final assessment
         print("\n" + "=" * 50)
         print("🎯 SYSTEM METRICS QA RESULTS:")
-        print(f"✅ Real-time Metrics: Available")
+        print("✅ Real-time Metrics: Available")
         print(f"✅ Model Usage Tracking: {len(model_metrics)} models tracked")
         print(f"✅ Health Monitoring: {'Available' if health_data else 'Unavailable'}")
         print(f"✅ Load Testing: {'Passed' if load_test_results else 'Failed'}")
-        print(f"✅ Historical Data: {len(historical_data) if isinstance(historical_data, list) else 'Available' if historical_data else 'Unavailable'}")
-        print(f"✅ Alerts System: {len(alerts_data) if isinstance(alerts_data, list) else 'Available' if alerts_data else 'Unavailable'}")
+        print(
+            f"✅ Historical Data: {len(historical_data) if isinstance(historical_data, list) else 'Available' if historical_data else 'Unavailable'}"
+        )
+        print(
+            f"✅ Alerts System: {len(alerts_data) if isinstance(alerts_data, list) else 'Available' if alerts_data else 'Unavailable'}"
+        )
         print(f"✅ Summary Reports: {'Available' if summary_data else 'Unavailable'}")
         print(f"✅ Accuracy Check: {'Passed' if accuracy_check else 'Failed'}")
 
@@ -469,7 +481,7 @@ class SystemMetricsQA:
             load_test_results is not None,
             bool(historical_data),
             bool(alerts_data),
-            summary_data is not None
+            summary_data is not None,
         ]
 
         health_score = sum(components_working) / len(components_working) * 100
@@ -485,6 +497,7 @@ class SystemMetricsQA:
             print("\n❌ System Metrics QA: FAILED - Multiple components not working")
             return False
 
+
 async def main():
     """Main QA execution"""
     print("Starting System Metrics QA...")
@@ -493,6 +506,7 @@ async def main():
     async with SystemMetricsQA() as qa:
         success = await qa.run_system_metrics_qa_suite()
         return success
+
 
 if __name__ == "__main__":
     result = asyncio.run(main())

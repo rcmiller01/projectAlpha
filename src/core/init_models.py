@@ -17,13 +17,13 @@ Author: ProjectAlpha Team
 Compatible with: CoreConductor, SLiM agents, HRM stack, MoELoader
 """
 
-import os
-import logging
 import hashlib
 import json
-from pathlib import Path
-from typing import Optional, Dict, Any, Protocol
+import logging
+import os
 from abc import ABC, abstractmethod
+from pathlib import Path
+from typing import Any, Dict, Optional, Protocol
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -37,7 +37,7 @@ MOE_EXPERT_REGISTRY = {
         "domain": "logical_reasoning",
         "description": "High-level logical reasoning and deduction",
         "priority": 1,
-        "dependencies": []
+        "dependencies": [],
     },
     "logic_code": {
         "path": os.getenv("LOGIC_CODE_MODEL_PATH", "models/logic_code.gguf"),
@@ -45,7 +45,7 @@ MOE_EXPERT_REGISTRY = {
         "domain": "code_analysis",
         "description": "Code analysis, debugging, and programming logic",
         "priority": 1,
-        "dependencies": []
+        "dependencies": [],
     },
     "logic_proof": {
         "path": os.getenv("LOGIC_PROOF_MODEL_PATH", "models/logic_proof.gguf"),
@@ -53,7 +53,7 @@ MOE_EXPERT_REGISTRY = {
         "domain": "mathematical_proof",
         "description": "Mathematical proofs and formal verification",
         "priority": 2,
-        "dependencies": []
+        "dependencies": [],
     },
     "logic_fallback": {
         "path": os.getenv("LOGIC_FALLBACK_MODEL_PATH", "models/logic_fallback.gguf"),
@@ -61,7 +61,7 @@ MOE_EXPERT_REGISTRY = {
         "domain": "general_reasoning",
         "description": "General purpose logical reasoning fallback",
         "priority": 0,
-        "dependencies": []
+        "dependencies": [],
     },
     "emote_valence": {
         "path": os.getenv("EMOTE_VALENCE_MODEL_PATH", "models/emote_valence.gguf"),
@@ -69,7 +69,7 @@ MOE_EXPERT_REGISTRY = {
         "domain": "emotional_valence",
         "description": "Emotional valence detection and generation",
         "priority": 1,
-        "dependencies": []
+        "dependencies": [],
     },
     "emote_arousal": {
         "path": os.getenv("EMOTE_AROUSAL_MODEL_PATH", "models/emote_arousal.gguf"),
@@ -77,7 +77,7 @@ MOE_EXPERT_REGISTRY = {
         "domain": "emotional_arousal",
         "description": "Emotional arousal and intensity modulation",
         "priority": 1,
-        "dependencies": []
+        "dependencies": [],
     },
     "creative_metaphor": {
         "path": os.getenv("CREATIVE_METAPHOR_MODEL_PATH", "models/creative_metaphor.gguf"),
@@ -85,7 +85,7 @@ MOE_EXPERT_REGISTRY = {
         "domain": "creative_metaphor",
         "description": "Metaphorical and creative expression",
         "priority": 1,
-        "dependencies": []
+        "dependencies": [],
     },
     "creative_write": {
         "path": os.getenv("CREATIVE_WRITE_MODEL_PATH", "models/creative_write.gguf"),
@@ -93,7 +93,7 @@ MOE_EXPERT_REGISTRY = {
         "domain": "creative_writing",
         "description": "Creative writing and narrative generation",
         "priority": 2,
-        "dependencies": []
+        "dependencies": [],
     },
     "planning_temporal": {
         "path": os.getenv("PLANNING_TEMPORAL_MODEL_PATH", "models/planning_temporal.gguf"),
@@ -101,7 +101,7 @@ MOE_EXPERT_REGISTRY = {
         "domain": "temporal_planning",
         "description": "Temporal reasoning and scheduling",
         "priority": 1,
-        "dependencies": []
+        "dependencies": [],
     },
     "planning_strategic": {
         "path": os.getenv("PLANNING_STRATEGIC_MODEL_PATH", "models/planning_strategic.gguf"),
@@ -109,7 +109,7 @@ MOE_EXPERT_REGISTRY = {
         "domain": "strategic_planning",
         "description": "Strategic planning and decision making",
         "priority": 1,
-        "dependencies": []
+        "dependencies": [],
     },
     "ritual_symbolic": {
         "path": os.getenv("RITUAL_SYMBOLIC_MODEL_PATH", "models/ritual_symbolic.gguf"),
@@ -117,7 +117,7 @@ MOE_EXPERT_REGISTRY = {
         "domain": "symbolic_ritual",
         "description": "Symbolic ritual and ceremonial logic",
         "priority": 2,
-        "dependencies": []
+        "dependencies": [],
     },
     "memory_recall": {
         "path": os.getenv("MEMORY_RECALL_MODEL_PATH", "models/memory_recall.gguf"),
@@ -125,12 +125,13 @@ MOE_EXPERT_REGISTRY = {
         "domain": "memory_recall",
         "description": "Memory recall and historical context",
         "priority": 1,
-        "dependencies": []
-    }
+        "dependencies": [],
+    },
 }
 
 # Model verification and integrity checking
 MODEL_CHECKSUMS_FILE = "config/model_checksums.json"
+
 
 def calculate_file_hash(file_path: str, algorithm: str = "sha256") -> Optional[str]:
     """
@@ -150,7 +151,7 @@ def calculate_file_hash(file_path: str, algorithm: str = "sha256") -> Optional[s
 
         hash_func = getattr(hashlib, algorithm.lower())()
 
-        with open(file_path, 'rb') as f:
+        with open(file_path, "rb") as f:
             # Read in chunks to handle large model files
             chunk_size = 64 * 1024  # 64KB chunks
             while True:
@@ -165,7 +166,10 @@ def calculate_file_hash(file_path: str, algorithm: str = "sha256") -> Optional[s
         logger.error(f"Error calculating hash for {file_path}: {e}")
         return None
 
-def verify_model_integrity(model_path: str, expected_checksum: Optional[str] = None) -> Dict[str, Any]:
+
+def verify_model_integrity(
+    model_path: str, expected_checksum: Optional[str] = None
+) -> dict[str, Any]:
     """
     Verify model file integrity using checksum verification.
 
@@ -184,7 +188,7 @@ def verify_model_integrity(model_path: str, expected_checksum: Optional[str] = N
         "checksum": None,
         "verification_status": "unknown",
         "expected_checksum": expected_checksum,
-        "timestamp": None
+        "timestamp": None,
     }
 
     try:
@@ -217,11 +221,15 @@ def verify_model_integrity(model_path: str, expected_checksum: Optional[str] = N
                 result["verification_status"] = "verified"
             else:
                 result["verification_status"] = "checksum_mismatch"
-                logger.warning(f"Checksum mismatch for {model_path}: "
-                             f"expected {expected_checksum[:12]}..., got {current_checksum[:12]}...")
+                logger.warning(
+                    f"Checksum mismatch for {model_path}: "
+                    f"expected {expected_checksum[:12]}..., got {current_checksum[:12]}..."
+                )
         else:
             result["verification_status"] = "no_expected_checksum"
-            logger.info(f"No expected checksum found for {model_path}, storing current: {current_checksum[:12]}...")
+            logger.info(
+                f"No expected checksum found for {model_path}, storing current: {current_checksum[:12]}..."
+            )
             store_model_checksum(model_path, current_checksum)
 
         return result
@@ -232,11 +240,12 @@ def verify_model_integrity(model_path: str, expected_checksum: Optional[str] = N
         result["error"] = str(e)
         return result
 
+
 def load_expected_checksum(model_path: str) -> Optional[str]:
     """Load expected checksum for a model from the checksums file."""
     try:
         if os.path.exists(MODEL_CHECKSUMS_FILE):
-            with open(MODEL_CHECKSUMS_FILE, 'r') as f:
+            with open(MODEL_CHECKSUMS_FILE) as f:
                 checksums = json.load(f)
 
             # Normalize path for lookup
@@ -248,13 +257,14 @@ def load_expected_checksum(model_path: str) -> Optional[str]:
 
     return None
 
+
 def store_model_checksum(model_path: str, checksum: str) -> bool:
     """Store model checksum in the checksums file."""
     try:
         # Load existing checksums
         checksums = {}
         if os.path.exists(MODEL_CHECKSUMS_FILE):
-            with open(MODEL_CHECKSUMS_FILE, 'r') as f:
+            with open(MODEL_CHECKSUMS_FILE) as f:
                 checksums = json.load(f)
 
         # Normalize path and store
@@ -265,7 +275,7 @@ def store_model_checksum(model_path: str, checksum: str) -> bool:
         os.makedirs(os.path.dirname(MODEL_CHECKSUMS_FILE), exist_ok=True)
 
         # Save updated checksums
-        with open(MODEL_CHECKSUMS_FILE, 'w') as f:
+        with open(MODEL_CHECKSUMS_FILE, "w") as f:
             json.dump(checksums, f, indent=2)
 
         logger.info(f"Stored checksum for {model_path}: {checksum[:12]}...")
@@ -275,17 +285,18 @@ def store_model_checksum(model_path: str, checksum: str) -> bool:
         logger.error(f"Error storing checksum: {e}")
         return False
 
-def get_model_info(model: ModelInterface) -> Dict[str, Any]:
+
+def get_model_info(model: ModelInterface) -> dict[str, Any]:
     """Get comprehensive model information including verification status."""
     info = {
         "model_type": type(model).__name__,
-        "model_name": getattr(model, 'model_name', 'unknown'),
-        "available": getattr(model, 'available', True),
-        "verification": None
+        "model_name": getattr(model, "model_name", "unknown"),
+        "available": getattr(model, "available", True),
+        "verification": None,
     }
 
     # Add verification info if model has a file path
-    if hasattr(model, 'model_path') and model.model_path:
+    if hasattr(model, "model_path") and model.model_path:
         verification = verify_model_integrity(model.model_path)
         info["verification"] = verification
         info["file_size_mb"] = verification.get("size_mb", 0)
@@ -293,12 +304,14 @@ def get_model_info(model: ModelInterface) -> Dict[str, Any]:
 
     return info
 
+
 class ModelInterface(Protocol):
     """Protocol defining the standard model interface"""
 
     def generate(self, prompt: str, context: Optional[str] = None, **kwargs) -> str:
         """Generate response from the model"""
         ...
+
 
 class MockModel:
     """Mock model implementation for testing and fallback"""
@@ -332,6 +345,7 @@ class MockModel:
         logger.debug(f"MockModel {self.model_name} generated response (call #{self.call_count})")
         return response
 
+
 class OllamaModel:
     """Ollama model implementation"""
 
@@ -348,8 +362,10 @@ class OllamaModel:
         """Check if Ollama is available"""
         try:
             import subprocess
-            result = subprocess.run(['ollama', 'list'],
-                                  capture_output=True, text=True, timeout=5)
+
+            result = subprocess.run(
+                ["ollama", "list"], capture_output=True, text=True, timeout=5, check=False
+            )
             return result.returncode == 0
         except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
             return False
@@ -370,8 +386,8 @@ class OllamaModel:
                 full_prompt = f"Context: {context}\n\nPrompt: {prompt}"
 
             # Call Ollama
-            cmd = ['ollama', 'run', self.model_name, full_prompt]
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            cmd = ["ollama", "run", self.model_name, full_prompt]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30, check=False)
 
             if result.returncode == 0:
                 response = result.stdout.strip()
@@ -388,6 +404,7 @@ class OllamaModel:
             # Fallback to mock
             mock = MockModel(f"Error-Fallback-{self.model_name}")
             return mock.generate(prompt, context, **kwargs)
+
 
 class LlamaCppModel:
     """llama.cpp model implementation"""
@@ -409,14 +426,14 @@ class LlamaCppModel:
             os.path.expanduser("~/models"),
             os.path.expanduser("~/.cache/huggingface"),
             "./models",
-            "/opt/models"
+            "/opt/models",
         ]
 
         for base_path in search_paths:
             if os.path.exists(base_path):
                 for root, dirs, files in os.walk(base_path):
                     for file in files:
-                        if model_name in file and file.endswith(('.gguf', '.bin', '.ggml')):
+                        if model_name in file and file.endswith((".gguf", ".bin", ".ggml")):
                             return os.path.join(root, file)
         return None
 
@@ -424,9 +441,11 @@ class LlamaCppModel:
         """Check if llama.cpp is available"""
         try:
             import subprocess
+
             # Check for llama.cpp executable
-            result = subprocess.run(['llama.cpp', '--help'],
-                                  capture_output=True, text=True, timeout=5)
+            result = subprocess.run(
+                ["llama.cpp", "--help"], capture_output=True, text=True, timeout=5, check=False
+            )
             return result.returncode == 0 and self.model_path is not None
         except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
             return False
@@ -447,8 +466,8 @@ class LlamaCppModel:
                 full_prompt = f"Context: {context}\n\nPrompt: {prompt}"
 
             # Call llama.cpp
-            cmd = ['llama.cpp', '-m', self.model_path, '-p', full_prompt, '-n', '256']
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            cmd = ["llama.cpp", "-m", self.model_path, "-p", full_prompt, "-n", "256"]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60, check=False)
 
             if result.returncode == 0:
                 response = result.stdout.strip()
@@ -465,6 +484,7 @@ class LlamaCppModel:
             # Fallback to mock
             mock = MockModel(f"Error-Fallback-{self.model_name}")
             return mock.generate(prompt, context, **kwargs)
+
 
 def load_model(env_var: str, default_model: str, backend: str = "auto") -> ModelInterface:
     """
@@ -511,6 +531,7 @@ def load_model(env_var: str, default_model: str, backend: str = "auto") -> Model
         logger.warning(f"Unknown backend '{backend_override}', falling back to mock")
         return MockModel(model_name)
 
+
 class MoEModelAdapter:
     """Adapter to make MoELoader compatible with ModelInterface protocol"""
 
@@ -550,7 +571,7 @@ class MoEModelAdapter:
 
         except Exception as e:
             logger.error(f"MoE adapter error: {e}")
-            return f"[MoE Error] Failed to process request: {str(e)}"
+            return f"[MoE Error] Failed to process request: {e!s}"
 
 
 def initialize_moe_system(max_ram_gb: float = 8.0):
@@ -564,7 +585,7 @@ def initialize_moe_system(max_ram_gb: float = 8.0):
         MoELoader instance if successful, None otherwise
     """
     try:
-        from .moe_loader import MoELoader, ExpertInfo
+        from .moe_loader import ExpertInfo, MoELoader
 
         # Convert registry to ExpertInfo objects
         model_registry = {}
@@ -576,16 +597,15 @@ def initialize_moe_system(max_ram_gb: float = 8.0):
                 domain=config["domain"],
                 description=config["description"],
                 priority=config["priority"],
-                dependencies=config["dependencies"]
+                dependencies=config["dependencies"],
             )
 
         # Initialize MoE system
-        moe_loader = MoELoader(
-            model_registry=model_registry,
-            ram_limit_gb=max_ram_gb
-        )
+        moe_loader = MoELoader(model_registry=model_registry, ram_limit_gb=max_ram_gb)
 
-        logger.info(f"MoE system initialized with {len(model_registry)} experts, max RAM: {max_ram_gb}GB")
+        logger.info(
+            f"MoE system initialized with {len(model_registry)} experts, max RAM: {max_ram_gb}GB"
+        )
         return moe_loader
 
     except ImportError as e:
@@ -596,7 +616,7 @@ def initialize_moe_system(max_ram_gb: float = 8.0):
         return None
 
 
-def get_moe_configuration() -> Dict[str, Any]:
+def get_moe_configuration() -> dict[str, Any]:
     """
     Get MoE system configuration from environment variables.
 
@@ -610,11 +630,11 @@ def get_moe_configuration() -> Dict[str, Any]:
         "classification_threshold": float(os.getenv("MOE_CLASSIFICATION_THRESHOLD", "0.7")),
         "fallback_enabled": os.getenv("MOE_FALLBACK_ENABLED", "true").lower() == "true",
         "expert_timeout": int(os.getenv("MOE_EXPERT_TIMEOUT", "30")),
-        "load_async": os.getenv("MOE_LOAD_ASYNC", "true").lower() == "true"
+        "load_async": os.getenv("MOE_LOAD_ASYNC", "true").lower() == "true",
     }
 
 
-def load_conductor_models(use_moe: bool = True) -> Dict[str, Any]:
+def load_conductor_models(use_moe: bool = True) -> dict[str, Any]:
     """
     Load all standard conductor models with role-specific defaults.
     Optionally initializes MoE system for dynamic expert loading.
@@ -632,7 +652,7 @@ def load_conductor_models(use_moe: bool = True) -> Dict[str, Any]:
         "conductor": load_model("CONDUCTOR_MODEL", "gpt-oss-20b"),
         "logic": load_model("LOGIC_MODEL", "deepseek-coder:1.3b"),
         "emotion": load_model("EMOTION_MODEL", "mistral:7b"),
-        "creative": load_model("CREATIVE_MODEL", "mixtral:8x7b")
+        "creative": load_model("CREATIVE_MODEL", "mixtral:8x7b"),
     }
 
     # Initialize MoE system if requested
@@ -648,7 +668,8 @@ def load_conductor_models(use_moe: bool = True) -> Dict[str, Any]:
     logger.info(f"Conductor model suite loaded: {list(models.keys())}")
     return models
 
-def load_slim_models() -> Dict[str, ModelInterface]:
+
+def load_slim_models() -> dict[str, ModelInterface]:
     """
     Load all SLiM agent models for hemispheric processing.
 
@@ -660,24 +681,25 @@ def load_slim_models() -> Dict[str, ModelInterface]:
     models = {
         # Main conductor
         "conductor": load_model("CONDUCTOR_MODEL", "gpt-oss-20b"),
-
         # Left Brain (Logic) SLiMs - 4 agents
         "logic_high": load_model("LOGIC_HIGH_MODEL", "phi4-mini-reasoning:3.8b"),
         "logic_code": load_model("LOGIC_CODE_MODEL", "qwen2.5-coder:3b"),
         "logic_proof": load_model("LOGIC_PROOF_MODEL", "deepseek-r1:1.5b"),
         "logic_fallback": load_model("LOGIC_FALLBACK_MODEL", "granite3.3:2b"),
-
         # Right Brain (Emotion & Creativity) SLiMs - 4 agents
         "emotion_valence": load_model("EMOTION_VALENCE_MODEL", "gemma3:1b"),
         "emotion_narrative": load_model("EMOTION_NARRATIVE_MODEL", "phi3:3.8b"),
-        "emotion_uncensored": load_model("EMOTION_UNCENSORED_MODEL", "artifish/llama3.2-uncensored:latest"),
-        "emotion_creative": load_model("EMOTION_CREATIVE_MODEL", "dolphin-phi:latest")
+        "emotion_uncensored": load_model(
+            "EMOTION_UNCENSORED_MODEL", "artifish/llama3.2-uncensored:latest"
+        ),
+        "emotion_creative": load_model("EMOTION_CREATIVE_MODEL", "dolphin-phi:latest"),
     }
 
     logger.info(f"SLiM agent model suite loaded: {list(models.keys())}")
     return models
 
-def load_all_models() -> Dict[str, ModelInterface]:
+
+def load_all_models() -> dict[str, ModelInterface]:
     """
     Load complete model suite including conductor and all SLiM agents.
 
@@ -689,45 +711,43 @@ def load_all_models() -> Dict[str, ModelInterface]:
     models = {
         # Main conductor
         "conductor": load_model("CONDUCTOR_MODEL", "gpt-oss-20b"),
-
         # Legacy role mappings for backward compatibility
         "logic": load_model("LOGIC_MODEL", "deepseek-coder:1.3b"),
         "emotion": load_model("EMOTION_MODEL", "mistral:7b"),
         "creative": load_model("CREATIVE_MODEL", "mixtral:8x7b"),
-
         # Left Brain (Logic) SLiMs - 4 agents
         "logic_high": load_model("LOGIC_HIGH_MODEL", "phi4-mini-reasoning:3.8b"),
         "logic_code": load_model("LOGIC_CODE_MODEL", "qwen2.5-coder:3b"),
         "logic_proof": load_model("LOGIC_PROOF_MODEL", "deepseek-r1:1.5b"),
         "logic_fallback": load_model("LOGIC_FALLBACK_MODEL", "granite3.3:2b"),
-
         # Right Brain (Emotion & Creativity) SLiMs - 4 agents
         "emotion_valence": load_model("EMOTION_VALENCE_MODEL", "gemma3:1b"),
         "emotion_narrative": load_model("EMOTION_NARRATIVE_MODEL", "phi3:3.8b"),
-        "emotion_uncensored": load_model("EMOTION_UNCENSORED_MODEL", "artifish/llama3.2-uncensored:latest"),
-        "emotion_creative": load_model("EMOTION_CREATIVE_MODEL", "dolphin-phi:latest")
+        "emotion_uncensored": load_model(
+            "EMOTION_UNCENSORED_MODEL", "artifish/llama3.2-uncensored:latest"
+        ),
+        "emotion_creative": load_model("EMOTION_CREATIVE_MODEL", "dolphin-phi:latest"),
     }
 
     logger.info(f"Complete model suite loaded: {list(models.keys())}")
     return models
 
-def get_model_info(model: ModelInterface) -> Dict[str, Any]:
+
+def get_model_info(model: ModelInterface) -> dict[str, Any]:
     """Get information about a loaded model"""
-    info = {
-        "type": type(model).__name__,
-        "available": True
-    }
+    info = {"type": type(model).__name__, "available": True}
 
-    if hasattr(model, 'model_name'):
-        info["model_name"] = getattr(model, 'model_name')
+    if hasattr(model, "model_name"):
+        info["model_name"] = model.model_name
 
-    if hasattr(model, 'available'):
-        info["available"] = getattr(model, 'available')
+    if hasattr(model, "available"):
+        info["available"] = model.available
 
-    if hasattr(model, 'call_count'):
-        info["call_count"] = getattr(model, 'call_count')
+    if hasattr(model, "call_count"):
+        info["call_count"] = model.call_count
 
     return info
+
 
 # Example usage and testing
 def example_usage():
@@ -759,13 +779,14 @@ def example_usage():
         "conductor": "What strategic approach should we take for this decision?",
         "logic": "Analyze the logical implications of this choice",
         "emotion": "How might the user feel about this response?",
-        "creative": "Generate an innovative solution to this problem"
+        "creative": "Generate an innovative solution to this problem",
     }
 
     for role, prompt in test_prompts.items():
         if role in models:
             response = models[role].generate(prompt)
             print(f"   {role}: {response[:80]}...")
+
 
 if __name__ == "__main__":
     example_usage()

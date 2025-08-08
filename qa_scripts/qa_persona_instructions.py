@@ -5,10 +5,12 @@ Tests persona manifestos, runtime switching, behavioral consistency, and routing
 """
 
 import asyncio
-import aiohttp
 import json
 import time
 from datetime import datetime
+
+import aiohttp
+
 
 class PersonaInstructionQA:
     """Targeted testing for the Persona Instruction Manager"""
@@ -36,10 +38,10 @@ class PersonaInstructionQA:
 
                     print(f"✅ Found {len(manifestos)} persona manifestos:")
                     for manifesto in manifestos:
-                        name = manifesto.get('name', 'Unknown')
-                        persona_id = manifesto.get('id', 'unknown')
-                        active = "🎯" if manifesto.get('is_active') else "  "
-                        description = manifesto.get('description', '')[:50] + "..."
+                        name = manifesto.get("name", "Unknown")
+                        persona_id = manifesto.get("id", "unknown")
+                        active = "🎯" if manifesto.get("is_active") else "  "
+                        description = manifesto.get("description", "")[:50] + "..."
 
                         print(f"   {active} {name} ({persona_id})")
                         print(f"      {description}")
@@ -62,9 +64,9 @@ class PersonaInstructionQA:
                     data = await response.json()
 
                     if data:
-                        name = data.get('name', 'Unknown')
-                        persona_id = data.get('id', 'unknown')
-                        active_since = data.get('active_since', 'Unknown')
+                        name = data.get("name", "Unknown")
+                        persona_id = data.get("id", "unknown")
+                        active_since = data.get("active_since", "Unknown")
 
                         print(f"✅ Active persona: {name} ({persona_id})")
                         print(f"   Active since: {active_since}")
@@ -91,15 +93,17 @@ class PersonaInstructionQA:
 
         # Test switching to different personas
         for i, manifesto in enumerate(manifestos[:3]):  # Test first 3
-            persona_id = manifesto.get('id')
-            name = manifesto.get('name', 'Unknown')
+            persona_id = manifesto.get("id")
+            name = manifesto.get("name", "Unknown")
 
             try:
-                async with self.session.post(f"{self.base_url}/api/personas/activate/{persona_id}") as response:
+                async with self.session.post(
+                    f"{self.base_url}/api/personas/activate/{persona_id}"
+                ) as response:
                     if response.status == 200:
                         data = await response.json()
-                        success = data.get('success', False)
-                        message = data.get('message', '')
+                        success = data.get("success", False)
+                        message = data.get("message", "")
 
                         print(f"  Switch {i+1}: ✅ Activated {name} - {message}")
 
@@ -107,34 +111,44 @@ class PersonaInstructionQA:
                         await asyncio.sleep(0.5)
                         active_check = await self.test_active_persona()
 
-                        if active_check and active_check.get('id') == persona_id:
-                            switching_results.append({
-                                "persona_id": persona_id,
-                                "name": name,
-                                "switch_successful": True,
-                                "verified": True
-                            })
+                        if active_check and active_check.get("id") == persona_id:
+                            switching_results.append(
+                                {
+                                    "persona_id": persona_id,
+                                    "name": name,
+                                    "switch_successful": True,
+                                    "verified": True,
+                                }
+                            )
                         else:
-                            switching_results.append({
+                            switching_results.append(
+                                {
+                                    "persona_id": persona_id,
+                                    "name": name,
+                                    "switch_successful": True,
+                                    "verified": False,
+                                }
+                            )
+                    else:
+                        print(
+                            f"  Switch {i+1}: ❌ Failed to activate {name} (status: {response.status})"
+                        )
+                        switching_results.append(
+                            {
                                 "persona_id": persona_id,
                                 "name": name,
-                                "switch_successful": True,
-                                "verified": False
-                            })
-                    else:
-                        print(f"  Switch {i+1}: ❌ Failed to activate {name} (status: {response.status})")
-                        switching_results.append({
-                            "persona_id": persona_id,
-                            "name": name,
-                            "switch_successful": False,
-                            "verified": False
-                        })
+                                "switch_successful": False,
+                                "verified": False,
+                            }
+                        )
 
             except Exception as e:
                 print(f"  Switch {i+1}: ❌ Error activating {name}: {e}")
 
-        successful_switches = [r for r in switching_results if r['switch_successful']]
-        print(f"✅ Successful persona switches: {len(successful_switches)}/{len(switching_results)}")
+        successful_switches = [r for r in switching_results if r["switch_successful"]]
+        print(
+            f"✅ Successful persona switches: {len(successful_switches)}/{len(switching_results)}"
+        )
 
         return switching_results
 
@@ -143,21 +157,23 @@ class PersonaInstructionQA:
         print("📋 Testing persona instructions loading...")
 
         try:
-            async with self.session.get(f"{self.base_url}/api/personas/active-instructions") as response:
+            async with self.session.get(
+                f"{self.base_url}/api/personas/active-instructions"
+            ) as response:
                 if response.status == 200:
                     data = await response.json()
 
                     if data:
-                        name = data.get('name', 'Unknown')
-                        instructions = data.get('instructions', {})
-                        system_prompt = data.get('system_prompt', '')
+                        name = data.get("name", "Unknown")
+                        instructions = data.get("instructions", {})
+                        system_prompt = data.get("system_prompt", "")
 
                         print(f"✅ Loaded instructions for: {name}")
                         print(f"   System prompt length: {len(system_prompt)} characters")
 
                         # Show instruction categories
                         if instructions:
-                            print(f"   Instruction categories:")
+                            print("   Instruction categories:")
                             for category, content in instructions.items():
                                 if isinstance(content, str):
                                     print(f"     • {category}: {len(content)} chars")
@@ -187,12 +203,14 @@ class PersonaInstructionQA:
         persona_responses = []
 
         for manifesto in manifestos[:3]:  # Test first 3 personas
-            persona_id = manifesto.get('id')
-            name = manifesto.get('name', 'Unknown')
+            persona_id = manifesto.get("id")
+            name = manifesto.get("name", "Unknown")
 
             try:
                 # Activate the persona
-                async with self.session.post(f"{self.base_url}/api/personas/activate/{persona_id}") as response:
+                async with self.session.post(
+                    f"{self.base_url}/api/personas/activate/{persona_id}"
+                ) as response:
                     if response.status != 200:
                         print(f"  ❌ Failed to activate {name}")
                         continue
@@ -203,28 +221,32 @@ class PersonaInstructionQA:
                 chat_data = {
                     "message": test_prompt,
                     "session_id": f"{self.session_id}_{persona_id}",
-                    "persona": persona_id
+                    "persona": persona_id,
                 }
 
-                async with self.session.post(f"{self.base_url}/api/chat", json=chat_data) as response:
+                async with self.session.post(
+                    f"{self.base_url}/api/chat", json=chat_data
+                ) as response:
                     if response.status == 200:
                         data = await response.json()
-                        response_text = data.get('response', '')
-                        handler = data.get('handler', 'unknown')
-                        persona_used = data.get('persona_used', 'unknown')
+                        response_text = data.get("response", "")
+                        handler = data.get("handler", "unknown")
+                        persona_used = data.get("persona_used", "unknown")
 
                         print(f"  {name}: ✅ Response received ({len(response_text)} chars)")
                         print(f"    Handler: {handler}, Persona: {persona_used}")
                         print(f"    Preview: {response_text[:100]}...")
 
-                        persona_responses.append({
-                            "persona_id": persona_id,
-                            "name": name,
-                            "response": response_text,
-                            "handler": handler,
-                            "persona_used": persona_used,
-                            "word_count": len(response_text.split())
-                        })
+                        persona_responses.append(
+                            {
+                                "persona_id": persona_id,
+                                "name": name,
+                                "response": response_text,
+                                "handler": handler,
+                                "persona_used": persona_used,
+                                "word_count": len(response_text.split()),
+                            }
+                        )
                     else:
                         print(f"  {name}: ❌ Chat failed (status: {response.status})")
 
@@ -233,24 +255,23 @@ class PersonaInstructionQA:
 
         # Analyze response differences
         if len(persona_responses) >= 2:
-            print(f"\n📊 Behavioral Analysis:")
+            print("\n📊 Behavioral Analysis:")
 
             # Compare response lengths
-            lengths = [r['word_count'] for r in persona_responses]
+            lengths = [r["word_count"] for r in persona_responses]
             length_variance = max(lengths) - min(lengths)
             print(f"   Response length variance: {length_variance} words")
 
             # Check for different handlers/routing
-            handlers = set(r['handler'] for r in persona_responses)
+            handlers = set(r["handler"] for r in persona_responses)
             print(f"   Unique handlers used: {len(handlers)} ({', '.join(handlers)})")
 
             # Simple content difference check
             unique_content = True
             for i in range(len(persona_responses)):
-                for j in range(i+1, len(persona_responses)):
+                for j in range(i + 1, len(persona_responses)):
                     similarity = self.calculate_simple_similarity(
-                        persona_responses[i]['response'],
-                        persona_responses[j]['response']
+                        persona_responses[i]["response"], persona_responses[j]["response"]
                     )
                     if similarity > 0.8:  # Very similar responses
                         unique_content = False
@@ -289,25 +310,20 @@ class PersonaInstructionQA:
                 "tone": "technical and precise",
                 "personality_traits": ["methodical", "detail-oriented", "systematic"],
                 "conversation_style": "Provide step-by-step analysis with clear conclusions",
-                "response_format": "Always start responses with 'Analysis:' and end with 'Conclusion:'"
+                "response_format": "Always start responses with 'Analysis:' and end with 'Conclusion:'",
             },
-            "routing_preferences": {
-                "prefer_local": False,
-                "complexity_threshold": 0.3
-            },
-            "metadata": {
-                "created_by": "qa_test",
-                "test_persona": True
-            }
+            "routing_preferences": {"prefer_local": False, "complexity_threshold": 0.3},
+            "metadata": {"created_by": "qa_test", "test_persona": True},
         }
 
         try:
-            async with self.session.post(f"{self.base_url}/api/personas/create",
-                                       json=custom_persona) as response:
+            async with self.session.post(
+                f"{self.base_url}/api/personas/create", json=custom_persona
+            ) as response:
                 if response.status == 200:
                     data = await response.json()
-                    success = data.get('success', False)
-                    persona_id = data.get('persona_id', '')
+                    success = data.get("success", False)
+                    persona_id = data.get("persona_id", "")
 
                     if success:
                         print(f"✅ Custom persona created: {persona_id}")
@@ -315,7 +331,9 @@ class PersonaInstructionQA:
                         # Test using the custom persona
                         await asyncio.sleep(0.5)
 
-                        async with self.session.post(f"{self.base_url}/api/personas/activate/{persona_id}") as activate_response:
+                        async with self.session.post(
+                            f"{self.base_url}/api/personas/activate/{persona_id}"
+                        ) as activate_response:
                             if activate_response.status == 200:
                                 print("✅ Custom persona activated successfully")
 
@@ -323,21 +341,27 @@ class PersonaInstructionQA:
                                 test_chat = {
                                     "message": "How should I test a new software feature?",
                                     "session_id": f"{self.session_id}_custom",
-                                    "persona": persona_id
+                                    "persona": persona_id,
                                 }
 
-                                async with self.session.post(f"{self.base_url}/api/chat", json=test_chat) as chat_response:
+                                async with self.session.post(
+                                    f"{self.base_url}/api/chat", json=test_chat
+                                ) as chat_response:
                                     if chat_response.status == 200:
                                         chat_data = await chat_response.json()
-                                        response = chat_data.get('response', '')
+                                        response = chat_data.get("response", "")
 
                                         # Check for custom persona characteristics
-                                        has_analysis = 'Analysis:' in response
-                                        has_conclusion = 'Conclusion:' in response
+                                        has_analysis = "Analysis:" in response
+                                        has_conclusion = "Conclusion:" in response
 
-                                        print(f"✅ Custom persona response received")
-                                        print(f"   Analysis format: {'✅' if has_analysis else '❌'}")
-                                        print(f"   Conclusion format: {'✅' if has_conclusion else '❌'}")
+                                        print("✅ Custom persona response received")
+                                        print(
+                                            f"   Analysis format: {'✅' if has_analysis else '❌'}"
+                                        )
+                                        print(
+                                            f"   Conclusion format: {'✅' if has_conclusion else '❌'}"
+                                        )
 
                                         return True
                                     else:
@@ -347,7 +371,9 @@ class PersonaInstructionQA:
                                 print("❌ Failed to activate custom persona")
                                 return False
                     else:
-                        print(f"❌ Custom persona creation failed: {data.get('message', 'Unknown error')}")
+                        print(
+                            f"❌ Custom persona creation failed: {data.get('message', 'Unknown error')}"
+                        )
                         return False
                 else:
                     print(f"❌ Custom persona creation request failed: {response.status}")
@@ -378,22 +404,28 @@ class PersonaInstructionQA:
         print("🎯 PERSONA INSTRUCTION MANAGER QA RESULTS:")
         print(f"✅ Available Manifestos: {len(manifestos)} found")
         print(f"✅ Active Persona Detection: {'Working' if initial_active else 'None active'}")
-        print(f"✅ Persona Switching: {len([r for r in switching_results if r['switch_successful']])}/{len(switching_results)} successful")
+        print(
+            f"✅ Persona Switching: {len([r for r in switching_results if r['switch_successful']])}/{len(switching_results)} successful"
+        )
         print(f"✅ Instructions Loading: {'Working' if instructions else 'Failed'}")
         print(f"✅ Behavioral Responses: {len(behavioral_responses)} personas tested")
-        print(f"{'✅' if custom_creation else '❌'} Custom Creation: {'Working' if custom_creation else 'Failed'}")
+        print(
+            f"{'✅' if custom_creation else '❌'} Custom Creation: {'Working' if custom_creation else 'Failed'}"
+        )
 
         # Check for persona diversity
         if behavioral_responses:
-            handlers = set(r['handler'] for r in behavioral_responses)
-            persona_diversity = len(handlers) > 1 or len(set(r['word_count'] for r in behavioral_responses)) > 1
+            handlers = set(r["handler"] for r in behavioral_responses)
+            persona_diversity = (
+                len(handlers) > 1 or len(set(r["word_count"] for r in behavioral_responses)) > 1
+            )
             print(f"✅ Behavioral Diversity: {'Detected' if persona_diversity else 'Limited'}")
 
         success_criteria = [
             len(manifestos) > 0,
-            len([r for r in switching_results if r['switch_successful']]) > 0,
+            len([r for r in switching_results if r["switch_successful"]]) > 0,
             instructions is not None,
-            len(behavioral_responses) > 0
+            len(behavioral_responses) > 0,
         ]
 
         if all(success_criteria):
@@ -403,6 +435,7 @@ class PersonaInstructionQA:
             print("\n❌ Persona Instruction Manager QA: PARTIAL - Some features may need attention")
             return False
 
+
 async def main():
     """Main QA execution"""
     print("Starting Persona Instruction Manager QA...")
@@ -411,6 +444,7 @@ async def main():
     async with PersonaInstructionQA() as qa:
         success = await qa.run_persona_instruction_qa_suite()
         return success
+
 
 if __name__ == "__main__":
     result = asyncio.run(main())

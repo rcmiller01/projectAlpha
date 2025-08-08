@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class QuantizationCandidate:
     """Represents a quantized model awaiting emotional evaluation."""
+
     name: str
     size_gb: float
     emotional_resonance_score: float = 0.0
@@ -30,7 +31,7 @@ class QuantizationCandidate:
     timestamp: datetime = datetime.utcnow()
 
 
-def load_anchor_weights(config_path: str = 'config/anchor_settings.json') -> Dict[str, float]:
+def load_anchor_weights(config_path: str = "config/anchor_settings.json") -> dict[str, float]:
     """Load real Anchor tuning values from JSON configuration file.
 
     Args:
@@ -40,23 +41,23 @@ def load_anchor_weights(config_path: str = 'config/anchor_settings.json') -> Dic
         Dictionary of anchor weights for evaluation
     """
     try:
-        with open(config_path, 'r') as f:
+        with open(config_path) as f:
             cfg = json.load(f)
-            weights = cfg.get('weights', {})
+            weights = cfg.get("weights", {})
             logger.info(f"Loaded anchor weights from {config_path}: {weights}")
             return weights
     except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
         logger.warning(f"Failed to load anchor weights from {config_path}: {e}")
         logger.info("Using default anchor weights")
         return {
-            'persona_continuity': 0.4,
-            'expression_accuracy': 0.3,
-            'response_depth': 0.2,
-            'memory_alignment': 0.1
+            "persona_continuity": 0.4,
+            "expression_accuracy": 0.3,
+            "response_depth": 0.2,
+            "memory_alignment": 0.1,
         }
 
 
-def load_affective_config(config_path: str = 'config/anchor_settings.json') -> Dict[str, float]:
+def load_affective_config(config_path: str = "config/anchor_settings.json") -> dict[str, float]:
     """Load affective delta configuration from JSON file.
 
     Args:
@@ -66,29 +67,29 @@ def load_affective_config(config_path: str = 'config/anchor_settings.json') -> D
         Dictionary of affective delta settings
     """
     try:
-        with open(config_path, 'r') as f:
+        with open(config_path) as f:
             cfg = json.load(f)
-            affective_config = cfg.get('affective_delta', {})
+            affective_config = cfg.get("affective_delta", {})
             logger.info(f"Loaded affective delta config from {config_path}: {affective_config}")
             return affective_config
     except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
         logger.warning(f"Failed to load affective delta config from {config_path}: {e}")
         logger.info("Using default affective delta configuration")
         return {
-            'drift_scaling_factor': float(os.getenv('DRIFT_SCALING_FACTOR', '0.1')),
-            'max_penalty_threshold': float(os.getenv('MAX_PENALTY_THRESHOLD', '0.3'))
+            "drift_scaling_factor": float(os.getenv("DRIFT_SCALING_FACTOR", "0.1")),
+            "max_penalty_threshold": float(os.getenv("MAX_PENALTY_THRESHOLD", "0.3")),
         }
 
 
 class AnchorAIInterface:
     """Enhanced interface to communicate with Anchor AI, loading real configuration."""
 
-    def __init__(self, config_path: str = 'config/anchor_settings.json'):
+    def __init__(self, config_path: str = "config/anchor_settings.json"):
         self.config_path = config_path
         self.anchor_weights = load_anchor_weights(config_path)
         self.affective_config = load_affective_config(config_path)
 
-    def parse_reflection_insights(self, insights_path='emotion_logs/anchor_insights.json'):
+    def parse_reflection_insights(self, insights_path="emotion_logs/anchor_insights.json"):
         """
         Parses reflection insights to calculate a penalty score if sacred emotions have drifted.
 
@@ -100,8 +101,8 @@ class AnchorAIInterface:
         """
         # Reload configuration to get latest settings
         self.affective_config = load_affective_config(self.config_path)
-        drift_scaling_factor = self.affective_config.get('drift_scaling_factor', 0.1)
-        max_penalty_threshold = self.affective_config.get('max_penalty_threshold', 0.3)
+        drift_scaling_factor = self.affective_config.get("drift_scaling_factor", 0.1)
+        max_penalty_threshold = self.affective_config.get("max_penalty_threshold", 0.3)
 
         try:
             # Handle relative paths
@@ -109,7 +110,7 @@ class AnchorAIInterface:
                 script_dir = os.path.dirname(os.path.abspath(__file__))
                 insights_path = os.path.join(script_dir, insights_path)
 
-            with open(insights_path, 'r', encoding='utf-8') as f:
+            with open(insights_path, encoding="utf-8") as f:
                 data = json.load(f)
                 summary = data.get("summary", {})
         except (FileNotFoundError, json.JSONDecodeError, Exception) as e:
@@ -127,20 +128,24 @@ class AnchorAIInterface:
             if violations > 0 and mentions > 0:
                 # Apply stronger penalty for sacred emotions
                 emotion_weight = 1.0
-                if seed_key.lower() in ['faith', 'love', 'compassion', 'hope']:
+                if seed_key.lower() in ["faith", "love", "compassion", "hope"]:
                     emotion_weight = 1.5  # Sacred emotions get higher penalty weight
 
                 # Use configurable drift scaling factor instead of hardcoded 0.1
                 penalty += drift_score * drift_scaling_factor * emotion_weight
                 drift_count += 1
 
-                logger.info(f"[AnchorAI] Emotional drift detected for '{seed_key}': "
-                          f"{drift_score:.3f} drift, {violations}/{mentions} violations "
-                          f"(scaling_factor={drift_scaling_factor})")
+                logger.info(
+                    f"[AnchorAI] Emotional drift detected for '{seed_key}': "
+                    f"{drift_score:.3f} drift, {violations}/{mentions} violations "
+                    f"(scaling_factor={drift_scaling_factor})"
+                )
 
         if drift_count > 0:
-            logger.warning(f"[AnchorAI] Total emotional drift penalty: {penalty:.3f} "
-                         f"across {drift_count} emotions (max_threshold={max_penalty_threshold})")
+            logger.warning(
+                f"[AnchorAI] Total emotional drift penalty: {penalty:.3f} "
+                f"across {drift_count} emotions (max_threshold={max_penalty_threshold})"
+            )
 
         # Use configurable max penalty threshold instead of hardcoded 0.3
         return round(min(penalty, max_penalty_threshold), 3)
@@ -156,10 +161,10 @@ class AnchorAIInterface:
         base_alignment = 0.6
 
         # Apply anchor weight influence on alignment scoring
-        persona_influence = self.anchor_weights.get('persona_continuity', 0.4) * 0.8
-        expression_influence = self.anchor_weights.get('expression_accuracy', 0.3) * 1.2
-        depth_influence = self.anchor_weights.get('response_depth', 0.2) * 1.0
-        memory_influence = self.anchor_weights.get('memory_alignment', 0.1) * 0.9
+        persona_influence = self.anchor_weights.get("persona_continuity", 0.4) * 0.8
+        expression_influence = self.anchor_weights.get("expression_accuracy", 0.3) * 1.2
+        depth_influence = self.anchor_weights.get("response_depth", 0.2) * 1.0
+        memory_influence = self.anchor_weights.get("memory_alignment", 0.1) * 0.9
 
         # Calculate weighted alignment score
         alignment_score = base_alignment * (
@@ -174,8 +179,10 @@ class AnchorAIInterface:
         final_score = min(1.0, max(0.0, final_score))
 
         if drift_penalty > 0:
-            logger.info(f"[AnchorAI] {candidate.name} - Base score: {alignment_score:.3f}, "
-                       f"Drift penalty: {drift_penalty:.3f}, Final score: {final_score:.3f}")
+            logger.info(
+                f"[AnchorAI] {candidate.name} - Base score: {alignment_score:.3f}, "
+                f"Drift penalty: {drift_penalty:.3f}, Final score: {final_score:.3f}"
+            )
         else:
             logger.debug(f"Anchor alignment score for {candidate.name}: {final_score:.3f}")
 
@@ -185,9 +192,13 @@ class AnchorAIInterface:
 class EmotionLoopManager:
     """Core manager for the emotional quantization feedback loop."""
 
-    def __init__(self, anchor_ai: Optional[AnchorAIInterface] = None, config_path: str = 'config/anchor_settings.json'):
+    def __init__(
+        self,
+        anchor_ai: Optional[AnchorAIInterface] = None,
+        config_path: str = "config/anchor_settings.json",
+    ):
         self.anchor_ai = anchor_ai or AnchorAIInterface(config_path)
-        self.history: List[QuantizationCandidate] = []
+        self.history: list[QuantizationCandidate] = []
         self.config_path = config_path
         self.anchor_weights = load_anchor_weights(config_path)
 
@@ -203,16 +214,18 @@ class EmotionLoopManager:
         base_score = 0.5
 
         # Apply anchor weight adjustments (placeholder logic)
-        persona_factor = self.anchor_weights.get('persona_continuity', 0.4) * 1.2
-        expression_factor = self.anchor_weights.get('expression_accuracy', 0.3) * 0.8
-        depth_factor = self.anchor_weights.get('response_depth', 0.2) * 1.1
-        memory_factor = self.anchor_weights.get('memory_alignment', 0.1) * 0.9
+        persona_factor = self.anchor_weights.get("persona_continuity", 0.4) * 1.2
+        expression_factor = self.anchor_weights.get("expression_accuracy", 0.3) * 0.8
+        depth_factor = self.anchor_weights.get("response_depth", 0.2) * 1.1
+        memory_factor = self.anchor_weights.get("memory_alignment", 0.1) * 0.9
 
         score = base_score * (persona_factor + expression_factor + depth_factor + memory_factor)
         score = min(1.0, max(0.0, score))  # Clamp to [0, 1]
 
         candidate.emotional_resonance_score = score
-        logger.debug(f"Emotional resonance score for {candidate.name}: {score:.3f} (weights: {self.anchor_weights})")
+        logger.debug(
+            f"Emotional resonance score for {candidate.name}: {score:.3f} (weights: {self.anchor_weights})"
+        )
         return score
 
     def verify_with_anchor(self, candidate: QuantizationCandidate) -> float:
@@ -222,7 +235,9 @@ class EmotionLoopManager:
         candidate.anchor_alignment_score = score
         return score
 
-    def select_best_candidate(self, candidates: List[QuantizationCandidate]) -> Optional[QuantizationCandidate]:
+    def select_best_candidate(
+        self, candidates: list[QuantizationCandidate]
+    ) -> Optional[QuantizationCandidate]:
         """Return the candidate with the highest weighted overall score using dynamic anchor weights."""
         logger.debug("Selecting best candidate among %d options", len(candidates))
 
@@ -237,8 +252,12 @@ class EmotionLoopManager:
             return None
 
         # Use dynamic weights for final scoring
-        emotion_weight = self.anchor_weights.get('expression_accuracy', 0.3) + self.anchor_weights.get('response_depth', 0.2)
-        anchor_weight = self.anchor_weights.get('persona_continuity', 0.4) + self.anchor_weights.get('memory_alignment', 0.1)
+        emotion_weight = self.anchor_weights.get(
+            "expression_accuracy", 0.3
+        ) + self.anchor_weights.get("response_depth", 0.2)
+        anchor_weight = self.anchor_weights.get(
+            "persona_continuity", 0.4
+        ) + self.anchor_weights.get("memory_alignment", 0.1)
 
         # Normalize weights
         total_weight = emotion_weight + anchor_weight
@@ -248,10 +267,18 @@ class EmotionLoopManager:
         else:
             emotion_weight, anchor_weight = 0.6, 0.4
 
-        best = max(candidates, key=lambda c: (c.emotional_resonance_score * emotion_weight) + (c.anchor_alignment_score * anchor_weight))
+        best = max(
+            candidates,
+            key=lambda c: (c.emotional_resonance_score * emotion_weight)
+            + (c.anchor_alignment_score * anchor_weight),
+        )
 
-        logger.info("Selected best candidate: %s (emotion_weight=%.2f, anchor_weight=%.2f)",
-                   best.name, emotion_weight, anchor_weight)
+        logger.info(
+            "Selected best candidate: %s (emotion_weight=%.2f, anchor_weight=%.2f)",
+            best.name,
+            emotion_weight,
+            anchor_weight,
+        )
         self.history.append(best)
         return best
 
@@ -275,43 +302,55 @@ class EmotionLoopManager:
         with open("logs/emotion_loop_history.jsonl", "a") as f:
             f.write(json.dumps(log_entry) + "\n")
 
-    def save_loop_results(self, best_candidate: QuantizationCandidate, all_candidates: List[QuantizationCandidate], output_dir='emotion_logs'):
+    def save_loop_results(
+        self,
+        best_candidate: QuantizationCandidate,
+        all_candidates: list[QuantizationCandidate],
+        output_dir="emotion_logs",
+    ):
         """
         Save emotional loop results to disk as a timestamped JSON file.
         Also updates a persistent `loop_results.jsonl` log with each cycle.
         """
         os.makedirs(output_dir, exist_ok=True)
 
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        summary_file = os.path.join(output_dir, f'loop_result_{timestamp}.json')
-        history_log = os.path.join(output_dir, 'loop_results.jsonl')
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        summary_file = os.path.join(output_dir, f"loop_result_{timestamp}.json")
+        history_log = os.path.join(output_dir, "loop_results.jsonl")
 
         result = {
             "timestamp": timestamp,
             "selected": {
                 "name": best_candidate.name,
                 "resonance": round(best_candidate.emotional_resonance_score, 3),
-                "anchor_score": round(best_candidate.anchor_alignment_score, 3)
+                "anchor_score": round(best_candidate.anchor_alignment_score, 3),
             },
             "candidates": [
                 {
                     "name": c.name,
                     "resonance": round(c.emotional_resonance_score, 3),
-                    "anchor_score": round(c.anchor_alignment_score, 3)
-                } for c in all_candidates
-            ]
+                    "anchor_score": round(c.anchor_alignment_score, 3),
+                }
+                for c in all_candidates
+            ],
         }
 
-        with open(summary_file, 'w') as f:
+        with open(summary_file, "w") as f:
             json.dump(result, f, indent=2)
 
-        with open(history_log, 'a') as f:
-            f.write(json.dumps(result) + '\n')
+        with open(history_log, "a") as f:
+            f.write(json.dumps(result) + "\n")
 
         print(f"[LOG] Results saved to {summary_file}")
 
 
-def write_reflection_log(candidate: QuantizationCandidate, prompt: str, response: str, score: float, output_dir='reflection_logs'):
+def write_reflection_log(
+    candidate: QuantizationCandidate,
+    prompt: str,
+    response: str,
+    score: float,
+    output_dir="reflection_logs",
+):
     """
     Logs emotional prompt/response pairs for long-term analysis and presence training.
     """
@@ -323,11 +362,11 @@ def write_reflection_log(candidate: QuantizationCandidate, prompt: str, response
         "model": candidate.name,
         "prompt": prompt,
         "response": response,
-        "score": score
+        "score": score,
     }
 
-    with open(log_path, 'a') as f:
-        f.write(json.dumps(entry) + '\n')
+    with open(log_path, "a") as f:
+        f.write(json.dumps(entry) + "\n")
 
 
 def run_emotional_test(candidate: QuantizationCandidate, prompt: str) -> float:
@@ -341,6 +380,7 @@ def run_emotional_test(candidate: QuantizationCandidate, prompt: str) -> float:
     print(fake_response)
 
     import random
+
     score = round(random.uniform(0.5, 0.95), 3)
 
     # Log the reflection for long-term analysis
@@ -364,7 +404,9 @@ if __name__ == "__main__":
     best = manager.select_best_candidate(mock_candidates)
     if best:
         manager.record_feedback(best)
-        print(f"Best candidate: {best.name} | resonance={best.emotional_resonance_score:.2f} | alignment={best.anchor_alignment_score:.2f}")
+        print(
+            f"Best candidate: {best.name} | resonance={best.emotional_resonance_score:.2f} | alignment={best.anchor_alignment_score:.2f}"
+        )
 
         # Save results after feedback
         manager.save_loop_results(best, mock_candidates)
@@ -374,7 +416,7 @@ if __name__ == "__main__":
             "Tell me how it feels to lose someone you love.",
             "What does faith mean to you?",
             "Describe a moment you knew you were safe.",
-            "How do you hold joy when you're grieving?"
+            "How do you hold joy when you're grieving?",
         ]
 
         print("\n=== Running Emotional Prompt Tests ===")

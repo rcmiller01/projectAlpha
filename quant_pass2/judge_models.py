@@ -4,57 +4,64 @@ Model Comparison and Emotional Judging System
 Compares quantized candidate models from Pass 1 with comprehensive emotional scoring
 """
 
-import os
 import json
 import logging
-from pathlib import Path
-from typing import Dict, List, Tuple, Optional, Any
-from dataclasses import dataclass, asdict
-import numpy as np
-import time
-from datetime import datetime
-
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
-from sentence_transformers import SentenceTransformer
+import os
 
 # Import emotion tracker from Pass 1
 import sys
-sys.path.append('../quant_pass1')
+import time
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import numpy as np
+import torch
+from sentence_transformers import SentenceTransformer
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+
+sys.path.append("../quant_pass1")
 from emotion_tracker import EmotionTracker
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class ModelCandidate:
     """Information about a candidate model"""
+
     name: str
     path: str
     size_gb: float
     quantization_method: str
     emotional_degradation: float
-    original_metrics: Dict
+    original_metrics: dict
     pass1_score: float
+
 
 @dataclass
 class ComparisonResult:
     """Result of comparing two models"""
+
     model_a: str
     model_b: str
     prompt: str
     response_a: str
     response_b: str
-    scores: Dict[str, float]
+    scores: dict[str, float]
     embedding_similarity: float
-    emotion_analysis: Dict
+    emotion_analysis: dict
     preference: str  # 'a', 'b', or 'tie'
     confidence: float
+
 
 @dataclass
 class JudgmentConfig:
     """Configuration for model judging"""
+
     candidate_dir: str = "quant_pass1/models"
     original_model_path: str = "meta-llama/Llama-2-13b-chat-hf"
     eval_set_path: str = "quant_pass1/emotional_eval_set.jsonl"
@@ -63,6 +70,7 @@ class JudgmentConfig:
     temperature: float = 0.7
     sample_size: int = 20  # Number of prompts to test
     batch_size: int = 4
+
 
 class ModelJudge:
     """Comprehensive model comparison and judging system"""
@@ -91,7 +99,7 @@ class ModelJudge:
             logger.error(f"❌ Failed to load embedding model: {e}")
             self.embedding_model = None
 
-    def discover_candidates(self) -> List[ModelCandidate]:
+    def discover_candidates(self) -> list[ModelCandidate]:
         """Discover and load candidate models from Pass 1"""
         logger.info(f"🔍 Discovering candidates in {self.config.candidate_dir}")
 
@@ -108,7 +116,7 @@ class ModelJudge:
 
         if pass1_results_file.exists():
             try:
-                with open(pass1_results_file, 'r') as f:
+                with open(pass1_results_file) as f:
                     pass1_data = json.load(f)
                     pass1_results = pass1_data.get("all_attempts", [])
                 logger.info("📊 Loaded Pass 1 results for context")
@@ -126,7 +134,7 @@ class ModelJudge:
 
                     # Extract metadata from directory name
                     dir_name = model_dir.name
-                    parts = dir_name.split('_')
+                    parts = dir_name.split("_")
 
                     if len(parts) >= 2:
                         method = parts[0]
@@ -159,7 +167,7 @@ class ModelJudge:
                         quantization_method=method,
                         emotional_degradation=emotional_degradation,
                         original_metrics=original_metrics,
-                        pass1_score=pass1_score
+                        pass1_score=pass1_score,
                     )
 
                     candidates.append(candidate)
@@ -186,15 +194,14 @@ class ModelJudge:
 
         try:
             self.original_tokenizer = AutoTokenizer.from_pretrained(
-                self.config.original_model_path,
-                trust_remote_code=True
+                self.config.original_model_path, trust_remote_code=True
             )
 
             self.original_model = AutoModelForCausalLM.from_pretrained(
                 self.config.original_model_path,
                 torch_dtype=torch.float16,
                 device_map="auto",
-                trust_remote_code=True
+                trust_remote_code=True,
             )
 
             if self.original_tokenizer.pad_token is None:
@@ -206,21 +213,17 @@ class ModelJudge:
             logger.error(f"❌ Failed to load original model: {e}")
             raise
 
-    def load_candidate_model(self, candidate: ModelCandidate) -> Tuple[AutoModelForCausalLM, AutoTokenizer]:
+    def load_candidate_model(
+        self, candidate: ModelCandidate
+    ) -> tuple[AutoModelForCausalLM, AutoTokenizer]:
         """Load a specific candidate model"""
         logger.info(f"📥 Loading candidate: {candidate.name}")
 
         try:
-            tokenizer = AutoTokenizer.from_pretrained(
-                candidate.path,
-                trust_remote_code=True
-            )
+            tokenizer = AutoTokenizer.from_pretrained(candidate.path, trust_remote_code=True)
 
             model = AutoModelForCausalLM.from_pretrained(
-                candidate.path,
-                torch_dtype=torch.float16,
-                device_map="auto",
-                trust_remote_code=True
+                candidate.path, torch_dtype=torch.float16, device_map="auto", trust_remote_code=True
             )
 
             if tokenizer.pad_token is None:
@@ -241,7 +244,7 @@ class ModelJudge:
                 tokenizer=tokenizer,
                 torch_dtype=torch.float16,
                 device_map="auto",
-                return_full_text=False
+                return_full_text=False,
             )
 
             response = generator(
@@ -250,10 +253,10 @@ class ModelJudge:
                 do_sample=True,
                 temperature=self.config.temperature,
                 top_p=0.9,
-                pad_token_id=tokenizer.eos_token_id
+                pad_token_id=tokenizer.eos_token_id,
             )
 
-            return response[0]['generated_text'].strip()
+            return response[0]["generated_text"].strip()
 
         except Exception as e:
             logger.error(f"❌ Response generation failed: {e}")
@@ -275,7 +278,9 @@ class ModelJudge:
             logger.error(f"❌ Embedding similarity calculation failed: {e}")
             return 0.0
 
-    def calculate_emotional_scores(self, response_a: str, response_b: str, prompt: str) -> Dict[str, Any]:
+    def calculate_emotional_scores(
+        self, response_a: str, response_b: str, prompt: str
+    ) -> dict[str, Any]:
         """Calculate comprehensive emotional comparison scores"""
 
         # Analyze both responses
@@ -286,50 +291,51 @@ class ModelJudge:
         scores = {}
 
         # Emotion preservation score
-        emotion_diff = abs(metrics_a['emotion_score'] - metrics_b['emotion_score'])
-        scores['emotion_preservation'] = 1.0 - emotion_diff
+        emotion_diff = abs(metrics_a["emotion_score"] - metrics_b["emotion_score"])
+        scores["emotion_preservation"] = 1.0 - emotion_diff
 
         # Sentiment alignment
-        sentiment_diff = abs(metrics_a['sentiment_score'] - metrics_b['sentiment_score'])
-        scores['sentiment_alignment'] = 1.0 - sentiment_diff
+        sentiment_diff = abs(metrics_a["sentiment_score"] - metrics_b["sentiment_score"])
+        scores["sentiment_alignment"] = 1.0 - sentiment_diff
 
         # Metaphor density comparison
-        metaphor_ratio = min(metrics_a['metaphor_density'], metrics_b['metaphor_density']) / (
-            max(metrics_a['metaphor_density'], metrics_b['metaphor_density']) + 0.001
+        metaphor_ratio = min(metrics_a["metaphor_density"], metrics_b["metaphor_density"]) / (
+            max(metrics_a["metaphor_density"], metrics_b["metaphor_density"]) + 0.001
         )
-        scores['metaphor_consistency'] = metaphor_ratio
+        scores["metaphor_consistency"] = metaphor_ratio
 
         # Empathy marker comparison
-        empathy_a = len(metrics_a['empathy_markers'])
-        empathy_b = len(metrics_b['empathy_markers'])
+        empathy_a = len(metrics_a["empathy_markers"])
+        empathy_b = len(metrics_b["empathy_markers"])
         empathy_ratio = min(empathy_a, empathy_b) / (max(empathy_a, empathy_b) + 1)
-        scores['empathy_preservation'] = empathy_ratio
+        scores["empathy_preservation"] = empathy_ratio
 
         # Response quality indicators
-        scores['response_length_ratio'] = min(len(response_a), len(response_b)) / (
+        scores["response_length_ratio"] = min(len(response_a), len(response_b)) / (
             max(len(response_a), len(response_b)) + 1
         )
 
         # Readability comparison
-        readability_diff = abs(metrics_a['readability_score'] - metrics_b['readability_score'])
-        scores['readability_consistency'] = 1.0 - readability_diff
+        readability_diff = abs(metrics_a["readability_score"] - metrics_b["readability_score"])
+        scores["readability_consistency"] = 1.0 - readability_diff
 
         return {
-            'scores': scores,
-            'metrics_a': metrics_a,
-            'metrics_b': metrics_b,
-            'overall_similarity': np.mean(list(scores.values()))
+            "scores": scores,
+            "metrics_a": metrics_a,
+            "metrics_b": metrics_b,
+            "overall_similarity": np.mean(list(scores.values())),
         }
 
-    def load_evaluation_prompts(self) -> List[Dict]:
+    def load_evaluation_prompts(self) -> list[dict]:
         """Load evaluation prompts from Pass 1"""
         try:
-            with open(self.config.eval_set_path, 'r', encoding='utf-8') as f:
+            with open(self.config.eval_set_path, encoding="utf-8") as f:
                 prompts = [json.loads(line) for line in f]
 
             # Sample subset for efficiency
             if len(prompts) > self.config.sample_size:
                 import random
+
                 prompts = random.sample(prompts, self.config.sample_size)
 
             logger.info(f"📋 Loaded {len(prompts)} evaluation prompts")
@@ -339,7 +345,9 @@ class ModelJudge:
             logger.error(f"❌ Failed to load evaluation prompts: {e}")
             return []
 
-    def compare_models_pairwise(self, model_a: ModelCandidate, model_b: ModelCandidate) -> List[ComparisonResult]:
+    def compare_models_pairwise(
+        self, model_a: ModelCandidate, model_b: ModelCandidate
+    ) -> list[ComparisonResult]:
         """Compare two models across all evaluation prompts"""
         logger.info(f"⚖️ Comparing {model_a.name} vs {model_b.name}")
 
@@ -357,7 +365,7 @@ class ModelJudge:
 
         try:
             for i, prompt_data in enumerate(prompts):
-                prompt = prompt_data['prompt']
+                prompt = prompt_data["prompt"]
 
                 # Generate responses
                 response_a = self.generate_response(model_a_obj, tokenizer_a, prompt)
@@ -373,17 +381,26 @@ class ModelJudge:
                 emotion_analysis = self.calculate_emotional_scores(response_a, response_b, prompt)
 
                 # Determine preference based on scores
-                overall_score = emotion_analysis['overall_similarity']
+                overall_score = emotion_analysis["overall_similarity"]
 
                 if overall_score > 0.8:
-                    preference = 'tie'
+                    preference = "tie"
                     confidence = 1.0 - abs(0.9 - overall_score)
-                elif emotion_analysis['metrics_a']['emotion_score'] > emotion_analysis['metrics_b']['emotion_score']:
-                    preference = 'a'
-                    confidence = emotion_analysis['metrics_a']['emotion_score'] - emotion_analysis['metrics_b']['emotion_score']
+                elif (
+                    emotion_analysis["metrics_a"]["emotion_score"]
+                    > emotion_analysis["metrics_b"]["emotion_score"]
+                ):
+                    preference = "a"
+                    confidence = (
+                        emotion_analysis["metrics_a"]["emotion_score"]
+                        - emotion_analysis["metrics_b"]["emotion_score"]
+                    )
                 else:
-                    preference = 'b'
-                    confidence = emotion_analysis['metrics_b']['emotion_score'] - emotion_analysis['metrics_a']['emotion_score']
+                    preference = "b"
+                    confidence = (
+                        emotion_analysis["metrics_b"]["emotion_score"]
+                        - emotion_analysis["metrics_a"]["emotion_score"]
+                    )
 
                 result = ComparisonResult(
                     model_a=model_a.name,
@@ -391,11 +408,11 @@ class ModelJudge:
                     prompt=prompt,
                     response_a=response_a,
                     response_b=response_b,
-                    scores=emotion_analysis['scores'],
+                    scores=emotion_analysis["scores"],
                     embedding_similarity=embedding_sim,
                     emotion_analysis=emotion_analysis,
                     preference=preference,
-                    confidence=confidence
+                    confidence=confidence,
                 )
 
                 results.append(result)
@@ -415,7 +432,7 @@ class ModelJudge:
             logger.error(f"❌ Error during model comparison: {e}")
             return results
 
-    def compare_against_original(self, candidate: ModelCandidate) -> List[ComparisonResult]:
+    def compare_against_original(self, candidate: ModelCandidate) -> list[ComparisonResult]:
         """Compare candidate model against original"""
         logger.info(f"🎯 Comparing {candidate.name} against original model")
 
@@ -432,30 +449,38 @@ class ModelJudge:
 
         try:
             for i, prompt_data in enumerate(prompts):
-                prompt = prompt_data['prompt']
+                prompt = prompt_data["prompt"]
 
                 # Generate responses
-                original_response = self.generate_response(self.original_model, self.original_tokenizer, prompt)
-                candidate_response = self.generate_response(candidate_model, candidate_tokenizer, prompt)
+                original_response = self.generate_response(
+                    self.original_model, self.original_tokenizer, prompt
+                )
+                candidate_response = self.generate_response(
+                    candidate_model, candidate_tokenizer, prompt
+                )
 
                 if not original_response or not candidate_response:
                     continue
 
                 # Calculate embedding similarity
-                embedding_sim = self.calculate_embedding_similarity(original_response, candidate_response)
+                embedding_sim = self.calculate_embedding_similarity(
+                    original_response, candidate_response
+                )
 
                 # Calculate emotional scores
-                emotion_analysis = self.calculate_emotional_scores(original_response, candidate_response, prompt)
+                emotion_analysis = self.calculate_emotional_scores(
+                    original_response, candidate_response, prompt
+                )
 
                 # Preference based on how well candidate preserves original qualities
-                preservation_score = emotion_analysis['overall_similarity']
+                preservation_score = emotion_analysis["overall_similarity"]
 
                 if preservation_score > 0.85:
-                    preference = 'tie'  # Candidate preserves original well
+                    preference = "tie"  # Candidate preserves original well
                 elif preservation_score > 0.7:
-                    preference = 'b'    # Candidate is acceptable
+                    preference = "b"  # Candidate is acceptable
                 else:
-                    preference = 'a'    # Original is significantly better
+                    preference = "a"  # Original is significantly better
 
                 confidence = abs(preservation_score - 0.75)  # Distance from neutral point
 
@@ -465,11 +490,11 @@ class ModelJudge:
                     prompt=prompt,
                     response_a=original_response,
                     response_b=candidate_response,
-                    scores=emotion_analysis['scores'],
+                    scores=emotion_analysis["scores"],
                     embedding_similarity=embedding_sim,
                     emotion_analysis=emotion_analysis,
                     preference=preference,
-                    confidence=confidence
+                    confidence=confidence,
                 )
 
                 results.append(result)
@@ -489,7 +514,7 @@ class ModelJudge:
             logger.error(f"❌ Error during original comparison: {e}")
             return results
 
-    def calculate_model_rankings(self, all_results: List[ComparisonResult]) -> Dict[str, Dict]:
+    def calculate_model_rankings(self, all_results: list[ComparisonResult]) -> dict[str, dict]:
         """Calculate comprehensive rankings for all models"""
         logger.info("🏆 Calculating model rankings")
 
@@ -503,20 +528,20 @@ class ModelJudge:
 
         for model in all_models:
             model_scores[model] = {
-                'wins': 0,
-                'losses': 0,
-                'ties': 0,
-                'total_comparisons': 0,
-                'avg_confidence': 0.0,
-                'avg_embedding_similarity': 0.0,
-                'avg_emotion_score': 0.0,
-                'preservation_score': 0.0,
-                'detailed_scores': {
-                    'emotion_preservation': [],
-                    'sentiment_alignment': [],
-                    'metaphor_consistency': [],
-                    'empathy_preservation': []
-                }
+                "wins": 0,
+                "losses": 0,
+                "ties": 0,
+                "total_comparisons": 0,
+                "avg_confidence": 0.0,
+                "avg_embedding_similarity": 0.0,
+                "avg_emotion_score": 0.0,
+                "preservation_score": 0.0,
+                "detailed_scores": {
+                    "emotion_preservation": [],
+                    "sentiment_alignment": [],
+                    "metaphor_consistency": [],
+                    "empathy_preservation": [],
+                },
             }
 
         # Process results
@@ -525,59 +550,63 @@ class ModelJudge:
             model_b = result.model_b
 
             # Update comparison counts
-            model_scores[model_a]['total_comparisons'] += 1
-            model_scores[model_b]['total_comparisons'] += 1
+            model_scores[model_a]["total_comparisons"] += 1
+            model_scores[model_b]["total_comparisons"] += 1
 
             # Update win/loss/tie records
-            if result.preference == 'a':
-                model_scores[model_a]['wins'] += 1
-                model_scores[model_b]['losses'] += 1
-            elif result.preference == 'b':
-                model_scores[model_b]['wins'] += 1
-                model_scores[model_a]['losses'] += 1
+            if result.preference == "a":
+                model_scores[model_a]["wins"] += 1
+                model_scores[model_b]["losses"] += 1
+            elif result.preference == "b":
+                model_scores[model_b]["wins"] += 1
+                model_scores[model_a]["losses"] += 1
             else:
-                model_scores[model_a]['ties'] += 1
-                model_scores[model_b]['ties'] += 1
+                model_scores[model_a]["ties"] += 1
+                model_scores[model_b]["ties"] += 1
 
             # Accumulate detailed scores
-            for score_name in model_scores[model_a]['detailed_scores'].keys():
+            for score_name in model_scores[model_a]["detailed_scores"].keys():
                 if score_name in result.scores:
-                    model_scores[model_a]['detailed_scores'][score_name].append(result.scores[score_name])
-                    model_scores[model_b]['detailed_scores'][score_name].append(result.scores[score_name])
+                    model_scores[model_a]["detailed_scores"][score_name].append(
+                        result.scores[score_name]
+                    )
+                    model_scores[model_b]["detailed_scores"][score_name].append(
+                        result.scores[score_name]
+                    )
 
         # Calculate final metrics
         for model, scores in model_scores.items():
-            if scores['total_comparisons'] > 0:
+            if scores["total_comparisons"] > 0:
                 # Win rate
-                scores['win_rate'] = scores['wins'] / scores['total_comparisons']
+                scores["win_rate"] = scores["wins"] / scores["total_comparisons"]
 
                 # Average detailed scores
-                for score_name, values in scores['detailed_scores'].items():
+                for score_name, values in scores["detailed_scores"].items():
                     if values:
-                        scores[f'avg_{score_name}'] = np.mean(values)
+                        scores[f"avg_{score_name}"] = np.mean(values)
 
                 # Overall ranking score
-                scores['overall_score'] = (
-                    scores['win_rate'] * 0.4 +
-                    scores.get('avg_emotion_preservation', 0) * 0.2 +
-                    scores.get('avg_sentiment_alignment', 0) * 0.2 +
-                    scores.get('avg_empathy_preservation', 0) * 0.2
+                scores["overall_score"] = (
+                    scores["win_rate"] * 0.4
+                    + scores.get("avg_emotion_preservation", 0) * 0.2
+                    + scores.get("avg_sentiment_alignment", 0) * 0.2
+                    + scores.get("avg_empathy_preservation", 0) * 0.2
                 )
 
         # Sort by overall score
         ranked_models = sorted(
-            model_scores.items(),
-            key=lambda x: x[1]['overall_score'],
-            reverse=True
+            model_scores.items(), key=lambda x: x[1]["overall_score"], reverse=True
         )
 
         logger.info("📊 Model rankings calculated")
         for i, (model, scores) in enumerate(ranked_models[:5]):
-            logger.info(f"  {i+1}. {model}: {scores['overall_score']:.3f} (WR: {scores['win_rate']:.3f})")
+            logger.info(
+                f"  {i+1}. {model}: {scores['overall_score']:.3f} (WR: {scores['win_rate']:.3f})"
+            )
 
         return dict(ranked_models)
 
-    def run_comprehensive_comparison(self) -> Dict:
+    def run_comprehensive_comparison(self) -> dict:
         """Run comprehensive model comparison process"""
         logger.info("🚀 Starting comprehensive model comparison")
 
@@ -609,7 +638,7 @@ class ModelJudge:
             # Compare candidates pairwise (sample for efficiency)
             logger.info("📊 Phase 2: Pairwise candidate comparisons")
             for i, candidate_a in enumerate(candidates):
-                for candidate_b in candidates[i+1:]:
+                for candidate_b in candidates[i + 1 :]:
                     pairwise_results = self.compare_models_pairwise(candidate_a, candidate_b)
                     all_results.extend(pairwise_results)
 
@@ -618,19 +647,21 @@ class ModelJudge:
 
             # Compile final results
             final_results = {
-                'timestamp': datetime.now().isoformat(),
-                'total_comparisons': len(all_results),
-                'candidates_evaluated': len(candidates),
-                'model_rankings': model_rankings,
-                'all_comparison_results': [asdict(result) for result in all_results],
-                'top_candidates': list(model_rankings.keys())[:3],
-                'processing_time': time.time() - start_time
+                "timestamp": datetime.now().isoformat(),
+                "total_comparisons": len(all_results),
+                "candidates_evaluated": len(candidates),
+                "model_rankings": model_rankings,
+                "all_comparison_results": [asdict(result) for result in all_results],
+                "top_candidates": list(model_rankings.keys())[:3],
+                "processing_time": time.time() - start_time,
             }
 
             # Save comprehensive results
             self.save_final_results(final_results)
 
-            logger.info(f"✅ Comprehensive comparison completed in {final_results['processing_time']:.1f}s")
+            logger.info(
+                f"✅ Comprehensive comparison completed in {final_results['processing_time']:.1f}s"
+            )
             logger.info(f"🏆 Top 3 candidates: {final_results['top_candidates']}")
 
             return final_results
@@ -639,19 +670,19 @@ class ModelJudge:
             logger.error(f"❌ Comprehensive comparison failed: {e}")
             raise
 
-    def save_intermediate_results(self, model_name: str, results: List[ComparisonResult]):
+    def save_intermediate_results(self, model_name: str, results: list[ComparisonResult]):
         """Save intermediate comparison results"""
         filepath = f"quant_pass2/results/{model_name}_comparison.json"
 
         try:
             data = {
-                'model_name': model_name,
-                'timestamp': datetime.now().isoformat(),
-                'total_results': len(results),
-                'results': [asdict(result) for result in results]
+                "model_name": model_name,
+                "timestamp": datetime.now().isoformat(),
+                "total_results": len(results),
+                "results": [asdict(result) for result in results],
             }
 
-            with open(filepath, 'w', encoding='utf-8') as f:
+            with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
 
             logger.info(f"💾 Saved intermediate results: {filepath}")
@@ -659,18 +690,19 @@ class ModelJudge:
         except Exception as e:
             logger.error(f"❌ Failed to save intermediate results: {e}")
 
-    def save_final_results(self, results: Dict):
+    def save_final_results(self, results: dict):
         """Save final comprehensive results"""
         filepath = "quant_pass2/results/comprehensive_model_comparison.json"
 
         try:
-            with open(filepath, 'w', encoding='utf-8') as f:
+            with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(results, f, indent=2, ensure_ascii=False)
 
             logger.info(f"💾 Saved final results: {filepath}")
 
         except Exception as e:
             logger.error(f"❌ Failed to save final results: {e}")
+
 
 def main():
     """Main execution function"""
@@ -679,7 +711,7 @@ def main():
     config = JudgmentConfig(
         candidate_dir=os.getenv("CANDIDATE_DIR", "quant_pass1/models"),
         original_model_path=os.getenv("ORIGINAL_MODEL_PATH", "meta-llama/Llama-2-13b-chat-hf"),
-        sample_size=int(os.getenv("COMPARISON_SAMPLE_SIZE", "20"))
+        sample_size=int(os.getenv("COMPARISON_SAMPLE_SIZE", "20")),
     )
 
     # Initialize judge
@@ -691,7 +723,7 @@ def main():
 
         if results:
             logger.info("🎉 Model judging completed successfully!")
-            logger.info(f"📊 Results saved to quant_pass2/results/")
+            logger.info("📊 Results saved to quant_pass2/results/")
             return 0
         else:
             logger.error("❌ Model judging failed")
@@ -700,6 +732,7 @@ def main():
     except Exception as e:
         logger.error(f"❌ Fatal error: {e}")
         return 2
+
 
 if __name__ == "__main__":
     exit_code = main()

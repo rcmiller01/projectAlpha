@@ -5,14 +5,15 @@ Database interface definitions for the unified companion system.
 This provides the schema and interface without requiring specific database dependencies.
 """
 
-from typing import Dict, List, Any, Optional, Protocol
-from datetime import datetime, timedelta
-from dataclasses import dataclass, field
-from enum import Enum
 import asyncio
-import logging
 import json
+import logging
 import uuid
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Dict, List, Optional, Protocol
+
 
 class InteractionType(Enum):
     EMOTIONAL_SUPPORT = "emotional_support"
@@ -21,6 +22,7 @@ class InteractionType(Enum):
     INTEGRATED_SUPPORT = "integrated_support"
     GENERAL_CONVERSATION = "general_conversation"
     CRISIS_SUPPORT = "crisis_support"
+
 
 class EmotionalState(Enum):
     STABLE = "stable"
@@ -32,40 +34,44 @@ class EmotionalState(Enum):
     OVERWHELMED = "overwhelmed"
     CONFUSED = "confused"
 
+
 @dataclass
 class UserProfile:
     """Core user profile information"""
+
     user_id: str
     created_at: datetime
     last_active: datetime
     display_name: Optional[str] = None
-    preferences: Dict[str, Any] = field(default_factory=dict)
-    adaptive_profile: Dict[str, Any] = field(default_factory=dict)
+    preferences: dict[str, Any] = field(default_factory=dict)
+    adaptive_profile: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "user_id": self.user_id,
             "created_at": self.created_at.isoformat(),
             "last_active": self.last_active.isoformat(),
             "display_name": self.display_name,
             "preferences": self.preferences,
-            "adaptive_profile": self.adaptive_profile
+            "adaptive_profile": self.adaptive_profile,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'UserProfile':
+    def from_dict(cls, data: dict[str, Any]) -> "UserProfile":
         return cls(
             user_id=data["user_id"],
             created_at=datetime.fromisoformat(data["created_at"]),
             last_active=datetime.fromisoformat(data["last_active"]),
             display_name=data.get("display_name"),
             preferences=data.get("preferences", {}),
-            adaptive_profile=data.get("adaptive_profile", {})
+            adaptive_profile=data.get("adaptive_profile", {}),
         )
+
 
 @dataclass
 class InteractionRecord:
     """Individual interaction record"""
+
     interaction_id: str
     user_id: str
     session_id: str
@@ -73,14 +79,14 @@ class InteractionRecord:
     user_input: str
     companion_response: str
     interaction_type: InteractionType
-    context_analysis: Dict[str, Any]
-    emotional_state: Dict[str, float]
-    technical_context: Dict[str, Any]
-    creative_context: Dict[str, Any]
-    guidance_used: Dict[str, Any]
-    response_metrics: Dict[str, Any]
+    context_analysis: dict[str, Any]
+    emotional_state: dict[str, float]
+    technical_context: dict[str, Any]
+    creative_context: dict[str, Any]
+    guidance_used: dict[str, Any]
+    response_metrics: dict[str, Any]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "interaction_id": self.interaction_id,
             "user_id": self.user_id,
@@ -94,11 +100,11 @@ class InteractionRecord:
             "technical_context": self.technical_context,
             "creative_context": self.creative_context,
             "guidance_used": self.guidance_used,
-            "response_metrics": self.response_metrics
+            "response_metrics": self.response_metrics,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'InteractionRecord':
+    def from_dict(cls, data: dict[str, Any]) -> "InteractionRecord":
         return cls(
             interaction_id=data["interaction_id"],
             user_id=data["user_id"],
@@ -112,22 +118,24 @@ class InteractionRecord:
             technical_context=data["technical_context"],
             creative_context=data["creative_context"],
             guidance_used=data["guidance_used"],
-            response_metrics=data["response_metrics"]
+            response_metrics=data["response_metrics"],
         )
+
 
 @dataclass
 class SessionRecord:
     """Session-level interaction data"""
+
     session_id: str
     user_id: str
     start_time: datetime
     end_time: Optional[datetime] = None
     total_interactions: int = 0
-    primary_focuses: List[str] = field(default_factory=list)
-    emotional_trajectory: List[Dict[str, Any]] = field(default_factory=list)
-    session_summary: Dict[str, Any] = field(default_factory=dict)
+    primary_focuses: list[str] = field(default_factory=list)
+    emotional_trajectory: list[dict[str, Any]] = field(default_factory=list)
+    session_summary: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "session_id": self.session_id,
             "user_id": self.user_id,
@@ -136,11 +144,11 @@ class SessionRecord:
             "total_interactions": self.total_interactions,
             "primary_focuses": self.primary_focuses,
             "emotional_trajectory": self.emotional_trajectory,
-            "session_summary": self.session_summary
+            "session_summary": self.session_summary,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'SessionRecord':
+    def from_dict(cls, data: dict[str, Any]) -> "SessionRecord":
         return cls(
             session_id=data["session_id"],
             user_id=data["user_id"],
@@ -149,24 +157,26 @@ class SessionRecord:
             total_interactions=data["total_interactions"],
             primary_focuses=data["primary_focuses"],
             emotional_trajectory=data["emotional_trajectory"],
-            session_summary=data["session_summary"]
+            session_summary=data["session_summary"],
         )
+
 
 @dataclass
 class PsychologicalState:
     """Comprehensive psychological state tracking"""
+
     user_id: str
     timestamp: datetime
-    emotional_indicators: Dict[str, float]
-    stress_levels: Dict[str, float]
-    attachment_patterns: Dict[str, Any]
-    creative_state: Dict[str, Any]
-    technical_confidence: Dict[str, float]
-    support_needs: List[str]
-    risk_factors: Dict[str, float]
-    growth_indicators: Dict[str, float]
+    emotional_indicators: dict[str, float]
+    stress_levels: dict[str, float]
+    attachment_patterns: dict[str, Any]
+    creative_state: dict[str, Any]
+    technical_confidence: dict[str, float]
+    support_needs: list[str]
+    risk_factors: dict[str, float]
+    growth_indicators: dict[str, float]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "user_id": self.user_id,
             "timestamp": self.timestamp.isoformat(),
@@ -177,11 +187,11 @@ class PsychologicalState:
             "technical_confidence": self.technical_confidence,
             "support_needs": self.support_needs,
             "risk_factors": self.risk_factors,
-            "growth_indicators": self.growth_indicators
+            "growth_indicators": self.growth_indicators,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'PsychologicalState':
+    def from_dict(cls, data: dict[str, Any]) -> "PsychologicalState":
         return cls(
             user_id=data["user_id"],
             timestamp=datetime.fromisoformat(data["timestamp"]),
@@ -192,12 +202,14 @@ class PsychologicalState:
             technical_confidence=data["technical_confidence"],
             support_needs=data["support_needs"],
             risk_factors=data["risk_factors"],
-            growth_indicators=data["growth_indicators"]
+            growth_indicators=data["growth_indicators"],
         )
+
 
 @dataclass
 class MemoryFragment:
     """Individual memory fragment for context continuity"""
+
     memory_id: str
     user_id: str
     content: str
@@ -206,13 +218,13 @@ class MemoryFragment:
     created_at: datetime
     last_accessed: datetime
     access_count: int
-    related_interactions: List[str]
-    tags: List[str]
+    related_interactions: list[str]
+    tags: list[str]
     tone: Optional[str] = None
     sentiment: float = 0.0
     time_of_day: Optional[str] = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "memory_id": self.memory_id,
             "user_id": self.user_id,
@@ -226,11 +238,11 @@ class MemoryFragment:
             "tags": self.tags,
             "tone": self.tone,
             "sentiment": self.sentiment,
-            "time_of_day": self.time_of_day
+            "time_of_day": self.time_of_day,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'MemoryFragment':
+    def from_dict(cls, data: dict[str, Any]) -> "MemoryFragment":
         return cls(
             memory_id=data["memory_id"],
             user_id=data["user_id"],
@@ -244,20 +256,21 @@ class MemoryFragment:
             tags=data["tags"],
             tone=data.get("tone"),
             sentiment=data.get("sentiment", 0.0),
-            time_of_day=data.get("time_of_day")
+            time_of_day=data.get("time_of_day"),
         )
 
 
 @dataclass
 class EmotionalRiskEntry:
     """Log of emotionally vulnerable interactions"""
+
     entry_id: str
     user_id: str
     timestamp: datetime
     user_input: str
-    risk_tags: List[str]
+    risk_tags: list[str]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "entry_id": self.entry_id,
             "user_id": self.user_id,
@@ -267,7 +280,7 @@ class EmotionalRiskEntry:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'EmotionalRiskEntry':
+    def from_dict(cls, data: dict[str, Any]) -> "EmotionalRiskEntry":
         return cls(
             entry_id=data["entry_id"],
             user_id=data["user_id"],
@@ -275,6 +288,7 @@ class EmotionalRiskEntry:
             user_input=data.get("user_input", ""),
             risk_tags=data.get("risk_tags", []),
         )
+
 
 class DatabaseInterface(Protocol):
     """Protocol defining the database interface for the unified companion system"""
@@ -291,7 +305,7 @@ class DatabaseInterface(Protocol):
         """Get user profile by user_id"""
         ...
 
-    async def update_user_profile(self, user_id: str, updates: Dict[str, Any]) -> bool:
+    async def update_user_profile(self, user_id: str, updates: dict[str, Any]) -> bool:
         """Update user profile"""
         ...
 
@@ -299,7 +313,9 @@ class DatabaseInterface(Protocol):
         """Save an interaction record"""
         ...
 
-    async def get_recent_interactions(self, user_id: str, limit: int = 20) -> List[InteractionRecord]:
+    async def get_recent_interactions(
+        self, user_id: str, limit: int = 20
+    ) -> list[InteractionRecord]:
         """Get recent interactions for a user"""
         ...
 
@@ -315,8 +331,13 @@ class DatabaseInterface(Protocol):
         """Save a memory fragment"""
         ...
 
-    async def get_relevant_memories(self, user_id: str, memory_type: Optional[str] = None,
-                                  tags: Optional[List[str]] = None, limit: int = 10) -> List[MemoryFragment]:
+    async def get_relevant_memories(
+        self,
+        user_id: str,
+        memory_type: Optional[str] = None,
+        tags: Optional[list[str]] = None,
+        limit: int = 10,
+    ) -> list[MemoryFragment]:
         """Get relevant memory fragments for context"""
         ...
 
@@ -324,9 +345,12 @@ class DatabaseInterface(Protocol):
         """Log an emotionally vulnerable interaction"""
         ...
 
-    async def get_emotional_risk_history(self, user_id: str, limit: int = 20) -> List[EmotionalRiskEntry]:
+    async def get_emotional_risk_history(
+        self, user_id: str, limit: int = 20
+    ) -> list[EmotionalRiskEntry]:
         """Retrieve emotional risk history"""
         ...
+
 
 class InMemoryDatabase:
     """
@@ -334,12 +358,12 @@ class InMemoryDatabase:
     """
 
     def __init__(self):
-        self.users: Dict[str, UserProfile] = {}
-        self.interactions: List[InteractionRecord] = []
-        self.sessions: Dict[str, SessionRecord] = {}
-        self.psychological_states: List[PsychologicalState] = []
-        self.memory_fragments: List[MemoryFragment] = []
-        self.emotional_risk_registry: List[EmotionalRiskEntry] = []
+        self.users: dict[str, UserProfile] = {}
+        self.interactions: list[InteractionRecord] = []
+        self.sessions: dict[str, SessionRecord] = {}
+        self.psychological_states: list[PsychologicalState] = []
+        self.memory_fragments: list[MemoryFragment] = []
+        self.emotional_risk_registry: list[EmotionalRiskEntry] = []
         self.logger = logging.getLogger(__name__)
 
     async def initialize(self) -> None:
@@ -361,7 +385,7 @@ class InMemoryDatabase:
         """Get user profile by user_id"""
         return self.users.get(user_id)
 
-    async def update_user_profile(self, user_id: str, updates: Dict[str, Any]) -> bool:
+    async def update_user_profile(self, user_id: str, updates: dict[str, Any]) -> bool:
         """Update user profile"""
         try:
             if user_id not in self.users:
@@ -387,7 +411,9 @@ class InMemoryDatabase:
             self.logger.error(f"Error saving interaction: {e}")
             return False
 
-    async def get_recent_interactions(self, user_id: str, limit: int = 20) -> List[InteractionRecord]:
+    async def get_recent_interactions(
+        self, user_id: str, limit: int = 20
+    ) -> list[InteractionRecord]:
         """Get recent interactions for a user"""
         try:
             user_interactions = [i for i in self.interactions if i.user_id == user_id]
@@ -397,7 +423,7 @@ class InMemoryDatabase:
             self.logger.error(f"Error getting recent interactions: {e}")
             return []
 
-    async def get_session_interactions(self, session_id: str) -> List[InteractionRecord]:
+    async def get_session_interactions(self, session_id: str) -> list[InteractionRecord]:
         """Get all interactions for a specific session"""
         try:
             session_interactions = [i for i in self.interactions if i.session_id == session_id]
@@ -416,7 +442,7 @@ class InMemoryDatabase:
             self.logger.error(f"Error creating session: {e}")
             return False
 
-    async def update_session(self, session_id: str, updates: Dict[str, Any]) -> bool:
+    async def update_session(self, session_id: str, updates: dict[str, Any]) -> bool:
         """Update session record"""
         try:
             if session_id not in self.sessions:
@@ -456,12 +482,17 @@ class InMemoryDatabase:
             self.logger.error(f"Error getting psychological state: {e}")
             return None
 
-    async def get_psychological_trend(self, user_id: str, days: int = 30) -> List[PsychologicalState]:
+    async def get_psychological_trend(
+        self, user_id: str, days: int = 30
+    ) -> list[PsychologicalState]:
         """Get psychological state trend over time"""
         try:
             start_date = datetime.now() - timedelta(days=days)
-            user_states = [s for s in self.psychological_states
-                          if s.user_id == user_id and s.timestamp >= start_date]
+            user_states = [
+                s
+                for s in self.psychological_states
+                if s.user_id == user_id and s.timestamp >= start_date
+            ]
             user_states.sort(key=lambda x: x.timestamp)
             return user_states
         except Exception as e:
@@ -477,8 +508,13 @@ class InMemoryDatabase:
             self.logger.error(f"Error saving memory fragment: {e}")
             return False
 
-    async def get_relevant_memories(self, user_id: str, memory_type: Optional[str] = None,
-                                  tags: Optional[List[str]] = None, limit: int = 10) -> List[MemoryFragment]:
+    async def get_relevant_memories(
+        self,
+        user_id: str,
+        memory_type: Optional[str] = None,
+        tags: Optional[list[str]] = None,
+        limit: int = 10,
+    ) -> list[MemoryFragment]:
         """Get relevant memory fragments for context"""
         try:
             user_memories = [m for m in self.memory_fragments if m.user_id == user_id]
@@ -518,7 +554,9 @@ class InMemoryDatabase:
             self.logger.error(f"Error logging emotional risk: {e}")
             return False
 
-    async def get_emotional_risk_history(self, user_id: str, limit: int = 20) -> List[EmotionalRiskEntry]:
+    async def get_emotional_risk_history(
+        self, user_id: str, limit: int = 20
+    ) -> list[EmotionalRiskEntry]:
         """Retrieve emotional risk history"""
         try:
             entries = [e for e in self.emotional_risk_registry if e.user_id == user_id]
@@ -528,14 +566,15 @@ class InMemoryDatabase:
             self.logger.error(f"Error getting emotional risk history: {e}")
             return []
 
-    async def get_user_analytics(self, user_id: str, days: int = 30) -> Dict[str, Any]:
+    async def get_user_analytics(self, user_id: str, days: int = 30) -> dict[str, Any]:
         """Get user interaction analytics"""
         try:
             start_date = datetime.now() - timedelta(days=days)
 
             # Get interactions in timeframe
-            user_interactions = [i for i in self.interactions
-                               if i.user_id == user_id and i.timestamp >= start_date]
+            user_interactions = [
+                i for i in self.interactions if i.user_id == user_id and i.timestamp >= start_date
+            ]
 
             # Count by interaction type
             interaction_stats = {}
@@ -544,14 +583,17 @@ class InMemoryDatabase:
                 interaction_stats[interaction_type] = interaction_stats.get(interaction_type, 0) + 1
 
             # Get emotional trend
-            user_states = [s for s in self.psychological_states
-                          if s.user_id == user_id and s.timestamp >= start_date]
+            user_states = [
+                s
+                for s in self.psychological_states
+                if s.user_id == user_id and s.timestamp >= start_date
+            ]
             user_states.sort(key=lambda x: x.timestamp)
 
             emotional_trend = [
                 {
                     "timestamp": state.timestamp.isoformat(),
-                    "emotional_indicators": state.emotional_indicators
+                    "emotional_indicators": state.emotional_indicators,
                 }
                 for state in user_states
             ]
@@ -562,7 +604,7 @@ class InMemoryDatabase:
                 "interaction_statistics": interaction_stats,
                 "emotional_trend": emotional_trend,
                 "total_interactions": len(user_interactions),
-                "generated_at": datetime.now().isoformat()
+                "generated_at": datetime.now().isoformat(),
             }
 
         except Exception as e:
@@ -573,7 +615,10 @@ class InMemoryDatabase:
         """Close database connection (no-op for in-memory)"""
         self.logger.info("In-memory database closed")
 
-def create_database_interface(connection_string: Optional[str] = None, database_type: str = "auto") -> DatabaseInterface:
+
+def create_database_interface(
+    connection_string: Optional[str] = None, database_type: str = "auto"
+) -> DatabaseInterface:
     """
     Factory function to create appropriate database interface
     Auto-detects MongoDB when connection string is provided
@@ -583,7 +628,7 @@ def create_database_interface(connection_string: Optional[str] = None, database_
 
     # Auto-detect database type based on environment and parameters
     if database_type == "auto":
-        if connection_string or os.getenv('MONGO_CONNECTION_STRING'):
+        if connection_string or os.getenv("MONGO_CONNECTION_STRING"):
             database_type = "mongodb"
             logging.info("Auto-detected MongoDB from connection string or environment")
         else:
@@ -592,20 +637,22 @@ def create_database_interface(connection_string: Optional[str] = None, database_
 
     # Use environment variable if no connection string provided
     if not connection_string:
-        connection_string = os.getenv('MONGO_CONNECTION_STRING')
+        connection_string = os.getenv("MONGO_CONNECTION_STRING")
 
     if database_type == "inmemory":
         logging.info("Using in-memory database")
         return InMemoryDatabase()
     elif database_type == "jsonfile":
-        json_path = connection_string or os.getenv('JSON_DB_PATH', 'companion_db.json')
+        json_path = connection_string or os.getenv("JSON_DB_PATH", "companion_db.json")
         logging.info(f"Using JSON database file: {json_path}")
         from .json_database import JSONDatabase
+
         db = JSONDatabase(json_path)
-        awaitable = getattr(db, 'initialize', None)
+        awaitable = getattr(db, "initialize", None)
         if awaitable:
             try:
                 import asyncio
+
                 loop = asyncio.get_event_loop()
                 if loop.is_running():
                     loop.create_task(db.initialize())
@@ -620,13 +667,18 @@ def create_database_interface(connection_string: Optional[str] = None, database_
 
         try:
             from .mongodb_database import MongoDatabase
-            logging.info(f"Initializing MongoDB with connection: {connection_string[:20] if len(connection_string) > 20 else connection_string}...")
+
+            logging.info(
+                f"Initializing MongoDB with connection: {connection_string[:20] if len(connection_string) > 20 else connection_string}..."
+            )
             db = MongoDatabase(connection_string)
             # Test basic functionality to ensure MongoDB is working
             logging.info("MongoDB interface created successfully")
             return db
         except ImportError as e:
-            error_msg = f"MongoDB dependencies not available: {e}. Install with 'pip install motor pymongo'"
+            error_msg = (
+                f"MongoDB dependencies not available: {e}. Install with 'pip install motor pymongo'"
+            )
             logging.error(error_msg)
             raise ImportError(error_msg)
         except Exception as e:

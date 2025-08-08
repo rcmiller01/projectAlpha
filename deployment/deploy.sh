@@ -6,6 +6,8 @@
 set -e
 
 ENVIRONMENT=${1:-production}
+# CLUSTER_NAME is defined for potential future cluster deployment
+# shellcheck disable=SC2034
 CLUSTER_NAME="emotionalai-cluster"
 
 echo "🚀 Deploying EmotionalAI to $ENVIRONMENT environment..."
@@ -29,8 +31,10 @@ mkdir -p models data logs cache nginx/ssl monitoring/grafana/dashboards monitori
 if [ "$ENVIRONMENT" = "production" ]; then
     echo "🔧 Configuring for production..."
     export COMPOSE_PROJECT_NAME=emotionalai-prod
-    export MONGODB_PASSWORD=$(openssl rand -base64 32)
-    export REDIS_PASSWORD=$(openssl rand -base64 32)
+    MONGODB_PASSWORD=$(openssl rand -base64 32)
+    REDIS_PASSWORD=$(openssl rand -base64 32)
+    export MONGODB_PASSWORD
+    export REDIS_PASSWORD
 elif [ "$ENVIRONMENT" = "staging" ]; then
     echo "🔧 Configuring for staging..."
     export COMPOSE_PROJECT_NAME=emotionalai-staging

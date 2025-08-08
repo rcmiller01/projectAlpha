@@ -19,11 +19,12 @@ Author: ProjectAlpha Team
 """
 
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from .base_agent import SLiMAgent
 
 logger = logging.getLogger(__name__)
+
 
 class MetaphorAgent(SLiMAgent):
     """
@@ -52,7 +53,7 @@ class MetaphorAgent(SLiMAgent):
             conductor=conductor,
             memory=memory,
             router=router,
-            agent_id=agent_id or "metaphor_agent"
+            agent_id=agent_id or "metaphor_agent",
         )
 
         # MetaphorAgent-specific configuration
@@ -89,8 +90,9 @@ class MetaphorAgent(SLiMAgent):
         logger.debug(f"MetaphorAgent generating metaphors for: {concept}")
         return self.run(prompt, depth=2, use_tools=True)
 
-    def creative_story(self, theme: str, elements: Optional[List[str]] = None,
-                      style: str = "narrative") -> str:
+    def creative_story(
+        self, theme: str, elements: Optional[list[str]] = None, style: str = "narrative"
+    ) -> str:
         """
         Create a creative story around a theme.
 
@@ -109,14 +111,16 @@ class MetaphorAgent(SLiMAgent):
             for element in elements:
                 prompt_parts.append(f"- {element}")
 
-        prompt_parts.extend([
-            "",
-            "Focus on:",
-            "- Rich imagery and symbolism",
-            "- Emotional depth and resonance",
-            "- Creative and unexpected connections",
-            "- Evocative language and metaphor"
-        ])
+        prompt_parts.extend(
+            [
+                "",
+                "Focus on:",
+                "- Rich imagery and symbolism",
+                "- Emotional depth and resonance",
+                "- Creative and unexpected connections",
+                "- Evocative language and metaphor",
+            ]
+        )
 
         full_prompt = "\n".join(prompt_parts)
 
@@ -139,23 +143,26 @@ class MetaphorAgent(SLiMAgent):
         if context:
             prompt_parts.append(f"Context: {context}")
 
-        prompt_parts.extend([
-            "",
-            "Explore:",
-            "- Multiple layers of meaning",
-            "- Cultural and universal symbolism",
-            "- Emotional and psychological associations",
-            "- Creative and personal interpretations",
-            "- Connections to broader themes and archetypes"
-        ])
+        prompt_parts.extend(
+            [
+                "",
+                "Explore:",
+                "- Multiple layers of meaning",
+                "- Cultural and universal symbolism",
+                "- Emotional and psychological associations",
+                "- Creative and personal interpretations",
+                "- Connections to broader themes and archetypes",
+            ]
+        )
 
         full_prompt = "\n".join(prompt_parts)
 
         logger.debug(f"MetaphorAgent interpreting symbol: {symbol}")
         return self.run(full_prompt, depth=2, use_tools=True)
 
-    def creative_connection(self, concept1: str, concept2: str,
-                           connection_type: str = "metaphorical") -> str:
+    def creative_connection(
+        self, concept1: str, concept2: str, connection_type: str = "metaphorical"
+    ) -> str:
         """
         Find creative connections between two concepts.
 
@@ -237,7 +244,7 @@ class MetaphorAgent(SLiMAgent):
         logger.debug(f"MetaphorAgent creating analogies for: {problem}")
         return self.run(prompt, depth=2, use_tools=True)
 
-    def _evaluate_tool_usage(self, prompt: str, context: List[Dict[str, Any]]) -> List[str]:
+    def _evaluate_tool_usage(self, prompt: str, context: list[dict[str, Any]]) -> list[str]:
         """
         Enhanced tool evaluation for creative tasks.
         """
@@ -260,7 +267,9 @@ class MetaphorAgent(SLiMAgent):
 
         return tool_calls
 
-    def _update_memory(self, prompt: str, response: str, context: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _update_memory(
+        self, prompt: str, response: str, context: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
         """
         Enhanced memory updates for creative expression.
         """
@@ -280,15 +289,12 @@ class MetaphorAgent(SLiMAgent):
                         "agent": self.agent_id,
                         "creativity_type": "metaphorical",
                         "expression_depth": self.expression_depth,
-                        "response_richness": "high" if len(response) > 400 else "medium"
-                    }
+                        "response_richness": "high" if len(response) > 400 else "medium",
+                    },
                 }
 
                 self.memory.add_fact(
-                    fact["subject"],
-                    fact["predicate"],
-                    fact["object"],
-                    fact["metadata"]
+                    fact["subject"], fact["predicate"], fact["object"], fact["metadata"]
                 )
                 memory_updates.append(fact)
 
@@ -302,15 +308,12 @@ class MetaphorAgent(SLiMAgent):
                         "agent": self.agent_id,
                         "creativity_type": "artistic",
                         "work_complexity": "complex" if len(response) > 600 else "moderate",
-                        "innovation_level": self.innovation_threshold
-                    }
+                        "innovation_level": self.innovation_threshold,
+                    },
                 }
 
                 self.memory.add_fact(
-                    fact["subject"],
-                    fact["predicate"],
-                    fact["object"],
-                    fact["metadata"]
+                    fact["subject"], fact["predicate"], fact["object"], fact["metadata"]
                 )
                 memory_updates.append(fact)
 
@@ -319,7 +322,7 @@ class MetaphorAgent(SLiMAgent):
 
         return memory_updates
 
-    def get_creativity_stats(self) -> Dict[str, Any]:
+    def get_creativity_stats(self) -> dict[str, Any]:
         """Get statistics specific to creative performance."""
         base_stats = self.get_status()
 
@@ -328,7 +331,7 @@ class MetaphorAgent(SLiMAgent):
             "expression_depth": self.expression_depth,
             "innovation_threshold": self.innovation_threshold,
             "metaphor_complexity": self.metaphor_complexity,
-            "specialization": "creative_expression_and_metaphorical_thinking"
+            "specialization": "creative_expression_and_metaphorical_thinking",
         }
 
         return {**base_stats, **creativity_stats}

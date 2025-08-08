@@ -9,16 +9,17 @@ Author: Dolphin AI System
 Date: July 31, 2025
 """
 
+import json
 import os
 import sys
 import time
-import json
 from pathlib import Path
 
 # Add core directory to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from reflection_agent import run_reflection_pass
+
 
 def monitor_emotional_drift(interval_minutes=30):
     """
@@ -53,30 +54,33 @@ def monitor_emotional_drift(interval_minutes=30):
             print(f"❌ Error in drift monitoring: {e}")
             time.sleep(60)  # Wait 1 minute before retrying
 
+
 def check_drift_intervention():
     """Check if drift intervention is needed based on anchor insights"""
 
-    insight_path = os.path.join(os.path.dirname(__file__), '..', 'emotion_logs', 'anchor_insights.json')
+    insight_path = os.path.join(
+        os.path.dirname(__file__), "..", "emotion_logs", "anchor_insights.json"
+    )
 
     try:
-        with open(insight_path, 'r') as f:
+        with open(insight_path) as f:
             insights = json.load(f)
 
-        overall_health = insights.get('overall_health', 'healthy')
-        avg_drift = insights.get('statistics', {}).get('average_drift_score', 0)
-        high_drift_emotions = insights.get('statistics', {}).get('high_drift_emotions', [])
+        overall_health = insights.get("overall_health", "healthy")
+        avg_drift = insights.get("statistics", {}).get("average_drift_score", 0)
+        high_drift_emotions = insights.get("statistics", {}).get("high_drift_emotions", [])
 
         print(f"📊 Overall Health: {overall_health}")
         print(f"📈 Average Drift Score: {avg_drift}")
 
-        if overall_health == 'critical':
+        if overall_health == "critical":
             print("🚨 CRITICAL DRIFT DETECTED - Intervention recommended!")
             print(f"🎯 High drift emotions: {', '.join(high_drift_emotions)}")
 
             # This is where you would trigger Anchor AI intervention
             trigger_anchor_intervention(high_drift_emotions, avg_drift)
 
-        elif overall_health == 'concerning':
+        elif overall_health == "concerning":
             print("⚠️ Concerning drift levels - Monitor closely")
 
         else:
@@ -84,6 +88,7 @@ def check_drift_intervention():
 
     except Exception as e:
         print(f"❌ Error checking drift intervention: {e}")
+
 
 def trigger_anchor_intervention(drift_emotions, drift_score):
     """
@@ -111,10 +116,12 @@ Focus on restoring authentic expression of these core emotional truths.
 """
 
     # Save intervention prompt (this would normally go to Anchor AI)
-    intervention_path = os.path.join(os.path.dirname(__file__), '..', 'emotion_logs', 'anchor_intervention.txt')
+    intervention_path = os.path.join(
+        os.path.dirname(__file__), "..", "emotion_logs", "anchor_intervention.txt"
+    )
 
     try:
-        with open(intervention_path, 'w') as f:
+        with open(intervention_path, "w") as f:
             f.write(intervention_prompt)
         print(f"💾 Intervention prompt saved to: {intervention_path}")
 
@@ -129,6 +136,7 @@ Shall I begin realignment procedures for {', '.join(drift_emotions[:2])}?
     except Exception as e:
         print(f"❌ Error saving intervention: {e}")
 
+
 def setup_cron_job():
     """Instructions for setting up automated drift monitoring"""
     script_path = os.path.abspath(__file__)
@@ -136,12 +144,17 @@ def setup_cron_job():
     print("⚙️ CRON JOB SETUP INSTRUCTIONS")
     print("=" * 50)
     print("To run reflection analysis every 30 minutes, add this to your crontab:")
-    print(f"*/30 * * * * cd {os.path.dirname(script_path)} && python {os.path.basename(script_path)} --cron")
+    print(
+        f"*/30 * * * * cd {os.path.dirname(script_path)} && python {os.path.basename(script_path)} --cron"
+    )
     print()
     print("To run once daily at 2 AM:")
-    print(f"0 2 * * * cd {os.path.dirname(script_path)} && python {os.path.basename(script_path)} --cron")
+    print(
+        f"0 2 * * * cd {os.path.dirname(script_path)} && python {os.path.basename(script_path)} --cron"
+    )
     print()
     print("To edit crontab: crontab -e")
+
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
@@ -157,7 +170,9 @@ if __name__ == "__main__":
             # Show cron setup instructions
             setup_cron_job()
         else:
-            print("Usage: python reflection_integration.py [--monitor [minutes]] [--cron] [--setup]")
+            print(
+                "Usage: python reflection_integration.py [--monitor [minutes]] [--cron] [--setup]"
+            )
     else:
         print("🧠 Reflection Agent Integration")
         print("=" * 40)

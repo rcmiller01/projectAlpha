@@ -6,19 +6,20 @@ on interactions and evolve its emotional understanding even when idle.
 """
 
 import asyncio
-import time
 import logging
-import sys
 import os
+import sys
+import time
 from typing import Optional
 
 # Add project root to path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from modules.reflection.emotion_reflector import EmotionReflector
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+
 
 class InnerMonologue:
     """
@@ -54,12 +55,16 @@ class InnerMonologue:
             idle_time = time.time() - self.last_user_interaction_time
 
             if idle_time > self.idle_threshold_seconds:
-                logger.info(f"User has been idle for {idle_time:.0f} seconds. Triggering inner reflection.")
+                logger.info(
+                    f"User has been idle for {idle_time:.0f} seconds. Triggering inner reflection."
+                )
 
                 # Trigger a daily reflection cycle
                 try:
                     summary = self.emotion_reflector.run_daily_reflection()
-                    logger.info(f"Inner reflection complete. Dominant emotion: {summary.dominant_emotion}")
+                    logger.info(
+                        f"Inner reflection complete. Dominant emotion: {summary.dominant_emotion}"
+                    )
                     # Reset timer after reflection to avoid continuous looping
                     self.record_user_interaction()
                 except Exception as e:
@@ -85,13 +90,14 @@ class InnerMonologue:
             self._task.cancel()
             logger.info("Inner monologue has been stopped.")
 
+
 # Example Usage
 async def main():
     """
     Example of how to run the InnerMonologue module.
     """
     print("Starting the Inner Monologue simulation.")
-    monologue = InnerMonologue(idle_threshold_seconds=10) # Shortened for demo
+    monologue = InnerMonologue(idle_threshold_seconds=10)  # Shortened for demo
     monologue.start()
 
     try:
@@ -103,7 +109,7 @@ async def main():
             print(f"[{time.time():.0f}] User interaction occurred.")
 
         print("\nSimulating user going idle. Reflection should trigger in 10 seconds.")
-        await asyncio.sleep(35) # Wait for reflection to run and then some
+        await asyncio.sleep(35)  # Wait for reflection to run and then some
 
     except asyncio.CancelledError:
         pass

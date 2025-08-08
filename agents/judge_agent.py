@@ -8,21 +8,21 @@ Enhanced with security features:
 - Rate limiting and monitoring for judgment operations
 """
 
-from typing import Any, Dict, Optional, List
 import hashlib
-import re
-import time
-import threading
 import logging
+import re
+import threading
+import time
+from collections import defaultdict, deque
 from datetime import datetime, timedelta
-from collections import deque, defaultdict
+from typing import Any, Dict, List, Optional
 
 from .base_agent import BaseAgent
 
 # Enhanced logging configuration
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -46,12 +46,14 @@ judge_requests = defaultdict(lambda: deque())
 # Access monitoring
 judge_access_history = deque(maxlen=1000)
 
+
 def generate_judge_session() -> str:
     """Generate a secure judge session token"""
     timestamp = str(time.time())
     random_data = str(hash(datetime.now()))
     token_string = f"judge:{timestamp}:{random_data}"
     return hashlib.sha256(token_string.encode()).hexdigest()[:JUDGE_SESSION_LENGTH]
+
 
 def validate_judge_session(session_token: str) -> bool:
     """Validate judge session token"""
@@ -63,21 +65,23 @@ def validate_judge_session(session_token: str) -> bool:
 
     # Check if session has expired
     session_data = judge_sessions[session_token]
-    if datetime.now() > session_data['expires_at']:
+    if datetime.now() > session_data["expires_at"]:
         del judge_sessions[session_token]
         return False
 
     # Update last access time
-    session_data['last_access'] = datetime.now()
+    session_data["last_access"] = datetime.now()
     return True
+
 
 def check_judge_rate_limit(session_token: str) -> bool:
     """Check if judge operation rate limit is exceeded"""
     current_time = time.time()
 
     # Clean old requests
-    while (judge_requests[session_token] and
-           judge_requests[session_token][0] < current_time - 3600):  # 1 hour window
+    while (
+        judge_requests[session_token] and judge_requests[session_token][0] < current_time - 3600
+    ):  # 1 hour window
         judge_requests[session_token].popleft()
 
     # Check limit
@@ -89,7 +93,10 @@ def check_judge_rate_limit(session_token: str) -> bool:
     judge_requests[session_token].append(current_time)
     return True
 
-def validate_evaluation_input(output: Any, criteria: Optional[List[str]] = None) -> tuple[bool, str]:
+
+def validate_evaluation_input(
+    output: Any, criteria: Optional[list[str]] = None
+) -> tuple[bool, str]:
     """Validate evaluation input"""
     try:
         # Convert output to string for validation
@@ -104,9 +111,9 @@ def validate_evaluation_input(output: Any, criteria: Optional[List[str]] = None)
 
         # Check for dangerous content
         dangerous_patterns = [
-            r'<script[^>]*>.*?</script>',  # XSS
-            r'javascript:',               # JavaScript protocol
-            r'on\w+\s*=',                # Event handlers
+            r"<script[^>]*>.*?</script>",  # XSS
+            r"javascript:",  # JavaScript protocol
+            r"on\w+\s*=",  # Event handlers
         ]
 
         for pattern in dangerous_patterns:
@@ -130,14 +137,17 @@ def validate_evaluation_input(output: Any, criteria: Optional[List[str]] = None)
         return True, "Valid"
 
     except Exception as e:
-        logger.error(f"Error validating evaluation input: {str(e)}")
-        return False, f"Validation error: {str(e)}"
+        logger.error(f"Error validating evaluation input: {e!s}")
+        return False, f"Validation error: {e!s}"
 
-def sanitize_evaluation_input(output: Any, criteria: Optional[List[str]] = None) -> tuple[str, List[str]]:
+
+def sanitize_evaluation_input(
+    output: Any, criteria: Optional[list[str]] = None
+) -> tuple[str, list[str]]:
     """Sanitize evaluation input"""
     # Sanitize output
     output_str = str(output) if output is not None else ""
-    clean_output = re.sub(r'[<>"\']', '', output_str)
+    clean_output = re.sub(r'[<>"\']', "", output_str)
     if len(clean_output) > MAX_OUTPUT_SIZE:
         clean_output = clean_output[:MAX_OUTPUT_SIZE] + "..."
 
@@ -145,23 +155,26 @@ def sanitize_evaluation_input(output: Any, criteria: Optional[List[str]] = None)
     clean_criteria = []
     if criteria:
         for criterion in criteria[:MAX_CRITERIA_COUNT]:
-            clean_criterion = re.sub(r'[<>"\']', '', str(criterion))
+            clean_criterion = re.sub(r'[<>"\']', "", str(criterion))
             if len(clean_criterion) > MAX_CRITERIA_LENGTH:
                 clean_criterion = clean_criterion[:MAX_CRITERIA_LENGTH] + "..."
             clean_criteria.append(clean_criterion)
 
     return clean_output, clean_criteria
 
-def log_judge_activity(activity_type: str, session_token: str, details: Dict[str, Any], status: str = "success"):
+
+def log_judge_activity(
+    activity_type: str, session_token: str, details: dict[str, Any], status: str = "success"
+):
     """Log judge access activities"""
     try:
         log_entry = {
-            'timestamp': datetime.now().isoformat(),
-            'activity_type': activity_type,
-            'session': session_token[:8] + "..." if session_token else "none",
-            'details': details,
-            'status': status,
-            'thread_id': threading.get_ident()
+            "timestamp": datetime.now().isoformat(),
+            "activity_type": activity_type,
+            "session": session_token[:8] + "..." if session_token else "none",
+            "details": details,
+            "status": status,
+            "thread_id": threading.get_ident(),
         }
 
         judge_access_history.append(log_entry)
@@ -172,7 +185,7 @@ def log_judge_activity(activity_type: str, session_token: str, details: Dict[str
             logger.warning(f"Judge access issue: {activity_type} failed with {status}")
 
     except Exception as e:
-        logger.error(f"Error logging judge access: {str(e)}")
+        logger.error(f"Error logging judge access: {e!s}")
 
 
 class JudgeAgent(BaseAgent):
@@ -194,22 +207,23 @@ class JudgeAgent(BaseAgent):
         self.evaluation_count = 0
         self.creation_time = datetime.now()
 
-        log_judge_activity("initialization", self.session_token, {
-            "agent_type": "judge",
-            "creation_time": self.creation_time.isoformat()
-        })
+        log_judge_activity(
+            "initialization",
+            self.session_token,
+            {"agent_type": "judge", "creation_time": self.creation_time.isoformat()},
+        )
 
-        logger.info(f"JudgeAgent initialized with security features")
+        logger.info("JudgeAgent initialized with security features")
 
     def create_session(self) -> str:
         """Create a new judge session"""
         with judge_lock:
             session_token = generate_judge_session()
             judge_sessions[session_token] = {
-                'created_at': datetime.now(),
-                'expires_at': datetime.now() + timedelta(hours=session_expiry_hours),
-                'last_access': datetime.now(),
-                'evaluations': 0
+                "created_at": datetime.now(),
+                "expires_at": datetime.now() + timedelta(hours=session_expiry_hours),
+                "last_access": datetime.now(),
+                "evaluations": 0,
             }
             return session_token
 
@@ -223,7 +237,9 @@ class JudgeAgent(BaseAgent):
 
         return validate_judge_session(token_to_validate)
 
-    def evaluate(self, output: Any, criteria: Optional[List[str]] = None, session_token: Optional[str] = None) -> Dict[str, Any]:
+    def evaluate(
+        self, output: Any, criteria: Optional[list[str]] = None, session_token: Optional[str] = None
+    ) -> dict[str, Any]:
         """
         Assess a given output or behavior with security validation.
 
@@ -238,36 +254,40 @@ class JudgeAgent(BaseAgent):
         try:
             # Validate session
             if not self.validate_session(session_token):
-                log_judge_activity("evaluate", session_token or self.session_token,
-                                  {"status": "session_invalid"}, "failed")
+                log_judge_activity(
+                    "evaluate",
+                    session_token or self.session_token,
+                    {"status": "session_invalid"},
+                    "failed",
+                )
                 return {
                     "success": False,
                     "error": "Invalid session for evaluation",
-                    "timestamp": datetime.now().isoformat()
+                    "timestamp": datetime.now().isoformat(),
                 }
 
             current_token = session_token or self.session_token
 
             # Check rate limit
             if not check_judge_rate_limit(current_token):
-                log_judge_activity("evaluate", current_token,
-                                  {"status": "rate_limited"}, "failed")
+                log_judge_activity("evaluate", current_token, {"status": "rate_limited"}, "failed")
                 return {
                     "success": False,
                     "error": "Rate limit exceeded for judge operations",
-                    "timestamp": datetime.now().isoformat()
+                    "timestamp": datetime.now().isoformat(),
                 }
 
             # Validate input
             is_valid, validation_message = validate_evaluation_input(output, criteria)
             if not is_valid:
                 logger.error(f"Invalid evaluation input: {validation_message}")
-                log_judge_activity("evaluate", current_token,
-                                  {"error": validation_message}, "validation_failed")
+                log_judge_activity(
+                    "evaluate", current_token, {"error": validation_message}, "validation_failed"
+                )
                 return {
                     "success": False,
                     "error": f"Validation failed: {validation_message}",
-                    "timestamp": datetime.now().isoformat()
+                    "timestamp": datetime.now().isoformat(),
                 }
 
             # Sanitize input
@@ -275,52 +295,63 @@ class JudgeAgent(BaseAgent):
 
             # Perform evaluation (placeholder implementation)
             evaluation_score = self._calculate_evaluation_score(clean_output, clean_criteria)
-            evaluation_report = self._generate_evaluation_report(clean_output, clean_criteria, evaluation_score)
+            evaluation_report = self._generate_evaluation_report(
+                clean_output, clean_criteria, evaluation_score
+            )
 
             # Track evaluation
             with judge_lock:
                 self.evaluation_count += 1
                 if current_token in judge_sessions:
-                    judge_sessions[current_token]['evaluations'] += 1
+                    judge_sessions[current_token]["evaluations"] += 1
 
             # Create result
             result = {
                 "success": True,
-                "evaluation_id": hashlib.md5(f"{current_token}{self.evaluation_count}{time.time()}".encode()).hexdigest()[:16],
+                "evaluation_id": hashlib.md5(
+                    f"{current_token}{self.evaluation_count}{time.time()}".encode()
+                ).hexdigest()[:16],
                 "score": evaluation_score,
                 "report": evaluation_report,
                 "criteria_used": clean_criteria,
-                "output_summary": clean_output[:200] + "..." if len(clean_output) > 200 else clean_output,
+                "output_summary": clean_output[:200] + "..."
+                if len(clean_output) > 200
+                else clean_output,
                 "evaluation_count": self.evaluation_count,
                 "timestamp": datetime.now().isoformat(),
                 "session_token": current_token[:8] + "...",
                 "security_metadata": {
                     "input_sanitized": True,
                     "session_validated": True,
-                    "rate_limit_checked": True
-                }
+                    "rate_limit_checked": True,
+                },
             }
 
-            log_judge_activity("evaluate", current_token, {
-                "evaluation_id": result["evaluation_id"],
-                "score": evaluation_score,
-                "criteria_count": len(clean_criteria),
-                "output_length": len(clean_output)
-            })
+            log_judge_activity(
+                "evaluate",
+                current_token,
+                {
+                    "evaluation_id": result["evaluation_id"],
+                    "score": evaluation_score,
+                    "criteria_count": len(clean_criteria),
+                    "output_length": len(clean_output),
+                },
+            )
 
             return result
 
         except Exception as e:
-            logger.error(f"Error in judge evaluation: {str(e)}")
-            log_judge_activity("evaluate", session_token or self.session_token,
-                              {"error": str(e)}, "error")
+            logger.error(f"Error in judge evaluation: {e!s}")
+            log_judge_activity(
+                "evaluate", session_token or self.session_token, {"error": str(e)}, "error"
+            )
             return {
                 "success": False,
-                "error": f"Evaluation error: {str(e)}",
-                "timestamp": datetime.now().isoformat()
+                "error": f"Evaluation error: {e!s}",
+                "timestamp": datetime.now().isoformat(),
             }
 
-    def _calculate_evaluation_score(self, output: str, criteria: List[str]) -> float:
+    def _calculate_evaluation_score(self, output: str, criteria: list[str]) -> float:
         """Calculate evaluation score based on output and criteria"""
         try:
             # Basic scoring algorithm (can be enhanced with ML models)
@@ -343,18 +374,22 @@ class JudgeAgent(BaseAgent):
                 base_score += 0.2
 
             # Quality indicators (simple heuristics)
-            quality_indicators = ['clear', 'accurate', 'relevant', 'helpful', 'complete']
-            quality_matches = sum(1 for indicator in quality_indicators if indicator in output.lower())
+            quality_indicators = ["clear", "accurate", "relevant", "helpful", "complete"]
+            quality_matches = sum(
+                1 for indicator in quality_indicators if indicator in output.lower()
+            )
             quality_score = min(quality_matches / len(quality_indicators) * 0.3, 0.3)
             base_score += quality_score
 
             return min(max(base_score, 0.0), 1.0)  # Clamp between 0 and 1
 
         except Exception as e:
-            logger.error(f"Error calculating evaluation score: {str(e)}")
+            logger.error(f"Error calculating evaluation score: {e!s}")
             return 0.5  # Neutral score on error
 
-    def _generate_evaluation_report(self, output: str, criteria: List[str], score: float) -> Dict[str, Any]:
+    def _generate_evaluation_report(
+        self, output: str, criteria: list[str], score: float
+    ) -> dict[str, Any]:
         """Generate detailed evaluation report"""
         try:
             report = {
@@ -362,11 +397,11 @@ class JudgeAgent(BaseAgent):
                 "score_breakdown": {
                     "length_appropriateness": 0.1 if 100 <= len(output) <= 1000 else 0.0,
                     "criteria_alignment": 0.0,
-                    "quality_indicators": 0.0
+                    "quality_indicators": 0.0,
                 },
                 "strengths": [],
                 "weaknesses": [],
-                "recommendations": []
+                "recommendations": [],
             }
 
             # Criteria analysis
@@ -375,17 +410,25 @@ class JudgeAgent(BaseAgent):
                 report["score_breakdown"]["criteria_alignment"] = matches / len(criteria) * 0.4
 
                 if matches > 0:
-                    report["strengths"].append(f"Addresses {matches}/{len(criteria)} specified criteria")
+                    report["strengths"].append(
+                        f"Addresses {matches}/{len(criteria)} specified criteria"
+                    )
                 else:
                     report["weaknesses"].append("Does not clearly address specified criteria")
 
             # Quality analysis
-            quality_indicators = ['clear', 'accurate', 'relevant', 'helpful', 'complete']
-            quality_matches = [indicator for indicator in quality_indicators if indicator in output.lower()]
-            report["score_breakdown"]["quality_indicators"] = len(quality_matches) / len(quality_indicators) * 0.3
+            quality_indicators = ["clear", "accurate", "relevant", "helpful", "complete"]
+            quality_matches = [
+                indicator for indicator in quality_indicators if indicator in output.lower()
+            ]
+            report["score_breakdown"]["quality_indicators"] = (
+                len(quality_matches) / len(quality_indicators) * 0.3
+            )
 
             if quality_matches:
-                report["strengths"].append(f"Shows quality indicators: {', '.join(quality_matches)}")
+                report["strengths"].append(
+                    f"Shows quality indicators: {', '.join(quality_matches)}"
+                )
 
             # Recommendations
             if score < 0.5:
@@ -399,18 +442,18 @@ class JudgeAgent(BaseAgent):
             return report
 
         except Exception as e:
-            logger.error(f"Error generating evaluation report: {str(e)}")
+            logger.error(f"Error generating evaluation report: {e!s}")
             return {
                 "overall_score": score,
                 "error": "Failed to generate detailed report",
-                "basic_assessment": "evaluation completed with errors"
+                "basic_assessment": "evaluation completed with errors",
             }
 
-    def get_evaluation_stats(self) -> Dict[str, Any]:
+    def get_evaluation_stats(self) -> dict[str, Any]:
         """Get judge agent statistics"""
         return {
-            'session_token': self.session_token[:8] + "..." if self.session_token else None,
-            'evaluation_count': self.evaluation_count,
-            'creation_time': self.creation_time.isoformat(),
-            'agent_type': 'judge'
+            "session_token": self.session_token[:8] + "..." if self.session_token else None,
+            "evaluation_count": self.evaluation_count,
+            "creation_time": self.creation_time.isoformat(),
+            "agent_type": "judge",
         }

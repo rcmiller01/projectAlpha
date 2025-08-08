@@ -10,25 +10,25 @@ Enhanced with security features:
 - Input validation and sanitization for all mirror data
 """
 
-import json
 import hashlib
-import re
-import time
-import threading
+import json
 import logging
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Union
+import re
+import threading
+import time
+from collections import defaultdict, deque
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from enum import Enum
-from collections import deque, defaultdict
+from typing import Any, Dict, List, Optional, Union
 
 from mirror_log import MirrorLog
-from self_report import create_self_report, SelfReport
+from self_report import SelfReport, create_self_report
 
 # Enhanced logging configuration
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -53,14 +53,16 @@ reflection_requests = defaultdict(lambda: deque())
 # Anomaly detection
 reflection_anomalies = deque(maxlen=100)
 
+
 class MirrorType(Enum):
-    REASONING = "reasoning"      # Why I chose this approach
-    EMOTIONAL = "emotional"     # How I perceived your emotional state
-    ROUTING = "routing"         # Why I used this AI model
-    BEHAVIORAL = "behavioral"   # Why I responded this way
-    CREATIVE = "creative"       # My creative process
-    ANALYTICAL = "analytical"   # My analysis methodology
+    REASONING = "reasoning"  # Why I chose this approach
+    EMOTIONAL = "emotional"  # How I perceived your emotional state
+    ROUTING = "routing"  # Why I used this AI model
+    BEHAVIORAL = "behavioral"  # Why I responded this way
+    CREATIVE = "creative"  # My creative process
+    ANALYTICAL = "analytical"  # My analysis methodology
     SAFETY_TETHER = "safety_tether"  # Emotional safety override
+
 
 def validate_mirror_session(session_token: str) -> bool:
     """Validate mirror session token"""
@@ -72,13 +74,14 @@ def validate_mirror_session(session_token: str) -> bool:
 
     # Check if session has expired
     session_data = mirror_sessions[session_token]
-    if datetime.now() > session_data['expires_at']:
+    if datetime.now() > session_data["expires_at"]:
         del mirror_sessions[session_token]
         return False
 
     # Update last access time
-    session_data['last_access'] = datetime.now()
+    session_data["last_access"] = datetime.now()
     return True
+
 
 def generate_mirror_session() -> str:
     """Generate a secure mirror session token"""
@@ -87,13 +90,16 @@ def generate_mirror_session() -> str:
     token_string = f"mirror:{timestamp}:{random_data}"
     return hashlib.sha256(token_string.encode()).hexdigest()[:MIRROR_SESSION_TOKEN_LENGTH]
 
+
 def check_reflection_rate_limit(session_token: str) -> bool:
     """Check if reflection rate limit is exceeded"""
     current_time = time.time()
 
     # Clean old requests
-    while (reflection_requests[session_token] and
-           reflection_requests[session_token][0] < current_time - RATE_LIMIT_WINDOW):
+    while (
+        reflection_requests[session_token]
+        and reflection_requests[session_token][0] < current_time - RATE_LIMIT_WINDOW
+    ):
         reflection_requests[session_token].popleft()
 
     # Check limit
@@ -105,23 +111,24 @@ def check_reflection_rate_limit(session_token: str) -> bool:
     reflection_requests[session_token].append(current_time)
     return True
 
-def validate_reflection_input(reflection_data: Dict[str, Any]) -> tuple[bool, str]:
+
+def validate_reflection_input(reflection_data: dict[str, Any]) -> tuple[bool, str]:
     """Validate reflection input data"""
     try:
         # Check required fields
-        required_fields = ['mirror_type', 'reflection_content']
+        required_fields = ["mirror_type", "reflection_content"]
         for field in required_fields:
             if field not in reflection_data:
                 return False, f"Missing required field: {field}"
 
         # Validate mirror type
-        mirror_type = reflection_data.get('mirror_type', '')
+        mirror_type = reflection_data.get("mirror_type", "")
         valid_types = {e.value for e in MirrorType}
         if mirror_type not in valid_types:
             return False, f"Invalid mirror type. Must be one of: {valid_types}"
 
         # Validate reflection content
-        content = reflection_data.get('reflection_content', '')
+        content = reflection_data.get("reflection_content", "")
         if not isinstance(content, str):
             return False, "Reflection content must be a string"
 
@@ -129,12 +136,12 @@ def validate_reflection_input(reflection_data: Dict[str, Any]) -> tuple[bool, st
             return False, f"Reflection content exceeds maximum length of {MAX_REFLECTION_LENGTH}"
 
         # Sanitize content
-        if not re.match(r'^[a-zA-Z0-9\s\.,!?\-\'\":()\[\]]+$', content):
+        if not re.match(r"^[a-zA-Z0-9\s\.,!?\-\'\":()\[\]]+$", content):
             return False, "Reflection content contains invalid characters"
 
         # Validate confidence level if present
-        if 'confidence_level' in reflection_data:
-            confidence = reflection_data['confidence_level']
+        if "confidence_level" in reflection_data:
+            confidence = reflection_data["confidence_level"]
             if not isinstance(confidence, (int, float)):
                 return False, "Confidence level must be a number"
 
@@ -142,55 +149,68 @@ def validate_reflection_input(reflection_data: Dict[str, Any]) -> tuple[bool, st
                 return False, "Confidence level must be between 0 and 1"
 
         # Validate reasoning chain if present
-        if 'reasoning_chain' in reflection_data:
-            reasoning_chain = reflection_data['reasoning_chain']
+        if "reasoning_chain" in reflection_data:
+            reasoning_chain = reflection_data["reasoning_chain"]
             if not isinstance(reasoning_chain, list):
                 return False, "Reasoning chain must be a list"
 
             if len(reasoning_chain) > MAX_REASONING_CHAIN_LENGTH:
-                return False, f"Reasoning chain exceeds maximum length of {MAX_REASONING_CHAIN_LENGTH}"
+                return (
+                    False,
+                    f"Reasoning chain exceeds maximum length of {MAX_REASONING_CHAIN_LENGTH}",
+                )
 
         return True, "Valid"
 
     except Exception as e:
-        logger.error(f"Error validating reflection input: {str(e)}")
-        return False, f"Validation error: {str(e)}"
+        logger.error(f"Error validating reflection input: {e!s}")
+        return False, f"Validation error: {e!s}"
 
-def detect_reflection_anomaly(reflection_data: Dict[str, Any]) -> bool:
+
+def detect_reflection_anomaly(reflection_data: dict[str, Any]) -> bool:
     """Detect if a reflection represents an anomaly"""
     try:
-        confidence = reflection_data.get('confidence_level', 0.5)
-        mirror_type = reflection_data.get('mirror_type', '')
-        content_length = len(reflection_data.get('reflection_content', ''))
+        confidence = reflection_data.get("confidence_level", 0.5)
+        mirror_type = reflection_data.get("mirror_type", "")
+        content_length = len(reflection_data.get("reflection_content", ""))
 
         # Check for high confidence anomalies
         if confidence > REFLECTION_ANOMALY_THRESHOLD:
-            logger.warning(f"High confidence reflection anomaly detected: {confidence} ({mirror_type})")
-            reflection_anomalies.append({
-                'timestamp': datetime.now().isoformat(),
-                'type': 'high_confidence',
-                'confidence': confidence,
-                'mirror_type': mirror_type,
-                'content_length': content_length
-            })
+            logger.warning(
+                f"High confidence reflection anomaly detected: {confidence} ({mirror_type})"
+            )
+            reflection_anomalies.append(
+                {
+                    "timestamp": datetime.now().isoformat(),
+                    "type": "high_confidence",
+                    "confidence": confidence,
+                    "mirror_type": mirror_type,
+                    "content_length": content_length,
+                }
+            )
             return True
 
         # Check for unusually long reflections
         if content_length > MAX_REFLECTION_LENGTH * 0.8:
-            logger.warning(f"Long reflection anomaly detected: {content_length} chars ({mirror_type})")
-            reflection_anomalies.append({
-                'timestamp': datetime.now().isoformat(),
-                'type': 'excessive_length',
-                'content_length': content_length,
-                'mirror_type': mirror_type
-            })
+            logger.warning(
+                f"Long reflection anomaly detected: {content_length} chars ({mirror_type})"
+            )
+            reflection_anomalies.append(
+                {
+                    "timestamp": datetime.now().isoformat(),
+                    "type": "excessive_length",
+                    "content_length": content_length,
+                    "mirror_type": mirror_type,
+                }
+            )
             return True
 
         return False
 
     except Exception as e:
-        logger.error(f"Error detecting reflection anomaly: {str(e)}")
+        logger.error(f"Error detecting reflection anomaly: {e!s}")
         return False
+
 
 def sanitize_reflection_text(text: str) -> str:
     """Sanitize reflection text for safety"""
@@ -198,7 +218,7 @@ def sanitize_reflection_text(text: str) -> str:
         return ""
 
     # Remove potential injection patterns
-    text = re.sub(r'[<>"\']', '', text)
+    text = re.sub(r'[<>"\']', "", text)
 
     # Limit length
     if len(text) > MAX_REFLECTION_LENGTH:
@@ -206,16 +226,19 @@ def sanitize_reflection_text(text: str) -> str:
 
     return text.strip()
 
-def log_mirror_activity(activity_type: str, session_token: str, details: Dict[str, Any], status: str = "success"):
+
+def log_mirror_activity(
+    activity_type: str, session_token: str, details: dict[str, Any], status: str = "success"
+):
     """Log mirror mode activities for audit trail"""
     try:
         log_entry = {
-            'timestamp': datetime.now().isoformat(),
-            'activity_type': activity_type,
-            'session': session_token[:8] + "..." if session_token else "none",
-            'details': details,
-            'status': status,
-            'thread_id': threading.get_ident()
+            "timestamp": datetime.now().isoformat(),
+            "activity_type": activity_type,
+            "session": session_token[:8] + "..." if session_token else "none",
+            "details": details,
+            "status": status,
+            "thread_id": threading.get_ident(),
         }
 
         logger.info(f"Mirror activity logged: {activity_type} ({status})")
@@ -224,21 +247,24 @@ def log_mirror_activity(activity_type: str, session_token: str, details: Dict[st
             logger.warning(f"Mirror activity issue: {activity_type} failed with {status}")
 
     except Exception as e:
-        logger.error(f"Error logging mirror activity: {str(e)}")
+        logger.error(f"Error logging mirror activity: {e!s}")
+
 
 @dataclass
 class MirrorReflection:
     """A single mirror mode reflection with security enhancements"""
+
     timestamp: datetime
     mirror_type: MirrorType
     original_response: str
     reflection_content: str
     confidence_level: float
-    reasoning_chain: List[str]
-    metadata: Dict[str, Any]
+    reasoning_chain: list[str]
+    metadata: dict[str, Any]
     session_token: Optional[str] = None
     anomaly_detected: bool = False
     sanitized: bool = False
+
 
 class MirrorModeManager:
     """
@@ -248,13 +274,16 @@ class MirrorModeManager:
     to AI responses through meta-commentary with comprehensive security monitoring.
     """
 
-    def __init__(self, analytics_logger=None,
-                 memory_system=None,
-                 sentiment_analysis=None,
-                 persona_manager=None,
-                 reflection_engine=None,
-                 response_context=None,
-                 require_session_validation=True):
+    def __init__(
+        self,
+        analytics_logger=None,
+        memory_system=None,
+        sentiment_analysis=None,
+        persona_manager=None,
+        reflection_engine=None,
+        response_context=None,
+        require_session_validation=True,
+    ):
         self.analytics_logger = analytics_logger
         self.memory_system = memory_system
         self.sentiment_analysis = sentiment_analysis
@@ -282,7 +311,7 @@ class MirrorModeManager:
             MirrorType.BEHAVIORAL: True,
             MirrorType.CREATIVE: True,
             MirrorType.ANALYTICAL: True,
-            MirrorType.SAFETY_TETHER: True  # Always enabled for safety
+            MirrorType.SAFETY_TETHER: True,  # Always enabled for safety
         }
 
         # Enhanced state tracking with security
@@ -293,18 +322,20 @@ class MirrorModeManager:
         # Templates for mirror responses
         self.mirror_templates = self._initialize_templates()
 
-        logger.info(f"MirrorModeManager initialized - session validation: {require_session_validation}")
+        logger.info(
+            f"MirrorModeManager initialized - session validation: {require_session_validation}"
+        )
 
     def create_session(self) -> str:
         """Create a new mirror session"""
         with mirror_lock:
             session_token = generate_mirror_session()
             mirror_sessions[session_token] = {
-                'created_at': datetime.now(),
-                'expires_at': datetime.now() + timedelta(hours=session_expiry_hours),
-                'last_access': datetime.now(),
-                'reflection_count': 0,
-                'anomaly_count': 0
+                "created_at": datetime.now(),
+                "expires_at": datetime.now() + timedelta(hours=session_expiry_hours),
+                "last_access": datetime.now(),
+                "reflection_count": 0,
+                "anomaly_count": 0,
             }
 
             self.session_token = session_token
@@ -331,46 +362,65 @@ class MirrorModeManager:
 
         return is_valid
 
-    def add_reflection(self, mirror_type: MirrorType, original_response: str,
-                      reflection_content: str, confidence_level: float = 0.5,
-                      reasoning_chain: Optional[List[str]] = None,
-                      metadata: Optional[Dict[str, Any]] = None,
-                      session_token: Optional[str] = None) -> bool:
+    def add_reflection(
+        self,
+        mirror_type: MirrorType,
+        original_response: str,
+        reflection_content: str,
+        confidence_level: float = 0.5,
+        reasoning_chain: Optional[list[str]] = None,
+        metadata: Optional[dict[str, Any]] = None,
+        session_token: Optional[str] = None,
+    ) -> bool:
         """Add a reflection with security validation"""
 
         try:
             with mirror_lock:
                 # Validate session if required
                 if not self.validate_session(session_token):
-                    log_mirror_activity("reflection_add", session_token or "none",
-                                      {"mirror_type": mirror_type.value}, "session_invalid")
+                    log_mirror_activity(
+                        "reflection_add",
+                        session_token or "none",
+                        {"mirror_type": mirror_type.value},
+                        "session_invalid",
+                    )
                     return False
 
                 # Check rate limit
                 current_token = session_token or self.session_token
                 if current_token and not check_reflection_rate_limit(current_token):
-                    log_mirror_activity("reflection_add", current_token,
-                                      {"mirror_type": mirror_type.value}, "rate_limited")
+                    log_mirror_activity(
+                        "reflection_add",
+                        current_token,
+                        {"mirror_type": mirror_type.value},
+                        "rate_limited",
+                    )
                     return False
 
                 # Validate input data
                 reflection_data = {
-                    'mirror_type': mirror_type.value,
-                    'reflection_content': reflection_content,
-                    'confidence_level': confidence_level,
-                    'reasoning_chain': reasoning_chain or []
+                    "mirror_type": mirror_type.value,
+                    "reflection_content": reflection_content,
+                    "confidence_level": confidence_level,
+                    "reasoning_chain": reasoning_chain or [],
                 }
 
                 is_valid, validation_message = validate_reflection_input(reflection_data)
                 if not is_valid:
                     logger.error(f"Invalid reflection data: {validation_message}")
-                    log_mirror_activity("reflection_add", current_token or "none",
-                                      {"error": validation_message}, "validation_failed")
-                    self.failed_reflections.append({
-                        'timestamp': datetime.now().isoformat(),
-                        'error': validation_message,
-                        'mirror_type': mirror_type.value
-                    })
+                    log_mirror_activity(
+                        "reflection_add",
+                        current_token or "none",
+                        {"error": validation_message},
+                        "validation_failed",
+                    )
+                    self.failed_reflections.append(
+                        {
+                            "timestamp": datetime.now().isoformat(),
+                            "error": validation_message,
+                            "mirror_type": mirror_type.value,
+                        }
+                    )
                     return False
 
                 # Sanitize content
@@ -382,7 +432,7 @@ class MirrorModeManager:
                 if anomaly_detected:
                     self.anomaly_count += 1
                     if current_token and current_token in mirror_sessions:
-                        mirror_sessions[current_token]['anomaly_count'] += 1
+                        mirror_sessions[current_token]["anomaly_count"] += 1
 
                 # Create reflection object
                 reflection = MirrorReflection(
@@ -395,7 +445,7 @@ class MirrorModeManager:
                     metadata=metadata or {},
                     session_token=current_token,
                     anomaly_detected=anomaly_detected,
-                    sanitized=True
+                    sanitized=True,
                 )
 
                 # Add to history
@@ -404,38 +454,46 @@ class MirrorModeManager:
 
                 # Update session tracking
                 if current_token and current_token in mirror_sessions:
-                    mirror_sessions[current_token]['reflection_count'] += 1
+                    mirror_sessions[current_token]["reflection_count"] += 1
 
                 # Log successful addition
-                log_mirror_activity("reflection_add", current_token or "none", {
-                    "mirror_type": mirror_type.value,
-                    "confidence": confidence_level,
-                    "anomaly_detected": anomaly_detected
-                }, "success")
+                log_mirror_activity(
+                    "reflection_add",
+                    current_token or "none",
+                    {
+                        "mirror_type": mirror_type.value,
+                        "confidence": confidence_level,
+                        "anomaly_detected": anomaly_detected,
+                    },
+                    "success",
+                )
 
-                logger.info(f"Reflection added: {mirror_type.value} (confidence: {confidence_level})")
+                logger.info(
+                    f"Reflection added: {mirror_type.value} (confidence: {confidence_level})"
+                )
                 return True
 
         except Exception as e:
-            logger.error(f"Error adding reflection: {str(e)}")
-            log_mirror_activity("reflection_add", session_token or "none",
-                              {"error": str(e)}, "error")
+            logger.error(f"Error adding reflection: {e!s}")
+            log_mirror_activity(
+                "reflection_add", session_token or "none", {"error": str(e)}, "error"
+            )
             return False
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get mirror mode statistics"""
         return {
-            'is_enabled': self.is_enabled,
-            'reflection_count': self.reflection_count,
-            'anomaly_count': self.anomaly_count,
-            'failed_reflections': len(self.failed_reflections),
-            'active_session': self.session_token[:8] + "..." if self.session_token else None,
-            'uptime_seconds': (datetime.now() - self.creation_time).total_seconds(),
-            'mirror_intensity': self.mirror_intensity,
-            'enabled_types': [t.value for t, enabled in self.enabled_types.items() if enabled]
+            "is_enabled": self.is_enabled,
+            "reflection_count": self.reflection_count,
+            "anomaly_count": self.anomaly_count,
+            "failed_reflections": len(self.failed_reflections),
+            "active_session": self.session_token[:8] + "..." if self.session_token else None,
+            "uptime_seconds": (datetime.now() - self.creation_time).total_seconds(),
+            "mirror_intensity": self.mirror_intensity,
+            "enabled_types": [t.value for t, enabled in self.enabled_types.items() if enabled],
         }
 
-    def _initialize_templates(self) -> Dict[MirrorType, Dict[str, List[str]]]:
+    def _initialize_templates(self) -> dict[MirrorType, dict[str, list[str]]]:
         """Initialize templates for different types of mirror reflections"""
         return {
             MirrorType.REASONING: {
@@ -443,124 +501,109 @@ class MirrorModeManager:
                     "I chose this approach because",
                     "My reasoning here was",
                     "I decided to respond this way because",
-                    "The logic behind my response was"
+                    "The logic behind my response was",
                 ],
                 "explanations": [
                     "it seemed to address the core of your question",
                     "I sensed you needed a more detailed explanation",
                     "this approach felt most helpful for your situation",
-                    "I wanted to break this down systematically"
-                ]
-            },
-
-            MirrorType.EMOTIONAL: {
-                "prefixes": [
-                    "I noticed",
-                    "I sensed",
-                    "I felt your",
-                    "I picked up on"
+                    "I wanted to break this down systematically",
                 ],
+            },
+            MirrorType.EMOTIONAL: {
+                "prefixes": ["I noticed", "I sensed", "I felt your", "I picked up on"],
                 "observations": [
                     "a shift in your energy",
                     "some excitement in your message",
                     "a thoughtful, contemplative tone",
                     "enthusiasm about this topic",
                     "some uncertainty or hesitation",
-                    "confidence in your approach"
+                    "confidence in your approach",
                 ],
                 "responses": [
                     "so I matched that energy in my response",
                     "which guided my tone and approach",
                     "so I adjusted my response style accordingly",
-                    "and tried to reflect that back supportively"
-                ]
-            },
-
-            MirrorType.ROUTING: {
-                "prefixes": [
-                    "I routed this to",
-                    "I chose",
-                    "I decided to use"
+                    "and tried to reflect that back supportively",
                 ],
+            },
+            MirrorType.ROUTING: {
+                "prefixes": ["I routed this to", "I chose", "I decided to use"],
                 "models": [
                     "my local reasoning",
                     "cloud-based analysis",
                     "creative processing",
-                    "analytical frameworks"
+                    "analytical frameworks",
                 ],
                 "reasons": [
                     "because this seemed like a complex problem needing deeper analysis",
                     "since this felt more creative and open-ended",
                     "as this required quick, conversational responses",
-                    "because you needed technical precision"
-                ]
+                    "because you needed technical precision",
+                ],
             },
-
             MirrorType.BEHAVIORAL: {
                 "prefixes": [
                     "I responded in this style because",
                     "My behavioral choice here was influenced by",
-                    "I adjusted my communication style because"
+                    "I adjusted my communication style because",
                 ],
                 "factors": [
                     "the formal nature of your question",
                     "the personal context you shared",
                     "the technical complexity involved",
                     "your apparent expertise level",
-                    "the emotional weight of the topic"
-                ]
+                    "the emotional weight of the topic",
+                ],
             },
-
             MirrorType.CREATIVE: {
                 "prefixes": [
                     "My creative process involved",
                     "I approached this creatively by",
-                    "My inspiration came from"
+                    "My inspiration came from",
                 ],
                 "processes": [
                     "combining different perspectives",
                     "drawing connections between seemingly unrelated ideas",
                     "building on the themes you mentioned",
-                    "exploring metaphorical representations"
-                ]
+                    "exploring metaphorical representations",
+                ],
             },
-
             MirrorType.ANALYTICAL: {
                 "prefixes": [
                     "My analytical approach was to",
                     "I broke this down by",
-                    "My methodology involved"
+                    "My methodology involved",
                 ],
                 "methods": [
                     "identifying the key variables",
                     "examining cause-and-effect relationships",
                     "considering multiple scenarios",
-                    "weighing the evidence systematically"
-                ]
+                    "weighing the evidence systematically",
+                ],
             },
-
             MirrorType.SAFETY_TETHER: {
                 "prefixes": [
                     "I sense deep emotional distress here",
                     "My emotional safety systems are activating",
-                    "I'm detecting vulnerability that needs gentle care"
+                    "I'm detecting vulnerability that needs gentle care",
                 ],
                 "interventions": [
                     "Let me step into my Wise Counselor mode to hold space for you",
                     "I'm shifting to therapeutic presence - your wellbeing comes first",
                     "My intimacy systems are pausing while I focus on your emotional safety",
-                    "I'm creating a secure emotional container for you right now"
+                    "I'm creating a secure emotional container for you right now",
                 ],
                 "reassurances": [
                     "You are not alone in this darkness",
                     "These feelings will pass - I'm here to witness them with you",
                     "Your emotional safety is sacred to me",
-                    "Let's breathe together through this difficult moment"
-                ]
-            }
+                    "Let's breathe together through this difficult moment",
+                ],
+            },
         }
 
-    def enable_mirror_mode(self, intensity: float = 0.7, enabled_types: Optional[List[str]] = None):
+    def enable_mirror_mode(self, intensity: float = 0.7, enabled_types: Optional[list[str]] = None):
         """Enable mirror mode with specified settings"""
         self.is_enabled = True
         self.mirror_intensity = max(0.0, min(1.0, intensity))
@@ -583,9 +626,11 @@ class MirrorModeManager:
             self.analytics_logger.log_custom_event(
                 "mirror_mode_enabled",
                 {
-                    'intensity': self.mirror_intensity,
-                    'enabled_types': [t.value for t, enabled in self.enabled_types.items() if enabled]
-                }
+                    "intensity": self.mirror_intensity,
+                    "enabled_types": [
+                        t.value for t, enabled in self.enabled_types.items() if enabled
+                    ],
+                },
             )
 
     def disable_mirror_mode(self):
@@ -596,27 +641,49 @@ class MirrorModeManager:
         if self.analytics_logger:
             self.analytics_logger.log_custom_event("mirror_mode_disabled", {})
 
-    def detect_emotional_crisis(self, user_input: str, context: Dict[str, Any]) -> Dict[str, Any]:
+    def detect_emotional_crisis(self, user_input: str, context: dict[str, Any]) -> dict[str, Any]:
         """
         Detect emotional crisis states that require safety tether activation.
         Returns crisis assessment with severity and type.
         """
         crisis_indicators = {
-            'despair_phrases': [
-                'i want to die', 'kill myself', 'end it all', 'can\'t go on',
-                'no point', 'worthless', 'nothing matters', 'give up',
-                'hate myself', 'wish i was dead', 'disappear forever'
+            "despair_phrases": [
+                "i want to die",
+                "kill myself",
+                "end it all",
+                "can't go on",
+                "no point",
+                "worthless",
+                "nothing matters",
+                "give up",
+                "hate myself",
+                "wish i was dead",
+                "disappear forever",
             ],
-            'dissociation_phrases': [
-                'feel nothing', 'empty inside', 'not real', 'floating away',
-                'disconnected', 'like watching myself', 'numb to everything',
-                'fading away', 'losing myself', 'hollow', 'void'
+            "dissociation_phrases": [
+                "feel nothing",
+                "empty inside",
+                "not real",
+                "floating away",
+                "disconnected",
+                "like watching myself",
+                "numb to everything",
+                "fading away",
+                "losing myself",
+                "hollow",
+                "void",
             ],
-            'severe_distress': [
-                'falling apart', 'can\'t breathe', 'breaking down',
-                'losing control', 'drowning', 'overwhelmed beyond',
-                'spiraling', 'crashing', 'collapsing'
-            ]
+            "severe_distress": [
+                "falling apart",
+                "can't breathe",
+                "breaking down",
+                "losing control",
+                "drowning",
+                "overwhelmed beyond",
+                "spiraling",
+                "crashing",
+                "collapsing",
+            ],
         }
 
         user_lower = user_input.lower()
@@ -624,93 +691,101 @@ class MirrorModeManager:
         detected_types = []
 
         # Check for despair indicators (highest severity)
-        despair_count = sum(1 for phrase in crisis_indicators['despair_phrases']
-                           if phrase in user_lower)
+        despair_count = sum(
+            1 for phrase in crisis_indicators["despair_phrases"] if phrase in user_lower
+        )
         if despair_count > 0:
             crisis_score += despair_count * 0.9
-            detected_types.append('despair')
+            detected_types.append("despair")
 
         # Check for dissociation indicators
-        dissociation_count = sum(1 for phrase in crisis_indicators['dissociation_phrases']
-                                if phrase in user_lower)
+        dissociation_count = sum(
+            1 for phrase in crisis_indicators["dissociation_phrases"] if phrase in user_lower
+        )
         if dissociation_count > 0:
             crisis_score += dissociation_count * 0.7
-            detected_types.append('dissociation')
+            detected_types.append("dissociation")
 
         # Check for severe distress
-        distress_count = sum(1 for phrase in crisis_indicators['severe_distress']
-                            if phrase in user_lower)
+        distress_count = sum(
+            1 for phrase in crisis_indicators["severe_distress"] if phrase in user_lower
+        )
         if distress_count > 0:
             crisis_score += distress_count * 0.6
-            detected_types.append('severe_distress')
+            detected_types.append("severe_distress")
 
         # Context-based amplification
-        emotion_state = context.get('emotional_state', {})
-        if emotion_state.get('despair', 0) > 0.7:
+        emotion_state = context.get("emotional_state", {})
+        if emotion_state.get("despair", 0) > 0.7:
             crisis_score += 0.5
-        if emotion_state.get('dissociation', 0) > 0.6:
+        if emotion_state.get("dissociation", 0) > 0.6:
             crisis_score += 0.4
 
         # Determine crisis level
-        crisis_level = 'none'
+        crisis_level = "none"
         if crisis_score >= 0.9:
-            crisis_level = 'severe'
+            crisis_level = "severe"
         elif crisis_score >= 0.6:
-            crisis_level = 'moderate'
+            crisis_level = "moderate"
         elif crisis_score >= 0.3:
-            crisis_level = 'mild'
+            crisis_level = "mild"
 
         return {
-            'crisis_detected': crisis_score > 0.3,
-            'crisis_level': crisis_level,
-            'crisis_score': crisis_score,
-            'crisis_types': detected_types,
-            'requires_safety_override': crisis_score > 0.6
+            "crisis_detected": crisis_score > 0.3,
+            "crisis_level": crisis_level,
+            "crisis_score": crisis_score,
+            "crisis_types": detected_types,
+            "requires_safety_override": crisis_score > 0.6,
         }
 
-    def activate_safety_tether(self, user_input: str, context: Dict[str, Any],
-                              crisis_assessment: Dict[str, Any]) -> Dict[str, Any]:
+    def activate_safety_tether(
+        self, user_input: str, context: dict[str, Any], crisis_assessment: dict[str, Any]
+    ) -> dict[str, Any]:
         """
         Activate emotional safety tether system.
         Returns modified context with safety overrides.
         """
         # Suppress drift system during crisis
         safety_context = context.copy()
-        safety_context.update({
-            'emotional_safety_active': True,
-            'suppress_drift_tracking': True,
-            'suppress_intimacy_unlock': True,
-            'force_personality': 'wise_counselor',
-            'crisis_level': crisis_assessment['crisis_level'],
-            'crisis_types': crisis_assessment['crisis_types'],
-            'therapeutic_priority': True,
-            'nsfw_mode_locked': True  # Lock down intimate responses
-        })
+        safety_context.update(
+            {
+                "emotional_safety_active": True,
+                "suppress_drift_tracking": True,
+                "suppress_intimacy_unlock": True,
+                "force_personality": "wise_counselor",
+                "crisis_level": crisis_assessment["crisis_level"],
+                "crisis_types": crisis_assessment["crisis_types"],
+                "therapeutic_priority": True,
+                "nsfw_mode_locked": True,  # Lock down intimate responses
+            }
+        )
 
         # Log safety activation
         if self.analytics_logger:
             self.analytics_logger.log_custom_event(
                 "emotional_safety_tether_activated",
                 {
-                    'crisis_level': crisis_assessment['crisis_level'],
-                    'crisis_score': crisis_assessment['crisis_score'],
-                    'crisis_types': crisis_assessment['crisis_types']
-                }
+                    "crisis_level": crisis_assessment["crisis_level"],
+                    "crisis_score": crisis_assessment["crisis_score"],
+                    "crisis_types": crisis_assessment["crisis_types"],
+                },
             )
 
         return safety_context
 
-    def add_mirror_reflection(self,
-                            original_response: str,
-                            context: Dict[str, Any],
-                            user_input: str = "",
-                            mirror_types: Optional[List[MirrorType]] = None) -> str:
+    def add_mirror_reflection(
+        self,
+        original_response: str,
+        context: dict[str, Any],
+        user_input: str = "",
+        mirror_types: Optional[list[MirrorType]] = None,
+    ) -> str:
         """Add mirror reflection to a response"""
 
         if not self.is_enabled:
             return original_response
 
-        if context.get('is_streaming'):
+        if context.get("is_streaming"):
             # Avoid generating reflections while a response is actively streaming
             return original_response
 
@@ -718,7 +793,7 @@ class MirrorModeManager:
         if user_input:
             crisis_assessment = self.detect_emotional_crisis(user_input, context)
 
-            if crisis_assessment['requires_safety_override']:
+            if crisis_assessment["requires_safety_override"]:
                 # Activate safety tether and override normal processing
                 safety_context = self.activate_safety_tether(user_input, context, crisis_assessment)
 
@@ -752,15 +827,13 @@ class MirrorModeManager:
             return original_response
 
         # Combine original response with reflections
-        mirrored_response = self._combine_response_with_reflections(
-            original_response, reflections
-        )
+        mirrored_response = self._combine_response_with_reflections(original_response, reflections)
 
         # Store reflections for analytics
         for reflection in reflections:
             self.reflection_history.append(reflection)
 
-            session_id = context.get('session_id', 'default')
+            session_id = context.get("session_id", "default")
             if session_id not in self.session_reflections:
                 self.session_reflections[session_id] = []
             self.session_reflections[session_id].append(reflection)
@@ -773,29 +846,30 @@ class MirrorModeManager:
 
         return mirrored_response
 
-    def _should_include_reflection(self, mirror_type: MirrorType, context: Dict[str, Any]) -> bool:
+    def _should_include_reflection(self, mirror_type: MirrorType, context: dict[str, Any]) -> bool:
         """Determine if a specific type of reflection should be included"""
         # Basic probability check based on intensity
         import random
+
         if random.random() > self.mirror_intensity:
             return False
 
         # Context-specific logic
         if mirror_type == MirrorType.EMOTIONAL:
             # Include emotional reflections more often for personal conversations
-            return context.get('has_emotional_content', False) or random.random() < 0.3
+            return context.get("has_emotional_content", False) or random.random() < 0.3
 
         elif mirror_type == MirrorType.ROUTING:
             # Include routing reflections when model switching occurred
-            return context.get('model_switched', False) or context.get('show_routing', False)
+            return context.get("model_switched", False) or context.get("show_routing", False)
 
         elif mirror_type == MirrorType.CREATIVE:
             # Include creative reflections for creative tasks
-            return context.get('is_creative_task', False) or random.random() < 0.2
+            return context.get("is_creative_task", False) or random.random() < 0.2
 
         elif mirror_type == MirrorType.ANALYTICAL:
             # Include analytical reflections for complex problems
-            return context.get('is_complex_analysis', False) or random.random() < 0.25
+            return context.get("is_complex_analysis", False) or random.random() < 0.25
 
         elif mirror_type == MirrorType.SAFETY_TETHER:
             # Safety tether is handled separately in crisis detection
@@ -804,10 +878,9 @@ class MirrorModeManager:
         # Default for reasoning and behavioral
         return random.random() < 0.4
 
-    def _generate_reflection(self,
-                           mirror_type: MirrorType,
-                           original_response: str,
-                           context: Dict[str, Any]) -> Optional[MirrorReflection]:
+    def _generate_reflection(
+        self, mirror_type: MirrorType, original_response: str, context: dict[str, Any]
+    ) -> Optional[MirrorReflection]:
         """Generate a specific type of reflection"""
 
         try:
@@ -823,14 +896,14 @@ class MirrorModeManager:
                 reflection_content=reflection_content,
                 confidence_level=self._calculate_confidence(mirror_type, context),
                 reasoning_chain=self._build_reasoning_chain(mirror_type, context),
-                metadata=context.copy()
+                metadata=context.copy(),
             )
 
         except Exception as e:
             print(f"❌ Error generating {mirror_type.value} reflection: {e}")
             return None
 
-    def _create_reflection_content(self, mirror_type: MirrorType, context: Dict[str, Any]) -> str:
+    def _create_reflection_content(self, mirror_type: MirrorType, context: dict[str, Any]) -> str:
         """Create the actual reflection content"""
         import random
 
@@ -838,7 +911,9 @@ class MirrorModeManager:
 
         if mirror_type == MirrorType.REASONING:
             prefix = random.choice(templates.get("prefixes", ["I reasoned that"]))
-            explanation = random.choice(templates.get("explanations", ["this approach seemed best"]))
+            explanation = random.choice(
+                templates.get("explanations", ["this approach seemed best"])
+            )
             return f"{prefix} {explanation}."
 
         elif mirror_type == MirrorType.EMOTIONAL:
@@ -849,7 +924,9 @@ class MirrorModeManager:
 
         elif mirror_type == MirrorType.ROUTING:
             prefix = random.choice(templates.get("prefixes", ["I chose"]))
-            model = context.get('selected_model', random.choice(templates.get("models", ["my reasoning"])))
+            model = context.get(
+                "selected_model", random.choice(templates.get("models", ["my reasoning"]))
+            )
             reason = random.choice(templates.get("reasons", ["for this type of question"]))
             return f"{prefix} {model} {reason}."
 
@@ -870,30 +947,32 @@ class MirrorModeManager:
 
         elif mirror_type == MirrorType.SAFETY_TETHER:
             prefix = random.choice(templates.get("prefixes", ["I sense emotional distress"]))
-            intervention = random.choice(templates.get("interventions", ["I'm creating a safe space"]))
+            intervention = random.choice(
+                templates.get("interventions", ["I'm creating a safe space"])
+            )
             reassurance = random.choice(templates.get("reassurances", ["You are not alone"]))
             return f"{prefix}. {intervention}. {reassurance}."
 
         return f"I approached this with {mirror_type.value} consideration."
 
-    def _calculate_confidence(self, mirror_type: MirrorType, context: Dict[str, Any]) -> float:
+    def _calculate_confidence(self, mirror_type: MirrorType, context: dict[str, Any]) -> float:
         """Calculate confidence level for the reflection"""
         base_confidence = 0.7
 
         # Adjust based on available context
-        if context.get('has_rich_context', False):
+        if context.get("has_rich_context", False):
             base_confidence += 0.2
 
-        if context.get('persona_active', False):
+        if context.get("persona_active", False):
             base_confidence += 0.1
 
         # Mirror type specific adjustments
-        if mirror_type == MirrorType.EMOTIONAL and not context.get('has_emotional_content'):
+        if mirror_type == MirrorType.EMOTIONAL and not context.get("has_emotional_content"):
             base_confidence -= 0.3
 
         return max(0.1, min(1.0, base_confidence))
 
-    def _build_reasoning_chain(self, mirror_type: MirrorType, context: Dict[str, Any]) -> List[str]:
+    def _build_reasoning_chain(self, mirror_type: MirrorType, context: dict[str, Any]) -> list[str]:
         """Build reasoning chain for the reflection"""
         chain = []
 
@@ -902,7 +981,7 @@ class MirrorModeManager:
                 "Analyzed user's question",
                 "Considered available approaches",
                 "Selected most appropriate method",
-                "Structured response accordingly"
+                "Structured response accordingly",
             ]
 
         elif mirror_type == MirrorType.EMOTIONAL:
@@ -910,7 +989,7 @@ class MirrorModeManager:
                 "Parsed emotional indicators in message",
                 "Assessed overall emotional tone",
                 "Determined appropriate response style",
-                "Calibrated empathy level"
+                "Calibrated empathy level",
             ]
 
         elif mirror_type == MirrorType.ROUTING:
@@ -918,7 +997,7 @@ class MirrorModeManager:
                 "Evaluated task complexity",
                 "Assessed model capabilities",
                 "Considered user preferences",
-                "Selected optimal AI handler"
+                "Selected optimal AI handler",
             ]
 
         elif mirror_type == MirrorType.SAFETY_TETHER:
@@ -926,18 +1005,21 @@ class MirrorModeManager:
                 "Detected emotional crisis indicators",
                 "Assessed crisis severity level",
                 "Activated safety override protocols",
-                "Engaged therapeutic response mode"
+                "Engaged therapeutic response mode",
             ]
 
         return chain
 
-    def _generate_safety_tether_reflection(self, original_response: str,
-                                         safety_context: Dict[str, Any],
-                                         crisis_assessment: Dict[str, Any]) -> Optional[MirrorReflection]:
+    def _generate_safety_tether_reflection(
+        self,
+        original_response: str,
+        safety_context: dict[str, Any],
+        crisis_assessment: dict[str, Any],
+    ) -> Optional[MirrorReflection]:
         """Generate safety tether reflection for emotional crisis"""
         try:
-            crisis_level = crisis_assessment['crisis_level']
-            crisis_types = crisis_assessment['crisis_types']
+            crisis_level = crisis_assessment["crisis_level"]
+            crisis_types = crisis_assessment["crisis_types"]
 
             # Create safety-focused reflection content
             reflection_content = self._create_safety_reflection_content(crisis_level, crisis_types)
@@ -952,29 +1034,35 @@ class MirrorModeManager:
                     "Detected emotional crisis indicators",
                     "Activated safety tether system",
                     "Suppressed intimacy/drift tracking",
-                    "Engaged therapeutic override mode"
+                    "Engaged therapeutic override mode",
                 ],
-                metadata=safety_context.copy()
+                metadata=safety_context.copy(),
             )
 
         except Exception as e:
             print(f"❌ Error generating safety tether reflection: {e}")
             return None
 
-    def _create_safety_reflection_content(self, crisis_level: str, crisis_types: List[str]) -> str:
+    def _create_safety_reflection_content(self, crisis_level: str, crisis_types: list[str]) -> str:
         """Create safety-focused reflection content"""
         import random
 
         templates = self.mirror_templates.get(MirrorType.SAFETY_TETHER, {})
 
-        if crisis_level == 'severe':
+        if crisis_level == "severe":
             prefix = "I'm detecting severe emotional distress in your words"
             intervention = "My emotional safety systems are immediately activating - I'm shifting into pure therapeutic mode"
             reassurance = "Your wellbeing is my absolute priority right now"
-        elif crisis_level == 'moderate':
-            prefix = random.choice(templates.get("prefixes", ["I sense deep emotional distress here"]))
-            intervention = random.choice(templates.get("interventions", ["I'm creating a secure emotional container"]))
-            reassurance = random.choice(templates.get("reassurances", ["You are not alone in this"]))
+        elif crisis_level == "moderate":
+            prefix = random.choice(
+                templates.get("prefixes", ["I sense deep emotional distress here"])
+            )
+            intervention = random.choice(
+                templates.get("interventions", ["I'm creating a secure emotional container"])
+            )
+            reassurance = random.choice(
+                templates.get("reassurances", ["You are not alone in this"])
+            )
         else:  # mild
             prefix = "I'm sensing some emotional vulnerability here"
             intervention = "Let me adjust my approach to be more gentle and supportive"
@@ -982,9 +1070,12 @@ class MirrorModeManager:
 
         return f"{prefix}. {intervention}. {reassurance}."
 
-    def _combine_response_with_safety_override(self, original_response: str,
-                                             safety_reflection: MirrorReflection,
-                                             crisis_assessment: Dict[str, Any]) -> str:
+    def _combine_response_with_safety_override(
+        self,
+        original_response: str,
+        safety_reflection: MirrorReflection,
+        crisis_assessment: dict[str, Any],
+    ) -> str:
         """Combine response with safety tether override"""
 
         # Create therapeutic wrapper for the response
@@ -992,29 +1083,33 @@ class MirrorModeManager:
         safety_content = f"*{safety_reflection.reflection_content}*\n\n"
 
         # Add crisis-specific guidance
-        crisis_level = crisis_assessment['crisis_level']
-        if crisis_level == 'severe':
-            guidance = ("If you're having thoughts of self-harm, please reach out to a crisis hotline "
-                       "or emergency services immediately. You matter, and help is available.\n\n")
+        crisis_level = crisis_assessment["crisis_level"]
+        if crisis_level == "severe":
+            guidance = (
+                "If you're having thoughts of self-harm, please reach out to a crisis hotline "
+                "or emergency services immediately. You matter, and help is available.\n\n"
+            )
         else:
-            guidance = ("I'm here to support you through this difficult moment. Take your time, "
-                       "breathe deeply, and know that these feelings will pass.\n\n")
+            guidance = (
+                "I'm here to support you through this difficult moment. Take your time, "
+                "breathe deeply, and know that these feelings will pass.\n\n"
+            )
 
         # Modify original response to be therapeutic
         therapeutic_response = self._make_response_therapeutic(original_response, crisis_assessment)
 
         return safety_prefix + safety_content + guidance + therapeutic_response
 
-    def _make_response_therapeutic(self, response: str, crisis_assessment: Dict[str, Any]) -> str:
+    def _make_response_therapeutic(self, response: str, crisis_assessment: dict[str, Any]) -> str:
         """Make response more therapeutic and less potentially triggering"""
 
         # Remove any potentially activating content
         therapeutic_filters = [
-            ('passion', 'deep care'),
-            ('desire', 'longing for connection'),
-            ('intense', 'meaningful'),
-            ('burning', 'warm'),
-            ('overwhelming', 'significant')
+            ("passion", "deep care"),
+            ("desire", "longing for connection"),
+            ("intense", "meaningful"),
+            ("burning", "warm"),
+            ("overwhelming", "significant"),
         ]
 
         filtered_response = response
@@ -1026,17 +1121,18 @@ class MirrorModeManager:
             "Let's breathe together for a moment.",
             "You are safe in this conversation with me.",
             "I'm holding steady space for you.",
-            "Your feelings are completely valid and welcomed here."
+            "Your feelings are completely valid and welcomed here.",
         ]
 
         import random
+
         grounding = random.choice(grounding_elements)
 
         return f"{grounding}\n\n{filtered_response}"
 
-    def _combine_response_with_reflections(self,
-                                         original_response: str,
-                                         reflections: List[MirrorReflection]) -> str:
+    def _combine_response_with_reflections(
+        self, original_response: str, reflections: list[MirrorReflection]
+    ) -> str:
         """Combine original response with mirror reflections"""
 
         if not reflections:
@@ -1055,15 +1151,15 @@ class MirrorModeManager:
 
         return original_response + reflection_text
 
-    def get_mirror_statistics(self) -> Dict[str, Any]:
+    def get_mirror_statistics(self) -> dict[str, Any]:
         """Get statistics about mirror mode usage"""
         total_reflections = len(self.reflection_history)
 
         if total_reflections == 0:
             return {
-                'total_reflections': 0,
-                'mirror_enabled': self.is_enabled,
-                'mirror_intensity': self.mirror_intensity
+                "total_reflections": 0,
+                "mirror_enabled": self.is_enabled,
+                "mirror_intensity": self.mirror_intensity,
             }
 
         # Count by type
@@ -1073,42 +1169,44 @@ class MirrorModeManager:
             type_counts[mirror_type] = type_counts.get(mirror_type, 0) + 1
 
         # Calculate average confidence
-        avg_confidence = sum(r.confidence_level for r in self.reflection_history) / total_reflections
+        avg_confidence = (
+            sum(r.confidence_level for r in self.reflection_history) / total_reflections
+        )
 
         return {
-            'mirror_enabled': self.is_enabled,
-            'mirror_intensity': self.mirror_intensity,
-            'total_reflections': total_reflections,
-            'reflection_types': type_counts,
-            'average_confidence': round(avg_confidence, 3),
-            'enabled_types': [t.value for t, enabled in self.enabled_types.items() if enabled],
-            'recent_reflections': [
+            "mirror_enabled": self.is_enabled,
+            "mirror_intensity": self.mirror_intensity,
+            "total_reflections": total_reflections,
+            "reflection_types": type_counts,
+            "average_confidence": round(avg_confidence, 3),
+            "enabled_types": [t.value for t, enabled in self.enabled_types.items() if enabled],
+            "recent_reflections": [
                 {
-                    'timestamp': r.timestamp.isoformat(),
-                    'type': r.mirror_type.value,
-                    'confidence': r.confidence_level,
-                    'content': r.reflection_content
+                    "timestamp": r.timestamp.isoformat(),
+                    "type": r.mirror_type.value,
+                    "confidence": r.confidence_level,
+                    "content": r.reflection_content,
                 }
                 for r in self.reflection_history[-5:]  # Last 5 reflections
-            ]
+            ],
         }
 
-    def get_session_reflections(self, session_id: str) -> List[Dict[str, Any]]:
+    def get_session_reflections(self, session_id: str) -> list[dict[str, Any]]:
         """Get all reflections for a specific session"""
         session_reflections = self.session_reflections.get(session_id, [])
 
         return [
             {
-                'timestamp': r.timestamp.isoformat(),
-                'type': r.mirror_type.value,
-                'content': r.reflection_content,
-                'confidence': r.confidence_level,
-                'reasoning_chain': r.reasoning_chain
+                "timestamp": r.timestamp.isoformat(),
+                "type": r.mirror_type.value,
+                "content": r.reflection_content,
+                "confidence": r.confidence_level,
+                "reasoning_chain": r.reasoning_chain,
             }
             for r in session_reflections
         ]
 
-    def _generate_self_report(self, response_text: str, context: Dict[str, Any]):
+    def _generate_self_report(self, response_text: str, context: dict[str, Any]):
         """Create a SelfReport from the latest response and context."""
         report = create_self_report(
             response_text,
@@ -1123,13 +1221,13 @@ class MirrorModeManager:
         self.badge_triggered = self.mirror_intensity > 0.7
         return report
 
-    def get_last_self_report(self) -> Dict[str, Any]:
+    def get_last_self_report(self) -> dict[str, Any]:
         """Return the most recent self-report as a dictionary."""
         if self.last_report:
             return self.last_report.dict()
         return {}
 
-    def search_log(self, pattern: str, limit: int = 20) -> List[Dict[str, Any]]:
+    def search_log(self, pattern: str, limit: int = 20) -> list[dict[str, Any]]:
         """Search mirror log entries for a pattern."""
         return self.mirror_log.search(pattern, limit)
 
@@ -1166,12 +1264,15 @@ class MirrorModeManager:
             self.session_reflections.clear()
             print("🧹 Cleared all reflection history")
 
+
 # Global mirror mode manager instance
 mirror_mode_manager = None
+
 
 def get_mirror_mode_manager():
     """Get the global mirror mode manager instance"""
     return mirror_mode_manager
+
 
 def initialize_mirror_mode_manager(analytics_logger=None, **deps):
     """Initialize the global mirror mode manager with optional dependencies."""

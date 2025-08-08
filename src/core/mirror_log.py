@@ -8,21 +8,21 @@ Enhanced with security features:
 - Rate limiting and monitoring for log operations
 """
 
-from pathlib import Path
-from typing import List, Dict, Any, Optional
-import json
 import hashlib
-import re
-import time
-import threading
+import json
 import logging
+import re
+import threading
+import time
+from collections import defaultdict, deque
 from datetime import datetime, timedelta
-from collections import deque, defaultdict
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 # Enhanced logging configuration
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -46,12 +46,14 @@ log_requests = defaultdict(lambda: deque())
 # Access monitoring
 log_access_history = deque(maxlen=1000)
 
+
 def generate_log_session() -> str:
     """Generate a secure mirror log session token"""
     timestamp = str(time.time())
     random_data = str(hash(datetime.now()))
     token_string = f"mirrorlog:{timestamp}:{random_data}"
     return hashlib.sha256(token_string.encode()).hexdigest()[:MIRROR_LOG_SESSION_LENGTH]
+
 
 def validate_log_session(session_token: str) -> bool:
     """Validate mirror log session token"""
@@ -63,21 +65,23 @@ def validate_log_session(session_token: str) -> bool:
 
     # Check if session has expired
     session_data = log_sessions[session_token]
-    if datetime.now() > session_data['expires_at']:
+    if datetime.now() > session_data["expires_at"]:
         del log_sessions[session_token]
         return False
 
     # Update last access time
-    session_data['last_access'] = datetime.now()
+    session_data["last_access"] = datetime.now()
     return True
+
 
 def check_log_rate_limit(session_token: str) -> bool:
     """Check if log operation rate limit is exceeded"""
     current_time = time.time()
 
     # Clean old requests
-    while (log_requests[session_token] and
-           log_requests[session_token][0] < current_time - 3600):  # 1 hour window
+    while (
+        log_requests[session_token] and log_requests[session_token][0] < current_time - 3600
+    ):  # 1 hour window
         log_requests[session_token].popleft()
 
     # Check limit
@@ -89,7 +93,8 @@ def check_log_rate_limit(session_token: str) -> bool:
     log_requests[session_token].append(current_time)
     return True
 
-def validate_log_entry(data: Dict[str, Any]) -> tuple[bool, str]:
+
+def validate_log_entry(data: dict[str, Any]) -> tuple[bool, str]:
     """Validate log entry data"""
     try:
         # Check data size
@@ -98,12 +103,12 @@ def validate_log_entry(data: Dict[str, Any]) -> tuple[bool, str]:
             return False, f"Log entry too large: {entry_size} bytes (max {MAX_LOG_ENTRY_SIZE})"
 
         # Validate required fields for mirror logs
-        if 'timestamp' not in data:
-            data['timestamp'] = datetime.now().isoformat()
+        if "timestamp" not in data:
+            data["timestamp"] = datetime.now().isoformat()
 
         # Validate summary if present
-        if 'summary' in data:
-            summary = data['summary']
+        if "summary" in data:
+            summary = data["summary"]
             if not isinstance(summary, str):
                 return False, "Summary must be a string"
 
@@ -113,9 +118,9 @@ def validate_log_entry(data: Dict[str, Any]) -> tuple[bool, str]:
         # Check for dangerous content
         data_str = json.dumps(data)
         dangerous_patterns = [
-            r'<script[^>]*>.*?</script>',  # XSS
-            r'javascript:',               # JavaScript protocol
-            r'on\w+\s*=',                # Event handlers
+            r"<script[^>]*>.*?</script>",  # XSS
+            r"javascript:",  # JavaScript protocol
+            r"on\w+\s*=",  # Event handlers
         ]
 
         for pattern in dangerous_patterns:
@@ -125,10 +130,11 @@ def validate_log_entry(data: Dict[str, Any]) -> tuple[bool, str]:
         return True, "Valid"
 
     except Exception as e:
-        logger.error(f"Error validating log entry: {str(e)}")
-        return False, f"Validation error: {str(e)}"
+        logger.error(f"Error validating log entry: {e!s}")
+        return False, f"Validation error: {e!s}"
 
-def sanitize_log_data(data: Dict[str, Any]) -> Dict[str, Any]:
+
+def sanitize_log_data(data: dict[str, Any]) -> dict[str, Any]:
     """Sanitize log data for safety"""
     sanitized = {}
 
@@ -136,17 +142,18 @@ def sanitize_log_data(data: Dict[str, Any]) -> Dict[str, Any]:
         # Sanitize string values
         if isinstance(value, str):
             # Remove potentially dangerous characters
-            value = re.sub(r'[<>"\']', '', value)
+            value = re.sub(r'[<>"\']', "", value)
             # Limit length
             if len(value) > 2000:
                 value = value[:2000] + "..."
 
         # Sanitize key names
-        clean_key = re.sub(r'[^a-zA-Z0-9_]', '', str(key))
+        clean_key = re.sub(r"[^a-zA-Z0-9_]", "", str(key))
         if clean_key:
             sanitized[clean_key] = value
 
     return sanitized
+
 
 def validate_search_pattern(pattern: str) -> tuple[bool, str]:
     """Validate search pattern"""
@@ -159,9 +166,9 @@ def validate_search_pattern(pattern: str) -> tuple[bool, str]:
 
         # Check for regex injection attempts
         dangerous_regex = [
-            r'\(\?\(',  # Conditional patterns
-            r'\(\?\#',  # Comments
-            r'\(\?\:',  # Non-capturing groups with potential issues
+            r"\(\?\(",  # Conditional patterns
+            r"\(\?\#",  # Comments
+            r"\(\?\:",  # Non-capturing groups with potential issues
         ]
 
         for regex in dangerous_regex:
@@ -171,19 +178,22 @@ def validate_search_pattern(pattern: str) -> tuple[bool, str]:
         return True, "Valid"
 
     except Exception as e:
-        logger.error(f"Error validating search pattern: {str(e)}")
-        return False, f"Validation error: {str(e)}"
+        logger.error(f"Error validating search pattern: {e!s}")
+        return False, f"Validation error: {e!s}"
 
-def log_access_activity(activity_type: str, session_token: str, details: Dict[str, Any], status: str = "success"):
+
+def log_access_activity(
+    activity_type: str, session_token: str, details: dict[str, Any], status: str = "success"
+):
     """Log mirror log access activities"""
     try:
         log_entry = {
-            'timestamp': datetime.now().isoformat(),
-            'activity_type': activity_type,
-            'session': session_token[:8] + "..." if session_token else "none",
-            'details': details,
-            'status': status,
-            'thread_id': threading.get_ident()
+            "timestamp": datetime.now().isoformat(),
+            "activity_type": activity_type,
+            "session": session_token[:8] + "..." if session_token else "none",
+            "details": details,
+            "status": status,
+            "thread_id": threading.get_ident(),
         }
 
         log_access_history.append(log_entry)
@@ -194,12 +204,15 @@ def log_access_activity(activity_type: str, session_token: str, details: Dict[st
             logger.warning(f"Mirror log access issue: {activity_type} failed with {status}")
 
     except Exception as e:
-        logger.error(f"Error logging mirror log access: {str(e)}")
+        logger.error(f"Error logging mirror log access: {e!s}")
+
 
 class MirrorLog:
     """Secure append-only log for mirror mode reports with enhanced security."""
 
-    def __init__(self, log_file: str = "logs/mirror_log.jsonl", session_token: Optional[str] = None):
+    def __init__(
+        self, log_file: str = "logs/mirror_log.jsonl", session_token: Optional[str] = None
+    ):
         self.log_path = Path(log_file)
         self.log_path.parent.mkdir(exist_ok=True)
         self.session_token = session_token
@@ -217,10 +230,10 @@ class MirrorLog:
         with log_lock:
             session_token = generate_log_session()
             log_sessions[session_token] = {
-                'created_at': datetime.now(),
-                'expires_at': datetime.now() + timedelta(hours=session_expiry_hours),
-                'last_access': datetime.now(),
-                'log_operations': 0
+                "created_at": datetime.now(),
+                "expires_at": datetime.now() + timedelta(hours=session_expiry_hours),
+                "last_access": datetime.now(),
+                "log_operations": 0,
             }
             return session_token
 
@@ -234,40 +247,46 @@ class MirrorLog:
 
         return validate_log_session(token_to_validate)
 
-    def append(self, data: Dict[str, Any], session_token: Optional[str] = None) -> bool:
+    def append(self, data: dict[str, Any], session_token: Optional[str] = None) -> bool:
         """Securely append data to mirror log"""
         try:
             with log_lock:
                 # Validate session
                 if not self.validate_session(session_token):
-                    log_access_activity("append", session_token or self.session_token,
-                                      {"status": "session_invalid"}, "failed")
+                    log_access_activity(
+                        "append",
+                        session_token or self.session_token,
+                        {"status": "session_invalid"},
+                        "failed",
+                    )
                     return False
 
                 # Check rate limit
                 current_token = session_token or self.session_token
                 if not check_log_rate_limit(current_token):
-                    log_access_activity("append", current_token,
-                                      {"status": "rate_limited"}, "failed")
+                    log_access_activity(
+                        "append", current_token, {"status": "rate_limited"}, "failed"
+                    )
                     return False
 
                 # Validate entry
                 is_valid, validation_message = validate_log_entry(data)
                 if not is_valid:
                     logger.error(f"Invalid log entry: {validation_message}")
-                    log_access_activity("append", current_token,
-                                      {"error": validation_message}, "validation_failed")
+                    log_access_activity(
+                        "append", current_token, {"error": validation_message}, "validation_failed"
+                    )
                     return False
 
                 # Sanitize data
                 sanitized_data = sanitize_log_data(data)
 
                 # Add security metadata
-                sanitized_data['_meta'] = {
-                    'entry_id': self.entry_count,
-                    'session_token': current_token[:8] + "...",
-                    'timestamp': datetime.now().isoformat(),
-                    'sanitized': True
+                sanitized_data["_meta"] = {
+                    "entry_id": self.entry_count,
+                    "session_token": current_token[:8] + "...",
+                    "timestamp": datetime.now().isoformat(),
+                    "sanitized": True,
                 }
 
                 # Write to log
@@ -278,26 +297,32 @@ class MirrorLog:
 
                 # Update session tracking
                 if current_token in log_sessions:
-                    log_sessions[current_token]['log_operations'] += 1
+                    log_sessions[current_token]["log_operations"] += 1
 
-                log_access_activity("append", current_token,
-                                  {"entry_count": self.entry_count}, "success")
+                log_access_activity(
+                    "append", current_token, {"entry_count": self.entry_count}, "success"
+                )
 
                 return True
 
         except Exception as e:
-            logger.error(f"Error appending to mirror log: {str(e)}")
-            log_access_activity("append", session_token or self.session_token,
-                              {"error": str(e)}, "error")
+            logger.error(f"Error appending to mirror log: {e!s}")
+            log_access_activity(
+                "append", session_token or self.session_token, {"error": str(e)}, "error"
+            )
             return False
 
-    def tail(self, limit: int = 20, session_token: Optional[str] = None) -> List[Dict[str, Any]]:
+    def tail(self, limit: int = 20, session_token: Optional[str] = None) -> list[dict[str, Any]]:
         """Securely retrieve recent log entries"""
         try:
             # Validate session
             if not self.validate_session(session_token):
-                log_access_activity("tail", session_token or self.session_token,
-                                  {"limit": limit, "status": "session_invalid"}, "failed")
+                log_access_activity(
+                    "tail",
+                    session_token or self.session_token,
+                    {"limit": limit, "status": "session_invalid"},
+                    "failed",
+                )
                 return []
 
             # Validate limit
@@ -308,8 +333,9 @@ class MirrorLog:
 
             # Check rate limit
             if not check_log_rate_limit(current_token):
-                log_access_activity("tail", current_token,
-                                  {"limit": limit, "status": "rate_limited"}, "failed")
+                log_access_activity(
+                    "tail", current_token, {"limit": limit, "status": "rate_limited"}, "failed"
+                )
                 return []
 
             if not self.log_path.exists():
@@ -324,45 +350,61 @@ class MirrorLog:
                 except Exception:
                     continue
 
-            log_access_activity("tail", current_token,
-                              {"limit": limit, "retrieved": len(records)}, "success")
+            log_access_activity(
+                "tail", current_token, {"limit": limit, "retrieved": len(records)}, "success"
+            )
 
             return records
 
         except Exception as e:
-            logger.error(f"Error reading mirror log tail: {str(e)}")
-            log_access_activity("tail", session_token or self.session_token,
-                              {"error": str(e)}, "error")
+            logger.error(f"Error reading mirror log tail: {e!s}")
+            log_access_activity(
+                "tail", session_token or self.session_token, {"error": str(e)}, "error"
+            )
             return []
 
-    def last(self, session_token: Optional[str] = None) -> Dict[str, Any]:
+    def last(self, session_token: Optional[str] = None) -> dict[str, Any]:
         """Securely retrieve the last log entry"""
         entries = self.tail(1, session_token)
         return entries[0] if entries else {}
 
-    def search(self, pattern: str, limit: int = 20, session_token: Optional[str] = None) -> List[Dict[str, Any]]:
+    def search(
+        self, pattern: str, limit: int = 20, session_token: Optional[str] = None
+    ) -> list[dict[str, Any]]:
         """Securely search log entries"""
         try:
             # Validate session
             if not self.validate_session(session_token):
-                log_access_activity("search", session_token or self.session_token,
-                                  {"pattern": pattern[:50], "status": "session_invalid"}, "failed")
+                log_access_activity(
+                    "search",
+                    session_token or self.session_token,
+                    {"pattern": pattern[:50], "status": "session_invalid"},
+                    "failed",
+                )
                 return []
 
             # Validate search pattern
             is_valid, validation_message = validate_search_pattern(pattern)
             if not is_valid:
                 logger.error(f"Invalid search pattern: {validation_message}")
-                log_access_activity("search", session_token or self.session_token,
-                                  {"error": validation_message}, "validation_failed")
+                log_access_activity(
+                    "search",
+                    session_token or self.session_token,
+                    {"error": validation_message},
+                    "validation_failed",
+                )
                 return []
 
             current_token = session_token or self.session_token
 
             # Check rate limit
             if not check_log_rate_limit(current_token):
-                log_access_activity("search", current_token,
-                                  {"pattern": pattern[:50], "status": "rate_limited"}, "failed")
+                log_access_activity(
+                    "search",
+                    current_token,
+                    {"pattern": pattern[:50], "status": "rate_limited"},
+                    "failed",
+                )
                 return []
 
             if not self.log_path.exists():
@@ -375,7 +417,7 @@ class MirrorLog:
             pattern = pattern.lower()
             results = []
 
-            with open(self.log_path, "r", encoding="utf-8") as f:
+            with open(self.log_path, encoding="utf-8") as f:
                 for line in reversed(f.readlines()):
                     if len(results) >= limit:
                         break
@@ -387,24 +429,29 @@ class MirrorLog:
                     if pattern in summary:
                         results.append(entry)
 
-            log_access_activity("search", current_token,
-                              {"pattern": pattern[:50], "limit": limit, "found": len(results)}, "success")
+            log_access_activity(
+                "search",
+                current_token,
+                {"pattern": pattern[:50], "limit": limit, "found": len(results)},
+                "success",
+            )
 
             return results
 
         except Exception as e:
-            logger.error(f"Error searching mirror log: {str(e)}")
-            log_access_activity("search", session_token or self.session_token,
-                              {"error": str(e)}, "error")
+            logger.error(f"Error searching mirror log: {e!s}")
+            log_access_activity(
+                "search", session_token or self.session_token, {"error": str(e)}, "error"
+            )
             return []
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get mirror log statistics"""
         return {
-            'log_file': str(self.log_path),
-            'entry_count': self.entry_count,
-            'file_exists': self.log_path.exists(),
-            'file_size_bytes': self.log_path.stat().st_size if self.log_path.exists() else 0,
-            'creation_time': self.creation_time.isoformat(),
-            'session_token': self.session_token[:8] + "..." if self.session_token else None
+            "log_file": str(self.log_path),
+            "entry_count": self.entry_count,
+            "file_exists": self.log_path.exists(),
+            "file_size_bytes": self.log_path.stat().st_size if self.log_path.exists() else 0,
+            "creation_time": self.creation_time.isoformat(),
+            "session_token": self.session_token[:8] + "..." if self.session_token else None,
         }

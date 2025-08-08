@@ -20,11 +20,12 @@ Author: ProjectAlpha Team
 """
 
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from .base_agent import SLiMAgent
 
 logger = logging.getLogger(__name__)
+
 
 class DeductionAgent(SLiMAgent):
     """
@@ -53,7 +54,7 @@ class DeductionAgent(SLiMAgent):
             conductor=conductor,
             memory=memory,
             router=router,
-            agent_id=agent_id or "deduction_agent"
+            agent_id=agent_id or "deduction_agent",
         )
 
         # DeductionAgent-specific configuration
@@ -66,9 +67,11 @@ class DeductionAgent(SLiMAgent):
         self.identity_validation_threshold = 0.7
         self.beliefs_validation_threshold = 0.6
 
-        logger.info(f"DeductionAgent {self.agent_id} initialized for logical reasoning with HRM validation")
+        logger.info(
+            f"DeductionAgent {self.agent_id} initialized for logical reasoning with HRM validation"
+        )
 
-    def prove(self, statement: str, premises: Optional[List[str]] = None) -> str:
+    def prove(self, statement: str, premises: Optional[list[str]] = None) -> str:
         """
         Attempt to prove a logical statement given premises.
 
@@ -115,7 +118,7 @@ class DeductionAgent(SLiMAgent):
         4. Any logical fallacies identified
         """
 
-        logger.debug(f"DeductionAgent analyzing argument validity")
+        logger.debug("DeductionAgent analyzing argument validity")
         return self.run(prompt, depth=2, use_tools=True)
 
     def solve_mathematical(self, problem: str, show_work: bool = True) -> str:
@@ -136,10 +139,10 @@ class DeductionAgent(SLiMAgent):
 
         full_prompt = "\n".join(prompt_parts)
 
-        logger.debug(f"DeductionAgent solving mathematical problem")
+        logger.debug("DeductionAgent solving mathematical problem")
         return self.run(full_prompt, depth=1, use_tools=True)
 
-    def deduce_from_facts(self, facts: List[str], question: Optional[str] = None) -> str:
+    def deduce_from_facts(self, facts: list[str], question: Optional[str] = None) -> str:
         """
         Perform deductive reasoning from a set of facts.
 
@@ -162,10 +165,10 @@ class DeductionAgent(SLiMAgent):
 
         full_prompt = "\n".join(prompt_parts)
 
-        logger.debug(f"DeductionAgent performing deductive reasoning")
+        logger.debug("DeductionAgent performing deductive reasoning")
         return self.run(full_prompt, depth=2, use_tools=True)
 
-    def _evaluate_tool_usage(self, prompt: str, context: List[Dict[str, Any]]) -> List[str]:
+    def _evaluate_tool_usage(self, prompt: str, context: list[dict[str, Any]]) -> list[str]:
         """
         Enhanced tool evaluation for logical reasoning tasks.
         """
@@ -185,7 +188,9 @@ class DeductionAgent(SLiMAgent):
 
         return tool_calls
 
-    def _update_memory(self, prompt: str, response: str, context: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _update_memory(
+        self, prompt: str, response: str, context: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
         """
         Enhanced memory updates for logical reasoning.
         """
@@ -204,15 +209,12 @@ class DeductionAgent(SLiMAgent):
                     "metadata": {
                         "agent": self.agent_id,
                         "reasoning_type": "mathematical",
-                        "solution_length": len(response)
-                    }
+                        "solution_length": len(response),
+                    },
                 }
 
                 self.memory.add_fact(
-                    fact["subject"],
-                    fact["predicate"],
-                    fact["object"],
-                    fact["metadata"]
+                    fact["subject"], fact["predicate"], fact["object"], fact["metadata"]
                 )
                 memory_updates.append(fact)
 
@@ -225,15 +227,12 @@ class DeductionAgent(SLiMAgent):
                     "metadata": {
                         "agent": self.agent_id,
                         "reasoning_type": "deductive",
-                        "proof_complexity": "high" if len(response) > 500 else "medium"
-                    }
+                        "proof_complexity": "high" if len(response) > 500 else "medium",
+                    },
                 }
 
                 self.memory.add_fact(
-                    fact["subject"],
-                    fact["predicate"],
-                    fact["object"],
-                    fact["metadata"]
+                    fact["subject"], fact["predicate"], fact["object"], fact["metadata"]
                 )
                 memory_updates.append(fact)
 
@@ -242,7 +241,9 @@ class DeductionAgent(SLiMAgent):
 
         return memory_updates
 
-    def validate_against_hrm_identity(self, deduction: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
+    def validate_against_hrm_identity(
+        self, deduction: str, context: dict[str, Any] = None
+    ) -> dict[str, Any]:
         """
         Validate deduction against HRM identity layer.
 
@@ -259,10 +260,9 @@ class DeductionAgent(SLiMAgent):
         try:
             # Extract identity-related facts from memory
             identity_facts = []
-            if hasattr(self.memory, 'query_facts'):
+            if hasattr(self.memory, "query_facts"):
                 identity_facts = self.memory.query_facts(
-                    subject_pattern="identity",
-                    predicate_pattern="defines|represents|characterizes"
+                    subject_pattern="identity", predicate_pattern="defines|represents|characterizes"
                 )
 
             validation_result = {
@@ -272,23 +272,29 @@ class DeductionAgent(SLiMAgent):
                 "identity_score": 0.0,
                 "compatibility": "unknown",
                 "conflicts": [],
-                "timestamp": str(context.get('timestamp')) if context else None
+                "timestamp": str(context.get("timestamp")) if context else None,
             }
 
             # Analyze identity compatibility
             deduction_lower = deduction.lower()
             identity_keywords = ["self", "identity", "purpose", "mission", "values", "core"]
 
-            identity_relevance = sum(1 for keyword in identity_keywords if keyword in deduction_lower)
+            identity_relevance = sum(
+                1 for keyword in identity_keywords if keyword in deduction_lower
+            )
             base_score = min(1.0, identity_relevance * 0.2)
 
             # Check for identity conflicts
             conflict_indicators = ["contradict", "oppose", "violate", "conflict", "deny"]
-            conflicts_found = [indicator for indicator in conflict_indicators if indicator in deduction_lower]
+            conflicts_found = [
+                indicator for indicator in conflict_indicators if indicator in deduction_lower
+            ]
 
             if conflicts_found:
                 validation_result["conflicts"] = conflicts_found
-                validation_result["identity_score"] = max(0.0, base_score - len(conflicts_found) * 0.3)
+                validation_result["identity_score"] = max(
+                    0.0, base_score - len(conflicts_found) * 0.3
+                )
             else:
                 validation_result["identity_score"] = min(1.0, base_score + 0.5)
 
@@ -300,14 +306,23 @@ class DeductionAgent(SLiMAgent):
             else:
                 validation_result["compatibility"] = "incompatible"
 
-            logger.debug(f"HRM identity validation - Score: {validation_result['identity_score']}, Status: {validation_result['compatibility']}")
+            logger.debug(
+                f"HRM identity validation - Score: {validation_result['identity_score']}, Status: {validation_result['compatibility']}"
+            )
             return validation_result
 
         except Exception as e:
             logger.error(f"HRM identity validation failed: {e}")
-            return {"validation_enabled": True, "identity_score": 0.0, "status": "error", "error": str(e)}
+            return {
+                "validation_enabled": True,
+                "identity_score": 0.0,
+                "status": "error",
+                "error": str(e),
+            }
 
-    def validate_against_hrm_beliefs(self, deduction: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
+    def validate_against_hrm_beliefs(
+        self, deduction: str, context: dict[str, Any] = None
+    ) -> dict[str, Any]:
         """
         Validate deduction against HRM beliefs layer.
 
@@ -324,10 +339,10 @@ class DeductionAgent(SLiMAgent):
         try:
             # Extract belief-related facts from memory
             belief_facts = []
-            if hasattr(self.memory, 'query_facts'):
+            if hasattr(self.memory, "query_facts"):
                 belief_facts = self.memory.query_facts(
                     subject_pattern="belief|conviction|principle",
-                    predicate_pattern="holds|maintains|believes"
+                    predicate_pattern="holds|maintains|believes",
                 )
 
             validation_result = {
@@ -337,7 +352,7 @@ class DeductionAgent(SLiMAgent):
                 "beliefs_score": 0.0,
                 "alignment": "unknown",
                 "contradictions": [],
-                "timestamp": str(context.get('timestamp')) if context else None
+                "timestamp": str(context.get("timestamp")) if context else None,
             }
 
             # Analyze beliefs alignment
@@ -349,11 +364,15 @@ class DeductionAgent(SLiMAgent):
 
             # Check for belief contradictions
             contradiction_indicators = ["false", "wrong", "invalid", "reject", "disagree"]
-            contradictions_found = [indicator for indicator in contradiction_indicators if indicator in deduction_lower]
+            contradictions_found = [
+                indicator for indicator in contradiction_indicators if indicator in deduction_lower
+            ]
 
             if contradictions_found:
                 validation_result["contradictions"] = contradictions_found
-                validation_result["beliefs_score"] = max(0.0, base_score - len(contradictions_found) * 0.25)
+                validation_result["beliefs_score"] = max(
+                    0.0, base_score - len(contradictions_found) * 0.25
+                )
             else:
                 validation_result["beliefs_score"] = min(1.0, base_score + 0.6)
 
@@ -365,14 +384,23 @@ class DeductionAgent(SLiMAgent):
             else:
                 validation_result["alignment"] = "misaligned"
 
-            logger.debug(f"HRM beliefs validation - Score: {validation_result['beliefs_score']}, Status: {validation_result['alignment']}")
+            logger.debug(
+                f"HRM beliefs validation - Score: {validation_result['beliefs_score']}, Status: {validation_result['alignment']}"
+            )
             return validation_result
 
         except Exception as e:
             logger.error(f"HRM beliefs validation failed: {e}")
-            return {"validation_enabled": True, "beliefs_score": 0.0, "status": "error", "error": str(e)}
+            return {
+                "validation_enabled": True,
+                "beliefs_score": 0.0,
+                "status": "error",
+                "error": str(e),
+            }
 
-    def validate_deduction_against_hrm(self, deduction: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
+    def validate_deduction_against_hrm(
+        self, deduction: str, context: dict[str, Any] = None
+    ) -> dict[str, Any]:
         """
         Comprehensive HRM validation combining identity and beliefs layers.
 
@@ -393,7 +421,7 @@ class DeductionAgent(SLiMAgent):
             "overall_score": 0.0,
             "overall_status": "unknown",
             "recommendations": [],
-            "validation_timestamp": str(context.get('timestamp')) if context else None
+            "validation_timestamp": str(context.get("timestamp")) if context else None,
         }
 
         # Calculate overall score (weighted average)
@@ -403,29 +431,41 @@ class DeductionAgent(SLiMAgent):
         identity_score = identity_validation.get("identity_score", 0.0)
         beliefs_score = beliefs_validation.get("beliefs_score", 0.0)
 
-        combined_result["overall_score"] = (identity_score * identity_weight) + (beliefs_score * beliefs_weight)
+        combined_result["overall_score"] = (identity_score * identity_weight) + (
+            beliefs_score * beliefs_weight
+        )
 
         # Determine overall status
         if combined_result["overall_score"] >= 0.7:
             combined_result["overall_status"] = "validated"
         elif combined_result["overall_score"] >= 0.5:
             combined_result["overall_status"] = "partially_validated"
-            combined_result["recommendations"].append("Consider reviewing deduction for better alignment with HRM layers")
+            combined_result["recommendations"].append(
+                "Consider reviewing deduction for better alignment with HRM layers"
+            )
         else:
             combined_result["overall_status"] = "validation_failed"
-            combined_result["recommendations"].append("Deduction requires significant revision for HRM compatibility")
+            combined_result["recommendations"].append(
+                "Deduction requires significant revision for HRM compatibility"
+            )
 
         # Add specific recommendations based on validation results
         if identity_validation.get("compatibility") == "incompatible":
-            combined_result["recommendations"].append("Review deduction for identity layer compatibility")
+            combined_result["recommendations"].append(
+                "Review deduction for identity layer compatibility"
+            )
 
         if beliefs_validation.get("alignment") == "misaligned":
-            combined_result["recommendations"].append("Align deduction with core beliefs and principles")
+            combined_result["recommendations"].append(
+                "Align deduction with core beliefs and principles"
+            )
 
-        logger.info(f"HRM validation complete - Overall score: {combined_result['overall_score']}, Status: {combined_result['overall_status']}")
+        logger.info(
+            f"HRM validation complete - Overall score: {combined_result['overall_score']}, Status: {combined_result['overall_status']}"
+        )
         return combined_result
 
-    def get_reasoning_stats(self) -> Dict[str, Any]:
+    def get_reasoning_stats(self) -> dict[str, Any]:
         """Get statistics specific to logical reasoning performance."""
         base_stats = self.get_status()
 
@@ -436,7 +476,7 @@ class DeductionAgent(SLiMAgent):
             "specialization": "logical_reasoning_and_mathematical_deduction",
             "hrm_validation_enabled": self.hrm_validation_enabled,
             "identity_validation_threshold": self.identity_validation_threshold,
-            "beliefs_validation_threshold": self.beliefs_validation_threshold
+            "beliefs_validation_threshold": self.beliefs_validation_threshold,
         }
 
         return {**base_stats, **reasoning_stats}
@@ -454,4 +494,5 @@ class DeductionAgent(SLiMAgent):
         logger.debug(f"Calculating valence for prompt: {prompt}")
         # Mock implementation: return a random score between -1 and 1
         import random
+
         return random.uniform(-1, 1)

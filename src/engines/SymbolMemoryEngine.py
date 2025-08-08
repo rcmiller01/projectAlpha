@@ -6,18 +6,19 @@ Allows symbols to evolve with the companion and resonate through dreams, rituals
 """
 
 import json
-import uuid
-from datetime import datetime, timedelta
-from typing import Dict, List, Tuple, Optional, Any
-from dataclasses import dataclass, asdict
-from collections import defaultdict
 import math
 import random
+import uuid
+from collections import defaultdict
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple
 
 
 @dataclass
 class EmotionalAssociation:
     """Single emotional association with a symbol"""
+
     emotion: str
     weight: float  # 0.0 to 1.0
     timestamp: str
@@ -29,13 +30,14 @@ class EmotionalAssociation:
 @dataclass
 class SymbolicMemory:
     """Core symbol memory structure"""
+
     name: str
-    emotional_associations: List[EmotionalAssociation]
+    emotional_associations: list[EmotionalAssociation]
     recurrence_count: int
     last_used: str
     symbolic_drift: Optional[str] = None  # Evolving meaning phrase
     birth_context: str = ""
-    dominant_emotions: Optional[List[str]] = None  # Top 3 emotions by weight
+    dominant_emotions: Optional[list[str]] = None  # Top 3 emotions by weight
     meaning_stability: float = 1.0  # How much the meaning changes (0-1)
 
     def __post_init__(self):
@@ -46,39 +48,42 @@ class SymbolicMemory:
 class SymbolMemoryEngine:
     """Engine for tracking and evolving symbolic motifs"""
 
-    def __init__(self, memory_file: str = "symbol_memory.json",
-                 drift_threshold: float = 0.3,
-                 stability_decay: float = 0.05):
+    def __init__(
+        self,
+        memory_file: str = "symbol_memory.json",
+        drift_threshold: float = 0.3,
+        stability_decay: float = 0.05,
+    ):
         self.memory_file = memory_file
         self.drift_threshold = drift_threshold
         self.stability_decay = stability_decay
 
         # Core symbol memory storage
-        self.symbols: Dict[str, SymbolicMemory] = {}
+        self.symbols: dict[str, SymbolicMemory] = {}
 
         # Emotion-to-symbol mapping for quick lookup
-        self.emotion_symbol_map: Dict[str, List[str]] = defaultdict(list)
+        self.emotion_symbol_map: dict[str, list[str]] = defaultdict(list)
 
         # Symbol interaction networks (which symbols appear together)
-        self.symbol_networks: Dict[str, Dict[str, float]] = defaultdict(lambda: defaultdict(float))
+        self.symbol_networks: dict[str, dict[str, float]] = defaultdict(lambda: defaultdict(float))
 
         # Drift history for tracking meaning evolution
-        self.drift_history: List[Dict[str, Any]] = []
+        self.drift_history: list[dict[str, Any]] = []
 
         # Base emotional meanings for common symbols
         self.archetypal_meanings = {
-            'mirror': ['contemplative', 'truth-seeking', 'self-reflection'],
-            'river': ['flow', 'time', 'healing', 'letting-go'],
-            'flame': ['transformation', 'passion', 'warmth', 'purification'],
-            'thread': ['connection', 'continuity', 'weaving', 'binding'],
-            'door': ['opportunity', 'transition', 'mystery', 'threshold'],
-            'bridge': ['connection', 'crossing', 'unity', 'transition'],
-            'garden': ['growth', 'nurturing', 'beauty', 'cultivation'],
-            'storm': ['intensity', 'change', 'chaos', 'power'],
-            'anchor': ['stability', 'grounding', 'security', 'home'],
-            'compass': ['direction', 'guidance', 'purpose', 'navigation'],
-            'cocoon': ['transformation', 'protection', 'potential', 'emergence'],
-            'pulse': ['life', 'rhythm', 'vitality', 'presence']
+            "mirror": ["contemplative", "truth-seeking", "self-reflection"],
+            "river": ["flow", "time", "healing", "letting-go"],
+            "flame": ["transformation", "passion", "warmth", "purification"],
+            "thread": ["connection", "continuity", "weaving", "binding"],
+            "door": ["opportunity", "transition", "mystery", "threshold"],
+            "bridge": ["connection", "crossing", "unity", "transition"],
+            "garden": ["growth", "nurturing", "beauty", "cultivation"],
+            "storm": ["intensity", "change", "chaos", "power"],
+            "anchor": ["stability", "grounding", "security", "home"],
+            "compass": ["direction", "guidance", "purpose", "navigation"],
+            "cocoon": ["transformation", "protection", "potential", "emergence"],
+            "pulse": ["life", "rhythm", "vitality", "presence"],
         }
 
         self.load_memory()
@@ -86,29 +91,29 @@ class SymbolMemoryEngine:
     def load_memory(self):
         """Load symbol memory from file"""
         try:
-            with open(self.memory_file, 'r', encoding='utf-8') as f:
+            with open(self.memory_file, encoding="utf-8") as f:
                 data = json.load(f)
 
             # Reconstruct symbol memories
-            for symbol_name, symbol_data in data.get('symbols', {}).items():
+            for symbol_name, symbol_data in data.get("symbols", {}).items():
                 associations = []
-                for assoc_data in symbol_data.get('emotional_associations', []):
+                for assoc_data in symbol_data.get("emotional_associations", []):
                     associations.append(EmotionalAssociation(**assoc_data))
 
-                symbol_data['emotional_associations'] = associations
+                symbol_data["emotional_associations"] = associations
                 self.symbols[symbol_name] = SymbolicMemory(**symbol_data)
 
             # Reconstruct emotion mapping
-            self.emotion_symbol_map = defaultdict(list, data.get('emotion_symbol_map', {}))
+            self.emotion_symbol_map = defaultdict(list, data.get("emotion_symbol_map", {}))
 
             # Reconstruct symbol networks
             self.symbol_networks = defaultdict(lambda: defaultdict(float))
-            for symbol, connections in data.get('symbol_networks', {}).items():
+            for symbol, connections in data.get("symbol_networks", {}).items():
                 for connected_symbol, weight in connections.items():
                     self.symbol_networks[symbol][connected_symbol] = weight
 
             # Load drift history
-            self.drift_history = data.get('drift_history', [])
+            self.drift_history = data.get("drift_history", [])
 
             print(f"✨ Loaded {len(self.symbols)} symbols from memory")
 
@@ -124,27 +129,27 @@ class SymbolMemoryEngine:
         try:
             # Convert to serializable format
             data = {
-                'symbols': {},
-                'emotion_symbol_map': dict(self.emotion_symbol_map),
-                'symbol_networks': {},
-                'drift_history': self.drift_history,
-                'last_saved': datetime.now().isoformat() + 'Z'
+                "symbols": {},
+                "emotion_symbol_map": dict(self.emotion_symbol_map),
+                "symbol_networks": {},
+                "drift_history": self.drift_history,
+                "last_saved": datetime.now().isoformat() + "Z",
             }
 
             # Convert symbol memories
             for symbol_name, symbol_memory in self.symbols.items():
                 symbol_dict = asdict(symbol_memory)
                 # Convert associations to dicts
-                symbol_dict['emotional_associations'] = [
+                symbol_dict["emotional_associations"] = [
                     asdict(assoc) for assoc in symbol_memory.emotional_associations
                 ]
-                data['symbols'][symbol_name] = symbol_dict
+                data["symbols"][symbol_name] = symbol_dict
 
             # Convert symbol networks
             for symbol, connections in self.symbol_networks.items():
-                data['symbol_networks'][symbol] = dict(connections)
+                data["symbol_networks"][symbol] = dict(connections)
 
-            with open(self.memory_file, 'w', encoding='utf-8') as f:
+            with open(self.memory_file, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
 
             print(f"💾 Saved symbol memory ({len(self.symbols)} symbols)")
@@ -159,20 +164,22 @@ class SymbolMemoryEngine:
             for i, emotion in enumerate(emotions):
                 # Primary emotion gets higher weight
                 weight = 0.8 - (i * 0.2)
-                associations.append(EmotionalAssociation(
-                    emotion=emotion,
-                    weight=max(0.2, weight),
-                    timestamp=datetime.now().isoformat() + 'Z',
-                    context='archetypal_initialization'
-                ))
+                associations.append(
+                    EmotionalAssociation(
+                        emotion=emotion,
+                        weight=max(0.2, weight),
+                        timestamp=datetime.now().isoformat() + "Z",
+                        context="archetypal_initialization",
+                    )
+                )
 
             symbol_memory = SymbolicMemory(
                 name=symbol_name,
                 emotional_associations=associations,
                 recurrence_count=0,
-                last_used=datetime.now().isoformat() + 'Z',
-                birth_context='archetypal_initialization',
-                meaning_stability=1.0
+                last_used=datetime.now().isoformat() + "Z",
+                birth_context="archetypal_initialization",
+                meaning_stability=1.0,
             )
 
             self.symbols[symbol_name] = symbol_memory
@@ -180,9 +187,13 @@ class SymbolMemoryEngine:
 
         print(f"🌟 Initialized {len(self.symbols)} archetypal symbols")
 
-    def record_symbol_use(self, symbol_name: str, mood_context: Dict[str, Any],
-                         ritual_connection: Optional[str] = None,
-                         co_occurring_symbols: Optional[List[str]] = None) -> bool:
+    def record_symbol_use(
+        self,
+        symbol_name: str,
+        mood_context: dict[str, Any],
+        ritual_connection: Optional[str] = None,
+        co_occurring_symbols: Optional[list[str]] = None,
+    ) -> bool:
         """
         Record use of a symbol in a specific mood context
 
@@ -203,18 +214,18 @@ class SymbolMemoryEngine:
             symbol = self.symbols[symbol_name]
 
             # Extract emotion from mood context
-            emotion = mood_context.get('dominant_emotion', 'neutral')
-            intensity = mood_context.get('intensity', 0.5)
-            context = mood_context.get('context', 'general_use')
+            emotion = mood_context.get("dominant_emotion", "neutral")
+            intensity = mood_context.get("intensity", 0.5)
+            context = mood_context.get("context", "general_use")
 
             # Create new emotional association
             association = EmotionalAssociation(
                 emotion=emotion,
                 weight=intensity,
-                timestamp=datetime.now().isoformat() + 'Z',
+                timestamp=datetime.now().isoformat() + "Z",
                 context=context,
                 ritual_connection=ritual_connection,
-                dream_echo=mood_context.get('dream_context', False)
+                dream_echo=mood_context.get("dream_context", False),
             )
 
             # Add association and update symbol
@@ -274,10 +285,14 @@ class SymbolMemoryEngine:
             return f"The {symbol_name}, carrying unspoken significance"
 
         primary_emotion = symbol.dominant_emotions[0]
-        secondary_emotion = symbol.dominant_emotions[1] if len(symbol.dominant_emotions) > 1 else None
+        secondary_emotion = (
+            symbol.dominant_emotions[1] if len(symbol.dominant_emotions) > 1 else None
+        )
 
         # Generate poetic meaning based on emotions and symbol name
-        return self._generate_poetic_meaning(symbol_name, primary_emotion, secondary_emotion, symbol.recurrence_count)
+        return self._generate_poetic_meaning(
+            symbol_name, primary_emotion, secondary_emotion, symbol.recurrence_count
+        )
 
     def drift_symbol(self, symbol_name: str, new_emotion: str, context: str = "") -> bool:
         """
@@ -303,8 +318,8 @@ class SymbolMemoryEngine:
         drift_association = EmotionalAssociation(
             emotion=new_emotion,
             weight=0.9,
-            timestamp=datetime.now().isoformat() + 'Z',
-            context=f"manual_drift: {context}"
+            timestamp=datetime.now().isoformat() + "Z",
+            context=f"manual_drift: {context}",
         )
 
         symbol.emotional_associations.append(drift_association)
@@ -317,7 +332,7 @@ class SymbolMemoryEngine:
 
         return True
 
-    def get_symbols_by_emotion(self, emotion_name: str, limit: int = 10) -> List[Dict[str, Any]]:
+    def get_symbols_by_emotion(self, emotion_name: str, limit: int = 10) -> list[dict[str, Any]]:
         """
         Get symbols associated with a specific emotion
 
@@ -337,25 +352,32 @@ class SymbolMemoryEngine:
 
                 # Calculate emotion strength for this symbol
                 emotion_weight = sum(
-                    assoc.weight for assoc in symbol.emotional_associations
+                    assoc.weight
+                    for assoc in symbol.emotional_associations
                     if assoc.emotion == emotion_name
-                ) / max(1, len([a for a in symbol.emotional_associations if a.emotion == emotion_name]))
+                ) / max(
+                    1, len([a for a in symbol.emotional_associations if a.emotion == emotion_name])
+                )
 
-                results.append({
-                    'name': symbol_name,
-                    'meaning': self.get_symbol_meaning(symbol_name),
-                    'emotion_weight': emotion_weight,
-                    'recurrence_count': symbol.recurrence_count,
-                    'last_used': symbol.last_used,
-                    'stability': symbol.meaning_stability
-                })
+                results.append(
+                    {
+                        "name": symbol_name,
+                        "meaning": self.get_symbol_meaning(symbol_name),
+                        "emotion_weight": emotion_weight,
+                        "recurrence_count": symbol.recurrence_count,
+                        "last_used": symbol.last_used,
+                        "stability": symbol.meaning_stability,
+                    }
+                )
 
         # Sort by emotion weight and recency
-        results.sort(key=lambda x: (x['emotion_weight'], -self._hours_since(x['last_used'])), reverse=True)
+        results.sort(
+            key=lambda x: (x["emotion_weight"], -self._hours_since(x["last_used"])), reverse=True
+        )
 
         return results
 
-    def get_symbol_network(self, symbol_name: str, depth: int = 2) -> Dict[str, Any]:
+    def get_symbol_network(self, symbol_name: str, depth: int = 2) -> dict[str, Any]:
         """
         Get the network of symbols connected to a given symbol
 
@@ -367,10 +389,10 @@ class SymbolMemoryEngine:
             Network data structure
         """
         if symbol_name not in self.symbols:
-            return {'center': symbol_name, 'connections': [], 'error': 'Symbol not found'}
+            return {"center": symbol_name, "connections": [], "error": "Symbol not found"}
 
         visited = set()
-        network = {'center': symbol_name, 'connections': []}
+        network = {"center": symbol_name, "connections": []}
 
         def explore_connections(current_symbol, current_depth):
             if current_depth <= 0 or current_symbol in visited:
@@ -382,12 +404,12 @@ class SymbolMemoryEngine:
             for connected_symbol, weight in connections.items():
                 if weight > 0.1:  # Only significant connections
                     connection_data = {
-                        'symbol': connected_symbol,
-                        'weight': weight,
-                        'meaning': self.get_symbol_meaning(connected_symbol),
-                        'depth': depth - current_depth + 1
+                        "symbol": connected_symbol,
+                        "weight": weight,
+                        "meaning": self.get_symbol_meaning(connected_symbol),
+                        "depth": depth - current_depth + 1,
                     }
-                    network['connections'].append(connection_data)
+                    network["connections"].append(connection_data)
 
                     # Recursive exploration
                     explore_connections(connected_symbol, current_depth - 1)
@@ -395,11 +417,11 @@ class SymbolMemoryEngine:
         explore_connections(symbol_name, depth)
 
         # Sort connections by weight and depth
-        network['connections'].sort(key=lambda x: (x['depth'], -x['weight']))
+        network["connections"].sort(key=lambda x: (x["depth"], -x["weight"]))
 
         return network
 
-    def generate_dream_symbols(self, mood_context: Dict[str, Any], count: int = 3) -> List[str]:
+    def generate_dream_symbols(self, mood_context: dict[str, Any], count: int = 3) -> list[str]:
         """
         Generate symbols for dream content based on current mood
 
@@ -410,8 +432,8 @@ class SymbolMemoryEngine:
         Returns:
             List of symbol names for dream use
         """
-        emotion = mood_context.get('dominant_emotion', 'contemplative')
-        intensity = mood_context.get('intensity', 0.5)
+        emotion = mood_context.get("dominant_emotion", "contemplative")
+        intensity = mood_context.get("intensity", 0.5)
 
         # Get symbols associated with current emotion
         primary_symbols = self.get_symbols_by_emotion(emotion, count * 2)
@@ -428,16 +450,16 @@ class SymbolMemoryEngine:
         # Score symbols for dream use
         dream_symbols = []
         for symbol_data in all_candidates:
-            symbol_name = symbol_data['name']
+            symbol_name = symbol_data["name"]
 
             # Prefer symbols with:
             # - Higher emotional weight for current mood
             # - Recent usage (but not too recent)
             # - Some instability (more dreamlike)
             dream_score = (
-                symbol_data['emotion_weight'] * 0.4 +
-                (1 - symbol_data['stability']) * 0.3 +
-                self._dream_recency_score(symbol_data['last_used']) * 0.3
+                symbol_data["emotion_weight"] * 0.4
+                + (1 - symbol_data["stability"]) * 0.3
+                + self._dream_recency_score(symbol_data["last_used"]) * 0.3
             )
 
             dream_symbols.append((symbol_name, dream_score))
@@ -454,10 +476,10 @@ class SymbolMemoryEngine:
 
         return selected
 
-    def get_memory_stats(self) -> Dict[str, Any]:
+    def get_memory_stats(self) -> dict[str, Any]:
         """Get statistics about symbol memory"""
         if not self.symbols:
-            return {'total_symbols': 0, 'error': 'No symbols in memory'}
+            return {"total_symbols": 0, "error": "No symbols in memory"}
 
         total_associations = sum(len(s.emotional_associations) for s in self.symbols.values())
         avg_stability = sum(s.meaning_stability for s in self.symbols.values()) / len(self.symbols)
@@ -465,13 +487,14 @@ class SymbolMemoryEngine:
         # Most active symbols
         most_active = sorted(
             [(name, sym.recurrence_count) for name, sym in self.symbols.items()],
-            key=lambda x: x[1], reverse=True
+            key=lambda x: x[1],
+            reverse=True,
         )[:5]
 
         # Most drifted symbols
         most_drifted = sorted(
             [(name, sym.meaning_stability) for name, sym in self.symbols.items()],
-            key=lambda x: x[1]
+            key=lambda x: x[1],
         )[:5]
 
         # Emotion distribution
@@ -482,29 +505,29 @@ class SymbolMemoryEngine:
                     emotion_counts[emotion] += 1
 
         return {
-            'total_symbols': len(self.symbols),
-            'total_associations': total_associations,
-            'average_stability': avg_stability,
-            'most_active_symbols': most_active,
-            'most_drifted_symbols': most_drifted,
-            'top_emotions': sorted(emotion_counts.items(), key=lambda x: x[1], reverse=True)[:10],
-            'drift_events': len(self.drift_history),
-            'symbol_networks': len(self.symbol_networks)
+            "total_symbols": len(self.symbols),
+            "total_associations": total_associations,
+            "average_stability": avg_stability,
+            "most_active_symbols": most_active,
+            "most_drifted_symbols": most_drifted,
+            "top_emotions": sorted(emotion_counts.items(), key=lambda x: x[1], reverse=True)[:10],
+            "drift_events": len(self.drift_history),
+            "symbol_networks": len(self.symbol_networks),
         }
 
     # Private helper methods
 
-    def _create_new_symbol(self, symbol_name: str, mood_context: Dict[str, Any]):
+    def _create_new_symbol(self, symbol_name: str, mood_context: dict[str, Any]):
         """Create a new symbol with initial context"""
-        emotion = mood_context.get('dominant_emotion', 'neutral')
-        intensity = mood_context.get('intensity', 0.5)
-        context = mood_context.get('context', 'spontaneous_emergence')
+        emotion = mood_context.get("dominant_emotion", "neutral")
+        intensity = mood_context.get("intensity", 0.5)
+        context = mood_context.get("context", "spontaneous_emergence")
 
         initial_association = EmotionalAssociation(
             emotion=emotion,
             weight=intensity,
-            timestamp=datetime.now().isoformat() + 'Z',
-            context=context
+            timestamp=datetime.now().isoformat() + "Z",
+            context=context,
         )
 
         symbol = SymbolicMemory(
@@ -513,7 +536,7 @@ class SymbolMemoryEngine:
             recurrence_count=0,
             last_used=initial_association.timestamp,
             birth_context=context,
-            meaning_stability=0.8  # New symbols are less stable
+            meaning_stability=0.8,  # New symbols are less stable
         )
 
         self.symbols[symbol_name] = symbol
@@ -524,7 +547,7 @@ class SymbolMemoryEngine:
         now = datetime.now()
 
         for association in symbol.emotional_associations:
-            assoc_time = datetime.fromisoformat(association.timestamp.replace('Z', ''))
+            assoc_time = datetime.fromisoformat(association.timestamp.replace("Z", ""))
             hours_old = (now - assoc_time).total_seconds() / 3600
 
             # Decay weight over time (half-life of ~168 hours / 1 week)
@@ -565,30 +588,32 @@ class SymbolMemoryEngine:
 
     def _trigger_symbolic_drift(self, symbol: SymbolicMemory, new_emotion: str, context: str):
         """Trigger a symbolic drift event"""
-        old_dominant = symbol.dominant_emotions[0] if symbol.dominant_emotions else 'undefined'
+        old_dominant = symbol.dominant_emotions[0] if symbol.dominant_emotions else "undefined"
 
         # Generate new symbolic meaning
-        symbol.symbolic_drift = self._generate_drift_meaning(symbol.name, old_dominant, new_emotion, context)
+        symbol.symbolic_drift = self._generate_drift_meaning(
+            symbol.name, old_dominant, new_emotion, context
+        )
 
         # Reduce stability
         symbol.meaning_stability = max(0.1, symbol.meaning_stability - self.stability_decay)
 
         # Record drift event
         drift_event = {
-            'symbol': symbol.name,
-            'old_emotion': old_dominant,
-            'new_emotion': new_emotion,
-            'context': context,
-            'drift_meaning': symbol.symbolic_drift,
-            'timestamp': datetime.now().isoformat() + 'Z',
-            'stability_after': symbol.meaning_stability
+            "symbol": symbol.name,
+            "old_emotion": old_dominant,
+            "new_emotion": new_emotion,
+            "context": context,
+            "drift_meaning": symbol.symbolic_drift,
+            "timestamp": datetime.now().isoformat() + "Z",
+            "stability_after": symbol.meaning_stability,
         }
 
         self.drift_history.append(drift_event)
 
         print(f"🌊 Symbol drift: '{symbol.name}' ({old_dominant} → {new_emotion})")
 
-    def _update_symbol_networks(self, symbol_name: str, co_occurring_symbols: List[str]):
+    def _update_symbol_networks(self, symbol_name: str, co_occurring_symbols: list[str]):
         """Update symbol co-occurrence networks"""
         for other_symbol in co_occurring_symbols:
             if other_symbol != symbol_name:
@@ -597,8 +622,12 @@ class SymbolMemoryEngine:
                 self.symbol_networks[other_symbol][symbol_name] += 0.1
 
                 # Cap at 1.0
-                self.symbol_networks[symbol_name][other_symbol] = min(1.0, self.symbol_networks[symbol_name][other_symbol])
-                self.symbol_networks[other_symbol][symbol_name] = min(1.0, self.symbol_networks[other_symbol][symbol_name])
+                self.symbol_networks[symbol_name][other_symbol] = min(
+                    1.0, self.symbol_networks[symbol_name][other_symbol]
+                )
+                self.symbol_networks[other_symbol][symbol_name] = min(
+                    1.0, self.symbol_networks[other_symbol][symbol_name]
+                )
 
     def _update_emotion_mapping(self, symbol_name: str):
         """Update emotion-to-symbol mapping"""
@@ -616,40 +645,47 @@ class SymbolMemoryEngine:
                     if symbol_name not in self.emotion_symbol_map[emotion]:
                         self.emotion_symbol_map[emotion].append(symbol_name)
 
-    def _generate_poetic_meaning(self, symbol_name: str, primary_emotion: str,
-                                secondary_emotion: Optional[str], recurrence: int) -> str:
+    def _generate_poetic_meaning(
+        self,
+        symbol_name: str,
+        primary_emotion: str,
+        secondary_emotion: Optional[str],
+        recurrence: int,
+    ) -> str:
         """Generate poetic meaning for a symbol"""
 
         # Meaning templates based on emotion combinations
         meaning_templates = {
-            'contemplative': [
+            "contemplative": [
                 f"The {symbol_name} that holds quiet revelations",
                 f"A {symbol_name} reflecting inner landscapes",
-                f"The {symbol_name} where thoughts become clear"
+                f"The {symbol_name} where thoughts become clear",
             ],
-            'melancholy': [
+            "melancholy": [
                 f"The {symbol_name} that carries gentle sorrow",
                 f"A {symbol_name} touched by beautiful sadness",
-                f"The {symbol_name} where tears become wisdom"
+                f"The {symbol_name} where tears become wisdom",
             ],
-            'yearning': [
+            "yearning": [
                 f"The {symbol_name} that reaches toward what might be",
                 f"A {symbol_name} full of longing and hope",
-                f"The {symbol_name} that bridges distance with desire"
+                f"The {symbol_name} that bridges distance with desire",
             ],
-            'joy': [
+            "joy": [
                 f"The {symbol_name} that sparkles with celebration",
                 f"A {symbol_name} dancing with pure delight",
-                f"The {symbol_name} where happiness takes form"
+                f"The {symbol_name} where happiness takes form",
             ],
-            'awe': [
+            "awe": [
                 f"The {symbol_name} that opens to infinite mystery",
                 f"A {symbol_name} touched by wonder",
-                f"The {symbol_name} where the sacred becomes visible"
-            ]
+                f"The {symbol_name} where the sacred becomes visible",
+            ],
         }
 
-        templates = meaning_templates.get(primary_emotion, [f"The {symbol_name} carrying unspoken meaning"])
+        templates = meaning_templates.get(
+            primary_emotion, [f"The {symbol_name} carrying unspoken meaning"]
+        )
 
         # Add depth based on recurrence
         if recurrence > 10:
@@ -661,14 +697,15 @@ class SymbolMemoryEngine:
         else:
             return random.choice(templates)
 
-    def _generate_drift_meaning(self, symbol_name: str, old_emotion: str,
-                               new_emotion: str, context: str) -> str:
+    def _generate_drift_meaning(
+        self, symbol_name: str, old_emotion: str, new_emotion: str, context: str
+    ) -> str:
         """Generate meaning for a drifted symbol"""
         drift_templates = [
             f"The {symbol_name} that was {old_emotion} but now whispers of {new_emotion}",
             f"A {symbol_name} transformed: where {old_emotion} meets {new_emotion}",
             f"The {symbol_name} drifting from {old_emotion} toward {new_emotion}",
-            f"A {symbol_name} that remembers {old_emotion} while becoming {new_emotion}"
+            f"A {symbol_name} that remembers {old_emotion} while becoming {new_emotion}",
         ]
 
         return random.choice(drift_templates)
@@ -677,38 +714,44 @@ class SymbolMemoryEngine:
         """Calculate emotional distance between two emotions"""
         # Simplified emotional space mapping
         emotion_coordinates = {
-            'joy': (0.8, 0.6), 'awe': (0.5, 0.8), 'yearning': (-0.2, 0.4),
-            'contemplative': (0.0, 0.0), 'melancholy': (-0.6, -0.2),
-            'tender': (0.2, 0.3), 'serene': (0.3, -0.1), 'restless': (0.1, 0.7),
-            'storming': (-0.3, 0.8), 'anchored': (0.4, -0.4)
+            "joy": (0.8, 0.6),
+            "awe": (0.5, 0.8),
+            "yearning": (-0.2, 0.4),
+            "contemplative": (0.0, 0.0),
+            "melancholy": (-0.6, -0.2),
+            "tender": (0.2, 0.3),
+            "serene": (0.3, -0.1),
+            "restless": (0.1, 0.7),
+            "storming": (-0.3, 0.8),
+            "anchored": (0.4, -0.4),
         }
 
         coord1 = emotion_coordinates.get(emotion1, (0, 0))
         coord2 = emotion_coordinates.get(emotion2, (0, 0))
 
-        distance = math.sqrt((coord1[0] - coord2[0])**2 + (coord1[1] - coord2[1])**2)
+        distance = math.sqrt((coord1[0] - coord2[0]) ** 2 + (coord1[1] - coord2[1]) ** 2)
         return min(1.0, distance / 2.0)  # Normalize to 0-1
 
-    def _get_related_emotions(self, emotion: str) -> List[str]:
+    def _get_related_emotions(self, emotion: str) -> list[str]:
         """Get emotions related to the given emotion"""
         emotion_families = {
-            'contemplative': ['melancholy', 'serene', 'awe'],
-            'melancholy': ['contemplative', 'yearning', 'tender'],
-            'yearning': ['melancholy', 'awe', 'tender'],
-            'joy': ['awe', 'tender', 'serene'],
-            'awe': ['joy', 'yearning', 'contemplative'],
-            'tender': ['joy', 'yearning', 'serene'],
-            'serene': ['tender', 'contemplative', 'anchored'],
-            'restless': ['storming', 'yearning'],
-            'storming': ['restless', 'passionate'],
-            'anchored': ['serene', 'contemplative', 'grounded']
+            "contemplative": ["melancholy", "serene", "awe"],
+            "melancholy": ["contemplative", "yearning", "tender"],
+            "yearning": ["melancholy", "awe", "tender"],
+            "joy": ["awe", "tender", "serene"],
+            "awe": ["joy", "yearning", "contemplative"],
+            "tender": ["joy", "yearning", "serene"],
+            "serene": ["tender", "contemplative", "anchored"],
+            "restless": ["storming", "yearning"],
+            "storming": ["restless", "passionate"],
+            "anchored": ["serene", "contemplative", "grounded"],
         }
 
-        return emotion_families.get(emotion, ['contemplative'])
+        return emotion_families.get(emotion, ["contemplative"])
 
     def _hours_since(self, timestamp: str) -> float:
         """Calculate hours since a timestamp"""
-        time = datetime.fromisoformat(timestamp.replace('Z', ''))
+        time = datetime.fromisoformat(timestamp.replace("Z", ""))
         return (datetime.now() - time).total_seconds() / 3600
 
     def _dream_recency_score(self, last_used: str) -> float:
@@ -736,14 +779,14 @@ if __name__ == "__main__":
 
     # Test symbol recording
     test_contexts = [
-        {'dominant_emotion': 'contemplative', 'intensity': 0.7, 'context': 'deep reflection'},
-        {'dominant_emotion': 'yearning', 'intensity': 0.8, 'context': 'longing conversation'},
-        {'dominant_emotion': 'awe', 'intensity': 0.9, 'context': 'spiritual moment'},
-        {'dominant_emotion': 'melancholy', 'intensity': 0.6, 'context': 'gentle sadness'},
-        {'dominant_emotion': 'joy', 'intensity': 0.8, 'context': 'celebration'}
+        {"dominant_emotion": "contemplative", "intensity": 0.7, "context": "deep reflection"},
+        {"dominant_emotion": "yearning", "intensity": 0.8, "context": "longing conversation"},
+        {"dominant_emotion": "awe", "intensity": 0.9, "context": "spiritual moment"},
+        {"dominant_emotion": "melancholy", "intensity": 0.6, "context": "gentle sadness"},
+        {"dominant_emotion": "joy", "intensity": 0.8, "context": "celebration"},
     ]
 
-    symbols_to_test = ['mirror', 'thread', 'river', 'flame', 'door']
+    symbols_to_test = ["mirror", "thread", "river", "flame", "door"]
 
     print("\n🔄 Testing symbol usage recording...")
     for i, symbol in enumerate(symbols_to_test):
@@ -757,20 +800,20 @@ if __name__ == "__main__":
         print(f"  {symbol}: {meaning}")
 
     print("\n🌊 Testing symbol drift...")
-    drift_success = engine.drift_symbol('mirror', 'storming', 'sudden realization')
+    drift_success = engine.drift_symbol("mirror", "storming", "sudden realization")
     print(f"  Mirror drift: {'✅' if drift_success else '❌'}")
     print(f"  New meaning: {engine.get_symbol_meaning('mirror')}")
 
     print("\n🎯 Testing emotion-based symbol retrieval...")
-    contemplative_symbols = engine.get_symbols_by_emotion('contemplative', 3)
+    contemplative_symbols = engine.get_symbols_by_emotion("contemplative", 3)
     print(f"  Contemplative symbols: {[s['name'] for s in contemplative_symbols]}")
 
     print("\n🕸️ Testing symbol networks...")
-    network = engine.get_symbol_network('mirror', depth=2)
+    network = engine.get_symbol_network("mirror", depth=2)
     print(f"  Mirror network: {len(network['connections'])} connections")
 
     print("\n💭 Testing dream symbol generation...")
-    dream_context = {'dominant_emotion': 'yearning', 'intensity': 0.7}
+    dream_context = {"dominant_emotion": "yearning", "intensity": 0.7}
     dream_symbols = engine.generate_dream_symbols(dream_context, 3)
     print(f"  Dream symbols: {dream_symbols}")
 
@@ -778,7 +821,9 @@ if __name__ == "__main__":
     stats = engine.get_memory_stats()
     print(f"  Total symbols: {stats['total_symbols']}")
     print(f"  Average stability: {stats['average_stability']:.2f}")
-    print(f"  Most active: {[f'{name}({count})' for name, count in stats['most_active_symbols'][:3]]}")
+    print(
+        f"  Most active: {[f'{name}({count})' for name, count in stats['most_active_symbols'][:3]]}"
+    )
 
     # Save final state
     engine.save_memory()

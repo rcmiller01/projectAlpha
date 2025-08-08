@@ -12,20 +12,20 @@ Enhanced with security features:
 - Input validation and sanitization
 """
 
-import logging
-import time
-import threading
 import hashlib
+import logging
 import re
-from typing import Dict, Any, List, Optional
-from enum import Enum
+import threading
+import time
+from collections import defaultdict, deque
 from datetime import datetime, timedelta
-from collections import deque, defaultdict
+from enum import Enum
+from typing import Any, Dict, List, Optional
 
 # Enhanced logging configuration
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -35,8 +35,12 @@ RATE_LIMIT_WINDOW = 3600  # 1 hour
 MAX_REQUESTS_PER_WINDOW = 50
 MAX_ACTION_DESCRIPTION_LENGTH = 1000
 REQUIRED_CONFIRMATION_TYPES = {
-    'memory_write', 'memory_delete', 'external_api',
-    'system_config', 'emotional_state', 'anchor_adjustment'
+    "memory_write",
+    "memory_delete",
+    "external_api",
+    "system_config",
+    "emotional_state",
+    "anchor_adjustment",
 }
 
 # Thread safety
@@ -45,7 +49,8 @@ anchor_lock = threading.Lock()
 # Rate limiting storage
 rate_limit_requests = defaultdict(lambda: deque())
 
-def validate_action_data(action_data: Dict[str, Any]) -> tuple[bool, str]:
+
+def validate_action_data(action_data: dict[str, Any]) -> tuple[bool, str]:
     """Validate action data for security and integrity"""
     try:
         # Check if input is dictionary
@@ -53,22 +58,22 @@ def validate_action_data(action_data: Dict[str, Any]) -> tuple[bool, str]:
             return False, "Action data must be a dictionary"
 
         # Validate required fields
-        required_fields = ['action_type', 'description']
+        required_fields = ["action_type", "description"]
         for field in required_fields:
             if field not in action_data:
                 return False, f"Missing required field: {field}"
 
         # Validate action type
-        action_type = action_data.get('action_type')
+        action_type = action_data.get("action_type")
         if not isinstance(action_type, str):
             return False, "Action type must be a string"
 
         # Sanitize action type
-        if not re.match(r'^[a-zA-Z_]+$', action_type):
+        if not re.match(r"^[a-zA-Z_]+$", action_type):
             return False, "Action type contains invalid characters"
 
         # Validate description
-        description = action_data.get('description', '')
+        description = action_data.get("description", "")
         if not isinstance(description, str):
             return False, "Description must be a string"
 
@@ -76,8 +81,8 @@ def validate_action_data(action_data: Dict[str, Any]) -> tuple[bool, str]:
             return False, f"Description exceeds maximum length of {MAX_ACTION_DESCRIPTION_LENGTH}"
 
         # Validate priority if present
-        if 'priority' in action_data:
-            priority = action_data['priority']
+        if "priority" in action_data:
+            priority = action_data["priority"]
             if not isinstance(priority, (int, float)):
                 return False, "Priority must be a number"
 
@@ -87,8 +92,9 @@ def validate_action_data(action_data: Dict[str, Any]) -> tuple[bool, str]:
         return True, "Valid"
 
     except Exception as e:
-        logger.error(f"Error validating action data: {str(e)}")
-        return False, f"Validation error: {str(e)}"
+        logger.error(f"Error validating action data: {e!s}")
+        return False, f"Validation error: {e!s}"
+
 
 def sanitize_description(description: str) -> str:
     """Sanitize action descriptions"""
@@ -96,7 +102,7 @@ def sanitize_description(description: str) -> str:
         return ""
 
     # Remove potential injection patterns
-    description = re.sub(r'[<>"\']', '', description)
+    description = re.sub(r'[<>"\']', "", description)
 
     # Limit length
     if len(description) > MAX_ACTION_DESCRIPTION_LENGTH:
@@ -104,13 +110,16 @@ def sanitize_description(description: str) -> str:
 
     return description.strip()
 
+
 def check_rate_limit(requester_id: str) -> bool:
     """Check if requester has exceeded rate limit"""
     current_time = time.time()
 
     # Clean old requests
-    while (rate_limit_requests[requester_id] and
-           rate_limit_requests[requester_id][0] < current_time - RATE_LIMIT_WINDOW):
+    while (
+        rate_limit_requests[requester_id]
+        and rate_limit_requests[requester_id][0] < current_time - RATE_LIMIT_WINDOW
+    ):
         rate_limit_requests[requester_id].popleft()
 
     # Check limit
@@ -122,33 +131,39 @@ def check_rate_limit(requester_id: str) -> bool:
     rate_limit_requests[requester_id].append(current_time)
     return True
 
-def log_anchor_action(action_type: str, action_data: Dict[str, Any],
-                     response: str, requester_id: str = "unknown"):
+
+def log_anchor_action(
+    action_type: str, action_data: dict[str, Any], response: str, requester_id: str = "unknown"
+):
     """Log anchor actions for audit trail"""
     try:
         log_entry = {
-            'timestamp': datetime.now().isoformat(),
-            'action_type': action_type,
-            'action_id': action_data.get('action_id', 'unknown'),
-            'description': action_data.get('description', ''),
-            'response': response,
-            'requester_id': requester_id,
-            'thread_id': threading.get_ident()
+            "timestamp": datetime.now().isoformat(),
+            "action_type": action_type,
+            "action_id": action_data.get("action_id", "unknown"),
+            "description": action_data.get("description", ""),
+            "response": response,
+            "requester_id": requester_id,
+            "thread_id": threading.get_ident(),
         }
 
         logger.info(f"Anchor action logged: {action_type} -> {response} by {requester_id}")
 
         # Log warning for denied actions
         if response == "denied":
-            logger.warning(f"Anchor action DENIED: {action_type} - {action_data.get('description', '')}")
+            logger.warning(
+                f"Anchor action DENIED: {action_type} - {action_data.get('description', '')}"
+            )
 
         return log_entry
 
     except Exception as e:
-        logger.error(f"Error logging anchor action: {str(e)}")
+        logger.error(f"Error logging anchor action: {e!s}")
+
 
 class ActionType(Enum):
     """Types of actions that require anchor approval"""
+
     MEMORY_WRITE = "memory_write"
     MEMORY_DELETE = "memory_delete"
     EXTERNAL_API = "external_api"
@@ -158,14 +173,17 @@ class ActionType(Enum):
     PERSONALITY_CHANGE = "personality_change"
     CRITICAL_DECISION = "critical_decision"
 
+
 class AnchorResponse(Enum):
     """Anchor response types"""
+
     APPROVED = "approved"
     DENIED = "denied"
     PENDING = "pending"
     TIMEOUT = "timeout"
     RATE_LIMITED = "rate_limited"
     INVALID_REQUEST = "invalid_request"
+
 
 class AnchorSystem:
     """
@@ -188,7 +206,7 @@ class AnchorSystem:
         self.require_confirmation = require_confirmation
         self.pending_actions = {}
         self.approval_history = deque(maxlen=1000)  # Keep last 1000 approvals
-        self.denied_actions = deque(maxlen=500)     # Keep last 500 denials
+        self.denied_actions = deque(maxlen=500)  # Keep last 500 denials
 
         # Security tracking
         self.creation_time = datetime.now()
@@ -199,7 +217,9 @@ class AnchorSystem:
 
         logger.info(f"AnchorSystem initialized - confirmation required: {require_confirmation}")
 
-    def confirm(self, autopilot_action: Dict[str, Any], requester_id: str = "autopilot") -> AnchorResponse:
+    def confirm(
+        self, autopilot_action: dict[str, Any], requester_id: str = "autopilot"
+    ) -> AnchorResponse:
         """
         Request confirmation for an autopilot action with enhanced security.
 
@@ -219,7 +239,9 @@ class AnchorSystem:
                 # Rate limiting check
                 if not check_rate_limit(requester_id):
                     self.denied_count += 1
-                    log_anchor_action("rate_limit_check", autopilot_action, "rate_limited", requester_id)
+                    log_anchor_action(
+                        "rate_limit_check", autopilot_action, "rate_limited", requester_id
+                    )
                     return AnchorResponse.RATE_LIMITED
 
                 # Validate action data
@@ -227,7 +249,9 @@ class AnchorSystem:
                 if not is_valid:
                     self.denied_count += 1
                     logger.error(f"Invalid action data: {validation_message}")
-                    log_anchor_action("validation", autopilot_action, "invalid_request", requester_id)
+                    log_anchor_action(
+                        "validation", autopilot_action, "invalid_request", requester_id
+                    )
                     return AnchorResponse.INVALID_REQUEST
 
                 # Check if pending actions limit exceeded
@@ -244,21 +268,23 @@ class AnchorSystem:
                 sanitized_action = self._sanitize_action(autopilot_action)
 
                 # Check if confirmation is required for this action type
-                action_type = sanitized_action.get('action_type', '').lower()
+                action_type = sanitized_action.get("action_type", "").lower()
 
                 if not self.require_confirmation or action_type not in REQUIRED_CONFIRMATION_TYPES:
                     # Auto-approve non-critical actions
                     self.approved_count += 1
                     log_anchor_action(action_type, sanitized_action, "approved", requester_id)
-                    self._record_approval(action_id, sanitized_action, requester_id, auto_approved=True)
+                    self._record_approval(
+                        action_id, sanitized_action, requester_id, auto_approved=True
+                    )
                     return AnchorResponse.APPROVED
 
                 # Add to pending actions for manual approval
                 self.pending_actions[action_id] = {
-                    'action': sanitized_action,
-                    'requester_id': requester_id,
-                    'timestamp': datetime.now(),
-                    'timeout_at': datetime.now() + timedelta(seconds=self.timeout_seconds)
+                    "action": sanitized_action,
+                    "requester_id": requester_id,
+                    "timestamp": datetime.now(),
+                    "timeout_at": datetime.now() + timedelta(seconds=self.timeout_seconds),
                 }
 
                 logger.info(f"Action pending approval: {action_id} from {requester_id}")
@@ -274,29 +300,31 @@ class AnchorSystem:
                 return approval_response
 
         except Exception as e:
-            logger.error(f"Error in anchor confirmation: {str(e)}")
+            logger.error(f"Error in anchor confirmation: {e!s}")
             self.denied_count += 1
             return AnchorResponse.DENIED
 
-    def _generate_action_id(self, action_data: Dict[str, Any], requester_id: str) -> str:
+    def _generate_action_id(self, action_data: dict[str, Any], requester_id: str) -> str:
         """Generate unique action ID"""
         timestamp = str(time.time())
-        action_str = str(action_data.get('action_type', '')) + str(action_data.get('description', ''))
+        action_str = str(action_data.get("action_type", "")) + str(
+            action_data.get("description", "")
+        )
         combined = f"{timestamp}:{requester_id}:{action_str}"
         return hashlib.md5(combined.encode()).hexdigest()[:12]
 
-    def _sanitize_action(self, action_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _sanitize_action(self, action_data: dict[str, Any]) -> dict[str, Any]:
         """Sanitize action data"""
         sanitized = action_data.copy()
 
         # Sanitize description
-        if 'description' in sanitized:
-            sanitized['description'] = sanitize_description(sanitized['description'])
+        if "description" in sanitized:
+            sanitized["description"] = sanitize_description(sanitized["description"])
 
         # Ensure action type is clean
-        if 'action_type' in sanitized:
-            action_type = str(sanitized['action_type']).lower()
-            sanitized['action_type'] = re.sub(r'[^a-zA-Z_]', '', action_type)
+        if "action_type" in sanitized:
+            action_type = str(sanitized["action_type"]).lower()
+            sanitized["action_type"] = re.sub(r"[^a-zA-Z_]", "", action_type)
 
         return sanitized
 
@@ -305,37 +333,42 @@ class AnchorSystem:
         if action_id in self.pending_actions:
             action_data = self.pending_actions[action_id]
             self.approved_count += 1
-            self._record_approval(action_id, action_data['action'], action_data['requester_id'])
+            self._record_approval(action_id, action_data["action"], action_data["requester_id"])
             del self.pending_actions[action_id]
             return AnchorResponse.APPROVED
         return AnchorResponse.DENIED
 
-    def _record_approval(self, action_id: str, action_data: Dict[str, Any],
-                        requester_id: str, auto_approved: bool = False):
+    def _record_approval(
+        self,
+        action_id: str,
+        action_data: dict[str, Any],
+        requester_id: str,
+        auto_approved: bool = False,
+    ):
         """Record approval in history"""
         approval_record = {
-            'action_id': action_id,
-            'action_type': action_data.get('action_type', 'unknown'),
-            'description': action_data.get('description', ''),
-            'requester_id': requester_id,
-            'timestamp': datetime.now().isoformat(),
-            'auto_approved': auto_approved
+            "action_id": action_id,
+            "action_type": action_data.get("action_type", "unknown"),
+            "description": action_data.get("description", ""),
+            "requester_id": requester_id,
+            "timestamp": datetime.now().isoformat(),
+            "auto_approved": auto_approved,
         }
         self.approval_history.append(approval_record)
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get anchor system statistics"""
         return {
-            'total_requests': self.total_requests,
-            'approved_count': self.approved_count,
-            'denied_count': self.denied_count,
-            'timeout_count': self.timeout_count,
-            'pending_count': len(self.pending_actions),
-            'uptime': (datetime.now() - self.creation_time).total_seconds(),
-            'approval_rate': self.approved_count / max(self.total_requests, 1)
+            "total_requests": self.total_requests,
+            "approved_count": self.approved_count,
+            "denied_count": self.denied_count,
+            "timeout_count": self.timeout_count,
+            "pending_count": len(self.pending_actions),
+            "uptime": (datetime.now() - self.creation_time).total_seconds(),
+            "approval_rate": self.approved_count / max(self.total_requests, 1),
         }
 
-    def get_recent_history(self, limit: int = 50) -> List[Dict[str, Any]]:
+    def get_recent_history(self, limit: int = 50) -> list[dict[str, Any]]:
         """Get recent approval history"""
         history_list = list(self.approval_history)
         return history_list[-limit:] if len(history_list) > limit else history_list
@@ -346,7 +379,7 @@ class AnchorSystem:
             "memory_delete": 0.3,  # More dangerous
             "external_api": 0.5,
             "system_config": 0.2,  # Very dangerous
-            "emotional_state": 0.8
+            "emotional_state": 0.8,
         }
 
         safety_score = base_scores.get(action_type, 0.5)
@@ -365,7 +398,7 @@ class AnchorSystem:
         """Generate a unique action ID"""
         return f"anchor_{int(time.time() * 1000)}"
 
-    def review_pending_actions(self) -> List[Dict[str, Any]]:
+    def review_pending_actions(self) -> list[dict[str, Any]]:
         """
         Review and clean up pending actions.
 
@@ -402,7 +435,7 @@ class AnchorSystem:
             return True
         return False
 
-    def get_approval_history(self, limit: int = 50) -> List[Dict[str, Any]]:
+    def get_approval_history(self, limit: int = 50) -> list[dict[str, Any]]:
         """
         Get recent approval history.
 
@@ -415,10 +448,14 @@ class AnchorSystem:
         history_list = list(self.approval_history)
         return history_list[-limit:] if len(history_list) > limit else history_list
 
+
 # Global anchor instance
 anchor = AnchorSystem()
 
-def require_anchor_approval(action_type: str, target: str = "", data: Optional[Dict] = None) -> bool:
+
+def require_anchor_approval(
+    action_type: str, target: str = "", data: Optional[dict] = None
+) -> bool:
     """
     Decorator function to require anchor approval for actions.
 
@@ -430,14 +467,11 @@ def require_anchor_approval(action_type: str, target: str = "", data: Optional[D
     Returns:
         bool: True if action is approved, False otherwise
     """
-    action = {
-        "type": action_type,
-        "target": target,
-        "data": data or {}
-    }
+    action = {"type": action_type, "target": target, "data": data or {}}
 
     response = anchor.confirm(action)
     return response == AnchorResponse.APPROVED
+
 
 if __name__ == "__main__":
     # Test the anchor system

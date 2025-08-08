@@ -4,36 +4,40 @@ Handles private memory entries with encryption and selective access
 for the Dolphin AI Orchestrator v2.0
 """
 
-import os
-import json
-import hashlib
 import base64
+import hashlib
+import json
+import os
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Union
-from dataclasses import dataclass, asdict
+from typing import Any, Dict, List, Optional, Union
+
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
+
 @dataclass
 class PrivateMemoryEntry:
     """Represents a private/encrypted memory entry"""
+
     id: str
     timestamp: datetime
     content_hash: str  # Hash of original content for indexing
     encrypted_content: bytes
-    tags: List[str]
+    tags: list[str]
     category: str
     session_id: str
     access_level: str  # "private", "encrypted", "secure"
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             **asdict(self),
-            'timestamp': self.timestamp.isoformat(),
-            'encrypted_content': base64.b64encode(self.encrypted_content).decode('utf-8')
+            "timestamp": self.timestamp.isoformat(),
+            "encrypted_content": base64.b64encode(self.encrypted_content).decode("utf-8"),
         }
+
 
 class PrivateMemoryManager:
     """
@@ -67,22 +71,22 @@ class PrivateMemoryManager:
         if os.path.exists(key_file):
             # Load existing key (would need user password in production)
             print("🔐 Loading existing encryption key...")
-            with open(key_file, 'rb') as f:
+            with open(key_file, "rb") as f:
                 self.master_key = f.read()
         else:
             # Generate new key
             print("🔐 Generating new encryption key...")
             self.master_key = Fernet.generate_key()
-            with open(key_file, 'wb') as f:
+            with open(key_file, "wb") as f:
                 f.write(self.master_key)
 
             # Secure the key file (basic protection)
-            if os.name != 'nt':  # Unix-like systems
+            if os.name != "nt":  # Unix-like systems
                 os.chmod(key_file, 0o600)
 
     def _derive_encryption_key(self, password: str = "default_dev_password") -> bytes:
         """Derive encryption key from password"""
-        salt = b'dolphin_ai_salt_2024'  # In production, use random salt per user
+        salt = b"dolphin_ai_salt_2024"  # In production, use random salt per user
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
             length=32,
@@ -133,12 +137,12 @@ class PrivateMemoryManager:
             # Create test entry
             test_data = "test_encryption_key"
             encrypted_test = self.encryption_key.encrypt(test_data.encode())
-            with open(test_file, 'wb') as f:
+            with open(test_file, "wb") as f:
                 f.write(encrypted_test)
             return True
 
         try:
-            with open(test_file, 'rb') as f:
+            with open(test_file, "rb") as f:
                 encrypted_data = f.read()
 
             decrypted = self.encryption_key.decrypt(encrypted_data)
@@ -153,7 +157,7 @@ class PrivateMemoryManager:
 
         if os.path.exists(index_file):
             try:
-                with open(index_file, 'r') as f:
+                with open(index_file) as f:
                     self.private_index = json.load(f)
             except Exception as e:
                 print(f"❌ Error loading private index: {e}")
@@ -164,7 +168,7 @@ class PrivateMemoryManager:
         index_file = os.path.join(self.storage_path, "private_index.json")
 
         try:
-            with open(index_file, 'w') as f:
+            with open(index_file, "w") as f:
                 json.dump(self.private_index, f, indent=2)
         except Exception as e:
             print(f"❌ Error saving private index: {e}")
@@ -178,7 +182,7 @@ class PrivateMemoryManager:
             try:
                 memory_file = os.path.join(self.storage_path, f"{entry_id}.enc")
                 if os.path.exists(memory_file):
-                    with open(memory_file, 'rb') as f:
+                    with open(memory_file, "rb") as f:
                         encrypted_content = f.read()
 
                     decrypted_content = self.encryption_key.decrypt(encrypted_content)
@@ -188,26 +192,34 @@ class PrivateMemoryManager:
             except Exception as e:
                 print(f"❌ Error loading private memory {entry_id}: {e}")
 
-    def add_private_memory(self, content: str, tags: List[str] = None,
-                          category: str = "private", session_id: str = "default",
-                          access_level: str = "private", metadata: Dict = None) -> str:
+    def add_private_memory(
+        self,
+        content: str,
+        tags: list[str] = None,
+        category: str = "private",
+        session_id: str = "default",
+        access_level: str = "private",
+        metadata: dict = None,
+    ) -> str:
         """Add a new private memory entry"""
         if not self.is_unlocked:
             raise ValueError("Private memories are locked. Unlock first.")
 
         # Generate unique ID
-        entry_id = hashlib.sha256(f"{content}{datetime.now().isoformat()}".encode()).hexdigest()[:16]
+        entry_id = hashlib.sha256(f"{content}{datetime.now().isoformat()}".encode()).hexdigest()[
+            :16
+        ]
 
         # Create memory entry
         memory_entry = {
-            'id': entry_id,
-            'timestamp': datetime.now().isoformat(),
-            'content': content,
-            'tags': tags or [],
-            'category': category,
-            'session_id': session_id,
-            'access_level': access_level,
-            'metadata': metadata or {}
+            "id": entry_id,
+            "timestamp": datetime.now().isoformat(),
+            "content": content,
+            "tags": tags or [],
+            "category": category,
+            "session_id": session_id,
+            "access_level": access_level,
+            "metadata": metadata or {},
         }
 
         # Encrypt and save
@@ -217,7 +229,7 @@ class PrivateMemoryManager:
 
             # Save encrypted file
             memory_file = os.path.join(self.storage_path, f"{entry_id}.enc")
-            with open(memory_file, 'wb') as f:
+            with open(memory_file, "wb") as f:
                 f.write(encrypted_content)
 
             # Add to unlocked memories
@@ -226,13 +238,15 @@ class PrivateMemoryManager:
             # Add to index (non-encrypted metadata only)
             content_hash = hashlib.sha256(content.encode()).hexdigest()[:16]
             self.private_index[entry_id] = {
-                'timestamp': memory_entry['timestamp'],
-                'content_hash': content_hash,
-                'tags': tags or [],
-                'category': category,
-                'session_id': session_id,
-                'access_level': access_level,
-                'content_preview': content[:50] + "..." if len(content) > 50 else content  # Preview only
+                "timestamp": memory_entry["timestamp"],
+                "content_hash": content_hash,
+                "tags": tags or [],
+                "category": category,
+                "session_id": session_id,
+                "access_level": access_level,
+                "content_preview": content[:50] + "..."
+                if len(content) > 50
+                else content,  # Preview only
             }
 
             # Save updated index
@@ -245,15 +259,16 @@ class PrivateMemoryManager:
             print(f"❌ Error adding private memory: {e}")
             raise
 
-    def get_private_memory(self, entry_id: str) -> Optional[Dict]:
+    def get_private_memory(self, entry_id: str) -> Optional[dict]:
         """Get a specific private memory entry"""
         if not self.is_unlocked:
             return None
 
         return self.unlocked_memories.get(entry_id)
 
-    def search_private_memories(self, query: str = None, tags: List[str] = None,
-                               category: str = None, limit: int = 10) -> List[Dict]:
+    def search_private_memories(
+        self, query: str = None, tags: list[str] = None, category: str = None, limit: int = 10
+    ) -> list[dict]:
         """Search private memories (requires unlock)"""
         if not self.is_unlocked:
             return []
@@ -262,37 +277,37 @@ class PrivateMemoryManager:
 
         for entry_id, memory in self.unlocked_memories.items():
             # Apply filters
-            if category and memory.get('category') != category:
+            if category and memory.get("category") != category:
                 continue
 
             if tags:
-                memory_tags = memory.get('tags', [])
+                memory_tags = memory.get("tags", [])
                 if not any(tag in memory_tags for tag in tags):
                     continue
 
             if query:
-                content = memory.get('content', '').lower()
+                content = memory.get("content", "").lower()
                 if query.lower() not in content:
                     continue
 
             results.append(memory)
 
         # Sort by timestamp (most recent first)
-        results.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+        results.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
 
         return results[:limit]
 
-    def get_private_memory_preview(self) -> List[Dict]:
+    def get_private_memory_preview(self) -> list[dict]:
         """Get non-sensitive preview of private memories (doesn't require unlock)"""
         return [
             {
-                'id': entry_id,
-                'timestamp': entry_data['timestamp'],
-                'category': entry_data['category'],
-                'tags': entry_data['tags'],
-                'access_level': entry_data['access_level'],
-                'content_preview': entry_data['content_preview'],
-                'is_unlocked': entry_id in self.unlocked_memories
+                "id": entry_id,
+                "timestamp": entry_data["timestamp"],
+                "category": entry_data["category"],
+                "tags": entry_data["tags"],
+                "access_level": entry_data["access_level"],
+                "content_preview": entry_data["content_preview"],
+                "is_unlocked": entry_id in self.unlocked_memories,
             }
             for entry_id, entry_data in self.private_index.items()
         ]
@@ -333,8 +348,8 @@ class PrivateMemoryManager:
 
         try:
             export_data = {
-                'export_timestamp': datetime.now().isoformat(),
-                'memories': list(self.unlocked_memories.values())
+                "export_timestamp": datetime.now().isoformat(),
+                "memories": list(self.unlocked_memories.values()),
             }
 
             # Re-encrypt with provided password
@@ -342,8 +357,10 @@ class PrivateMemoryManager:
             fernet = Fernet(export_key)
             encrypted_export = fernet.encrypt(json.dumps(export_data).encode())
 
-            export_file = os.path.join(self.storage_path, f"export_{int(datetime.now().timestamp())}.enc")
-            with open(export_file, 'wb') as f:
+            export_file = os.path.join(
+                self.storage_path, f"export_{int(datetime.now().timestamp())}.enc"
+            )
+            with open(export_file, "wb") as f:
                 f.write(encrypted_export)
 
             return export_file
@@ -359,7 +376,7 @@ class PrivateMemoryManager:
             export_key = self._derive_encryption_key(password)
             fernet = Fernet(export_key)
 
-            with open(export_file, 'rb') as f:
+            with open(export_file, "rb") as f:
                 encrypted_data = f.read()
 
             decrypted_data = fernet.decrypt(encrypted_data)
@@ -367,15 +384,15 @@ class PrivateMemoryManager:
 
             # Import memories
             imported_count = 0
-            for memory in export_data.get('memories', []):
+            for memory in export_data.get("memories", []):
                 try:
                     self.add_private_memory(
-                        content=memory['content'],
-                        tags=memory.get('tags', []),
-                        category=memory.get('category', 'imported'),
-                        session_id=memory.get('session_id', 'imported'),
-                        access_level=memory.get('access_level', 'private'),
-                        metadata=memory.get('metadata', {})
+                        content=memory["content"],
+                        tags=memory.get("tags", []),
+                        category=memory.get("category", "imported"),
+                        session_id=memory.get("session_id", "imported"),
+                        access_level=memory.get("access_level", "private"),
+                        metadata=memory.get("metadata", {}),
                     )
                     imported_count += 1
                 except Exception as e:
@@ -388,16 +405,20 @@ class PrivateMemoryManager:
             print(f"❌ Error importing private memories: {e}")
             return False
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Get private memory system status"""
         return {
-            'is_unlocked': self.is_unlocked,
-            'session_unlock_time': self.session_unlock_time.isoformat() if self.session_unlock_time else None,
-            'total_private_memories': len(self.private_index),
-            'unlocked_memories_count': len(self.unlocked_memories),
-            'storage_path': self.storage_path,
-            'categories': list(set(entry['category'] for entry in self.private_index.values())),
-            'access_levels': list(set(entry['access_level'] for entry in self.private_index.values()))
+            "is_unlocked": self.is_unlocked,
+            "session_unlock_time": self.session_unlock_time.isoformat()
+            if self.session_unlock_time
+            else None,
+            "total_private_memories": len(self.private_index),
+            "unlocked_memories_count": len(self.unlocked_memories),
+            "storage_path": self.storage_path,
+            "categories": list(set(entry["category"] for entry in self.private_index.values())),
+            "access_levels": list(
+                set(entry["access_level"] for entry in self.private_index.values())
+            ),
         }
 
     def check_unlock_expiry(self):
@@ -408,12 +429,15 @@ class PrivateMemoryManager:
                 self.lock_private_memories()
                 print("🕐 Private memory session expired - locked automatically")
 
+
 # Global private memory manager instance
 private_memory_manager = None
+
 
 def get_private_memory_manager():
     """Get the global private memory manager instance"""
     return private_memory_manager
+
 
 def initialize_private_memory_manager(storage_path: str = "memory/private"):
     """Initialize the global private memory manager"""

@@ -3,10 +3,11 @@
 
 import json
 import random
-from typing import Dict, List, Optional
-from datetime import datetime
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
+from typing import Dict, List, Optional
+
 
 class AvatarExpression(Enum):
     HAPPY = "happy"
@@ -20,6 +21,7 @@ class AvatarExpression(Enum):
     AFFECTIONATE = "affectionate"
     CALM = "calm"
 
+
 class AvatarGesture(Enum):
     WAVE = "wave"
     BLOW_KISS = "blow_kiss"
@@ -32,6 +34,7 @@ class AvatarGesture(Enum):
     REACH_OUT = "reach_out"
     DANCE = "dance"
 
+
 @dataclass
 class AvatarState:
     expression: AvatarExpression
@@ -42,6 +45,7 @@ class AvatarState:
     animation_speed: float  # 0.5 to 2.0
     timestamp: datetime
 
+
 class RomanticAvatar:
     def __init__(self):
         self.current_state = AvatarState(
@@ -51,7 +55,7 @@ class RomanticAvatar:
             blush_intensity=0.0,
             smile_intensity=0.3,
             animation_speed=1.0,
-            timestamp=datetime.now()
+            timestamp=datetime.now(),
         )
 
         # Expression mappings for romantic emotions
@@ -63,7 +67,7 @@ class RomanticAvatar:
             "security": [AvatarExpression.SECURE, AvatarExpression.CALM],
             "affection": [AvatarExpression.AFFECTIONATE, AvatarExpression.PLAYFUL],
             "joy": [AvatarExpression.HAPPY, AvatarExpression.PLAYFUL],
-            "calm": [AvatarExpression.CALM, AvatarExpression.SECURE]
+            "calm": [AvatarExpression.CALM, AvatarExpression.SECURE],
         }
 
         # Gesture mappings for romantic interactions
@@ -72,7 +76,7 @@ class RomanticAvatar:
             "affection": [AvatarGesture.HEART_HANDS, AvatarGesture.BLOW_KISS],
             "comfort": [AvatarGesture.HUG, AvatarGesture.REACH_OUT],
             "playful": [AvatarGesture.WINK, AvatarGesture.DANCE],
-            "intimate": [AvatarGesture.TOUCH_HEART, AvatarGesture.TILT_HEAD]
+            "intimate": [AvatarGesture.TOUCH_HEART, AvatarGesture.TILT_HEAD],
         }
 
         # Avatar appearance settings
@@ -82,7 +86,7 @@ class RomanticAvatar:
             "skin_tone": "warm_medium",
             "height": "average",
             "build": "slender",
-            "clothing_style": "romantic_casual"
+            "clothing_style": "romantic_casual",
         }
 
     def update_expression(self, emotion: str, intensity: float = 1.0):
@@ -116,7 +120,7 @@ class RomanticAvatar:
         self.current_state.eye_contact = enabled
         self.current_state.timestamp = datetime.now()
 
-    def get_visual_state(self) -> Dict:
+    def get_visual_state(self) -> dict:
         """Get current visual state for frontend rendering"""
         return {
             "expression": self.current_state.expression.value,
@@ -126,72 +130,73 @@ class RomanticAvatar:
             "smile_intensity": self.current_state.smile_intensity,
             "animation_speed": self.current_state.animation_speed,
             "appearance": self.appearance,
-            "timestamp": self.current_state.timestamp.isoformat()
+            "timestamp": self.current_state.timestamp.isoformat(),
         }
 
-    def generate_romantic_scene(self, scene_type: str) -> Dict:
+    def generate_romantic_scene(self, scene_type: str) -> dict:
         """Generate romantic scene settings"""
         scenes = {
             "sunset": {
                 "background": "warm_sunset_gradient",
                 "lighting": "golden_hour",
                 "atmosphere": "romantic_warm",
-                "music_suggestion": "soft_jazz"
+                "music_suggestion": "soft_jazz",
             },
             "garden": {
                 "background": "flower_garden",
                 "lighting": "natural_soft",
                 "atmosphere": "peaceful_natural",
-                "music_suggestion": "nature_sounds"
+                "music_suggestion": "nature_sounds",
             },
             "bedroom": {
                 "background": "cozy_bedroom",
                 "lighting": "warm_lamp",
                 "atmosphere": "intimate_cozy",
-                "music_suggestion": "romantic_piano"
+                "music_suggestion": "romantic_piano",
             },
             "beach": {
                 "background": "ocean_sunset",
                 "lighting": "dramatic_sunset",
                 "atmosphere": "dreamy_romantic",
-                "music_suggestion": "ocean_waves"
-            }
+                "music_suggestion": "ocean_waves",
+            },
         }
 
         return scenes.get(scene_type, scenes["sunset"])
 
-    def create_romantic_animation(self, emotion: str, duration: float = 3.0) -> Dict:
+    def create_romantic_animation(self, emotion: str, duration: float = 3.0) -> dict:
         """Create romantic animation sequence"""
         animations = {
             "love": {
                 "sequence": [
                     {"expression": "loving", "gesture": "heart_hands", "duration": 1.0},
                     {"expression": "affectionate", "gesture": "blow_kiss", "duration": 1.0},
-                    {"expression": "loving", "gesture": None, "duration": 1.0}
+                    {"expression": "loving", "gesture": None, "duration": 1.0},
                 ],
                 "blush_curve": [0.0, 0.8, 0.6],
-                "smile_curve": [0.3, 0.9, 0.7]
+                "smile_curve": [0.3, 0.9, 0.7],
             },
             "longing": {
                 "sequence": [
                     {"expression": "longing", "gesture": "reach_out", "duration": 1.5},
-                    {"expression": "vulnerable", "gesture": None, "duration": 1.5}
+                    {"expression": "vulnerable", "gesture": None, "duration": 1.5},
                 ],
                 "blush_curve": [0.2, 0.4],
-                "smile_curve": [0.1, 0.2]
+                "smile_curve": [0.1, 0.2],
             },
             "passion": {
                 "sequence": [
                     {"expression": "passionate", "gesture": "touch_heart", "duration": 1.0},
                     {"expression": "loving", "gesture": "tilt_head", "duration": 1.0},
-                    {"expression": "passionate", "gesture": None, "duration": 1.0}
+                    {"expression": "passionate", "gesture": None, "duration": 1.0},
                 ],
                 "blush_curve": [0.3, 0.9, 0.8],
-                "smile_curve": [0.4, 0.8, 0.7]
-            }
+                "smile_curve": [0.4, 0.8, 0.7],
+            },
         }
 
         return animations.get(emotion, animations["love"])
+
 
 # Global avatar instance
 romantic_avatar = RomanticAvatar()

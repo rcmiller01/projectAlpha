@@ -4,11 +4,12 @@ Bootloader Integration Test
 Comprehensive test of the autopilot bootloader system
 """
 
-import time
 import json
 import subprocess
 import sys
+import time
 from pathlib import Path
+
 
 def test_bootloader_integration():
     """Test the complete bootloader integration"""
@@ -26,7 +27,7 @@ def test_bootloader_integration():
             with open(config_path) as f:
                 config = json.load(f)
 
-            required_fields = ['mode', 'idle_threshold', 'check_interval']
+            required_fields = ["mode", "idle_threshold", "check_interval"]
             missing = [f for f in required_fields if f not in config]
 
             if not missing:
@@ -46,21 +47,25 @@ def test_bootloader_integration():
     # Test 2: Bootloader status functionality
     print("\nTest 2: Bootloader Status")
     try:
-        result = subprocess.run([
-            "python", "autopilot_bootloader.py", "--status"
-        ], capture_output=True, text=True, timeout=30)
+        result = subprocess.run(
+            ["python", "autopilot_bootloader.py", "--status"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+        )
 
         if result.returncode == 0:
             # Parse JSON output
-            lines = result.stdout.strip().split('\n')
-            json_lines = [line for line in lines if line.startswith('{')]
+            lines = result.stdout.strip().split("\n")
+            json_lines = [line for line in lines if line.startswith("{")]
 
             if json_lines:
                 status_data = json.loads(json_lines[-1])
-                bootloader_status = status_data.get('bootloader', {})
-                system_status = status_data.get('system', {})
+                bootloader_status = status_data.get("bootloader", {})
+                system_status = status_data.get("system", {})
 
-                print(f"[OK] Status retrieved successfully")
+                print("[OK] Status retrieved successfully")
                 print(f"     Mode: {bootloader_status.get('mode', 'unknown')}")
                 print(f"     CPU: {system_status.get('cpu_percent', 0):.1f}%")
                 print(f"     Memory: {system_status.get('memory_percent', 0):.1f}%")
@@ -79,11 +84,19 @@ def test_bootloader_integration():
     # Test 3: Autopilot integration check
     print("\nTest 3: Autopilot Integration")
     try:
-        result = subprocess.run([
-            "python", "emotion_quant_autopilot/quant_autopilot.py",
-            "--config", "emotion_quant_autopilot/autopilot_config.json",
-            "integration"
-        ], capture_output=True, text=True, timeout=30)
+        result = subprocess.run(
+            [
+                "python",
+                "emotion_quant_autopilot/quant_autopilot.py",
+                "--config",
+                "emotion_quant_autopilot/autopilot_config.json",
+                "integration",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+        )
 
         if result.returncode == 0:
             output = result.stdout.lower()
@@ -110,7 +123,7 @@ def test_bootloader_integration():
             with open(service_script) as f:
                 content = f.read()
 
-            required_commands = ['start', 'stop', 'status', 'install']
+            required_commands = ["start", "stop", "status", "install"]
             found_commands = [cmd for cmd in required_commands if f":{cmd.upper()}" in content]
 
             if len(found_commands) == len(required_commands):
@@ -131,10 +144,7 @@ def test_bootloader_integration():
     # Test 5: Documentation completeness
     print("\nTest 5: Documentation")
     try:
-        doc_files = [
-            "AUTOPILOT_BOOTLOADER_DOCUMENTATION.md",
-            "bootloader.log"
-        ]
+        doc_files = ["AUTOPILOT_BOOTLOADER_DOCUMENTATION.md", "bootloader.log"]
 
         missing_docs = [doc for doc in doc_files if not Path(doc).exists()]
 
@@ -158,9 +168,13 @@ def test_bootloader_integration():
 
         if autopilot_script.exists() and autopilot_config.exists():
             # Test help command to verify script is executable
-            result = subprocess.run([
-                "python", str(autopilot_script), "--help"
-            ], capture_output=True, text=True, timeout=15)
+            result = subprocess.run(
+                ["python", str(autopilot_script), "--help"],
+                capture_output=True,
+                text=True,
+                timeout=15,
+                check=False,
+            )
 
             if result.returncode == 0:
                 print("[OK] Autopilot script accessible and executable")
@@ -212,6 +226,7 @@ def test_bootloader_integration():
     print("   ✓ API integration in dolphin_backend.py")
 
     return passed == total
+
 
 if __name__ == "__main__":
     success = test_bootloader_integration()

@@ -3,24 +3,27 @@ Message Timing Utilities - Conversation tempo and pacing
 Adapts response timing based on emotional context and conversation flow
 """
 
-import time
 import math
-from typing import Dict, Optional, List, Tuple
+import time
 from dataclasses import dataclass
+from typing import Dict, List, Optional, Tuple
+
 
 @dataclass
 class ConversationPacing:
     """Tracks conversation pacing metrics"""
+
     last_message_time: float
     average_response_delay: float
     silence_tolerance: float
     emotional_tempo_modifier: float
 
+
 class MessageTiming:
     """Manages conversation timing and pacing"""
 
     def __init__(self):
-        self.conversation_history: List[Tuple[float, str]] = []  # (timestamp, mood)
+        self.conversation_history: list[tuple[float, str]] = []  # (timestamp, mood)
         self.base_response_delay = 2.0  # seconds
         self.silence_threshold = 10.0  # seconds before considering "silence"
 
@@ -35,11 +38,12 @@ class MessageTiming:
             "playful": {"multiplier": 0.7, "silence_tolerance": 6.0},
             "nostalgic": {"multiplier": 1.0, "silence_tolerance": 18.0},
             "romantic": {"multiplier": 0.9, "silence_tolerance": 10.0},
-            "neutral": {"multiplier": 1.0, "silence_tolerance": 10.0}
+            "neutral": {"multiplier": 1.0, "silence_tolerance": 10.0},
         }
 
-    def infer_conversation_tempo(self, mood: str, recent_silence: float,
-                               message_complexity: int = 50) -> float:
+    def infer_conversation_tempo(
+        self, mood: str, recent_silence: float, message_complexity: int = 50
+    ) -> float:
         """
         Returns a pacing multiplier based on emotional tone and silence.
 
@@ -90,8 +94,9 @@ class MessageTiming:
         """Get additional context-based tempo adjustments"""
 
         # Check conversation momentum from recent history
-        recent_moods = [m for t, m in self.conversation_history
-                       if time.time() - t < 300]  # Last 5 minutes
+        recent_moods = [
+            m for t, m in self.conversation_history if time.time() - t < 300
+        ]  # Last 5 minutes
 
         context_factor = 1.0
 
@@ -116,8 +121,9 @@ class MessageTiming:
 
         return context_factor
 
-    def get_response_delay_suggestion(self, mood: str, recent_silence: float,
-                                    message_length: int = 50) -> float:
+    def get_response_delay_suggestion(
+        self, mood: str, recent_silence: float, message_length: int = 50
+    ) -> float:
         """Get suggested response delay in seconds"""
         tempo_multiplier = self.infer_conversation_tempo(mood, recent_silence, message_length)
         return self.base_response_delay * tempo_multiplier
@@ -129,8 +135,9 @@ class MessageTiming:
 
         return max(0.5, min(4.0, base_typing_time * tempo_factor))
 
-    def should_pause_before_response(self, mood: str, recent_silence: float,
-                                   emotional_weight: float = 0.5) -> bool:
+    def should_pause_before_response(
+        self, mood: str, recent_silence: float, emotional_weight: float = 0.5
+    ) -> bool:
         """Determine if a pause is needed before responding"""
 
         # High emotional weight messages need more consideration time
@@ -153,8 +160,11 @@ class MessageTiming:
         cutoff = time.time() - 3600
         self.conversation_history = [(t, m) for t, m in self.conversation_history if t > cutoff]
 
+
 # Convenience function for easy importing
-def infer_conversation_tempo(mood: str, recent_silence: float, message_complexity: int = 50) -> float:
+def infer_conversation_tempo(
+    mood: str, recent_silence: float, message_complexity: int = 50
+) -> float:
     """
     Standalone function for conversation tempo inference.
     Returns a pacing multiplier based on emotional tone and silence.
@@ -162,16 +172,17 @@ def infer_conversation_tempo(mood: str, recent_silence: float, message_complexit
     timing = MessageTiming()
     return timing.infer_conversation_tempo(mood, recent_silence, message_complexity)
 
+
 # Example usage
 if __name__ == "__main__":
     timing = MessageTiming()
 
     # Test different scenarios
     test_cases = [
-        ("calm", 5.0, 50),      # Normal calm conversation
-        ("intimate", 15.0, 80), # Intimate with some silence
-        ("anxious", 2.0, 30),   # Quick anxious exchange
-        ("contemplative", 45.0, 120), # Long contemplative pause
+        ("calm", 5.0, 50),  # Normal calm conversation
+        ("intimate", 15.0, 80),  # Intimate with some silence
+        ("anxious", 2.0, 30),  # Quick anxious exchange
+        ("contemplative", 45.0, 120),  # Long contemplative pause
     ]
 
     for mood, silence, complexity in test_cases:

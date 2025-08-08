@@ -4,18 +4,19 @@ Core Model Replacement System
 Replaces the current companion core model with selected candidate
 """
 
-import os
-import json
-import shutil
-import logging
-from pathlib import Path
-from typing import Dict, Optional, List
-from datetime import datetime
 import hashlib
+import json
+import logging
+import os
+import shutil
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
 
 class CoreModelReplacer:
     """System for safely replacing the active companion core model"""
@@ -35,7 +36,7 @@ class CoreModelReplacer:
         logger.info(f"📁 Final model directory: {self.final_model_dir}")
         logger.info(f"💾 Backup directory: {self.backup_dir}")
 
-    def validate_candidate(self, candidate_path: str) -> Dict:
+    def validate_candidate(self, candidate_path: str) -> dict:
         """Validate that candidate model is complete and functional"""
         logger.info(f"🔍 Validating candidate: {candidate_path}")
 
@@ -44,18 +45,25 @@ class CoreModelReplacer:
             "issues": [],
             "model_info": {},
             "file_count": 0,
-            "total_size_mb": 0
+            "total_size_mb": 0,
         }
 
         candidate_dir = Path(candidate_path)
 
         if not candidate_dir.exists():
-            validation_result["issues"].append(f"Candidate directory does not exist: {candidate_path}")
+            validation_result["issues"].append(
+                f"Candidate directory does not exist: {candidate_path}"
+            )
             return validation_result
 
         # Check for required files
         required_files = ["config.json", "pytorch_model.bin"]
-        optional_files = ["tokenizer.json", "tokenizer_config.json", "special_tokens_map.json", "vocab.txt"]
+        optional_files = [
+            "tokenizer.json",
+            "tokenizer_config.json",
+            "special_tokens_map.json",
+            "vocab.txt",
+        ]
 
         existing_files = list(candidate_dir.glob("*"))
         file_names = [f.name for f in existing_files]
@@ -66,9 +74,15 @@ class CoreModelReplacer:
                 # Check for alternative patterns
                 if required_file == "pytorch_model.bin":
                     # Look for alternative model file patterns
-                    model_files = [f for f in file_names if f.startswith("pytorch_model") or f.endswith(".safetensors")]
+                    model_files = [
+                        f
+                        for f in file_names
+                        if f.startswith("pytorch_model") or f.endswith(".safetensors")
+                    ]
                     if not model_files:
-                        validation_result["issues"].append(f"Missing model weights file (expected {required_file} or similar)")
+                        validation_result["issues"].append(
+                            f"Missing model weights file (expected {required_file} or similar)"
+                        )
                 else:
                     validation_result["issues"].append(f"Missing required file: {required_file}")
 
@@ -85,13 +99,13 @@ class CoreModelReplacer:
         config_path = candidate_dir / "config.json"
         if config_path.exists():
             try:
-                with open(config_path, 'r') as f:
+                with open(config_path) as f:
                     config = json.load(f)
                     validation_result["model_info"] = {
                         "model_type": config.get("model_type", "unknown"),
                         "hidden_size": config.get("hidden_size", "unknown"),
                         "num_layers": config.get("num_hidden_layers", "unknown"),
-                        "vocab_size": config.get("vocab_size", "unknown")
+                        "vocab_size": config.get("vocab_size", "unknown"),
                     }
             except Exception as e:
                 validation_result["issues"].append(f"Could not parse config.json: {e}")
@@ -99,17 +113,19 @@ class CoreModelReplacer:
         # Check minimum size (quantized model should still be substantial)
         min_size_mb = 1000  # 1GB minimum
         if validation_result["total_size_mb"] < min_size_mb:
-            validation_result["issues"].append(f"Model size ({validation_result['total_size_mb']:.1f}MB) seems too small")
+            validation_result["issues"].append(
+                f"Model size ({validation_result['total_size_mb']:.1f}MB) seems too small"
+            )
 
         # Mark as valid if no critical issues
         validation_result["valid"] = len(validation_result["issues"]) == 0
 
         if validation_result["valid"]:
-            logger.info(f"✅ Candidate validation passed")
+            logger.info("✅ Candidate validation passed")
             logger.info(f"   📊 Files: {validation_result['file_count']}")
             logger.info(f"   📦 Size: {validation_result['total_size_mb']:.1f}MB")
         else:
-            logger.warning(f"⚠️ Candidate validation issues:")
+            logger.warning("⚠️ Candidate validation issues:")
             for issue in validation_result["issues"]:
                 logger.warning(f"   • {issue}")
 
@@ -138,13 +154,16 @@ class CoreModelReplacer:
                     "original_path": str(active_model_path),
                     "backup_path": str(backup_path),
                     "file_count": len(list(backup_path.rglob("*"))),
-                    "backup_size_mb": sum(f.stat().st_size for f in backup_path.rglob("*") if f.is_file()) / (1024 * 1024)
+                    "backup_size_mb": sum(
+                        f.stat().st_size for f in backup_path.rglob("*") if f.is_file()
+                    )
+                    / (1024 * 1024),
                 }
 
-                with open(backup_path / "backup_metadata.json", 'w') as f:
+                with open(backup_path / "backup_metadata.json", "w") as f:
                     json.dump(metadata, f, indent=2)
 
-                logger.info(f"✅ Backup created successfully")
+                logger.info("✅ Backup created successfully")
                 logger.info(f"   📁 Location: {backup_path}")
                 logger.info(f"   📊 Size: {metadata['backup_size_mb']:.1f}MB")
 
@@ -157,7 +176,7 @@ class CoreModelReplacer:
             logger.error(f"❌ Backup creation failed: {e}")
             raise
 
-    def replace_model(self, candidate_path: str, backup_name: Optional[str] = None) -> Dict:
+    def replace_model(self, candidate_path: str, backup_name: Optional[str] = None) -> dict:
         """Replace active model with candidate"""
         logger.info(f"🔄 Replacing active model with: {candidate_path}")
 
@@ -167,7 +186,7 @@ class CoreModelReplacer:
             "candidate_path": candidate_path,
             "validation_result": {},
             "replacement_info": {},
-            "error_message": ""
+            "error_message": "",
         }
 
         try:
@@ -202,11 +221,11 @@ class CoreModelReplacer:
                 "model_info": validation["model_info"],
                 "file_count": validation["file_count"],
                 "size_mb": validation["total_size_mb"],
-                "checksum": self._calculate_directory_checksum(active_model_path)
+                "checksum": self._calculate_directory_checksum(active_model_path),
             }
 
             # Save replacement metadata
-            with open(active_model_path / "replacement_metadata.json", 'w') as f:
+            with open(active_model_path / "replacement_metadata.json", "w") as f:
                 json.dump(replacement_info, f, indent=2)
 
             replacement_result["replacement_info"] = replacement_info
@@ -231,7 +250,7 @@ class CoreModelReplacer:
 
         return replacement_result
 
-    def update_companion_manifest(self, new_model_path: str, quantization_info: Dict):
+    def update_companion_manifest(self, new_model_path: str, quantization_info: dict):
         """Update companion manifest to reflect new model"""
         logger.info("📝 Updating companion manifest")
 
@@ -240,7 +259,7 @@ class CoreModelReplacer:
 
             # Load existing manifest
             if manifest_path.exists():
-                with open(manifest_path, 'r') as f:
+                with open(manifest_path) as f:
                     manifest = json.load(f)
             else:
                 logger.warning(f"⚠️ Companion manifest not found: {manifest_path}")
@@ -248,14 +267,16 @@ class CoreModelReplacer:
 
             # Update model information
             manifest["model_info"] = manifest.get("model_info", {})
-            manifest["model_info"].update({
-                "model_path": new_model_path,
-                "quantization_method": quantization_info.get("quantization_method", "unknown"),
-                "size_mb": quantization_info.get("size_mb", 0),
-                "emotional_degradation": quantization_info.get("emotional_degradation", 0),
-                "last_updated": datetime.now().isoformat(),
-                "replacement_checksum": quantization_info.get("checksum", "")
-            })
+            manifest["model_info"].update(
+                {
+                    "model_path": new_model_path,
+                    "quantization_method": quantization_info.get("quantization_method", "unknown"),
+                    "size_mb": quantization_info.get("size_mb", 0),
+                    "emotional_degradation": quantization_info.get("emotional_degradation", 0),
+                    "last_updated": datetime.now().isoformat(),
+                    "replacement_checksum": quantization_info.get("checksum", ""),
+                }
+            )
 
             # Update routing bias to prefer the new quantized model
             if "routing_bias" in manifest:
@@ -263,7 +284,7 @@ class CoreModelReplacer:
                 manifest["routing_bias"]["last_optimization"] = datetime.now().isoformat()
 
             # Save updated manifest
-            with open(manifest_path, 'w') as f:
+            with open(manifest_path, "w") as f:
                 json.dump(manifest, f, indent=2)
 
             logger.info("✅ Companion manifest updated")
@@ -302,7 +323,7 @@ class CoreModelReplacer:
             logger.error(f"❌ Backup restoration failed: {e}")
             return False
 
-    def list_backups(self) -> List[Dict]:
+    def list_backups(self) -> list[dict]:
         """List available backups"""
         backups = []
         backup_dir = Path(self.backup_dir)
@@ -316,17 +337,24 @@ class CoreModelReplacer:
 
                 if metadata_file.exists():
                     try:
-                        with open(metadata_file, 'r') as f:
+                        with open(metadata_file) as f:
                             metadata = json.load(f)
                         backups.append(metadata)
                     except:
                         # Create basic metadata if file is corrupted
-                        backups.append({
-                            "backup_name": backup_subdir.name,
-                            "backup_path": str(backup_subdir),
-                            "timestamp": "unknown",
-                            "backup_size_mb": sum(f.stat().st_size for f in backup_subdir.rglob("*") if f.is_file()) / (1024 * 1024)
-                        })
+                        backups.append(
+                            {
+                                "backup_name": backup_subdir.name,
+                                "backup_path": str(backup_subdir),
+                                "timestamp": "unknown",
+                                "backup_size_mb": sum(
+                                    f.stat().st_size
+                                    for f in backup_subdir.rglob("*")
+                                    if f.is_file()
+                                )
+                                / (1024 * 1024),
+                            }
+                        )
 
         # Sort by timestamp (newest first)
         backups.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
@@ -339,14 +367,14 @@ class CoreModelReplacer:
         for file_path in sorted(directory.rglob("*")):
             if file_path.is_file():
                 hasher.update(file_path.name.encode())
-                with open(file_path, 'rb') as f:
+                with open(file_path, "rb") as f:
                     # Read file in chunks to handle large files
                     for chunk in iter(lambda: f.read(8192), b""):
                         hasher.update(chunk)
 
         return hasher.hexdigest()
 
-    def get_replacement_status(self) -> Dict:
+    def get_replacement_status(self) -> dict:
         """Get status of current active model"""
         active_model_path = Path(self.final_model_dir)
 
@@ -355,7 +383,7 @@ class CoreModelReplacer:
             "active_model_path": str(active_model_path),
             "replacement_info": {},
             "validation_status": {},
-            "available_backups": len(self.list_backups())
+            "available_backups": len(self.list_backups()),
         }
 
         if active_model_path.exists():
@@ -363,7 +391,7 @@ class CoreModelReplacer:
             metadata_file = active_model_path / "replacement_metadata.json"
             if metadata_file.exists():
                 try:
-                    with open(metadata_file, 'r') as f:
+                    with open(metadata_file) as f:
                         status["replacement_info"] = json.load(f)
                 except:
                     pass
@@ -372,6 +400,7 @@ class CoreModelReplacer:
             status["validation_status"] = self.validate_candidate(str(active_model_path))
 
         return status
+
 
 def main():
     """Main execution function for testing and manual operations"""
@@ -443,6 +472,7 @@ def main():
     except Exception as e:
         logger.error(f"❌ Command failed: {e}")
         return 2
+
 
 if __name__ == "__main__":
     exit_code = main()

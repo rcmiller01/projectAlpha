@@ -4,13 +4,14 @@ Dynamically finds and installs AI models for creative collaboration
 """
 
 import asyncio
-import logging
-from typing import Dict, Any, List, Optional
 import json
+import logging
 import subprocess
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
+
 
 class CreativeModelDiscovery:
     """
@@ -27,7 +28,7 @@ class CreativeModelDiscovery:
             "writing": ["gpt", "claude", "llama", "palm"],
             "video": ["runway", "pika", "stable-video", "luma"],
             "voice": ["elevenlabs", "bark", "tortoise", "coqui"],
-            "code": ["codex", "codewhisperer", "copilot", "starcoder"]
+            "code": ["codex", "codewhisperer", "copilot", "starcoder"],
         }
         self.model_database = {}
 
@@ -51,7 +52,7 @@ class CreativeModelDiscovery:
                 "install_command": "pip install musicgen",
                 "capabilities": ["melody_generation", "accompaniment", "style_transfer"],
                 "supported_formats": ["wav", "mp3"],
-                "requirements": ["torch", "torchaudio"]
+                "requirements": ["torch", "torchaudio"],
             },
             "audiocraft": {
                 "name": "AudioCraft",
@@ -61,9 +62,8 @@ class CreativeModelDiscovery:
                 "install_command": "pip install audiocraft",
                 "capabilities": ["music_generation", "sound_effects", "audio_compression"],
                 "supported_formats": ["wav", "mp3", "flac"],
-                "requirements": ["torch", "torchaudio", "xformers"]
+                "requirements": ["torch", "torchaudio", "xformers"],
             },
-
             # Art Generation Models
             "stable-diffusion-xl": {
                 "name": "Stable Diffusion XL",
@@ -73,7 +73,7 @@ class CreativeModelDiscovery:
                 "install_command": "pip install diffusers transformers",
                 "capabilities": ["text_to_image", "image_to_image", "inpainting"],
                 "supported_formats": ["png", "jpg", "webp"],
-                "requirements": ["torch", "transformers", "diffusers"]
+                "requirements": ["torch", "transformers", "diffusers"],
             },
             "controlnet": {
                 "name": "ControlNet",
@@ -83,9 +83,8 @@ class CreativeModelDiscovery:
                 "install_command": "pip install controlnet-aux",
                 "capabilities": ["pose_control", "edge_detection", "depth_control"],
                 "supported_formats": ["png", "jpg"],
-                "requirements": ["torch", "transformers", "controlnet-aux"]
+                "requirements": ["torch", "transformers", "controlnet-aux"],
             },
-
             # Writing Models
             "gpt-neo": {
                 "name": "GPT-Neo",
@@ -95,9 +94,8 @@ class CreativeModelDiscovery:
                 "install_command": "pip install transformers",
                 "capabilities": ["story_writing", "poetry", "dialogue", "screenwriting"],
                 "supported_formats": ["txt", "md"],
-                "requirements": ["transformers", "torch"]
+                "requirements": ["transformers", "torch"],
             },
-
             # Video Generation Models
             "animatediff": {
                 "name": "AnimateDiff",
@@ -107,9 +105,8 @@ class CreativeModelDiscovery:
                 "install_command": "pip install animatediff",
                 "capabilities": ["image_animation", "video_generation", "motion_control"],
                 "supported_formats": ["mp4", "gif"],
-                "requirements": ["torch", "diffusers", "opencv-python"]
+                "requirements": ["torch", "diffusers", "opencv-python"],
             },
-
             # Voice Synthesis Models
             "bark": {
                 "name": "Bark",
@@ -119,9 +116,8 @@ class CreativeModelDiscovery:
                 "install_command": "pip install bark",
                 "capabilities": ["text_to_speech", "emotion_control", "voice_cloning"],
                 "supported_formats": ["wav", "mp3"],
-                "requirements": ["torch", "torchaudio", "scipy"]
+                "requirements": ["torch", "torchaudio", "scipy"],
             },
-
             # Code Generation Models
             "starcoder": {
                 "name": "StarCoder",
@@ -131,8 +127,8 @@ class CreativeModelDiscovery:
                 "install_command": "pip install transformers",
                 "capabilities": ["code_completion", "code_generation", "debugging"],
                 "supported_formats": ["py", "js", "cpp", "java"],
-                "requirements": ["transformers", "torch"]
-            }
+                "requirements": ["transformers", "torch"],
+            },
         }
 
     async def _scan_installed_models(self):
@@ -153,14 +149,17 @@ class CreativeModelDiscovery:
             except ImportError:
                 logger.debug(f"Model {model_id} not installed")
 
-    async def find_models_for_project(self, project_type: str, requirements: Dict[str, Any] = {}) -> List[Dict[str, Any]]:
+    async def find_models_for_project(
+        self, project_type: str, requirements: dict[str, Any] = {}
+    ) -> list[dict[str, Any]]:
         """Find suitable models for a specific project type"""
 
         suitable_models = []
 
         # Get models for the project category
         category_models = [
-            model_id for model_id, model_info in self.model_database.items()
+            model_id
+            for model_id, model_info in self.model_database.items()
             if model_info["category"] == project_type
         ]
 
@@ -173,7 +172,7 @@ class CreativeModelDiscovery:
                 "description": model_info["description"],
                 "capabilities": model_info["capabilities"],
                 "size": model_info["size"],
-                "status": "installed" if model_id in self.installed_models else "installable"
+                "status": "installed" if model_id in self.installed_models else "installable",
             }
 
             suitable_models.append(model_status)
@@ -183,7 +182,7 @@ class CreativeModelDiscovery:
 
         return suitable_models
 
-    async def find_models_for_message(self, message: str) -> List[Dict[str, Any]]:
+    async def find_models_for_message(self, message: str) -> list[dict[str, Any]]:
         """Analyze message and suggest relevant models"""
 
         message_lower = message.lower()
@@ -196,7 +195,7 @@ class CreativeModelDiscovery:
             "writing": ["write", "story", "poem", "script", "text", "novel"],
             "video": ["video", "animation", "movie", "film", "animate"],
             "voice": ["voice", "speak", "speech", "audio", "sound"],
-            "code": ["code", "program", "script", "function", "algorithm"]
+            "code": ["code", "program", "script", "function", "algorithm"],
         }
 
         # Find matching categories
@@ -207,7 +206,7 @@ class CreativeModelDiscovery:
 
         return relevant_models
 
-    async def install_model(self, model_id: str) -> Dict[str, Any]:
+    async def install_model(self, model_id: str) -> dict[str, Any]:
         """Install a specific model"""
 
         if model_id not in self.model_database:
@@ -221,9 +220,7 @@ class CreativeModelDiscovery:
             # Execute installation command
             install_cmd = model_info["install_command"]
             process = await asyncio.create_subprocess_shell(
-                install_cmd,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                install_cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
             )
 
             stdout, stderr = await process.communicate()
@@ -235,27 +232,19 @@ class CreativeModelDiscovery:
                 return {
                     "status": "success",
                     "model_id": model_id,
-                    "message": f"{model_info['name']} installed successfully!"
+                    "message": f"{model_info['name']} installed successfully!",
                 }
             else:
                 error_msg = stderr.decode() if stderr else "Installation failed"
                 logger.error(f"Failed to install {model_info['name']}: {error_msg}")
 
-                return {
-                    "status": "error",
-                    "model_id": model_id,
-                    "error": error_msg
-                }
+                return {"status": "error", "model_id": model_id, "error": error_msg}
 
         except Exception as e:
             logger.error(f"Error installing {model_id}: {e}")
-            return {
-                "status": "error",
-                "model_id": model_id,
-                "error": str(e)
-            }
+            return {"status": "error", "model_id": model_id, "error": str(e)}
 
-    async def get_all_available_models(self) -> List[Dict[str, Any]]:
+    async def get_all_available_models(self) -> list[dict[str, Any]]:
         """Get comprehensive list of all available models"""
 
         all_models = []
@@ -268,13 +257,13 @@ class CreativeModelDiscovery:
                 "description": model_info["description"],
                 "size": model_info["size"],
                 "capabilities": model_info["capabilities"],
-                "status": "installed" if model_id in self.installed_models else "available"
+                "status": "installed" if model_id in self.installed_models else "available",
             }
             all_models.append(model_data)
 
         return all_models
 
-    async def get_model_categories(self) -> Dict[str, List[str]]:
+    async def get_model_categories(self) -> dict[str, list[str]]:
         """Get model categories and their descriptions"""
 
         category_descriptions = {
@@ -283,20 +272,26 @@ class CreativeModelDiscovery:
             "writing": "Generate stories, poems, and written content",
             "video": "Create animations and video content",
             "voice": "Synthesize speech and voice content",
-            "code": "Generate and assist with programming code"
+            "code": "Generate and assist with programming code",
         }
 
         return category_descriptions
 
-    async def analyze_for_opportunities(self, message: str, response_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+    async def analyze_for_opportunities(
+        self, message: str, response_data: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """Analyze conversation for creative opportunities"""
 
         opportunities = []
 
         # Check if user expressed interest in creating something
         creative_expressions = [
-            "i want to make", "let's create", "can you help me build",
-            "i'd like to try", "how about we", "let's work on"
+            "i want to make",
+            "let's create",
+            "can you help me build",
+            "i'd like to try",
+            "how about we",
+            "let's work on",
         ]
 
         message_lower = message.lower()
@@ -306,16 +301,18 @@ class CreativeModelDiscovery:
             relevant_models = await self.find_models_for_message(message)
 
             if relevant_models:
-                opportunities.append({
-                    "type": "creative_collaboration",
-                    "suggestion": f"I can help you create that! I have access to {len(relevant_models)} tools that could work for this project.",
-                    "models": relevant_models[:3],  # Top 3 suggestions
-                    "action": "start_project"
-                })
+                opportunities.append(
+                    {
+                        "type": "creative_collaboration",
+                        "suggestion": f"I can help you create that! I have access to {len(relevant_models)} tools that could work for this project.",
+                        "models": relevant_models[:3],  # Top 3 suggestions
+                        "action": "start_project",
+                    }
+                )
 
         return opportunities
 
-    async def get_project_next_steps(self, project: Dict[str, Any]) -> List[str]:
+    async def get_project_next_steps(self, project: dict[str, Any]) -> list[str]:
         """Get suggested next steps for a creative project"""
 
         project_type = project["type"]
@@ -324,37 +321,40 @@ class CreativeModelDiscovery:
             "music": [
                 "Tell me what style or mood you're going for",
                 "Do you have any reference tracks you like?",
-                "Should we start with a melody or rhythm?"
+                "Should we start with a melody or rhythm?",
             ],
             "art": [
                 "Describe the image you want to create",
                 "What style are you thinking? (realistic, cartoon, abstract)",
-                "Any specific colors or themes in mind?"
+                "Any specific colors or themes in mind?",
             ],
             "writing": [
                 "What genre are you interested in?",
                 "Do you have characters or a plot in mind?",
-                "How long should the piece be?"
+                "How long should the piece be?",
             ],
             "video": [
                 "What's the concept for your video?",
                 "How long should it be?",
-                "Any specific visual style you prefer?"
+                "Any specific visual style you prefer?",
             ],
             "voice": [
                 "What text would you like me to speak?",
                 "What emotion or tone should I use?",
-                "Male or female voice preference?"
+                "Male or female voice preference?",
             ],
             "code": [
                 "What programming language?",
                 "What should the code accomplish?",
-                "Any specific requirements or constraints?"
-            ]
+                "Any specific requirements or constraints?",
+            ],
         }
 
-        return next_steps.get(project_type, [
-            "Tell me more about what you'd like to create",
-            "What's your vision for this project?",
-            "How can I best help you with this?"
-        ])
+        return next_steps.get(
+            project_type,
+            [
+                "Tell me more about what you'd like to create",
+                "What's your vision for this project?",
+                "How can I best help you with this?",
+            ],
+        )

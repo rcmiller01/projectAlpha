@@ -15,7 +15,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # Try to load settings, fall back to defaults if required env vars are missing
 try:
-    from config.settings import settings, log_configuration_summary
+    from config.settings import log_configuration_summary, settings
+
     config_loaded = True
 except Exception as e:
     print(f"Warning: Could not load full configuration: {e}")
@@ -26,26 +27,25 @@ except Exception as e:
 # Configure logging
 log_level = settings.LOG_LEVEL if settings else "INFO"
 logging.basicConfig(
-    level=getattr(logging, log_level),
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=getattr(logging, log_level), format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 # Log configuration on startup
 logger.info("🚀 Starting ProjectAlpha Backend")
-if config_loaded:
+if config_loaded and settings:
     log_configuration_summary(settings)
 else:
-    logger.warning("⚠️  Running with minimal configuration - set required environment variables for full functionality")
+    logger.warning(
+        "⚠️  Running with minimal configuration - set required environment variables for full functionality"
+    )
 
 # Check for kill switch
 if settings and settings.SAFE_MODE_FORCE:
     logger.warning("⚠️  SAFE MODE FORCE is enabled - system operating in restricted mode")
 
 app = FastAPI(
-    title="ProjectAlpha Backend",
-    version="1.0.0",
-    debug=settings.DEBUG if settings else False
+    title="ProjectAlpha Backend", version="1.0.0", debug=settings.DEBUG if settings else False
 )
 
 # Add CORS middleware
@@ -56,6 +56,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 @app.on_event("startup")
 async def startup_event():
@@ -76,10 +77,12 @@ async def startup_event():
     else:
         logger.info("📊 Feature flags: Using defaults (config not fully loaded)")
 
+
 @app.on_event("shutdown")
 async def shutdown_event():
     """Application shutdown event."""
     logger.info("⏹️  ProjectAlpha Backend shutting down")
+
 
 @app.get("/")
 async def root():
@@ -93,22 +96,72 @@ async def root():
             "emotion_loop": settings.EMOTION_LOOP_ENABLED if settings else True,
             "autopilot": settings.AUTOPILOT_ENABLED if settings else True,
             "debug": settings.DEBUG if settings else False,
-        }
+        },
     }
+
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint."""
+    """Enhanced health check endpoint with dependency status."""
+    from datetime import datetime
+
+    # Check dependencies
+    deps_status = {}
+    overall_status = "up"
+
+    # Check Mirror Mode
+    try:
+        from core.mirror_mode import get_mirror_mode_manager
+
+        mirror_manager = get_mirror_mode_manager()
+        deps_status["mirror"] = mirror_manager is not None
+    except Exception as e:
+        logger.warning(f"Mirror Mode not available: {e}")
+        deps_status["mirror"] = False
+        overall_status = "degraded"
+
+    # Check Anchor System
+    try:
+        from backend.anchor_system import AnchorSystem
+
+        # Simple import test - more sophisticated check could be added
+        deps_status["anchor"] = True
+    except Exception as e:
+        logger.warning(f"Anchor System not available: {e}")
+        deps_status["anchor"] = False
+        overall_status = "degraded"
+
+    # Check HRM Router
+    try:
+        from backend.hrm_router import HRMRouter
+
+        # Simple import test - more sophisticated check could be added
+        deps_status["hrm"] = True
+    except Exception as e:
+        logger.warning(f"HRM Router not available: {e}")
+        deps_status["hrm"] = False
+        overall_status = "degraded"
+
+    # Determine final status
+    if all(deps_status.values()):
+        overall_status = "up"
+    elif any(deps_status.values()):
+        overall_status = "degraded"
+    else:
+        overall_status = "down"
+
     return {
-        "status": "healthy",
-        "timestamp": "2025-08-07T00:00:00Z",
+        "status": overall_status,
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "safe_mode": settings.SAFE_MODE_FORCE if settings else False,
+        "deps": deps_status,
         "config": {
             "port": settings.PORT if settings else 8000,
             "server_role": settings.SERVER_ROLE if settings else "unknown",
             "server_id": settings.SERVER_ID if settings else "default",
-            "safe_mode": settings.SAFE_MODE_FORCE if settings else False,
-        }
+        },
     }
+
 
 @app.get("/config")
 async def get_config_summary():
@@ -116,7 +169,7 @@ async def get_config_summary():
     if not settings:
         return {
             "error": "Configuration not fully loaded",
-            "message": "Set required environment variables (MONGO_ROOT_USERNAME, MONGO_ROOT_PASSWORD, etc.)"
+            "message": "Set required environment variables (MONGO_ROOT_USERNAME, MONGO_ROOT_PASSWORD, etc.)",
         }
 
     return {
@@ -140,8 +193,9 @@ async def get_config_summary():
         "emotional_processing": {
             "drift_scaling_factor": settings.DRIFT_SCALING_FACTOR,
             "max_penalty_threshold": settings.MAX_PENALTY_THRESHOLD,
-        }
+        },
     }
+
 
 if __name__ == "__main__":
     import uvicorn
@@ -151,10 +205,4 @@ if __name__ == "__main__":
     log_level = settings.LOG_LEVEL.lower() if settings else "info"
 
     logger.info(f"🌐 Starting server on port {port}")
-    uvicorn.run(
-        "app:app",
-        host="0.0.0.0",
-        port=port,
-        reload=debug,
-        log_level=log_level
-    )
+    uvicorn.run("app:app", host="0.0.0.0", port=port, reload=debug, log_level=log_level)

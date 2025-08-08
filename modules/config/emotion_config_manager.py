@@ -4,13 +4,15 @@ Provides runtime access to emotional configuration with hot-reload support
 """
 
 import json
+import logging
 import os
 import time
-from typing import Dict, Any, List, Optional, Callable
+from collections.abc import Callable
 from datetime import datetime
-import logging
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
+
 
 class EmotionConfigManager:
     def __init__(self, config_dir: str = "config/emotion"):
@@ -29,13 +31,13 @@ class EmotionConfigManager:
             "symbol_map.json",
             "tone_profiles.json",
             "ritual_hooks.json",
-            "emotional_signature.json"
+            "emotional_signature.json",
         ]
 
         for config_file in config_files:
             self.load_config(config_file)
 
-    def load_config(self, filename: str) -> Dict[str, Any]:
+    def load_config(self, filename: str) -> dict[str, Any]:
         """Load a specific configuration file with change detection"""
         file_path = os.path.join(self.config_dir, filename)
 
@@ -46,12 +48,13 @@ class EmotionConfigManager:
         try:
             # Check if file has been modified
             modified_time = os.path.getmtime(file_path)
-            config_key = filename.replace('.json', '')
+            config_key = filename.replace(".json", "")
 
-            if (config_key not in self.last_modified or
-                modified_time > self.last_modified[config_key]):
-
-                with open(file_path, 'r') as f:
+            if (
+                config_key not in self.last_modified
+                or modified_time > self.last_modified[config_key]
+            ):
+                with open(file_path) as f:
                     config_data = json.load(f)
 
                 self.configs[config_key] = config_data
@@ -70,7 +73,7 @@ class EmotionConfigManager:
             logger.error(f"Error loading config {filename}: {e}")
             return {}
 
-    def get_emotional_hook(self, trigger_type: str, trigger_name: str) -> Optional[Dict]:
+    def get_emotional_hook(self, trigger_type: str, trigger_name: str) -> Optional[dict]:
         """Get specific emotional hook configuration"""
         hooks = self.configs.get("emotional_hooks", {})
         return hooks.get(trigger_type, {}).get(trigger_name)
@@ -92,7 +95,7 @@ class EmotionConfigManager:
                 "emotion": emotion,
                 "weight": 0.0,
                 "first_seen": datetime.now().isoformat(),
-                "last_reinforced": datetime.now().isoformat()
+                "last_reinforced": datetime.now().isoformat(),
             }
 
         # Update weight and timestamp
@@ -102,20 +105,19 @@ class EmotionConfigManager:
         # Apply max weight limit
         max_weight = symbol_map.get("learning_settings", {}).get("max_weight", 2.0)
         symbol_map["symbols"][symbol]["weight"] = min(
-            symbol_map["symbols"][symbol]["weight"],
-            max_weight
+            symbol_map["symbols"][symbol]["weight"], max_weight
         )
 
         # Save updated configuration
         self.save_config("symbol_map.json", symbol_map)
 
-    def get_tone_profile(self, emotional_state: str) -> Dict[str, Any]:
+    def get_tone_profile(self, emotional_state: str) -> dict[str, Any]:
         """Get voice and tone configuration for emotional state"""
         tone_profiles = self.configs.get("tone_profiles", {})
         emotional_tones = tone_profiles.get("emotional_tones", {})
         return emotional_tones.get(emotional_state, {})
 
-    def get_ritual_hook(self, trigger_event: str) -> Optional[Dict]:
+    def get_ritual_hook(self, trigger_event: str) -> Optional[dict]:
         """Get ritual configuration for specific trigger event"""
         ritual_hooks = self.configs.get("ritual_hooks", {})
 
@@ -127,19 +129,19 @@ class EmotionConfigManager:
                         return ritual_config
         return None
 
-    def get_emotional_signature(self) -> Dict[str, Any]:
+    def get_emotional_signature(self) -> dict[str, Any]:
         """Get current emotional signature configuration"""
         return self.configs.get("emotional_signature", {})
 
-    def save_config(self, filename: str, config_data: Dict[str, Any]):
+    def save_config(self, filename: str, config_data: dict[str, Any]):
         """Save configuration to file"""
         file_path = os.path.join(self.config_dir, filename)
         try:
-            with open(file_path, 'w') as f:
+            with open(file_path, "w") as f:
                 json.dump(config_data, f, indent=2)
 
             # Update internal cache
-            config_key = filename.replace('.json', '')
+            config_key = filename.replace(".json", "")
             self.configs[config_key] = config_data
             self.last_modified[config_key] = time.time()
 
@@ -155,6 +157,7 @@ class EmotionConfigManager:
     def refresh_all_configs(self):
         """Force refresh of all configuration files"""
         self.load_all_configs()
+
 
 # Global instance
 emotion_config = EmotionConfigManager()

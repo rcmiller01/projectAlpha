@@ -18,25 +18,29 @@ import logging
 import os
 import re
 import time
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class TaskType(Enum):
     """Types of tasks that can be routed to council members"""
+
     EXPLICIT_REQUEST = "explicit_request"  # "Ask the Dreamer..."
-    EMOTIONAL_STATE = "emotional_state"    # Route based on current emotion
-    IDLE_LOOP = "idle_loop"               # Background processing tasks
-    EMERGENCY = "emergency"                # High priority interventions
-    COLLABORATIVE = "collaborative"        # Multi-member tasks
+    EMOTIONAL_STATE = "emotional_state"  # Route based on current emotion
+    IDLE_LOOP = "idle_loop"  # Background processing tasks
+    EMERGENCY = "emergency"  # High priority interventions
+    COLLABORATIVE = "collaborative"  # Multi-member tasks
+
 
 class EmotionalContext(Enum):
     """Emotional contexts for routing decisions"""
+
     GRIEF = "grief"
     DOUBT = "doubt"
     JOY = "joy"
@@ -46,9 +50,11 @@ class EmotionalContext(Enum):
     REFLECTION = "reflection"
     NEUTRAL = "neutral"
 
+
 @dataclass
 class CouncilMember:
     """Represents a council member with their capabilities and state"""
+
     name: str
     purpose: str
     model_file: str
@@ -57,11 +63,13 @@ class CouncilMember:
     is_active: bool = False
     last_used: Optional[datetime] = None
     current_load: float = 0.0
-    specialties: Optional[List[str]] = None
+    specialties: Optional[list[str]] = None
+
 
 @dataclass
 class TaskRequest:
     """Represents a task to be routed to council members"""
+
     content: str
     task_type: TaskType
     emotional_context: EmotionalContext = EmotionalContext.NEUTRAL
@@ -70,13 +78,14 @@ class TaskRequest:
     timestamp: Optional[datetime] = None
     preferred_member: Optional[str] = None
 
+
 class CouncilCoordinator:
     """Main coordinator class for managing the AI Council"""
 
     def __init__(self, manifest_path: str = "config/council_manifest.json"):
         self.manifest_path = manifest_path
-        self.members: Dict[str, CouncilMember] = {}
-        self.routing_rules: Dict[str, List[str]] = {}
+        self.members: dict[str, CouncilMember] = {}
+        self.routing_rules: dict[str, list[str]] = {}
         self.round_robin_index = 0
         self.load_manifest()
         self.setup_routing_rules()
@@ -91,7 +100,7 @@ class CouncilCoordinator:
             else:
                 manifest_path = self.manifest_path
 
-            with open(manifest_path, 'r', encoding='utf-8') as f:
+            with open(manifest_path, encoding="utf-8") as f:
                 manifest = json.load(f)
 
             council_config = manifest.get("council", {})
@@ -104,7 +113,7 @@ class CouncilCoordinator:
                     model_file=member_config["model_file"],
                     emotional_signature=member_config["emotional_signature"],
                     task_loop=member_config["task_loop"],
-                    specialties=self._extract_specialties(member_config["purpose"])
+                    specialties=self._extract_specialties(member_config["purpose"]),
                 )
                 self.members[member.name] = member
 
@@ -122,7 +131,7 @@ class CouncilCoordinator:
             logger.error(f"[Council] Error loading manifest: {e}")
             raise
 
-    def _extract_specialties(self, purpose: str) -> List[str]:
+    def _extract_specialties(self, purpose: str) -> list[str]:
         """Extract key specialties from purpose description"""
         # Simple keyword extraction - can be enhanced with NLP
         keywords = purpose.lower().split(", ")
@@ -139,16 +148,14 @@ class CouncilCoordinator:
             EmotionalContext.CREATIVITY.value: ["The Dreamer", "The Painter"],
             EmotionalContext.ANALYSIS.value: ["The Analyst"],
             EmotionalContext.REFLECTION.value: ["The Mirror"],
-
             # Explicit request patterns (regex-based)
             "dream": ["The Dreamer"],
             "analyze|analysis|logic": ["The Analyst"],
             "reflect|mirror|truth": ["The Mirror"],
             "paint|image|visual": ["The Painter"],
-
             # Task type routing
             TaskType.IDLE_LOOP.value: ["The Dreamer", "The Mirror"],  # Background tasks
-            TaskType.EMERGENCY.value: ["The Mirror", "The Analyst"],   # Crisis response
+            TaskType.EMERGENCY.value: ["The Mirror", "The Analyst"],  # Crisis response
         }
 
         logger.info("[Council] Routing rules configured")
@@ -170,21 +177,33 @@ class CouncilCoordinator:
         for pattern, member_names in self.routing_rules.items():
             if pattern in ["dream", "analyze", "reflect", "paint"]:  # Explicit patterns
                 if re.search(pattern, content_lower):
-                    candidates.extend([self.members[name] for name in member_names if name in self.members])
-                    logger.info(f"[Council] Pattern '{pattern}' matched, candidates: {[m.name for m in candidates]}")
+                    candidates.extend(
+                        [self.members[name] for name in member_names if name in self.members]
+                    )
+                    logger.info(
+                        f"[Council] Pattern '{pattern}' matched, candidates: {[m.name for m in candidates]}"
+                    )
                     break
 
         # 3. Route based on emotional context
         if not candidates and task.emotional_context != EmotionalContext.NEUTRAL:
             context_members = self.routing_rules.get(task.emotional_context.value, [])
-            candidates.extend([self.members[name] for name in context_members if name in self.members])
-            logger.info(f"[Council] Emotional context '{task.emotional_context.value}' routing to: {[m.name for m in candidates]}")
+            candidates.extend(
+                [self.members[name] for name in context_members if name in self.members]
+            )
+            logger.info(
+                f"[Council] Emotional context '{task.emotional_context.value}' routing to: {[m.name for m in candidates]}"
+            )
 
         # 4. Route based on task type
         if not candidates:
             task_type_members = self.routing_rules.get(task.task_type.value, [])
-            candidates.extend([self.members[name] for name in task_type_members if name in self.members])
-            logger.info(f"[Council] Task type '{task.task_type.value}' routing to: {[m.name for m in candidates]}")
+            candidates.extend(
+                [self.members[name] for name in task_type_members if name in self.members]
+            )
+            logger.info(
+                f"[Council] Task type '{task.task_type.value}' routing to: {[m.name for m in candidates]}"
+            )
 
         # 5. Fall back to round-robin if no specific routing
         if not candidates:
@@ -204,7 +223,9 @@ class CouncilCoordinator:
 
         return selected
 
-    def _select_best_candidate(self, candidates: List[CouncilMember], task: TaskRequest) -> Optional[CouncilMember]:
+    def _select_best_candidate(
+        self, candidates: list[CouncilMember], task: TaskRequest
+    ) -> Optional[CouncilMember]:
         """Select the best candidate from a list based on load balancing"""
         if not candidates:
             return None
@@ -228,10 +249,13 @@ class CouncilCoordinator:
                 score += 0.3  # Never used bonus
 
             # Consider specialty match
-            if hasattr(task, 'content'):
+            if hasattr(task, "content"):
                 content_words = task.content.lower().split()
-                specialty_matches = sum(1 for specialty in (member.specialties or [])
-                                     if any(word in specialty for word in content_words))
+                specialty_matches = sum(
+                    1
+                    for specialty in (member.specialties or [])
+                    if any(word in specialty for word in content_words)
+                )
                 score += specialty_matches * 0.3
 
             scored_candidates.append((member, score))
@@ -240,12 +264,19 @@ class CouncilCoordinator:
         scored_candidates.sort(key=lambda x: x[1], reverse=True)
         best_member = scored_candidates[0][0]
 
-        logger.debug(f"[Council] Best candidate: {best_member.name} (score: {scored_candidates[0][1]:.3f})")
+        logger.debug(
+            f"[Council] Best candidate: {best_member.name} (score: {scored_candidates[0][1]:.3f})"
+        )
         return best_member
 
-    def create_task(self, content: str, task_type: TaskType = TaskType.EXPLICIT_REQUEST,
-                   emotional_context: EmotionalContext = EmotionalContext.NEUTRAL,
-                   priority: int = 5, preferred_member: Optional[str] = None) -> TaskRequest:
+    def create_task(
+        self,
+        content: str,
+        task_type: TaskType = TaskType.EXPLICIT_REQUEST,
+        emotional_context: EmotionalContext = EmotionalContext.NEUTRAL,
+        priority: int = 5,
+        preferred_member: Optional[str] = None,
+    ) -> TaskRequest:
         """Create a new task request"""
         return TaskRequest(
             content=content,
@@ -253,7 +284,7 @@ class CouncilCoordinator:
             emotional_context=emotional_context,
             priority=priority,
             timestamp=datetime.now(),
-            preferred_member=preferred_member
+            preferred_member=preferred_member,
         )
 
     def process_explicit_request(self, request: str) -> Optional[CouncilMember]:
@@ -263,7 +294,9 @@ class CouncilCoordinator:
         # Check for explicit member mentions
         for member_name in self.members.keys():
             if member_name.lower() in request_lower:
-                task = self.create_task(request, TaskType.EXPLICIT_REQUEST, preferred_member=member_name)
+                task = self.create_task(
+                    request, TaskType.EXPLICIT_REQUEST, preferred_member=member_name
+                )
                 return self.route_task(task)
 
         # No explicit member found, route normally
@@ -275,7 +308,7 @@ class CouncilCoordinator:
         task = self.create_task(content, TaskType.EMOTIONAL_STATE, emotion)
         return self.route_task(task)
 
-    def schedule_idle_loops(self) -> Dict[str, List[str]]:
+    def schedule_idle_loops(self) -> dict[str, list[str]]:
         """Schedule idle background tasks for council members"""
         schedule = {}
         current_time = datetime.now()
@@ -295,7 +328,7 @@ class CouncilCoordinator:
         logger.info(f"[Council] Scheduled idle loops: {schedule}")
         return schedule
 
-    def get_member_status(self) -> Dict[str, Dict]:
+    def get_member_status(self) -> dict[str, dict]:
         """Get status of all council members"""
         status = {}
         for name, member in self.members.items():
@@ -303,7 +336,7 @@ class CouncilCoordinator:
                 "active": member.is_active,
                 "load": member.current_load,
                 "last_used": member.last_used.isoformat() if member.last_used else None,
-                "specialties": member.specialties
+                "specialties": member.specialties,
             }
         return status
 
@@ -312,6 +345,7 @@ class CouncilCoordinator:
         for member in self.members.values():
             member.current_load = max(0, member.current_load - 0.1)  # Gradual decay
         logger.debug("[Council] Member loads reset")
+
 
 def main():
     """Example usage and testing"""
@@ -326,7 +360,7 @@ def main():
         "Ask the Dreamer to create a story about flying",
         "Have the Analyst examine this data pattern",
         "Let the Mirror reflect on this contradiction",
-        "Get the Painter to visualize this concept"
+        "Get the Painter to visualize this concept",
     ]
 
     for request in test_requests:
@@ -339,7 +373,7 @@ def main():
         (EmotionalContext.GRIEF, "I'm feeling lost and sad"),
         (EmotionalContext.DOUBT, "I'm not sure about this decision"),
         (EmotionalContext.JOY, "This is wonderful news!"),
-        (EmotionalContext.CREATIVITY, "I need inspiration for a project")
+        (EmotionalContext.CREATIVITY, "I need inspiration for a project"),
     ]
 
     for emotion, content in emotional_tests:
@@ -357,6 +391,7 @@ def main():
     status = coordinator.get_member_status()
     for name, info in status.items():
         print(f"  {name}: Load={info['load']:.2f}, Active={info['active']}")
+
 
 if __name__ == "__main__":
     main()

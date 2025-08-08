@@ -3,21 +3,25 @@ SubAgent Router Integration with FastAPI Backend
 Demonstrates how to integrate the SubAgent Router system with the existing backend
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import Dict, Any, Optional, List
 import asyncio
 import time
+from typing import Any, Dict, List, Optional
+
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
+from backend.ai_reformulator import PersonalityFormatter, ReformulationRequest
 
 # Import our SubAgent Router system
 from backend.subagent_router import SubAgentRouter
-from backend.ai_reformulator import PersonalityFormatter, ReformulationRequest
+
 
 # Pydantic models for API
 class ChatRequest(BaseModel):
     message: str
-    context: Optional[Dict[str, Any]] = None
+    context: Optional[dict[str, Any]] = None
     user_id: Optional[str] = None
+
 
 class SubAgentResponse(BaseModel):
     response: str
@@ -27,13 +31,15 @@ class SubAgentResponse(BaseModel):
     formatting_confidence: float
     emotional_tone: str
     processing_time: float
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
+
 
 class AnalyticsResponse(BaseModel):
     total_routes: int
-    intent_distribution: Dict[str, int]
-    agent_performance: Dict[str, Dict[str, float]]
-    available_agents: List[str]
+    intent_distribution: dict[str, int]
+    agent_performance: dict[str, dict[str, float]]
+    available_agents: list[str]
+
 
 # FastAPI app setup
 app = FastAPI(title="SubAgent Router API", version="1.0.0")
@@ -42,11 +48,13 @@ app = FastAPI(title="SubAgent Router API", version="1.0.0")
 router = SubAgentRouter()
 formatter = PersonalityFormatter()
 
+
 @app.on_event("startup")
 async def startup_event():
     """Initialize the SubAgent Router system on startup"""
     print("🚀 Initializing SubAgent Router System...")
     print(f"✅ Available agents: {list(router.agents.keys())}")
+
 
 @app.post("/chat/subagent", response_model=SubAgentResponse)
 async def chat_with_subagents(request: ChatRequest):
@@ -75,7 +83,7 @@ async def chat_with_subagents(request: ChatRequest):
             agent_type=agent_response.agent_type,
             intent_detected=agent_response.intent_detected.value,
             user_context=context,
-            personality_context={}
+            personality_context={},
         )
 
         formatted_response = await formatter.format(format_request)
@@ -94,12 +102,13 @@ async def chat_with_subagents(request: ChatRequest):
                 "original_response": agent_response.content,
                 "personality_adjustments": formatted_response.personality_adjustments,
                 "agent_metadata": agent_response.metadata,
-                "processing_notes": formatted_response.processing_notes
-            }
+                "processing_notes": formatted_response.processing_notes,
+            },
         )
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"SubAgent processing failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"SubAgent processing failed: {e!s}")
+
 
 @app.get("/analytics/routing", response_model=AnalyticsResponse)
 async def get_routing_analytics():
@@ -111,11 +120,12 @@ async def get_routing_analytics():
             total_routes=analytics["total_routes"],
             intent_distribution=analytics["intent_distribution"],
             agent_performance=analytics["agent_performance"],
-            available_agents=analytics["available_agents"]
+            available_agents=analytics["available_agents"],
         )
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Analytics retrieval failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Analytics retrieval failed: {e!s}")
+
 
 @app.get("/agents/capabilities")
 async def get_agent_capabilities():
@@ -124,38 +134,41 @@ async def get_agent_capabilities():
         capabilities = {}
 
         for agent_name, agent in router.agents.items():
-            if agent is not None and hasattr(agent, 'get_capabilities'):
+            if agent is not None and hasattr(agent, "get_capabilities"):
                 capabilities[agent_name] = agent.get_capabilities()
             else:
                 capabilities[agent_name] = {
                     "agent_type": agent_name,
                     "status": "available" if agent_name == "conversational" else "mock",
-                    "specialties": ["General conversation and emotional support"]
+                    "specialties": ["General conversation and emotional support"],
                 }
 
         return capabilities
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Capabilities retrieval failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Capabilities retrieval failed: {e!s}")
+
 
 @app.post("/chat/intent-classify")
 async def classify_intent(request: ChatRequest):
     """Classify the intent of a message without processing it"""
     try:
         intent, confidence = router.classifier.classify_intent(
-            request.message,
-            request.context or {}
+            request.message, request.context or {}
         )
 
         return {
             "message": request.message,
             "intent": intent.value,
             "confidence": confidence,
-            "suggested_agent": router._make_routing_decision(intent, confidence, request.context or {}).agent_chosen
+            "suggested_agent": router._make_routing_decision(
+                intent, confidence, request.context or {}
+            ).agent_chosen,
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Intent classification failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Intent classification failed: {e!s}")
+
 
 @app.get("/personality/profile")
 async def get_personality_profile():
@@ -166,26 +179,28 @@ async def get_personality_profile():
         return {
             "personality_traits": profile,
             "available_tones": list(formatter.tone_mappings.values()),
-            "emotional_filters": list(formatter.emotional_filters.keys())
+            "emotional_filters": list(formatter.emotional_filters.keys()),
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Personality profile retrieval failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Personality profile retrieval failed: {e!s}")
+
 
 @app.post("/personality/feedback")
-async def apply_personality_feedback(user_response: str, ai_message: str, context: Optional[Dict[str, Any]] = None):
+async def apply_personality_feedback(
+    user_response: str, ai_message: str, context: Optional[dict[str, Any]] = None
+):
     """Apply user feedback to evolve personality preferences"""
     try:
         formatter.apply_personality_evolution_feedback(
-            user_response=user_response,
-            reformulated_response=ai_message,
-            context=context or {}
+            user_response=user_response, reformulated_response=ai_message, context=context or {}
         )
 
         return {"status": "feedback_applied", "message": "Personality evolution updated"}
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Feedback application failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Feedback application failed: {e!s}")
+
 
 # Health check endpoint
 @app.get("/health")
@@ -199,17 +214,12 @@ async def health_check():
             "status": "healthy",
             "available_agents": list(router.agents.keys()),
             "total_routes_processed": len(router.routing_history),
-            "test_classification": {
-                "intent": test_intent.value,
-                "confidence": test_confidence
-            }
+            "test_classification": {"intent": test_intent.value, "confidence": test_confidence},
         }
 
     except Exception as e:
-        return {
-            "status": "unhealthy",
-            "error": str(e)
-        }
+        return {"status": "unhealthy", "error": str(e)}
+
 
 # Example usage function
 async def example_usage():
@@ -222,16 +232,13 @@ async def example_usage():
     examples = [
         {
             "message": "Help me debug this Python function",
-            "context": {"mood": "focused", "project_type": "python"}
+            "context": {"mood": "focused", "project_type": "python"},
         },
         {
             "message": "Tell me a story about courage",
-            "context": {"mood": "creative", "conversation_depth": 0.6}
+            "context": {"mood": "creative", "conversation_depth": 0.6},
         },
-        {
-            "message": "I'm feeling overwhelmed",
-            "context": {"mood": "anxious"}
-        }
+        {"message": "I'm feeling overwhelmed", "context": {"mood": "anxious"}},
     ]
 
     for example in examples:
@@ -244,6 +251,7 @@ async def example_usage():
         print(f"   Agent: {response.agent_used}")
         print(f"   Intent: {response.intent_detected}")
         print(f"   Response: {response.response[:100]}...")
+
 
 if __name__ == "__main__":
     # Run example usage

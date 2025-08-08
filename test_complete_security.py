@@ -11,6 +11,7 @@ from pathlib import Path
 # Add backend to path
 sys.path.insert(0, str(Path(__file__).parent / "backend"))
 
+
 def test_security_module():
     """Test the security module functions."""
     print("🧪 Testing Security Module")
@@ -18,8 +19,12 @@ def test_security_module():
 
     try:
         from backend.common.security import (
-            mask_token, extract_token, get_token_type,
-            require_scope, validate_json_schema, audit_action
+            audit_action,
+            extract_token,
+            get_token_type,
+            mask_token,
+            require_scope,
+            validate_json_schema,
         )
 
         # Test token masking
@@ -40,10 +45,7 @@ def test_security_module():
 
         # Test token extraction
         print("\n📋 Testing token extraction:")
-        headers = {
-            "Authorization": "Bearer test_bearer_token",
-            "X-API-Key": "test_api_key"
-        }
+        headers = {"Authorization": "Bearer test_bearer_token", "X-API-Key": "test_api_key"}
 
         # Mock request object
         class MockRequest:
@@ -79,6 +81,7 @@ def test_security_module():
 
     return True
 
+
 def test_json_schemas():
     """Test JSON schema validation."""
     print("\n🧪 Testing JSON Schema Validation")
@@ -91,7 +94,7 @@ def test_json_schemas():
         valid_data = {
             "content": "Test memory content",
             "layer": "ephemeral",
-            "metadata": {"source": "test"}
+            "metadata": {"source": "test"},
         }
 
         # Test valid data
@@ -106,11 +109,7 @@ def test_json_schemas():
         print("   ✅ Missing required field correctly rejected")
 
         # Test unknown field
-        invalid_data = {
-            "content": "Test",
-            "layer": "ephemeral",
-            "unknown_field": "bad"
-        }
+        invalid_data = {"content": "Test", "layer": "ephemeral", "unknown_field": "bad"}
         errors = validate_json_data(invalid_data, MEMORY_CREATE_SCHEMA)
         assert errors, "Unknown field should fail validation"
         print("   ✅ Unknown field correctly rejected")
@@ -126,6 +125,7 @@ def test_json_schemas():
 
     return True
 
+
 def test_audit_logging():
     """Test audit logging functionality."""
     print("\n🧪 Testing Audit Logging")
@@ -140,13 +140,13 @@ def test_audit_logging():
             action="test_action",
             success=True,
             layer="ephemeral",
-            details={"test": "data"}
+            details={"test": "data"},
         )
 
         # Check if audit log was created
         audit_file = Path("logs/audit.jsonl")
         if audit_file.exists():
-            with open(audit_file, 'r') as f:
+            with open(audit_file) as f:
                 lines = f.readlines()
 
             if lines:
@@ -158,7 +158,7 @@ def test_audit_logging():
                     assert field in last_entry, f"Missing required field: {field}"
 
                 print(f"   ✅ Audit log created with {len(lines)} entries")
-                print(f"   ✅ Last entry has all required fields")
+                print("   ✅ Last entry has all required fields")
                 return True
             else:
                 print("   ❌ Audit log file is empty")
@@ -170,6 +170,7 @@ def test_audit_logging():
     except Exception as e:
         print(f"❌ Audit logging test failed: {e}")
         return False
+
 
 def test_weighting_strategy_enum():
     """Test WeightingStrategy enum usage."""
@@ -208,6 +209,7 @@ def test_weighting_strategy_enum():
         print(f"❌ WeightingStrategy test failed: {e}")
         return False
 
+
 def check_security_files():
     """Check if all security-enhanced files exist and are valid."""
     print("\n🧪 Checking Security-Enhanced Files")
@@ -218,7 +220,7 @@ def check_security_files():
         "backend/memory_symbol_api.py",
         "backend/hrm_api.py",
         "backend/hrm_router.py",
-        "backend/core_arbiter_api.py"
+        "backend/core_arbiter_api.py",
     ]
 
     all_good = True
@@ -227,7 +229,7 @@ def check_security_files():
         full_path = Path(file_path)
         if full_path.exists():
             try:
-                with open(full_path, 'r', encoding='utf-8') as f:
+                with open(full_path, encoding="utf-8") as f:
                     content = f.read()
 
                 # Check for security imports
@@ -245,6 +247,7 @@ def check_security_files():
 
     return all_good
 
+
 def main():
     """Run all security tests."""
     print("🚀 ProjectAlpha Complete Security Test Suite")
@@ -255,7 +258,7 @@ def main():
         ("JSON Schema Validation", test_json_schemas),
         ("Audit Logging", test_audit_logging),
         ("WeightingStrategy Enum", test_weighting_strategy_enum),
-        ("Security Files Check", check_security_files)
+        ("Security Files Check", check_security_files),
     ]
 
     results = []
@@ -296,6 +299,7 @@ def main():
         print("   ✅ Comprehensive error handling")
     else:
         print("⚠️  Some tests failed - review the output above")
+
 
 if __name__ == "__main__":
     main()

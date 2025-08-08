@@ -5,9 +5,10 @@ Tests core security functionality without complex imports.
 """
 
 import json
-import sys
 import os
+import sys
 from pathlib import Path
+
 
 def test_token_masking():
     """Test token masking functionality."""
@@ -42,6 +43,7 @@ def test_token_masking():
 
     return all_passed
 
+
 def test_security_files_exist():
     """Check if all security-enhanced files exist."""
     print("\n🧪 Checking Security Files")
@@ -52,7 +54,7 @@ def test_security_files_exist():
         "backend/memory_symbol_api.py",
         "backend/hrm_api.py",
         "backend/hrm_router.py",
-        "backend/core_arbiter_api.py"
+        "backend/core_arbiter_api.py",
     ]
 
     all_exist = True
@@ -66,6 +68,7 @@ def test_security_files_exist():
 
     return all_exist
 
+
 def test_audit_log_structure():
     """Test audit log file structure."""
     print("\n🧪 Testing Audit Log")
@@ -77,7 +80,7 @@ def test_audit_log_structure():
         print(f"   ✅ Audit log exists: {audit_file}")
 
         try:
-            with open(audit_file, 'r') as f:
+            with open(audit_file) as f:
                 lines = f.readlines()
 
             print(f"   ✅ Found {len(lines)} audit entries")
@@ -108,6 +111,7 @@ def test_audit_log_structure():
     else:
         print("   ⚠️  Audit log not yet created (normal for first run)")
         return True
+
 
 def test_json_schema_structure():
     """Test JSON schema validation structure."""
@@ -165,6 +169,7 @@ def test_json_schema_structure():
 
     return True
 
+
 def test_rbac_structure():
     """Test RBAC structure and logic."""
     print("\n🧪 Testing RBAC Structure")
@@ -185,9 +190,9 @@ def test_rbac_structure():
 
     # Layer permissions
     layer_permissions = {
-        'identity': {'admin'},
-        'beliefs': {'admin', 'system'},
-        'ephemeral': {'admin', 'system', 'user'},
+        "identity": {"admin"},
+        "beliefs": {"admin", "system"},
+        "ephemeral": {"admin", "system", "user"},
     }
 
     def check_layer_access(token, layer):
@@ -218,6 +223,7 @@ def test_rbac_structure():
 
     return all_passed
 
+
 def main():
     """Run all security tests."""
     print("🚀 ProjectAlpha Security Verification")
@@ -228,7 +234,7 @@ def main():
         ("Security Files", test_security_files_exist),
         ("Audit Log Structure", test_audit_log_structure),
         ("JSON Schema Validation", test_json_schema_structure),
-        ("RBAC Logic", test_rbac_structure)
+        ("RBAC Logic", test_rbac_structure),
     ]
 
     results = []
@@ -278,6 +284,7 @@ def main():
 
     else:
         print("⚠️  Some verifications failed - check implementation")
+
 
 if __name__ == "__main__":
     main()

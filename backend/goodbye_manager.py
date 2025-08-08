@@ -9,26 +9,29 @@ Enhanced with security features:
 """
 
 import hashlib
-import re
-import time
-import threading
-import logging
 import json
-from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, List, Callable, Tuple
-from collections import deque, defaultdict
+import logging
+import re
+import threading
+import time
+from collections import defaultdict, deque
+from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
 
 # Enhanced logging configuration
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
+
 class GoodbyeState(Enum):
     """Goodbye procedure states"""
+
     INITIATED = "initiated"
     CLEANING_UP = "cleaning_up"
     SAVING_STATE = "saving_state"
@@ -36,14 +39,17 @@ class GoodbyeState(Enum):
     COMPLETED = "completed"
     FAILED = "failed"
 
+
 class GoodbyeReason(Enum):
     """Reasons for goodbye procedures"""
+
     USER_REQUEST = "user_request"
     SESSION_TIMEOUT = "session_timeout"
     SYSTEM_SHUTDOWN = "system_shutdown"
     ERROR_CONDITION = "error_condition"
     MAINTENANCE = "maintenance"
     SECURITY_VIOLATION = "security_violation"
+
 
 # Security configuration
 GOODBYE_SESSION_LENGTH = 32
@@ -65,9 +71,11 @@ goodbye_requests = defaultdict(lambda: deque())
 # Access monitoring
 goodbye_access_history = deque(maxlen=1000)
 
+
 @dataclass
 class GoodbyeTask:
     """A cleanup task to be executed during goodbye"""
+
     name: str
     callback: Callable[[], bool]
     priority: int
@@ -75,18 +83,21 @@ class GoodbyeTask:
     description: str
     created_at: str
 
+
 @dataclass
 class GoodbyeReport:
     """Report of goodbye procedure execution"""
+
     goodbye_id: str
     reason: GoodbyeReason
     state: GoodbyeState
     started_at: str
     completed_at: Optional[str]
-    tasks_executed: List[Dict[str, Any]]
+    tasks_executed: list[dict[str, Any]]
     cleanup_success: bool
     session_token: str
-    security_metadata: Dict[str, Any]
+    security_metadata: dict[str, Any]
+
 
 def generate_goodbye_session() -> str:
     """Generate a secure goodbye session token"""
@@ -94,6 +105,7 @@ def generate_goodbye_session() -> str:
     random_data = str(hash(datetime.now()))
     token_string = f"goodbye:{timestamp}:{random_data}"
     return hashlib.sha256(token_string.encode()).hexdigest()[:GOODBYE_SESSION_LENGTH]
+
 
 def validate_goodbye_session(session_token: str) -> bool:
     """Validate goodbye session token"""
@@ -105,21 +117,23 @@ def validate_goodbye_session(session_token: str) -> bool:
 
     # Check if session has expired
     session_data = goodbye_sessions[session_token]
-    if datetime.now() > session_data['expires_at']:
+    if datetime.now() > session_data["expires_at"]:
         del goodbye_sessions[session_token]
         return False
 
     # Update last access time
-    session_data['last_access'] = datetime.now()
+    session_data["last_access"] = datetime.now()
     return True
+
 
 def check_goodbye_rate_limit(session_token: str) -> bool:
     """Check if goodbye operation rate limit is exceeded"""
     current_time = time.time()
 
     # Clean old requests
-    while (goodbye_requests[session_token] and
-           goodbye_requests[session_token][0] < current_time - 3600):  # 1 hour window
+    while (
+        goodbye_requests[session_token] and goodbye_requests[session_token][0] < current_time - 3600
+    ):  # 1 hour window
         goodbye_requests[session_token].popleft()
 
     # Check limit
@@ -131,7 +145,8 @@ def check_goodbye_rate_limit(session_token: str) -> bool:
     goodbye_requests[session_token].append(current_time)
     return True
 
-def validate_goodbye_message(message: str) -> Tuple[bool, str]:
+
+def validate_goodbye_message(message: str) -> tuple[bool, str]:
     """Validate goodbye message"""
     try:
         if not isinstance(message, str):
@@ -142,9 +157,9 @@ def validate_goodbye_message(message: str) -> Tuple[bool, str]:
 
         # Check for dangerous content
         dangerous_patterns = [
-            r'<script[^>]*>.*?</script>',  # XSS
-            r'javascript:',               # JavaScript protocol
-            r'on\w+\s*=',                # Event handlers
+            r"<script[^>]*>.*?</script>",  # XSS
+            r"javascript:",  # JavaScript protocol
+            r"on\w+\s*=",  # Event handlers
         ]
 
         for pattern in dangerous_patterns:
@@ -154,28 +169,32 @@ def validate_goodbye_message(message: str) -> Tuple[bool, str]:
         return True, "Valid"
 
     except Exception as e:
-        logger.error(f"Error validating goodbye message: {str(e)}")
-        return False, f"Validation error: {str(e)}"
+        logger.error(f"Error validating goodbye message: {e!s}")
+        return False, f"Validation error: {e!s}"
+
 
 def sanitize_goodbye_message(message: str) -> str:
     """Sanitize goodbye message for safety"""
     # Remove dangerous characters
-    clean_message = re.sub(r'[<>"\']', '', str(message))
+    clean_message = re.sub(r'[<>"\']', "", str(message))
     # Limit length
     if len(clean_message) > MAX_GOODBYE_MESSAGE_LENGTH:
         clean_message = clean_message[:MAX_GOODBYE_MESSAGE_LENGTH] + "..."
     return clean_message
 
-def log_goodbye_activity(activity_type: str, session_token: str, details: Dict[str, Any], status: str = "success"):
+
+def log_goodbye_activity(
+    activity_type: str, session_token: str, details: dict[str, Any], status: str = "success"
+):
     """Log goodbye access activities"""
     try:
         log_entry = {
-            'timestamp': datetime.now().isoformat(),
-            'activity_type': activity_type,
-            'session': session_token[:8] + "..." if session_token else "none",
-            'details': details,
-            'status': status,
-            'thread_id': threading.get_ident()
+            "timestamp": datetime.now().isoformat(),
+            "activity_type": activity_type,
+            "session": session_token[:8] + "..." if session_token else "none",
+            "details": details,
+            "status": status,
+            "thread_id": threading.get_ident(),
         }
 
         goodbye_access_history.append(log_entry)
@@ -186,7 +205,8 @@ def log_goodbye_activity(activity_type: str, session_token: str, details: Dict[s
             logger.warning(f"Goodbye access issue: {activity_type} failed with {status}")
 
     except Exception as e:
-        logger.error(f"Error logging goodbye access: {str(e)}")
+        logger.error(f"Error logging goodbye access: {e!s}")
+
 
 class GoodbyeManager:
     """
@@ -205,29 +225,33 @@ class GoodbyeManager:
         """Initialize goodbye manager with security features"""
         self.session_token = session_token or self.create_session()
         self.creation_time = datetime.now()
-        self.cleanup_tasks: List[GoodbyeTask] = []
+        self.cleanup_tasks: list[GoodbyeTask] = []
         self.goodbye_count = 0
         self.current_state = GoodbyeState.INITIATED
 
         # Initialize default cleanup tasks
         self._register_default_tasks()
 
-        log_goodbye_activity("initialization", self.session_token, {
-            "creation_time": self.creation_time.isoformat(),
-            "default_tasks": len(self.cleanup_tasks)
-        })
+        log_goodbye_activity(
+            "initialization",
+            self.session_token,
+            {
+                "creation_time": self.creation_time.isoformat(),
+                "default_tasks": len(self.cleanup_tasks),
+            },
+        )
 
-        logger.info(f"GoodbyeManager initialized with security features")
+        logger.info("GoodbyeManager initialized with security features")
 
     def create_session(self) -> str:
         """Create a new goodbye session"""
         with goodbye_lock:
             session_token = generate_goodbye_session()
             goodbye_sessions[session_token] = {
-                'created_at': datetime.now(),
-                'expires_at': datetime.now() + timedelta(hours=session_expiry_hours),
-                'last_access': datetime.now(),
-                'goodbye_operations': 0
+                "created_at": datetime.now(),
+                "expires_at": datetime.now() + timedelta(hours=session_expiry_hours),
+                "last_access": datetime.now(),
+                "goodbye_operations": 0,
             }
             return session_token
 
@@ -249,29 +273,29 @@ class GoodbyeManager:
                 "callback": self._save_session_state,
                 "priority": 1,
                 "timeout": 30.0,
-                "description": "Save current session state to persistent storage"
+                "description": "Save current session state to persistent storage",
             },
             {
                 "name": "cleanup_temp_files",
                 "callback": self._cleanup_temp_files,
                 "priority": 2,
                 "timeout": 15.0,
-                "description": "Remove temporary files and cache"
+                "description": "Remove temporary files and cache",
             },
             {
                 "name": "close_connections",
                 "callback": self._close_connections,
                 "priority": 3,
                 "timeout": 10.0,
-                "description": "Close network connections and file handles"
+                "description": "Close network connections and file handles",
             },
             {
                 "name": "finalize_logs",
                 "callback": self._finalize_logs,
                 "priority": 4,
                 "timeout": 5.0,
-                "description": "Flush and finalize log files"
-            }
+                "description": "Flush and finalize log files",
+            },
         ]
 
         for task_config in default_tasks:
@@ -281,20 +305,22 @@ class GoodbyeManager:
                 priority=task_config["priority"],
                 timeout=task_config["timeout"],
                 description=task_config["description"],
-                created_at=datetime.now().isoformat()
+                created_at=datetime.now().isoformat(),
             )
             self.cleanup_tasks.append(task)
 
         # Sort tasks by priority
         self.cleanup_tasks.sort(key=lambda t: t.priority)
 
-    def register_cleanup_task(self,
-                            name: str,
-                            callback: Callable[[], bool],
-                            priority: int = 5,
-                            timeout: float = 30.0,
-                            description: str = "",
-                            session_token: Optional[str] = None) -> bool:
+    def register_cleanup_task(
+        self,
+        name: str,
+        callback: Callable[[], bool],
+        priority: int = 5,
+        timeout: float = 30.0,
+        description: str = "",
+        session_token: Optional[str] = None,
+    ) -> bool:
         """
         Register a cleanup task with security validation.
 
@@ -312,16 +338,24 @@ class GoodbyeManager:
         try:
             # Validate session
             if not self.validate_session(session_token):
-                log_goodbye_activity("register_task", session_token or self.session_token,
-                                    {"name": name, "status": "session_invalid"}, "failed")
+                log_goodbye_activity(
+                    "register_task",
+                    session_token or self.session_token,
+                    {"name": name, "status": "session_invalid"},
+                    "failed",
+                )
                 return False
 
             current_token = session_token or self.session_token
 
             # Check rate limit
             if not check_goodbye_rate_limit(current_token):
-                log_goodbye_activity("register_task", current_token,
-                                    {"name": name, "status": "rate_limited"}, "failed")
+                log_goodbye_activity(
+                    "register_task",
+                    current_token,
+                    {"name": name, "status": "rate_limited"},
+                    "failed",
+                )
                 return False
 
             # Validate task parameters
@@ -346,23 +380,31 @@ class GoodbyeManager:
                 logger.warning(f"Task timeout clamped to {MAX_GOODBYE_TIMEOUT} seconds")
 
             # Sanitize name and description
-            clean_name = re.sub(r'[<>"\']', '', name.strip())
-            clean_description = re.sub(r'[<>"\']', '', str(description))
+            clean_name = re.sub(r'[<>"\']', "", name.strip())
+            clean_description = re.sub(r'[<>"\']', "", str(description))
 
             with goodbye_lock:
                 # Check if too many tasks
                 if len(self.cleanup_tasks) >= MAX_CLEANUP_TASKS:
                     logger.error(f"Too many cleanup tasks (max {MAX_CLEANUP_TASKS})")
-                    log_goodbye_activity("register_task", current_token,
-                                        {"name": clean_name, "error": "too_many_tasks"}, "failed")
+                    log_goodbye_activity(
+                        "register_task",
+                        current_token,
+                        {"name": clean_name, "error": "too_many_tasks"},
+                        "failed",
+                    )
                     return False
 
                 # Check for duplicate name
                 existing_names = [task.name for task in self.cleanup_tasks]
                 if clean_name in existing_names:
                     logger.error(f"Task with name '{clean_name}' already exists")
-                    log_goodbye_activity("register_task", current_token,
-                                        {"name": clean_name, "error": "duplicate_name"}, "failed")
+                    log_goodbye_activity(
+                        "register_task",
+                        current_token,
+                        {"name": clean_name, "error": "duplicate_name"},
+                        "failed",
+                    )
                     return False
 
                 # Create and register task
@@ -372,7 +414,7 @@ class GoodbyeManager:
                     priority=priority,
                     timeout=timeout,
                     description=clean_description,
-                    created_at=datetime.now().isoformat()
+                    created_at=datetime.now().isoformat(),
                 )
 
                 self.cleanup_tasks.append(task)
@@ -382,28 +424,38 @@ class GoodbyeManager:
 
                 # Update session tracking
                 if current_token in goodbye_sessions:
-                    goodbye_sessions[current_token]['goodbye_operations'] += 1
+                    goodbye_sessions[current_token]["goodbye_operations"] += 1
 
-            log_goodbye_activity("register_task", current_token, {
-                "name": clean_name,
-                "priority": priority,
-                "timeout": timeout,
-                "tasks_count": len(self.cleanup_tasks)
-            })
+            log_goodbye_activity(
+                "register_task",
+                current_token,
+                {
+                    "name": clean_name,
+                    "priority": priority,
+                    "timeout": timeout,
+                    "tasks_count": len(self.cleanup_tasks),
+                },
+            )
 
             logger.info(f"Cleanup task registered: {clean_name} (priority: {priority})")
             return True
 
         except Exception as e:
-            logger.error(f"Error registering cleanup task: {str(e)}")
-            log_goodbye_activity("register_task", session_token or self.session_token,
-                                {"name": name, "error": str(e)}, "error")
+            logger.error(f"Error registering cleanup task: {e!s}")
+            log_goodbye_activity(
+                "register_task",
+                session_token or self.session_token,
+                {"name": name, "error": str(e)},
+                "error",
+            )
             return False
 
-    def say_goodbye(self,
-                   reason: GoodbyeReason = GoodbyeReason.USER_REQUEST,
-                   message: str = "",
-                   session_token: Optional[str] = None) -> GoodbyeReport:
+    def say_goodbye(
+        self,
+        reason: GoodbyeReason = GoodbyeReason.USER_REQUEST,
+        message: str = "",
+        session_token: Optional[str] = None,
+    ) -> GoodbyeReport:
         """
         Execute goodbye procedure with security validation.
 
@@ -421,16 +473,24 @@ class GoodbyeManager:
         try:
             # Validate session
             if not self.validate_session(session_token):
-                log_goodbye_activity("say_goodbye", session_token or self.session_token,
-                                    {"reason": reason.value, "status": "session_invalid"}, "failed")
+                log_goodbye_activity(
+                    "say_goodbye",
+                    session_token or self.session_token,
+                    {"reason": reason.value, "status": "session_invalid"},
+                    "failed",
+                )
                 return self._create_error_report(goodbye_id, reason, "Invalid session")
 
             current_token = session_token or self.session_token
 
             # Check rate limit
             if not check_goodbye_rate_limit(current_token):
-                log_goodbye_activity("say_goodbye", current_token,
-                                    {"reason": reason.value, "status": "rate_limited"}, "failed")
+                log_goodbye_activity(
+                    "say_goodbye",
+                    current_token,
+                    {"reason": reason.value, "status": "rate_limited"},
+                    "failed",
+                )
                 return self._create_error_report(goodbye_id, reason, "Rate limit exceeded")
 
             # Validate and sanitize message
@@ -454,13 +514,13 @@ class GoodbyeManager:
             for task in self.cleanup_tasks:
                 task_start = time.time()
                 task_result = {
-                    'name': task.name,
-                    'priority': task.priority,
-                    'description': task.description,
-                    'started_at': datetime.now().isoformat(),
-                    'success': False,
-                    'execution_time': 0.0,
-                    'error': None
+                    "name": task.name,
+                    "priority": task.priority,
+                    "description": task.description,
+                    "started_at": datetime.now().isoformat(),
+                    "success": False,
+                    "execution_time": 0.0,
+                    "error": None,
                 }
 
                 try:
@@ -468,7 +528,7 @@ class GoodbyeManager:
 
                     # Execute task with timeout
                     success = task.callback()
-                    task_result['success'] = bool(success)
+                    task_result["success"] = bool(success)
 
                     if not success:
                         cleanup_success = False
@@ -476,11 +536,11 @@ class GoodbyeManager:
 
                 except Exception as task_error:
                     cleanup_success = False
-                    task_result['error'] = str(task_error)
-                    logger.error(f"Error in cleanup task {task.name}: {str(task_error)}")
+                    task_result["error"] = str(task_error)
+                    logger.error(f"Error in cleanup task {task.name}: {task_error!s}")
 
                 finally:
-                    task_result['execution_time'] = time.time() - task_start
+                    task_result["execution_time"] = time.time() - task_start
                     tasks_executed.append(task_result)
 
             # Update state
@@ -490,7 +550,7 @@ class GoodbyeManager:
             with goodbye_lock:
                 self.goodbye_count += 1
                 if current_token in goodbye_sessions:
-                    goodbye_sessions[current_token]['goodbye_operations'] += 1
+                    goodbye_sessions[current_token]["goodbye_operations"] += 1
 
             # Create report
             self.current_state = GoodbyeState.COMPLETED if cleanup_success else GoodbyeState.FAILED
@@ -508,19 +568,25 @@ class GoodbyeManager:
                     "session_validated": True,
                     "rate_limit_checked": True,
                     "message_sanitized": bool(message),
-                    "tasks_count": len(tasks_executed)
-                }
+                    "tasks_count": len(tasks_executed),
+                },
             )
 
-            log_goodbye_activity("say_goodbye", current_token, {
-                "goodbye_id": goodbye_id,
-                "reason": reason.value,
-                "cleanup_success": cleanup_success,
-                "tasks_executed": len(tasks_executed),
-                "total_time": (datetime.now() - start_time).total_seconds()
-            })
+            log_goodbye_activity(
+                "say_goodbye",
+                current_token,
+                {
+                    "goodbye_id": goodbye_id,
+                    "reason": reason.value,
+                    "cleanup_success": cleanup_success,
+                    "tasks_executed": len(tasks_executed),
+                    "total_time": (datetime.now() - start_time).total_seconds(),
+                },
+            )
 
-            logger.info(f"Goodbye procedure completed: {goodbye_id} ({'success' if cleanup_success else 'with errors'})")
+            logger.info(
+                f"Goodbye procedure completed: {goodbye_id} ({'success' if cleanup_success else 'with errors'})"
+            )
 
             if message:
                 logger.info(f"Goodbye message: {message}")
@@ -528,12 +594,18 @@ class GoodbyeManager:
             return report
 
         except Exception as e:
-            logger.error(f"Error in goodbye procedure: {str(e)}")
-            log_goodbye_activity("say_goodbye", session_token or self.session_token,
-                                {"goodbye_id": goodbye_id, "error": str(e)}, "error")
+            logger.error(f"Error in goodbye procedure: {e!s}")
+            log_goodbye_activity(
+                "say_goodbye",
+                session_token or self.session_token,
+                {"goodbye_id": goodbye_id, "error": str(e)},
+                "error",
+            )
             return self._create_error_report(goodbye_id, reason, str(e))
 
-    def _create_error_report(self, goodbye_id: str, reason: GoodbyeReason, error: str) -> GoodbyeReport:
+    def _create_error_report(
+        self, goodbye_id: str, reason: GoodbyeReason, error: str
+    ) -> GoodbyeReport:
         """Create an error report for failed goodbye procedures"""
         return GoodbyeReport(
             goodbye_id=goodbye_id,
@@ -544,10 +616,7 @@ class GoodbyeManager:
             tasks_executed=[],
             cleanup_success=False,
             session_token=self.session_token[:8] + "..." if self.session_token else "unknown",
-            security_metadata={
-                "error": error,
-                "session_validated": False
-            }
+            security_metadata={"error": error, "session_validated": False},
         )
 
     def _save_session_state(self) -> bool:
@@ -558,7 +627,7 @@ class GoodbyeManager:
             time.sleep(0.1)  # Simulate work
             return True
         except Exception as e:
-            logger.error(f"Error saving session state: {str(e)}")
+            logger.error(f"Error saving session state: {e!s}")
             return False
 
     def _cleanup_temp_files(self) -> bool:
@@ -569,7 +638,7 @@ class GoodbyeManager:
             time.sleep(0.1)  # Simulate work
             return True
         except Exception as e:
-            logger.error(f"Error cleaning up temp files: {str(e)}")
+            logger.error(f"Error cleaning up temp files: {e!s}")
             return False
 
     def _close_connections(self) -> bool:
@@ -580,7 +649,7 @@ class GoodbyeManager:
             time.sleep(0.1)  # Simulate work
             return True
         except Exception as e:
-            logger.error(f"Error closing connections: {str(e)}")
+            logger.error(f"Error closing connections: {e!s}")
             return False
 
     def _finalize_logs(self) -> bool:
@@ -591,16 +660,16 @@ class GoodbyeManager:
             time.sleep(0.1)  # Simulate work
             return True
         except Exception as e:
-            logger.error(f"Error finalizing logs: {str(e)}")
+            logger.error(f"Error finalizing logs: {e!s}")
             return False
 
-    def get_goodbye_stats(self) -> Dict[str, Any]:
+    def get_goodbye_stats(self) -> dict[str, Any]:
         """Get goodbye manager statistics"""
         return {
-            'session_token': self.session_token[:8] + "..." if self.session_token else None,
-            'creation_time': self.creation_time.isoformat(),
-            'goodbye_count': self.goodbye_count,
-            'cleanup_tasks_count': len(self.cleanup_tasks),
-            'current_state': self.current_state.value,
-            'available_reasons': [reason.value for reason in GoodbyeReason]
+            "session_token": self.session_token[:8] + "..." if self.session_token else None,
+            "creation_time": self.creation_time.isoformat(),
+            "goodbye_count": self.goodbye_count,
+            "cleanup_tasks_count": len(self.cleanup_tasks),
+            "current_state": self.current_state.value,
+            "available_reasons": [reason.value for reason in GoodbyeReason],
         }

@@ -15,34 +15,39 @@ Author: ProjectAlpha Team
 Compatible with: HRM stack, SLiM agent integration
 """
 
-import threading
-import json
-import uuid
-import logging
 import inspect
+import json
+import logging
+import threading
+import uuid
+from collections.abc import Callable
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Dict, Any, Callable, Optional, List
-from pathlib import Path
-from dataclasses import dataclass, asdict
 from functools import wraps
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class ToolRequest:
     """Structured tool request with metadata"""
+
     request_id: str
     tool_name: str
     intent: str
-    parameters: Dict[str, Any]
+    parameters: dict[str, Any]
     timestamp: str
     source: str = "unknown"
+
 
 @dataclass
 class ToolResponse:
     """Structured tool response with metadata"""
+
     request_id: str
     tool_name: str
     success: bool
@@ -51,6 +56,7 @@ class ToolResponse:
     execution_time_ms: float
     timestamp: str
     trace_id: str
+
 
 class ToolRequestRouter:
     """
@@ -75,8 +81,8 @@ class ToolRequestRouter:
             log_file: Path to log file for tool requests. If None, uses default location.
             enable_logging: Whether to enable request/response logging
         """
-        self._tools: Dict[str, Callable] = {}
-        self._tool_metadata: Dict[str, Dict[str, Any]] = {}
+        self._tools: dict[str, Callable] = {}
+        self._tool_metadata: dict[str, dict[str, Any]] = {}
         self._lock = threading.Lock()
         self.log_file = log_file or "logs/tool_requests.jsonl"
         self.enable_logging = enable_logging
@@ -96,18 +102,18 @@ class ToolRequestRouter:
 
         try:
             log_entry = {
-                'request': asdict(request),
-                'response': asdict(response),
-                'logged_at': datetime.now().isoformat()
+                "request": asdict(request),
+                "response": asdict(response),
+                "logged_at": datetime.now().isoformat(),
             }
 
-            with open(self.log_file, 'a', encoding='utf-8') as f:
-                f.write(json.dumps(log_entry) + '\n')
+            with open(self.log_file, "a", encoding="utf-8") as f:
+                f.write(json.dumps(log_entry) + "\n")
 
         except Exception as e:
             logger.error(f"Error logging tool request: {e}")
 
-    def _extract_tool_metadata(self, handler: Callable) -> Dict[str, Any]:
+    def _extract_tool_metadata(self, handler: Callable) -> dict[str, Any]:
         """Extract metadata from tool function"""
         try:
             sig = inspect.signature(handler)
@@ -116,31 +122,38 @@ class ToolRequestRouter:
             parameters = {}
             for param_name, param in sig.parameters.items():
                 param_info = {
-                    'type': str(param.annotation) if param.annotation != inspect.Parameter.empty else 'Any',
-                    'required': param.default == inspect.Parameter.empty,
-                    'default': str(param.default) if param.default != inspect.Parameter.empty else None
+                    "type": str(param.annotation)
+                    if param.annotation != inspect.Parameter.empty
+                    else "Any",
+                    "required": param.default == inspect.Parameter.empty,
+                    "default": str(param.default)
+                    if param.default != inspect.Parameter.empty
+                    else None,
                 }
                 parameters[param_name] = param_info
 
             return {
-                'description': doc,
-                'parameters': parameters,
-                'return_type': str(sig.return_annotation) if sig.return_annotation != inspect.Signature.empty else 'Any',
-                'module': handler.__module__,
-                'registered_at': datetime.now().isoformat()
+                "description": doc,
+                "parameters": parameters,
+                "return_type": str(sig.return_annotation)
+                if sig.return_annotation != inspect.Signature.empty
+                else "Any",
+                "module": handler.__module__,
+                "registered_at": datetime.now().isoformat(),
             }
         except Exception as e:
             logger.warning(f"Could not extract metadata for tool: {e}")
             return {
-                'description': "Metadata extraction failed",
-                'parameters': {},
-                'return_type': 'Any',
-                'module': 'unknown',
-                'registered_at': datetime.now().isoformat()
+                "description": "Metadata extraction failed",
+                "parameters": {},
+                "return_type": "Any",
+                "module": "unknown",
+                "registered_at": datetime.now().isoformat(),
             }
 
-    def register_tool(self, name: str, handler: Callable,
-                     description: Optional[str] = None) -> bool:
+    def register_tool(
+        self, name: str, handler: Callable, description: Optional[str] = None
+    ) -> bool:
         """
         Register a tool function with the router.
 
@@ -161,7 +174,7 @@ class ToolRequestRouter:
                 # Extract metadata
                 metadata = self._extract_tool_metadata(handler)
                 if description:
-                    metadata['description'] = description
+                    metadata["description"] = description
 
                 # Register tool
                 self._tools[name] = handler
@@ -194,8 +207,9 @@ class ToolRequestRouter:
                 logger.warning(f"Tool '{name}' not found for unregistration")
                 return False
 
-    def route_request(self, intent: str, parameters: Optional[Dict[str, Any]] = None,
-                     source: str = "unknown") -> ToolResponse:
+    def route_request(
+        self, intent: str, parameters: Optional[dict[str, Any]] = None, source: str = "unknown"
+    ) -> ToolResponse:
         """
         Route a tool request based on intent string.
 
@@ -218,7 +232,7 @@ class ToolRequestRouter:
             intent=intent,
             parameters=parameters or {},
             timestamp=start_time.isoformat(),
-            source=source
+            source=source,
         )
 
         # Default response for errors
@@ -231,13 +245,15 @@ class ToolRequestRouter:
                 error_message=error_msg,
                 execution_time_ms=0.0,
                 timestamp=datetime.now().isoformat(),
-                trace_id=trace_id
+                trace_id=trace_id,
             )
 
         # Check if tool exists
         with self._lock:
             if intent not in self._tools:
-                error_msg = f"Tool '{intent}' not found. Available tools: {list(self._tools.keys())}"
+                error_msg = (
+                    f"Tool '{intent}' not found. Available tools: {list(self._tools.keys())}"
+                )
                 logger.warning(error_msg)
                 response = create_error_response(error_msg)
                 self._log_request(request, response)
@@ -252,10 +268,10 @@ class ToolRequestRouter:
             # Add trace_id to parameters if tool supports it
             exec_params = parameters.copy() if parameters else {}
             sig = inspect.signature(tool_handler)
-            if 'trace_id' in sig.parameters:
-                exec_params['trace_id'] = trace_id
-            if 'request_id' in sig.parameters:
-                exec_params['request_id'] = request_id
+            if "trace_id" in sig.parameters:
+                exec_params["trace_id"] = trace_id
+            if "request_id" in sig.parameters:
+                exec_params["request_id"] = request_id
 
             # Execute the tool
             result = tool_handler(**exec_params)
@@ -272,14 +288,14 @@ class ToolRequestRouter:
                 error_message=None,
                 execution_time_ms=execution_time,
                 timestamp=datetime.now().isoformat(),
-                trace_id=trace_id
+                trace_id=trace_id,
             )
 
             logger.info(f"Tool '{intent}' executed successfully in {execution_time:.2f}ms")
 
         except Exception as e:
             execution_time = (datetime.now() - start_time).total_seconds() * 1000
-            error_msg = f"Error executing tool '{intent}': {str(e)}"
+            error_msg = f"Error executing tool '{intent}': {e!s}"
             logger.error(error_msg)
 
             response = ToolResponse(
@@ -290,14 +306,14 @@ class ToolRequestRouter:
                 error_message=error_msg,
                 execution_time_ms=execution_time,
                 timestamp=datetime.now().isoformat(),
-                trace_id=trace_id
+                trace_id=trace_id,
             )
 
         # Log the request/response
         self._log_request(request, response)
         return response
 
-    def list_tools(self) -> Dict[str, Dict[str, Any]]:
+    def list_tools(self) -> dict[str, dict[str, Any]]:
         """
         Get list of all registered tools with their metadata.
 
@@ -307,7 +323,7 @@ class ToolRequestRouter:
         with self._lock:
             return self._tool_metadata.copy()
 
-    def get_tool_info(self, name: str) -> Optional[Dict[str, Any]]:
+    def get_tool_info(self, name: str) -> Optional[dict[str, Any]]:
         """
         Get detailed information about a specific tool.
 
@@ -325,29 +341,32 @@ class ToolRequestRouter:
         with self._lock:
             return name in self._tools
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get router statistics"""
         with self._lock:
             return {
-                'total_tools': len(self._tools),
-                'registered_tools': list(self._tools.keys()),
-                'log_file': self.log_file,
-                'logging_enabled': self.enable_logging
+                "total_tools": len(self._tools),
+                "registered_tools": list(self._tools.keys()),
+                "log_file": self.log_file,
+                "logging_enabled": self.enable_logging,
             }
 
 
 # Utility decorators for tool development
 def tool_handler(name: str, description: str = ""):
     """Decorator to mark functions as tool handlers"""
+
     def decorator(func: Callable) -> Callable:
         func._tool_name = name
         func._tool_description = description
         return func
+
     return decorator
 
 
 def requires_params(*param_names: str):
     """Decorator to validate required parameters for tools"""
+
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -355,7 +374,9 @@ def requires_params(*param_names: str):
                 if param not in kwargs or kwargs[param] is None:
                     raise ValueError(f"Required parameter '{param}' is missing or None")
             return func(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
@@ -377,11 +398,15 @@ def example_web_search_tool(query: str, max_results: int = 5, **kwargs) -> dict:
     return {
         "result": f"Web search results for: {query}",
         "results": [
-            {"title": f"Result {i+1}", "url": f"https://example.com/{i+1}", "snippet": f"Sample snippet {i+1}"}
+            {
+                "title": f"Result {i+1}",
+                "url": f"https://example.com/{i+1}",
+                "snippet": f"Sample snippet {i+1}",
+            }
             for i in range(min(max_results, 3))
         ],
         "total_results": min(max_results, 3),
-        "trace": kwargs.get('trace_id', str(uuid.uuid4()))
+        "trace": kwargs.get("trace_id", str(uuid.uuid4())),
     }
 
 
@@ -404,14 +429,14 @@ def example_calculator_tool(expression: str, **kwargs) -> dict:
             "result": f"Calculation result: {result}",
             "expression": expression,
             "value": result,
-            "trace": kwargs.get('trace_id', str(uuid.uuid4()))
+            "trace": kwargs.get("trace_id", str(uuid.uuid4())),
         }
     except Exception as e:
         return {
-            "result": f"Calculation error: {str(e)}",
+            "result": f"Calculation error: {e!s}",
             "expression": expression,
             "error": str(e),
-            "trace": kwargs.get('trace_id', str(uuid.uuid4()))
+            "trace": kwargs.get("trace_id", str(uuid.uuid4())),
         }
 
 
@@ -433,10 +458,8 @@ def example_memory_query_tool(concept: str, depth: int = 2, **kwargs) -> dict:
         "result": f"Memory query for concept: {concept}",
         "concept": concept,
         "depth": depth,
-        "related_concepts": [
-            f"related_concept_{i}" for i in range(3)
-        ],
-        "trace": kwargs.get('trace_id', str(uuid.uuid4()))
+        "related_concepts": [f"related_concept_{i}" for i in range(3)],
+        "trace": kwargs.get("trace_id", str(uuid.uuid4())),
     }
 
 
@@ -459,18 +482,15 @@ def example_usage():
     print("\nExecuting example tool requests:")
 
     # Web search
-    response1 = router.route_request("search_web",
-                                   {"query": "AI memory systems", "max_results": 3})
+    response1 = router.route_request("search_web", {"query": "AI memory systems", "max_results": 3})
     print(f"Web search: {response1.success}, Result: {response1.result}")
 
     # Calculator
-    response2 = router.route_request("calculate",
-                                   {"expression": "2 + 2 * 3"})
+    response2 = router.route_request("calculate", {"expression": "2 + 2 * 3"})
     print(f"Calculator: {response2.success}, Result: {response2.result}")
 
     # Memory query
-    response3 = router.route_request("memory_query",
-                                   {"concept": "user_preferences", "depth": 2})
+    response3 = router.route_request("memory_query", {"concept": "user_preferences", "depth": 2})
     print(f"Memory query: {response3.success}, Result: {response3.result}")
 
     # Error case

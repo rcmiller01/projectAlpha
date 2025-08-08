@@ -207,7 +207,8 @@ class EmotionLoopManager:
         Save emotional loop results to disk as a timestamped JSON file.
         Also updates a persistent `loop_results.jsonl` log with each cycle.
         """
-        import os, json
+        import json
+        import os
         os.makedirs(output_dir, exist_ok=True)
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         summary_file = os.path.join(output_dir, f'loop_result_{timestamp}.json')
@@ -242,7 +243,8 @@ def write_reflection_log(candidate: QuantizationCandidate, prompt: str, response
     """
     Logs emotional prompt/response pairs for long-term analysis and presence training.
     """
-    import os, json
+    import json
+    import os
     os.makedirs(output_dir, exist_ok=True)
     log_path = os.path.join(output_dir, f"{candidate.name}.jsonl")
 

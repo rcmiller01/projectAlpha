@@ -8,30 +8,34 @@ This module provides comprehensive health data integration including:
 - Privacy-compliant health data access
 """
 
-import json
 import asyncio
+import json
 import logging
-from typing import Dict, Any, Optional, List, Union
-from dataclasses import dataclass, asdict
+import statistics
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-import statistics
+from typing import Any, Dict, List, Optional, Union
 
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class BiometricReading:
     """Individual biometric measurement"""
+
     metric_type: str  # heart_rate, blood_pressure, temperature, etc.
-    value: Union[float, Dict[str, float]]  # Single value or dict for complex metrics
+    value: Union[float, dict[str, float]]  # Single value or dict for complex metrics
     unit: str
     timestamp: datetime
     source: str  # apple_watch, iphone, manual, etc.
     confidence: float = 1.0  # 0.0 to 1.0
 
+
 @dataclass
 class HealthTrend:
     """Health trend analysis over time"""
+
     metric_type: str
     period: str  # daily, weekly, monthly
     trend_direction: str  # increasing, decreasing, stable
@@ -40,20 +44,23 @@ class HealthTrend:
     data_points: int
     last_updated: datetime
 
+
 @dataclass
 class HealthContext:
     """Current health context for emotional awareness"""
+
     stress_level: Optional[float] = None  # 0.0 to 1.0
     energy_level: Optional[float] = None  # 0.0 to 1.0
     sleep_quality: Optional[float] = None  # 0.0 to 1.0
     activity_level: Optional[float] = None  # 0.0 to 1.0
     heart_rate_variability: Optional[float] = None
     current_activity: Optional[str] = None  # walking, running, resting, etc.
-    health_alerts: Optional[List[str]] = None
+    health_alerts: Optional[list[str]] = None
 
     def __post_init__(self):
         if self.health_alerts is None:
             self.health_alerts = []
+
 
 class HealthKitConnector:
     """Core HealthKit data connector"""
@@ -70,10 +77,12 @@ class HealthKitConnector:
         """Load health integration configuration"""
         try:
             if self.config_path.exists():
-                with open(self.config_path, 'r') as f:
+                with open(self.config_path) as f:
                     self.config = json.load(f)
-                self.authorized_metrics = set(self.config.get('authorized_metrics', []))
-                logger.info(f"Loaded health config with {len(self.authorized_metrics)} authorized metrics")
+                self.authorized_metrics = set(self.config.get("authorized_metrics", []))
+                logger.info(
+                    f"Loaded health config with {len(self.authorized_metrics)} authorized metrics"
+                )
             else:
                 self.config = self._get_default_config()
                 self.save_config()
@@ -85,12 +94,12 @@ class HealthKitConnector:
         """Save health configuration"""
         try:
             self.config_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(self.config_path, 'w') as f:
+            with open(self.config_path, "w") as f:
                 json.dump(self.config, f, indent=2)
         except Exception as e:
             logger.error(f"Error saving health config: {e}")
 
-    def _get_default_config(self) -> Dict[str, Any]:
+    def _get_default_config(self) -> dict[str, Any]:
         """Get default health configuration"""
         return {
             "authorized_metrics": [
@@ -108,7 +117,7 @@ class HealthKitConnector:
                 "mindfulness_minutes",
                 "stand_hours",
                 "exercise_minutes",
-                "environmental_audio_exposure"
+                "environmental_audio_exposure",
             ],
             "sync_interval": 300,  # 5 minutes
             "privacy_mode": "anonymized",
@@ -120,11 +129,11 @@ class HealthKitConnector:
                 "heart_rate_max": 180,
                 "heart_rate_min": 50,
                 "stress_level_high": 0.8,
-                "sleep_hours_min": 6
-            }
+                "sleep_hours_min": 6,
+            },
         }
 
-    async def request_authorization(self, metrics: List[str]) -> bool:
+    async def request_authorization(self, metrics: list[str]) -> bool:
         """Request authorization for specific health metrics"""
         try:
             # In a real implementation, this would use HealthKit APIs
@@ -134,7 +143,7 @@ class HealthKitConnector:
 
             # Simulate authorization success
             self.authorized_metrics.update(metrics)
-            self.config['authorized_metrics'] = list(self.authorized_metrics)
+            self.config["authorized_metrics"] = list(self.authorized_metrics)
             self.save_config()
 
             logger.info(f"Authorization granted for {len(metrics)} metrics")
@@ -144,7 +153,7 @@ class HealthKitConnector:
             logger.error(f"Authorization request failed: {e}")
             return False
 
-    async def get_real_time_biometrics(self) -> List[BiometricReading]:
+    async def get_real_time_biometrics(self) -> list[BiometricReading]:
         """Get current real-time biometric readings"""
         readings = []
         now = datetime.now()
@@ -152,44 +161,52 @@ class HealthKitConnector:
         try:
             # Simulate real-time data from Apple Watch/iPhone
             if "heart_rate" in self.authorized_metrics:
-                readings.append(BiometricReading(
-                    metric_type="heart_rate",
-                    value=72.0,  # Simulated value
-                    unit="bpm",
-                    timestamp=now,
-                    source="apple_watch",
-                    confidence=0.95
-                ))
+                readings.append(
+                    BiometricReading(
+                        metric_type="heart_rate",
+                        value=72.0,  # Simulated value
+                        unit="bpm",
+                        timestamp=now,
+                        source="apple_watch",
+                        confidence=0.95,
+                    )
+                )
 
             if "heart_rate_variability" in self.authorized_metrics:
-                readings.append(BiometricReading(
-                    metric_type="heart_rate_variability",
-                    value=45.2,  # Simulated HRV in ms
-                    unit="ms",
-                    timestamp=now,
-                    source="apple_watch",
-                    confidence=0.90
-                ))
+                readings.append(
+                    BiometricReading(
+                        metric_type="heart_rate_variability",
+                        value=45.2,  # Simulated HRV in ms
+                        unit="ms",
+                        timestamp=now,
+                        source="apple_watch",
+                        confidence=0.90,
+                    )
+                )
 
             if "blood_oxygen" in self.authorized_metrics:
-                readings.append(BiometricReading(
-                    metric_type="blood_oxygen",
-                    value=98.5,  # Simulated SpO2
-                    unit="percent",
-                    timestamp=now,
-                    source="apple_watch",
-                    confidence=0.88
-                ))
+                readings.append(
+                    BiometricReading(
+                        metric_type="blood_oxygen",
+                        value=98.5,  # Simulated SpO2
+                        unit="percent",
+                        timestamp=now,
+                        source="apple_watch",
+                        confidence=0.88,
+                    )
+                )
 
             if "stress_level" in self.authorized_metrics:
-                readings.append(BiometricReading(
-                    metric_type="stress_level",
-                    value=0.3,  # Simulated stress (0.0-1.0)
-                    unit="normalized",
-                    timestamp=now,
-                    source="apple_watch",
-                    confidence=0.75
-                ))
+                readings.append(
+                    BiometricReading(
+                        metric_type="stress_level",
+                        value=0.3,  # Simulated stress (0.0-1.0)
+                        unit="normalized",
+                        timestamp=now,
+                        source="apple_watch",
+                        confidence=0.75,
+                    )
+                )
 
             logger.debug(f"Retrieved {len(readings)} real-time biometric readings")
             return readings
@@ -198,7 +215,7 @@ class HealthKitConnector:
             logger.error(f"Error getting real-time biometrics: {e}")
             return []
 
-    async def get_historical_data(self, metric_type: str, days: int = 7) -> List[BiometricReading]:
+    async def get_historical_data(self, metric_type: str, days: int = 7) -> list[BiometricReading]:
         """Get historical health data for analysis"""
         if metric_type not in self.authorized_metrics:
             logger.warning(f"Not authorized for metric: {metric_type}")
@@ -222,14 +239,16 @@ class HealthKitConnector:
                 else:
                     value = 50.0  # Default value
 
-                readings.append(BiometricReading(
-                    metric_type=metric_type,
-                    value=value,
-                    unit=self._get_metric_unit(metric_type),
-                    timestamp=current_date,
-                    source="healthkit",
-                    confidence=0.85
-                ))
+                readings.append(
+                    BiometricReading(
+                        metric_type=metric_type,
+                        value=value,
+                        unit=self._get_metric_unit(metric_type),
+                        timestamp=current_date,
+                        source="healthkit",
+                        confidence=0.85,
+                    )
+                )
 
                 current_date += timedelta(hours=1)
 
@@ -256,9 +275,10 @@ class HealthKitConnector:
             "stress_level": "normalized",
             "mindfulness_minutes": "minutes",
             "stand_hours": "hours",
-            "exercise_minutes": "minutes"
+            "exercise_minutes": "minutes",
         }
         return units.get(metric_type, "unit")
+
 
 class HealthAnalyzer:
     """Analyzes health data for trends and insights"""
@@ -266,7 +286,7 @@ class HealthAnalyzer:
     def __init__(self, connector: HealthKitConnector):
         self.connector = connector
 
-    async def analyze_health_trends(self, days: int = 30) -> List[HealthTrend]:
+    async def analyze_health_trends(self, days: int = 30) -> list[HealthTrend]:
         """Analyze health trends over specified period"""
         trends = []
 
@@ -288,7 +308,9 @@ class HealthAnalyzer:
             logger.error(f"Error analyzing health trends: {e}")
             return []
 
-    def _calculate_trend(self, readings: List[BiometricReading], metric_type: str) -> Optional[HealthTrend]:
+    def _calculate_trend(
+        self, readings: list[BiometricReading], metric_type: str
+    ) -> Optional[HealthTrend]:
         """Calculate trend for a specific metric"""
         try:
             if len(readings) < 7:
@@ -296,8 +318,12 @@ class HealthAnalyzer:
 
             # Split data into first and second half for comparison
             mid_point = len(readings) // 2
-            first_half = [r.value for r in readings[:mid_point] if isinstance(r.value, (int, float))]
-            second_half = [r.value for r in readings[mid_point:] if isinstance(r.value, (int, float))]
+            first_half = [
+                r.value for r in readings[:mid_point] if isinstance(r.value, (int, float))
+            ]
+            second_half = [
+                r.value for r in readings[mid_point:] if isinstance(r.value, (int, float))
+            ]
 
             if not first_half or not second_half:
                 return None
@@ -325,7 +351,7 @@ class HealthAnalyzer:
                 percentage_change=percentage_change,
                 significance=significance,
                 data_points=len(readings),
-                last_updated=datetime.now()
+                last_updated=datetime.now(),
             )
 
         except Exception as e:
@@ -340,9 +366,13 @@ class HealthAnalyzer:
             context = HealthContext()
 
             for reading in readings:
-                if reading.metric_type == "stress_level" and isinstance(reading.value, (int, float)):
+                if reading.metric_type == "stress_level" and isinstance(
+                    reading.value, (int, float)
+                ):
                     context.stress_level = float(reading.value)
-                elif reading.metric_type == "heart_rate_variability" and isinstance(reading.value, (int, float)):
+                elif reading.metric_type == "heart_rate_variability" and isinstance(
+                    reading.value, (int, float)
+                ):
                     # Higher HRV generally indicates better stress management
                     context.energy_level = min(1.0, float(reading.value) / 50.0)
 
@@ -350,13 +380,17 @@ class HealthAnalyzer:
             sleep_data = await self.connector.get_historical_data("sleep_analysis", 1)
             if sleep_data and isinstance(sleep_data[-1].value, (int, float)):
                 latest_sleep = sleep_data[-1]
-                context.sleep_quality = min(1.0, float(latest_sleep.value) / 8.0)  # Normalize to 8 hours
+                context.sleep_quality = min(
+                    1.0, float(latest_sleep.value) / 8.0
+                )  # Normalize to 8 hours
 
             # Get recent activity data
             steps_data = await self.connector.get_historical_data("steps", 1)
             if steps_data and isinstance(steps_data[-1].value, (int, float)):
                 latest_steps = steps_data[-1]
-                context.activity_level = min(1.0, float(latest_steps.value) / 10000.0)  # Normalize to 10k steps
+                context.activity_level = min(
+                    1.0, float(latest_steps.value) / 10000.0
+                )  # Normalize to 10k steps
 
             # Check for health alerts
             await self._check_health_alerts(context, readings)
@@ -368,23 +402,24 @@ class HealthAnalyzer:
             logger.error(f"Error getting health context: {e}")
             return HealthContext()
 
-    async def _check_health_alerts(self, context: HealthContext, readings: List[BiometricReading]):
+    async def _check_health_alerts(self, context: HealthContext, readings: list[BiometricReading]):
         """Check for health alerts based on thresholds"""
         if context.health_alerts is None:
             context.health_alerts = []
 
-        thresholds = self.connector.config.get('alert_thresholds', {})
+        thresholds = self.connector.config.get("alert_thresholds", {})
 
         for reading in readings:
             if reading.metric_type == "heart_rate" and isinstance(reading.value, (int, float)):
-                if reading.value > thresholds.get('heart_rate_max', 180):
+                if reading.value > thresholds.get("heart_rate_max", 180):
                     context.health_alerts.append(f"High heart rate detected: {reading.value} bpm")
-                elif reading.value < thresholds.get('heart_rate_min', 50):
+                elif reading.value < thresholds.get("heart_rate_min", 50):
                     context.health_alerts.append(f"Low heart rate detected: {reading.value} bpm")
 
             elif reading.metric_type == "stress_level" and isinstance(reading.value, (int, float)):
-                if reading.value > thresholds.get('stress_level_high', 0.8):
+                if reading.value > thresholds.get("stress_level_high", 0.8):
                     context.health_alerts.append("High stress level detected")
+
 
 class EmotionalHealthIntegration:
     """Integrates health data with emotional state management"""
@@ -398,8 +433,12 @@ class EmotionalHealthIntegration:
         try:
             # Request core health permissions
             core_metrics = [
-                "heart_rate", "heart_rate_variability", "stress_level",
-                "sleep_analysis", "steps", "blood_oxygen"
+                "heart_rate",
+                "heart_rate_variability",
+                "stress_level",
+                "sleep_analysis",
+                "steps",
+                "blood_oxygen",
             ]
 
             success = await self.connector.request_authorization(core_metrics)
@@ -411,7 +450,7 @@ class EmotionalHealthIntegration:
             logger.error(f"Failed to initialize health integration: {e}")
             return False
 
-    async def get_emotional_health_context(self) -> Dict[str, Any]:
+    async def get_emotional_health_context(self) -> dict[str, Any]:
         """Get comprehensive health context for emotional awareness"""
         try:
             # Get current health state
@@ -424,21 +463,25 @@ class EmotionalHealthIntegration:
             current_readings = await self.connector.get_real_time_biometrics()
 
             # Generate emotional recommendations based on health data
-            emotional_recommendations = self._generate_emotional_recommendations(health_context, trends)
+            emotional_recommendations = self._generate_emotional_recommendations(
+                health_context, trends
+            )
 
             return {
                 "health_context": asdict(health_context),
                 "current_readings": [asdict(r) for r in current_readings],
                 "health_trends": [asdict(t) for t in trends],
                 "emotional_recommendations": emotional_recommendations,
-                "last_updated": datetime.now().isoformat()
+                "last_updated": datetime.now().isoformat(),
             }
 
         except Exception as e:
             logger.error(f"Error getting emotional health context: {e}")
             return {}
 
-    def _generate_emotional_recommendations(self, context: HealthContext, trends: List[HealthTrend]) -> List[str]:
+    def _generate_emotional_recommendations(
+        self, context: HealthContext, trends: list[HealthTrend]
+    ) -> list[str]:
         """Generate emotional recommendations based on health data"""
         recommendations = []
 
@@ -446,19 +489,27 @@ class EmotionalHealthIntegration:
             # Stress-based recommendations
             if context.stress_level and context.stress_level > 0.7:
                 recommendations.append("Consider taking a moment for deep breathing or mindfulness")
-                recommendations.append("Your stress levels are elevated - perhaps we should talk about what's on your mind")
+                recommendations.append(
+                    "Your stress levels are elevated - perhaps we should talk about what's on your mind"
+                )
 
             # Sleep-based recommendations
             if context.sleep_quality and context.sleep_quality < 0.6:
-                recommendations.append("It looks like you might need some rest - would you like to discuss your sleep schedule?")
+                recommendations.append(
+                    "It looks like you might need some rest - would you like to discuss your sleep schedule?"
+                )
 
             # Activity-based recommendations
             if context.activity_level and context.activity_level < 0.3:
-                recommendations.append("You've been less active today - would a gentle walk or movement help?")
+                recommendations.append(
+                    "You've been less active today - would a gentle walk or movement help?"
+                )
 
             # Energy-based recommendations
             if context.energy_level and context.energy_level < 0.4:
-                recommendations.append("Your energy seems low - let's focus on gentle, restorative conversation")
+                recommendations.append(
+                    "Your energy seems low - let's focus on gentle, restorative conversation"
+                )
 
             # Health alerts
             if context.health_alerts:
@@ -467,9 +518,15 @@ class EmotionalHealthIntegration:
             # Trend-based recommendations
             for trend in trends:
                 if trend.metric_type == "stress_level" and trend.trend_direction == "increasing":
-                    recommendations.append("I've noticed your stress levels trending upward - would you like to talk about stress management?")
-                elif trend.metric_type == "sleep_analysis" and trend.trend_direction == "decreasing":
-                    recommendations.append("Your sleep patterns have been changing - rest is so important for emotional wellbeing")
+                    recommendations.append(
+                        "I've noticed your stress levels trending upward - would you like to talk about stress management?"
+                    )
+                elif (
+                    trend.metric_type == "sleep_analysis" and trend.trend_direction == "decreasing"
+                ):
+                    recommendations.append(
+                        "Your sleep patterns have been changing - rest is so important for emotional wellbeing"
+                    )
 
             return recommendations
 
@@ -477,15 +534,16 @@ class EmotionalHealthIntegration:
             logger.error(f"Error generating emotional recommendations: {e}")
             return []
 
-    async def get_health_status(self) -> Dict[str, Any]:
+    async def get_health_status(self) -> dict[str, Any]:
         """Get current health integration status"""
         return {
             "authorized": len(self.connector.authorized_metrics) > 0,
             "authorized_metrics": list(self.connector.authorized_metrics),
             "last_sync": self.connector.last_sync,
             "privacy_mode": self.connector.config.get("privacy_mode", "anonymized"),
-            "real_time_monitoring": self.connector.config.get("real_time_monitoring", False)
+            "real_time_monitoring": self.connector.config.get("real_time_monitoring", False),
         }
+
 
 # Example usage and testing
 async def demo_health_integration():
@@ -501,22 +559,24 @@ async def demo_health_integration():
         # Get emotional health context
         context = await health_integration.get_emotional_health_context()
 
-        print(f"\nHealth Context:")
+        print("\nHealth Context:")
         print(f"  Stress Level: {context['health_context'].get('stress_level', 'N/A')}")
         print(f"  Energy Level: {context['health_context'].get('energy_level', 'N/A')}")
         print(f"  Sleep Quality: {context['health_context'].get('sleep_quality', 'N/A')}")
         print(f"  Activity Level: {context['health_context'].get('activity_level', 'N/A')}")
 
         print(f"\nCurrent Readings: {len(context['current_readings'])} metrics")
-        for reading in context['current_readings'][:3]:  # Show first 3
+        for reading in context["current_readings"][:3]:  # Show first 3
             print(f"  {reading['metric_type']}: {reading['value']} {reading['unit']}")
 
         print(f"\nHealth Trends: {len(context['health_trends'])} trends")
-        for trend in context['health_trends']:
-            print(f"  {trend['metric_type']}: {trend['trend_direction']} ({trend['percentage_change']:+.1f}%)")
+        for trend in context["health_trends"]:
+            print(
+                f"  {trend['metric_type']}: {trend['trend_direction']} ({trend['percentage_change']:+.1f}%)"
+            )
 
-        print(f"\nEmotional Recommendations:")
-        for rec in context['emotional_recommendations']:
+        print("\nEmotional Recommendations:")
+        for rec in context["emotional_recommendations"]:
             print(f"  • {rec}")
 
         # Status check
@@ -525,6 +585,7 @@ async def demo_health_integration():
 
     else:
         print("✗ Failed to initialize health integration")
+
 
 if __name__ == "__main__":
     asyncio.run(demo_health_integration())

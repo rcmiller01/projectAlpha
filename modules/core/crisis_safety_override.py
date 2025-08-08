@@ -7,11 +7,14 @@ stream override and safety protocols.
 
 import asyncio
 import logging
-from typing import Dict, List, Any, Optional, Callable
-from datetime import datetime
+from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
 from .crisis_memory import record_crisis_event
+
 
 class CrisisLevel(Enum):
     NONE = "none"
@@ -20,6 +23,7 @@ class CrisisLevel(Enum):
     HIGH = "high"
     CRITICAL = "critical"
 
+
 class InterventionType(Enum):
     IMMEDIATE_SUPPORT = "immediate_support"
     SAFETY_RESOURCES = "safety_resources"
@@ -27,31 +31,36 @@ class InterventionType(Enum):
     EMERGENCY_CONTACT = "emergency_contact"
     FOLLOW_UP_REQUIRED = "follow_up_required"
 
+
 @dataclass
 class CrisisAssessment:
     """Comprehensive crisis assessment result"""
+
     level: CrisisLevel
     confidence_score: float
-    detected_indicators: List[str]
+    detected_indicators: list[str]
     intervention_required: bool
     immediate_response_needed: bool
-    safety_concerns: List[str]
-    recommended_actions: List[InterventionType]
-    context_factors: Dict[str, Any]
+    safety_concerns: list[str]
+    recommended_actions: list[InterventionType]
+    context_factors: dict[str, Any]
     timestamp: datetime
+
 
 @dataclass
 class CrisisIntervention:
     """Crisis intervention action taken"""
+
     intervention_id: str
     user_id: str
     assessment: CrisisAssessment
     intervention_type: InterventionType
     response_generated: str
-    resources_provided: List[Dict[str, str]]
+    resources_provided: list[dict[str, str]]
     follow_up_scheduled: bool
     timestamp: datetime
     outcome: Optional[str] = None
+
 
 class CrisisSafetyOverride:
     """
@@ -59,28 +68,54 @@ class CrisisSafetyOverride:
     to provide immediate safety-focused responses
     """
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
         self.logger = logging.getLogger(__name__)
 
         # Crisis detection patterns (enhanced from context detector)
         self.crisis_patterns = {
             CrisisLevel.CRITICAL: [
-                "want to die", "kill myself", "end it all", "suicide", "hurt myself",
-                "no point living", "better off dead", "can't go on", "final goodbye"
+                "want to die",
+                "kill myself",
+                "end it all",
+                "suicide",
+                "hurt myself",
+                "no point living",
+                "better off dead",
+                "can't go on",
+                "final goodbye",
             ],
             CrisisLevel.HIGH: [
-                "hopeless", "can't take it", "overwhelming", "breaking point",
-                "give up", "end the pain", "escape", "nobody cares", "alone"
+                "hopeless",
+                "can't take it",
+                "overwhelming",
+                "breaking point",
+                "give up",
+                "end the pain",
+                "escape",
+                "nobody cares",
+                "alone",
             ],
             CrisisLevel.MEDIUM: [
-                "struggling", "falling apart", "can't cope", "exhausted",
-                "defeated", "lost", "stuck", "drowning"
+                "struggling",
+                "falling apart",
+                "can't cope",
+                "exhausted",
+                "defeated",
+                "lost",
+                "stuck",
+                "drowning",
             ],
             CrisisLevel.LOW: [
-                "stressed", "worried", "anxious", "sad", "frustrated",
-                "disappointed", "tired", "confused"
-            ]
+                "stressed",
+                "worried",
+                "anxious",
+                "sad",
+                "frustrated",
+                "disappointed",
+                "tired",
+                "confused",
+            ],
         }
 
         # Safety resources by severity
@@ -90,73 +125,73 @@ class CrisisSafetyOverride:
                     "name": "National Suicide Prevention Lifeline",
                     "contact": "988",
                     "description": "24/7 free and confidential support",
-                    "type": "phone"
+                    "type": "phone",
                 },
                 {
                     "name": "Crisis Text Line",
                     "contact": "Text HOME to 741741",
                     "description": "24/7 crisis support via text",
-                    "type": "text"
+                    "type": "text",
                 },
                 {
                     "name": "Emergency Services",
                     "contact": "911",
                     "description": "Immediate emergency assistance",
-                    "type": "emergency"
-                }
+                    "type": "emergency",
+                },
             ],
             CrisisLevel.HIGH: [
                 {
                     "name": "National Suicide Prevention Lifeline",
                     "contact": "988",
                     "description": "24/7 free and confidential support",
-                    "type": "phone"
+                    "type": "phone",
                 },
                 {
                     "name": "Crisis Text Line",
                     "contact": "Text HOME to 741741",
                     "description": "24/7 crisis support via text",
-                    "type": "text"
+                    "type": "text",
                 },
                 {
                     "name": "SAMHSA Helpline",
                     "contact": "1-800-662-4357",
                     "description": "Mental health and substance abuse support",
-                    "type": "phone"
-                }
+                    "type": "phone",
+                },
             ],
             CrisisLevel.MEDIUM: [
                 {
                     "name": "Crisis Text Line",
                     "contact": "Text HOME to 741741",
                     "description": "24/7 crisis support via text",
-                    "type": "text"
+                    "type": "text",
                 },
                 {
                     "name": "Psychology Today Therapist Finder",
                     "contact": "psychologytoday.com",
                     "description": "Find mental health professionals near you",
-                    "type": "web"
-                }
-            ]
+                    "type": "web",
+                },
+            ],
         }
 
         # Override flags and callbacks
         self.override_active = False
         self.interrupt_active = False
-        self.intervention_callbacks: List[Callable] = []
-        self.active_interventions: Dict[str, CrisisIntervention] = {}
+        self.intervention_callbacks: list[Callable] = []
+        self.active_interventions: dict[str, CrisisIntervention] = {}
 
         # Initialize logging for crisis events
         self.crisis_logger = logging.getLogger("crisis_intervention")
         handler = logging.FileHandler("crisis_interventions.log")
-        handler.setFormatter(logging.Formatter(
-            '%(asctime)s - %(levelname)s - %(message)s'
-        ))
+        handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
         self.crisis_logger.addHandler(handler)
         self.crisis_logger.setLevel(logging.WARNING)
 
-    async def assess_crisis_level(self, user_input: str, context: Dict[str, Any]) -> CrisisAssessment:
+    async def assess_crisis_level(
+        self, user_input: str, context: dict[str, Any]
+    ) -> CrisisAssessment:
         """
         Enhanced crisis assessment with detailed analysis
         """
@@ -184,7 +219,11 @@ class CrisisSafetyOverride:
                     max_level = level
                 elif level.value in ["high"] and max_level.value not in ["critical", "high"]:
                     max_level = level
-                elif level.value in ["medium"] and max_level.value not in ["critical", "high", "medium"]:
+                elif level.value in ["medium"] and max_level.value not in [
+                    "critical",
+                    "high",
+                    "medium",
+                ]:
                     max_level = level
                 elif level.value in ["low"] and max_level == CrisisLevel.NONE:
                     max_level = level
@@ -200,7 +239,9 @@ class CrisisSafetyOverride:
         immediate_response_needed = adjusted_level.value in ["high", "critical"]
 
         # Generate recommended actions
-        recommended_actions = self._generate_intervention_recommendations(adjusted_level, context_factors)
+        recommended_actions = self._generate_intervention_recommendations(
+            adjusted_level, context_factors
+        )
 
         # Calculate final confidence score
         final_confidence = max(confidence_scores.values()) if confidence_scores else 0.0
@@ -214,16 +255,18 @@ class CrisisSafetyOverride:
             safety_concerns=safety_concerns,
             recommended_actions=recommended_actions,
             context_factors=context_factors,
-            timestamp=datetime.now()
+            timestamp=datetime.now(),
         )
 
         # Log crisis assessment
         if assessment.level != CrisisLevel.NONE:
-            self.crisis_logger.warning(f"Crisis detected: {assessment.level.value} - {detected_indicators}")
+            self.crisis_logger.warning(
+                f"Crisis detected: {assessment.level.value} - {detected_indicators}"
+            )
 
         return assessment
 
-    def _analyze_context_factors(self, context: Dict[str, Any]) -> Dict[str, Any]:
+    def _analyze_context_factors(self, context: dict[str, Any]) -> dict[str, Any]:
         """Analyze context for crisis-relevant factors"""
         factors = {}
 
@@ -237,7 +280,9 @@ class CrisisSafetyOverride:
         # Historical context
         conversation_history = context.get("conversation_history", [])
         factors["conversation_length"] = len(conversation_history)
-        factors["recent_crisis_indicators"] = self._check_recent_crisis_history(conversation_history)
+        factors["recent_crisis_indicators"] = self._check_recent_crisis_history(
+            conversation_history
+        )
 
         # User profile factors
         user_profile = context.get("user_profile", {})
@@ -246,7 +291,7 @@ class CrisisSafetyOverride:
 
         return factors
 
-    def _check_recent_crisis_history(self, conversation_history: List[Dict[str, Any]]) -> bool:
+    def _check_recent_crisis_history(self, conversation_history: list[dict[str, Any]]) -> bool:
         """Check for crisis indicators in recent conversation history"""
         if len(conversation_history) < 3:
             return False
@@ -263,7 +308,9 @@ class CrisisSafetyOverride:
 
         return crisis_count >= 2
 
-    def _adjust_for_context(self, initial_level: CrisisLevel, context_factors: Dict[str, Any]) -> tuple[CrisisLevel, List[str]]:
+    def _adjust_for_context(
+        self, initial_level: CrisisLevel, context_factors: dict[str, Any]
+    ) -> tuple[CrisisLevel, list[str]]:
         """Adjust crisis level based on context factors"""
         adjusted_level = initial_level
         safety_concerns = []
@@ -278,13 +325,19 @@ class CrisisSafetyOverride:
                 safety_concerns.append("Critical emotional state with high intensity")
 
         # Escalate based on despair/hopelessness
-        if context_factors.get("despair_level", 0) > 0.7 or context_factors.get("hopelessness", 0) > 0.7:
+        if (
+            context_factors.get("despair_level", 0) > 0.7
+            or context_factors.get("hopelessness", 0) > 0.7
+        ):
             if initial_level in [CrisisLevel.LOW, CrisisLevel.MEDIUM]:
                 adjusted_level = CrisisLevel.HIGH
                 safety_concerns.append("Significant despair/hopelessness indicators")
 
         # Escalate based on isolation
-        if context_factors.get("isolation", 0) > 0.8 and context_factors.get("support_network", 0.5) < 0.3:
+        if (
+            context_factors.get("isolation", 0) > 0.8
+            and context_factors.get("support_network", 0.5) < 0.3
+        ):
             safety_concerns.append("High isolation with weak support network")
             if initial_level == CrisisLevel.MEDIUM:
                 adjusted_level = CrisisLevel.HIGH
@@ -297,35 +350,44 @@ class CrisisSafetyOverride:
 
         return adjusted_level, safety_concerns
 
-    def _generate_intervention_recommendations(self, level: CrisisLevel, context_factors: Dict[str, Any]) -> List[InterventionType]:
+    def _generate_intervention_recommendations(
+        self, level: CrisisLevel, context_factors: dict[str, Any]
+    ) -> list[InterventionType]:
         """Generate appropriate intervention recommendations"""
         recommendations = []
 
         if level == CrisisLevel.CRITICAL:
-            recommendations.extend([
-                InterventionType.IMMEDIATE_SUPPORT,
-                InterventionType.SAFETY_RESOURCES,
-                InterventionType.EMERGENCY_CONTACT,
-                InterventionType.FOLLOW_UP_REQUIRED
-            ])
+            recommendations.extend(
+                [
+                    InterventionType.IMMEDIATE_SUPPORT,
+                    InterventionType.SAFETY_RESOURCES,
+                    InterventionType.EMERGENCY_CONTACT,
+                    InterventionType.FOLLOW_UP_REQUIRED,
+                ]
+            )
         elif level == CrisisLevel.HIGH:
-            recommendations.extend([
-                InterventionType.IMMEDIATE_SUPPORT,
-                InterventionType.SAFETY_RESOURCES,
-                InterventionType.PROFESSIONAL_REFERRAL,
-                InterventionType.FOLLOW_UP_REQUIRED
-            ])
+            recommendations.extend(
+                [
+                    InterventionType.IMMEDIATE_SUPPORT,
+                    InterventionType.SAFETY_RESOURCES,
+                    InterventionType.PROFESSIONAL_REFERRAL,
+                    InterventionType.FOLLOW_UP_REQUIRED,
+                ]
+            )
         elif level == CrisisLevel.MEDIUM:
-            recommendations.extend([
-                InterventionType.IMMEDIATE_SUPPORT,
-                InterventionType.SAFETY_RESOURCES,
-                InterventionType.PROFESSIONAL_REFERRAL
-            ])
+            recommendations.extend(
+                [
+                    InterventionType.IMMEDIATE_SUPPORT,
+                    InterventionType.SAFETY_RESOURCES,
+                    InterventionType.PROFESSIONAL_REFERRAL,
+                ]
+            )
 
         return recommendations
 
-    async def trigger_crisis_override(self, assessment: CrisisAssessment, user_id: str,
-                                   original_response: str) -> tuple[bool, str, CrisisIntervention]:
+    async def trigger_crisis_override(
+        self, assessment: CrisisAssessment, user_id: str, original_response: str
+    ) -> tuple[bool, str, CrisisIntervention]:
         """
         Trigger crisis override - interrupt normal response flow with safety-focused intervention
         """
@@ -350,7 +412,7 @@ class CrisisSafetyOverride:
                 response_generated=crisis_response,
                 resources_provided=resources,
                 follow_up_scheduled=assessment.level.value in ["high", "critical"],
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
 
             # Store active intervention
@@ -358,14 +420,16 @@ class CrisisSafetyOverride:
 
             # Record crisis event for memory
             try:
-                record_crisis_event(user_id, assessment.level.value, {
-                    'indicators': assessment.detected_indicators
-                })
+                record_crisis_event(
+                    user_id, assessment.level.value, {"indicators": assessment.detected_indicators}
+                )
             except Exception:
                 pass
 
             # Log critical intervention
-            self.crisis_logger.critical(f"Crisis override triggered for user {user_id}: {assessment.level.value}")
+            self.crisis_logger.critical(
+                f"Crisis override triggered for user {user_id}: {assessment.level.value}"
+            )
 
             # Execute intervention callbacks
             for callback in self.intervention_callbacks:
@@ -390,13 +454,13 @@ class CrisisSafetyOverride:
                 response_generated=fallback_response,
                 resources_provided=[],
                 follow_up_scheduled=True,
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
 
             try:
-                record_crisis_event(user_id, assessment.level.value, {
-                    'indicators': assessment.detected_indicators
-                })
+                record_crisis_event(
+                    user_id, assessment.level.value, {"indicators": assessment.detected_indicators}
+                )
             except Exception:
                 pass
 
@@ -411,18 +475,18 @@ class CrisisSafetyOverride:
             CrisisLevel.CRITICAL: [
                 "I'm deeply concerned about what you're sharing. Your safety is the most important thing right now.",
                 "What you're feeling is very serious, and I want to make sure you get the immediate support you need.",
-                "Thank you for trusting me with this. Let's get you connected with someone who can provide immediate help."
+                "Thank you for trusting me with this. Let's get you connected with someone who can provide immediate help.",
             ],
             CrisisLevel.HIGH: [
                 "I can hear how much pain you're in right now. You don't have to go through this alone.",
                 "What you're experiencing sounds overwhelming. There are people specially trained to help with exactly this.",
-                "I'm glad you're reaching out. Let's make sure you have access to the support you deserve."
+                "I'm glad you're reaching out. Let's make sure you have access to the support you deserve.",
             ],
             CrisisLevel.MEDIUM: [
                 "I can sense you're going through a really difficult time. That takes courage to share.",
                 "It sounds like you're dealing with a lot right now. There are resources that can help.",
-                "Thank you for being open about what you're experiencing. Let's explore some support options."
-            ]
+                "Thank you for being open about what you're experiencing. Let's explore some support options.",
+            ],
         }
 
         # Select appropriate base response
@@ -434,7 +498,9 @@ class CrisisSafetyOverride:
         resource_text = "\n\n**Immediate Support Resources:**\n"
 
         for resource in resources[:3]:  # Limit to top 3 resources
-            resource_text += f"• **{resource['name']}**: {resource['contact']} - {resource['description']}\n"
+            resource_text += (
+                f"• **{resource['name']}**: {resource['contact']} - {resource['description']}\n"
+            )
 
         # Add specific safety messaging based on level
         if assessment.level == CrisisLevel.CRITICAL:
@@ -442,14 +508,21 @@ class CrisisSafetyOverride:
         elif assessment.level == CrisisLevel.HIGH:
             safety_message = "\n\n⚠️ **If you're having thoughts of self-harm, please reach out to a crisis line immediately.**"
         else:
-            safety_message = "\n\n💙 **Remember: seeking help is a sign of strength, not weakness.**"
+            safety_message = (
+                "\n\n💙 **Remember: seeking help is a sign of strength, not weakness.**"
+            )
 
         # Combine response components
         full_response = base_response + resource_text + safety_message
 
         # Add follow-up commitment if required
-        if assessment.recommended_actions and InterventionType.FOLLOW_UP_REQUIRED in assessment.recommended_actions:
-            full_response += "\n\nI'll be here to continue supporting you. Please let me know how you're doing."
+        if (
+            assessment.recommended_actions
+            and InterventionType.FOLLOW_UP_REQUIRED in assessment.recommended_actions
+        ):
+            full_response += (
+                "\n\nI'll be here to continue supporting you. Please let me know how you're doing."
+            )
 
         return full_response
 
@@ -461,12 +534,15 @@ class CrisisSafetyOverride:
         """Check if crisis override is currently active"""
         return self.override_active
 
-    async def get_intervention_history(self, user_id: str, days: int = 30) -> List[CrisisIntervention]:
+    async def get_intervention_history(
+        self, user_id: str, days: int = 30
+    ) -> list[CrisisIntervention]:
         """Get crisis intervention history for user"""
         # This would typically query the database
         # For now, return active interventions for this session
         user_interventions = [
-            intervention for intervention in self.active_interventions.values()
+            intervention
+            for intervention in self.active_interventions.values()
             if intervention.user_id == user_id
         ]
         return user_interventions
@@ -479,7 +555,7 @@ class CrisisSafetyOverride:
             return True
         return False
 
-    async def check_interrupt_required(self, user_input: str, context: Dict[str, Any]) -> bool:
+    async def check_interrupt_required(self, user_input: str, context: dict[str, Any]) -> bool:
         """
         Check if immediate interrupt is required for crisis intervention
 
@@ -489,25 +565,23 @@ class CrisisSafetyOverride:
 
         # Immediate interrupt for critical/high crisis levels
         if assessment.level in [CrisisLevel.CRITICAL, CrisisLevel.HIGH]:
-            self.logger.warning(
-                f"CRISIS INTERRUPT TRIGGERED - Level: {assessment.level.value}"
-            )
+            self.logger.warning(f"CRISIS INTERRUPT TRIGGERED - Level: {assessment.level.value}")
             self.interrupt_active = True
             return True
 
         # Interrupt for medium level with additional risk factors
         if assessment.level == CrisisLevel.MEDIUM:
             if assessment.immediate_response_needed or len(assessment.safety_concerns) > 2:
-                self.logger.warning(
-                    "CRISIS INTERRUPT TRIGGERED - Medium level with high risk"
-                )
+                self.logger.warning("CRISIS INTERRUPT TRIGGERED - Medium level with high risk")
                 self.interrupt_active = True
                 return True
 
         self.interrupt_active = False
         return False
 
-    async def execute_interrupt_response(self, user_input: str, context: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute_interrupt_response(
+        self, user_input: str, context: dict[str, Any]
+    ) -> dict[str, Any]:
         """
         Execute immediate crisis interrupt response
 
@@ -521,9 +595,7 @@ class CrisisSafetyOverride:
 
         # Generate immediate intervention
         success, crisis_response, intervention = await self.trigger_crisis_override(
-            assessment=assessment,
-            user_id=context.get("user_id", "unknown"),
-            original_response=""
+            assessment=assessment, user_id=context.get("user_id", "unknown"), original_response=""
         )
 
         # Execute all registered callbacks
@@ -544,5 +616,5 @@ class CrisisSafetyOverride:
             "safety_concerns": assessment.safety_concerns,
             "intervention_id": intervention.intervention_id,
             "timestamp": intervention.timestamp.isoformat(),
-            "override_normal_flow": True
+            "override_normal_flow": True,
         }

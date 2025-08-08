@@ -9,20 +9,24 @@ import functools
 import logging
 import random
 import time
-from typing import Any, Callable, Optional, Tuple, Type, Union
+from collections.abc import Callable
+from typing import Any, Optional, Tuple, Type, Union
 
 logger = logging.getLogger(__name__)
+
 
 class RetryConfig:
     """Configuration for retry behavior."""
 
-    def __init__(self,
-                 max_attempts: int = 3,
-                 base_delay: float = 1.0,
-                 max_delay: float = 60.0,
-                 exponential_base: float = 2.0,
-                 jitter: bool = True,
-                 jitter_range: float = 0.1):
+    def __init__(
+        self,
+        max_attempts: int = 3,
+        base_delay: float = 1.0,
+        max_delay: float = 60.0,
+        exponential_base: float = 2.0,
+        jitter: bool = True,
+        jitter_range: float = 0.1,
+    ):
         """
         Initialize retry configuration.
 
@@ -41,17 +45,24 @@ class RetryConfig:
         self.jitter = jitter
         self.jitter_range = jitter_range
 
+
 class RetryableError(Exception):
     """Base class for errors that should trigger retries."""
+
     pass
+
 
 class NetworkError(RetryableError):
     """Network-related errors that should be retried."""
+
     pass
+
 
 class ServiceUnavailableError(RetryableError):
     """Service unavailable errors that should be retried."""
+
     pass
+
 
 def calculate_delay(attempt: int, config: RetryConfig) -> float:
     """
@@ -65,7 +76,7 @@ def calculate_delay(attempt: int, config: RetryConfig) -> float:
         Delay in seconds
     """
     # Exponential backoff
-    delay = config.base_delay * (config.exponential_base ** attempt)
+    delay = config.base_delay * (config.exponential_base**attempt)
 
     # Cap at max delay
     delay = min(delay, config.max_delay)
@@ -78,11 +89,12 @@ def calculate_delay(attempt: int, config: RetryConfig) -> float:
 
     return delay
 
+
 def retry_with_backoff(
     config: Optional[RetryConfig] = None,
-    exceptions: Tuple[Type[Exception], ...] = (RetryableError,),
+    exceptions: tuple[type[Exception], ...] = (RetryableError,),
     on_retry: Optional[Callable[[int, Exception], None]] = None,
-    on_final_failure: Optional[Callable[[Exception], Any]] = None
+    on_final_failure: Optional[Callable[[Exception], Any]] = None,
 ):
     """
     Decorator for retrying functions with exponential backoff.
@@ -114,7 +126,7 @@ def retry_with_backoff(
                         # Final attempt failed
                         logger.error(
                             f"Function {func.__name__} failed after {config.max_attempts} attempts. "
-                            f"Final error: {str(e)}"
+                            f"Final error: {e!s}"
                         )
                         if on_final_failure:
                             return on_final_failure(e)
@@ -125,7 +137,7 @@ def retry_with_backoff(
 
                     logger.warning(
                         f"Function {func.__name__} failed on attempt {attempt + 1}/{config.max_attempts}. "
-                        f"Error: {str(e)}. Retrying in {delay:.2f}s..."
+                        f"Error: {e!s}. Retrying in {delay:.2f}s..."
                     )
 
                     if on_retry:
@@ -134,7 +146,7 @@ def retry_with_backoff(
                     time.sleep(delay)
                 except Exception as e:
                     # Non-retryable exception
-                    logger.error(f"Function {func.__name__} failed with non-retryable error: {str(e)}")
+                    logger.error(f"Function {func.__name__} failed with non-retryable error: {e!s}")
                     raise
 
             # Should never reach here, but just in case
@@ -142,32 +154,23 @@ def retry_with_backoff(
                 raise last_exception
 
         return wrapper
+
     return decorator
+
 
 # Predefined configurations for common scenarios
 HRM_RETRY_CONFIG = RetryConfig(
-    max_attempts=3,
-    base_delay=0.5,
-    max_delay=10.0,
-    exponential_base=2.0,
-    jitter=True
+    max_attempts=3, base_delay=0.5, max_delay=10.0, exponential_base=2.0, jitter=True
 )
 
 ARBITER_RETRY_CONFIG = RetryConfig(
-    max_attempts=5,
-    base_delay=1.0,
-    max_delay=30.0,
-    exponential_base=1.5,
-    jitter=True
+    max_attempts=5, base_delay=1.0, max_delay=30.0, exponential_base=1.5, jitter=True
 )
 
 MEMORY_RETRY_CONFIG = RetryConfig(
-    max_attempts=2,
-    base_delay=0.2,
-    max_delay=5.0,
-    exponential_base=2.0,
-    jitter=True
+    max_attempts=2, base_delay=0.2, max_delay=5.0, exponential_base=2.0, jitter=True
 )
+
 
 # Convenience decorators for common scenarios
 def retry_hrm_call(func: Callable) -> Callable:
@@ -176,8 +179,9 @@ def retry_hrm_call(func: Callable) -> Callable:
         config=HRM_RETRY_CONFIG,
         exceptions=(NetworkError, ServiceUnavailableError, ConnectionError, TimeoutError),
         on_retry=lambda attempt, error: logger.info(f"HRM call retry #{attempt}: {error}"),
-        on_final_failure=lambda error: {"error": "HRM service unavailable", "details": str(error)}
+        on_final_failure=lambda error: {"error": "HRM service unavailable", "details": str(error)},
     )(func)
+
 
 def retry_arbiter_call(func: Callable) -> Callable:
     """Decorator for CoreArbiter-related calls with appropriate retry settings."""
@@ -185,8 +189,12 @@ def retry_arbiter_call(func: Callable) -> Callable:
         config=ARBITER_RETRY_CONFIG,
         exceptions=(NetworkError, ServiceUnavailableError, ConnectionError, TimeoutError),
         on_retry=lambda attempt, error: logger.info(f"Arbiter call retry #{attempt}: {error}"),
-        on_final_failure=lambda error: {"error": "Arbiter service unavailable", "details": str(error)}
+        on_final_failure=lambda error: {
+            "error": "Arbiter service unavailable",
+            "details": str(error),
+        },
     )(func)
+
 
 def retry_memory_call(func: Callable) -> Callable:
     """Decorator for memory-related calls with appropriate retry settings."""
@@ -194,8 +202,9 @@ def retry_memory_call(func: Callable) -> Callable:
         config=MEMORY_RETRY_CONFIG,
         exceptions=(NetworkError, ServiceUnavailableError, OSError, IOError),
         on_retry=lambda attempt, error: logger.info(f"Memory operation retry #{attempt}: {error}"),
-        on_final_failure=lambda error: {"error": "Memory operation failed", "details": str(error)}
+        on_final_failure=lambda error: {"error": "Memory operation failed", "details": str(error)},
     )(func)
+
 
 # Utility functions for checking service health
 def check_service_health(service_url: str, timeout: float = 5.0) -> bool:
@@ -211,11 +220,13 @@ def check_service_health(service_url: str, timeout: float = 5.0) -> bool:
     """
     try:
         import requests
+
         response = requests.get(f"{service_url}/health", timeout=timeout)
         return response.status_code == 200
     except Exception as e:
         logger.warning(f"Health check failed for {service_url}: {e}")
         return False
+
 
 def backoff_delay(attempt: int, base_delay: float = 1.0, max_delay: float = 60.0) -> float:
     """
@@ -229,8 +240,9 @@ def backoff_delay(attempt: int, base_delay: float = 1.0, max_delay: float = 60.0
     Returns:
         Delay in seconds
     """
-    delay = base_delay * (2 ** attempt)
+    delay = base_delay * (2**attempt)
     return min(delay, max_delay)
+
 
 # Context manager for handling retryable operations
 class RetryContext:
@@ -254,8 +266,6 @@ class RetryContext:
         if exc_type is None:
             logger.debug(f"Completed {self.operation_name} in {duration:.2f}s")
         else:
-            logger.warning(
-                f"Failed {self.operation_name} after {duration:.2f}s: {exc_val}"
-            )
+            logger.warning(f"Failed {self.operation_name} after {duration:.2f}s: {exc_val}")
 
         return False  # Don't suppress exceptions

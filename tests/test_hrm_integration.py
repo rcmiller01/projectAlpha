@@ -7,11 +7,12 @@ Comprehensive integration test to verify HRM system works with existing
 projectAlpha components before moving forward.
 """
 
-import sys
-import os
 import asyncio
+import os
+import sys
 import traceback
 from datetime import datetime
+
 
 def test_basic_imports():
     """Test basic component imports"""
@@ -19,25 +20,30 @@ def test_basic_imports():
 
     try:
         # Core components
-        from core.core_arbiter import CoreArbiter, ArbiterResponse
+        from core.core_arbiter import ArbiterResponse, CoreArbiter
+
         print("   ✅ CoreArbiter imported")
 
         from core.mirror_mode import MirrorModeManager, MirrorType
+
         print("   ✅ MirrorMode imported")
 
         # HRM components
-        from backend.hrm_router import HRMRouter, HRMMode, RequestType
+        from backend.hrm_router import HRMMode, HRMRouter, RequestType
+
         print("   ✅ HRM Router imported")
 
         # Backend components
         try:
-            from backend.subagent_router import SubAgentRouter, AgentType
+            from backend.subagent_router import AgentType, SubAgentRouter
+
             print("   ✅ SubAgent Router imported")
         except ImportError as e:
             print(f"   ⚠️  SubAgent Router import issue: {e}")
 
         try:
             from backend.ai_reformulator import PersonalityFormatter
+
             print("   ✅ AI Reformulator imported")
         except ImportError as e:
             print(f"   ⚠️  AI Reformulator import issue: {e}")
@@ -49,6 +55,7 @@ def test_basic_imports():
         traceback.print_exc()
         return False
 
+
 def test_component_initialization():
     """Test component initialization"""
     print("\n🏗️  Testing Component Initialization...")
@@ -56,14 +63,17 @@ def test_component_initialization():
     try:
         # Initialize core components
         from core.core_arbiter import CoreArbiter
+
         arbiter = CoreArbiter()
         print("   ✅ CoreArbiter initialized")
 
         from core.mirror_mode import MirrorModeManager
+
         mirror = MirrorModeManager()
         print("   ✅ MirrorMode initialized")
 
         from backend.hrm_router import HRMRouter
+
         router = HRMRouter()
         print("   ✅ HRM Router initialized")
 
@@ -77,6 +87,7 @@ def test_component_initialization():
         print(f"   ❌ Initialization failed: {e}")
         traceback.print_exc()
         return False
+
 
 async def test_core_arbiter_integration():
     """Test Core Arbiter integration"""
@@ -93,7 +104,7 @@ async def test_core_arbiter_integration():
 
         response = await arbiter.process_input(test_input, test_state)
 
-        print(f"   ✅ Core Arbiter processed input")
+        print("   ✅ Core Arbiter processed input")
         print(f"   📊 Confidence: {response.confidence:.2f}")
         print(f"   🎭 Tone: {response.tone}")
         print(f"   📝 Response length: {len(response.final_output)} chars")
@@ -104,6 +115,7 @@ async def test_core_arbiter_integration():
         print(f"   ❌ Core Arbiter integration failed: {e}")
         traceback.print_exc()
         return False
+
 
 async def test_hrm_router_processing():
     """Test HRM Router processing"""
@@ -137,6 +149,7 @@ async def test_hrm_router_processing():
         traceback.print_exc()
         return False
 
+
 def test_mirror_mode_integration():
     """Test Mirror Mode integration"""
     print("\n🪩 Testing Mirror Mode Integration...")
@@ -151,13 +164,11 @@ def test_mirror_mode_integration():
         test_context = {
             "processing_mode": "balanced",
             "confidence": 0.85,
-            "agents_used": ["core_arbiter"]
+            "agents_used": ["core_arbiter"],
         }
 
         enhanced_response = mirror.add_mirror_reflection(
-            test_response,
-            test_context,
-            [MirrorType.REASONING]
+            test_response, test_context, [MirrorType.REASONING]
         )
 
         print("   ✅ Mirror reflection added")
@@ -170,6 +181,7 @@ def test_mirror_mode_integration():
         print(f"   ❌ Mirror Mode integration failed: {e}")
         traceback.print_exc()
         return False
+
 
 def test_configuration_system():
     """Test configuration system"""
@@ -203,56 +215,60 @@ def test_configuration_system():
         traceback.print_exc()
         return False
 
+
 def test_identity_layer_protection():
     """Test identity layer protection with admin key requirements"""
     print("\n🔐 Testing Identity Layer Protection...")
 
     try:
-        from backend.hrm_api import verify_admin_access, check_layer_protection
         import os
 
+        from backend.hrm_api import check_layer_protection, verify_admin_access
+
         # Test admin key verification
-        os.environ['ADMIN_MASTER_KEY'] = 'test_key_123'
+        os.environ["ADMIN_MASTER_KEY"] = "test_key_123"
 
         # Test valid admin access
-        is_admin = verify_admin_access('test_key_123')
+        is_admin = verify_admin_access("test_key_123")
         assert is_admin, "Valid admin key should be verified"
-        print(f"   ✅ Admin key verification: valid key accepted")
+        print("   ✅ Admin key verification: valid key accepted")
 
         # Test invalid admin access
-        is_admin = verify_admin_access('wrong_key')
+        is_admin = verify_admin_access("wrong_key")
         assert not is_admin, "Invalid admin key should be rejected"
-        print(f"   ✅ Admin key verification: invalid key rejected")
+        print("   ✅ Admin key verification: invalid key rejected")
 
         # Test identity layer protection
-        identity_protected = check_layer_protection('identity', 'test_key_123')
+        identity_protected = check_layer_protection("identity", "test_key_123")
         assert identity_protected, "Identity layer should require admin key"
-        print(f"   ✅ Identity layer protection: admin key required")
+        print("   ✅ Identity layer protection: admin key required")
 
         # Test beliefs layer protection
-        beliefs_protected = check_layer_protection('beliefs', 'test_key_123')
+        beliefs_protected = check_layer_protection("beliefs", "test_key_123")
         assert beliefs_protected, "Beliefs layer should require admin key"
-        print(f"   ✅ Beliefs layer protection: admin key required")
+        print("   ✅ Beliefs layer protection: admin key required")
 
         # Test that unauthorized access is blocked
         try:
-            identity_blocked = check_layer_protection('identity', 'wrong_key')
+            identity_blocked = check_layer_protection("identity", "wrong_key")
             assert not identity_blocked, "Identity access should be blocked without valid admin key"
-            print(f"   ✅ Identity layer protection: unauthorized access blocked")
+            print("   ✅ Identity layer protection: unauthorized access blocked")
         except Exception as auth_error:
-            print(f"   ✅ Identity layer protection: authorization error raised as expected")
+            print("   ✅ Identity layer protection: authorization error raised as expected")
 
         # Test ephemeral layer (should not require admin key)
-        ephemeral_access = check_layer_protection('ephemeral', None)
-        print(f"   ✅ Ephemeral layer: public access allowed")
+        ephemeral_access = check_layer_protection("ephemeral", None)
+        print("   ✅ Ephemeral layer: public access allowed")
 
         return True
 
     except Exception as e:
         print(f"   ❌ Identity layer protection test failed: {e}")
         import traceback
+
         traceback.print_exc()
         return False
+
 
 def test_data_directory_structure():
     """Test data directory structure"""
@@ -276,7 +292,7 @@ def test_data_directory_structure():
         config_files = [
             "data/hrm_config.json",
             "data/core_arbiter_config.json",
-            "data/identity_tether.json"
+            "data/identity_tether.json",
         ]
 
         for config_file in config_files:
@@ -291,13 +307,15 @@ def test_data_directory_structure():
         print(f"   ❌ Directory structure test failed: {e}")
         return False
 
+
 def test_offline_simulation():
     """Test offline simulation mode with isolation verification"""
     print("\n🔌 Testing Offline Simulation Mode...")
 
     try:
-        from backend.core_arbiter import CoreArbiter
         import os
+
+        from backend.core_arbiter import CoreArbiter
 
         # Create arbiter instance
         arbiter = CoreArbiter()
@@ -338,8 +356,10 @@ def test_offline_simulation():
     except Exception as e:
         print(f"   ❌ Offline simulation test failed: {e}")
         import traceback
+
         traceback.print_exc()
         return False
+
 
 async def run_integration_tests():
     """Run all integration tests"""
@@ -365,7 +385,7 @@ async def run_integration_tests():
     results = {}
 
     for test_name, test_func in tests:
-        print(f"\n" + "─" * 60)
+        print("\n" + "─" * 60)
         try:
             if asyncio.iscoroutinefunction(test_func):
                 result = await test_func()
@@ -377,7 +397,7 @@ async def run_integration_tests():
             results[test_name] = False
 
     # Summary
-    print(f"\n" + "=" * 60)
+    print("\n" + "=" * 60)
     print("📊 INTEGRATION TEST RESULTS")
     print("=" * 60)
 
@@ -398,6 +418,7 @@ async def run_integration_tests():
         print("❌ SIGNIFICANT ISSUES - Need to fix critical problems")
 
     return results
+
 
 if __name__ == "__main__":
     asyncio.run(run_integration_tests())

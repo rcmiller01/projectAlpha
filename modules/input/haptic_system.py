@@ -1,13 +1,14 @@
 # haptic_system.py
 # Phase 3: Advanced haptic integration for physical connection simulation
 
+import asyncio
 import json
-import time
 import threading
-from typing import Dict, List, Optional, Tuple
+import time
 from dataclasses import dataclass
 from enum import Enum
-import asyncio
+from typing import Dict, List, Optional, Tuple
+
 
 class HapticPattern(Enum):
     HEARTBEAT = "heartbeat"
@@ -21,12 +22,14 @@ class HapticPattern(Enum):
     RHYTHM = "rhythm"
     INTIMATE = "intimate"
 
+
 class HapticIntensity(Enum):
     SUBTLE = 0.2
     GENTLE = 0.4
     MODERATE = 0.6
     STRONG = 0.8
     INTENSE = 1.0
+
 
 @dataclass
 class HapticFeedback:
@@ -36,6 +39,7 @@ class HapticFeedback:
     location: str = "general"  # heart, hands, full_body, etc.
     emotional_context: str = "neutral"
 
+
 class HapticSystem:
     def __init__(self):
         self.is_active = False
@@ -44,15 +48,15 @@ class HapticSystem:
         self.pattern_definitions = self._load_pattern_definitions()
         self.emotional_mappings = self._load_emotional_mappings()
 
-    def _detect_haptic_devices(self) -> Dict[str, bool]:
+    def _detect_haptic_devices(self) -> dict[str, bool]:
         """Detect available haptic devices and capabilities"""
         devices = {
             "mobile_vibration": True,  # Most mobile devices
-            "gamepad_rumble": False,   # Game controllers
-            "haptic_gloves": False,    # VR haptic gloves
-            "smart_watch": False,      # Apple Watch, etc.
-            "haptic_vest": False,      # Haptic feedback vest
-            "desktop_haptic": False    # Desktop haptic devices
+            "gamepad_rumble": False,  # Game controllers
+            "haptic_gloves": False,  # VR haptic gloves
+            "smart_watch": False,  # Apple Watch, etc.
+            "haptic_vest": False,  # Haptic feedback vest
+            "desktop_haptic": False,  # Desktop haptic devices
         }
 
         # Try to detect specific devices
@@ -61,11 +65,12 @@ class HapticSystem:
             # Use fallback approach for non-browser environments
             if self._has_navigator_api():
                 from js import navigator  # pyodide/browser environment
-                if hasattr(navigator, 'vibrate'):
+
+                if hasattr(navigator, "vibrate"):
                     devices["mobile_vibration"] = True
 
                 # Check for gamepad support
-                if hasattr(navigator, 'getGamepads'):
+                if hasattr(navigator, "getGamepads"):
                     devices["gamepad_rumble"] = True
             else:
                 # Non-browser environment - check for alternative APIs
@@ -82,24 +87,26 @@ class HapticSystem:
         """Check if navigator API is available (browser environment)"""
         try:
             import js
-            return hasattr(js, 'navigator')
+
+            return hasattr(js, "navigator")
         except ImportError:
             return False
 
-    def _detect_system_haptic_devices(self) -> Dict[str, bool]:
+    def _detect_system_haptic_devices(self) -> dict[str, bool]:
         """Detect haptic devices using system APIs when navigator unavailable"""
         devices = {}
 
         try:
             import platform
+
             system = platform.system().lower()
 
             # Mobile platform detection
-            if system in ['android', 'ios']:
+            if system in ["android", "ios"]:
                 devices["mobile_vibration"] = True
 
             # Desktop haptic device detection
-            elif system in ['windows', 'linux', 'darwin']:
+            elif system in ["windows", "linux", "darwin"]:
                 # Check for common haptic devices/drivers
                 devices["gamepad_rumble"] = self._check_gamepad_support()
                 devices["desktop_haptic"] = self._check_desktop_haptic()
@@ -114,6 +121,7 @@ class HapticSystem:
         try:
             # Try to import pygame for gamepad detection
             import pygame
+
             pygame.init()
             return pygame.joystick.get_count() > 0
         except ImportError:
@@ -122,8 +130,10 @@ class HapticSystem:
         try:
             # Try to check for DirectInput/XInput on Windows
             import platform
-            if platform.system().lower() == 'windows':
+
+            if platform.system().lower() == "windows":
                 import ctypes
+
                 # Simple check for XInput availability
                 try:
                     xinput = ctypes.windll.xinput1_4
@@ -143,42 +153,43 @@ class HapticSystem:
 
         return devices
 
-    def _load_pattern_definitions(self) -> Dict[HapticPattern, List[Tuple[float, float]]]:
+    def _load_pattern_definitions(self) -> dict[HapticPattern, list[tuple[float, float]]]:
         """Load haptic pattern definitions (timing, intensity)"""
         return {
-            HapticPattern.HEARTBEAT: [
-                (0.0, 0.8), (0.1, 0.0), (0.3, 0.8), (0.4, 0.0), (1.0, 0.0)
-            ],
-            HapticPattern.BREATHING: [
-                (0.0, 0.3), (0.5, 0.6), (1.0, 0.3), (1.5, 0.1), (2.0, 0.0)
-            ],
-            HapticPattern.TOUCH: [
-                (0.0, 0.5), (0.2, 0.0)
-            ],
-            HapticPattern.EMBRACE: [
-                (0.0, 0.4), (0.5, 0.7), (1.0, 0.4), (1.5, 0.2), (2.0, 0.0)
-            ],
-            HapticPattern.KISS: [
-                (0.0, 0.6), (0.1, 0.0), (0.3, 0.4), (0.4, 0.0)
-            ],
+            HapticPattern.HEARTBEAT: [(0.0, 0.8), (0.1, 0.0), (0.3, 0.8), (0.4, 0.0), (1.0, 0.0)],
+            HapticPattern.BREATHING: [(0.0, 0.3), (0.5, 0.6), (1.0, 0.3), (1.5, 0.1), (2.0, 0.0)],
+            HapticPattern.TOUCH: [(0.0, 0.5), (0.2, 0.0)],
+            HapticPattern.EMBRACE: [(0.0, 0.4), (0.5, 0.7), (1.0, 0.4), (1.5, 0.2), (2.0, 0.0)],
+            HapticPattern.KISS: [(0.0, 0.6), (0.1, 0.0), (0.3, 0.4), (0.4, 0.0)],
             HapticPattern.STROKE: [
-                (0.0, 0.3), (0.2, 0.5), (0.4, 0.3), (0.6, 0.5), (0.8, 0.3), (1.0, 0.0)
+                (0.0, 0.3),
+                (0.2, 0.5),
+                (0.4, 0.3),
+                (0.6, 0.5),
+                (0.8, 0.3),
+                (1.0, 0.0),
             ],
             HapticPattern.PULSE: [
-                (0.0, 0.4), (0.1, 0.0), (0.2, 0.4), (0.3, 0.0), (0.4, 0.4), (0.5, 0.0)
+                (0.0, 0.4),
+                (0.1, 0.0),
+                (0.2, 0.4),
+                (0.3, 0.0),
+                (0.4, 0.4),
+                (0.5, 0.0),
             ],
-            HapticPattern.WAVE: [
-                (0.0, 0.2), (0.25, 0.6), (0.5, 0.2), (0.75, 0.6), (1.0, 0.2)
-            ],
-            HapticPattern.RHYTHM: [
-                (0.0, 0.5), (0.25, 0.0), (0.5, 0.5), (0.75, 0.0), (1.0, 0.5)
-            ],
+            HapticPattern.WAVE: [(0.0, 0.2), (0.25, 0.6), (0.5, 0.2), (0.75, 0.6), (1.0, 0.2)],
+            HapticPattern.RHYTHM: [(0.0, 0.5), (0.25, 0.0), (0.5, 0.5), (0.75, 0.0), (1.0, 0.5)],
             HapticPattern.INTIMATE: [
-                (0.0, 0.3), (0.2, 0.7), (0.4, 0.3), (0.6, 0.8), (0.8, 0.3), (1.0, 0.0)
-            ]
+                (0.0, 0.3),
+                (0.2, 0.7),
+                (0.4, 0.3),
+                (0.6, 0.8),
+                (0.8, 0.3),
+                (1.0, 0.0),
+            ],
         }
 
-    def _load_emotional_mappings(self) -> Dict[str, HapticPattern]:
+    def _load_emotional_mappings(self) -> dict[str, HapticPattern]:
         """Map emotions to haptic patterns"""
         return {
             "love": HapticPattern.HEARTBEAT,
@@ -190,7 +201,7 @@ class HapticSystem:
             "comfort": HapticPattern.EMBRACE,
             "affection": HapticPattern.TOUCH,
             "romance": HapticPattern.WAVE,
-            "desire": HapticPattern.PULSE
+            "desire": HapticPattern.PULSE,
         }
 
     def start_haptic_feedback(self, feedback: HapticFeedback):
@@ -203,11 +214,7 @@ class HapticSystem:
         self.current_pattern = feedback
 
         # Start pattern in background thread
-        threading.Thread(
-            target=self._execute_pattern,
-            args=(feedback,),
-            daemon=True
-        ).start()
+        threading.Thread(target=self._execute_pattern, args=(feedback,), daemon=True).start()
 
         print(f"[Haptic] Started {feedback.pattern.value} pattern")
         return True
@@ -251,7 +258,8 @@ class HapticSystem:
             if self._has_navigator_api():
                 try:
                     from js import navigator
-                    if hasattr(navigator, 'vibrate'):
+
+                    if hasattr(navigator, "vibrate"):
                         navigator.vibrate(vibration_pattern)
                         print(f"[Haptic] Applied vibration via navigator API: {vibration_pattern}")
                     else:
@@ -282,20 +290,21 @@ class HapticSystem:
         self.current_pattern = None
         print("[Haptic] Stopped haptic feedback")
 
-    def trigger_emotional_haptic(self, emotion: str, intensity: HapticIntensity = HapticIntensity.MODERATE):
+    def trigger_emotional_haptic(
+        self, emotion: str, intensity: HapticIntensity = HapticIntensity.MODERATE
+    ):
         """Trigger haptic feedback based on emotion"""
         if emotion in self.emotional_mappings:
             pattern = self.emotional_mappings[emotion]
             feedback = HapticFeedback(
-                pattern=pattern,
-                intensity=intensity,
-                duration=2.0,
-                emotional_context=emotion
+                pattern=pattern, intensity=intensity, duration=2.0, emotional_context=emotion
             )
             return self.start_haptic_feedback(feedback)
         return False
 
-    def trigger_romantic_haptic(self, action: str, intensity: HapticIntensity = HapticIntensity.MODERATE):
+    def trigger_romantic_haptic(
+        self, action: str, intensity: HapticIntensity = HapticIntensity.MODERATE
+    ):
         """Trigger romantic haptic feedback"""
         romantic_patterns = {
             "kiss": HapticPattern.KISS,
@@ -303,7 +312,7 @@ class HapticSystem:
             "touch": HapticPattern.TOUCH,
             "stroke": HapticPattern.STROKE,
             "heartbeat": HapticPattern.HEARTBEAT,
-            "breathing": HapticPattern.BREATHING
+            "breathing": HapticPattern.BREATHING,
         }
 
         if action in romantic_patterns:
@@ -312,27 +321,30 @@ class HapticSystem:
                 intensity=intensity,
                 duration=3.0,
                 location="heart" if action in ["kiss", "heartbeat"] else "general",
-                emotional_context="romantic"
+                emotional_context="romantic",
             )
             return self.start_haptic_feedback(feedback)
         return False
 
-    def get_haptic_status(self) -> Dict:
+    def get_haptic_status(self) -> dict:
         """Get current haptic system status"""
         return {
             "active": self.is_active,
             "current_pattern": self.current_pattern.pattern.value if self.current_pattern else None,
             "device_support": self.device_support,
             "available_patterns": [p.value for p in HapticPattern],
-            "emotional_mappings": {k: v.value for k, v in self.emotional_mappings.items()}
+            "emotional_mappings": {k: v.value for k, v in self.emotional_mappings.items()},
         }
+
 
 # Global haptic system instance
 haptic_system = HapticSystem()
 
+
 def get_haptic_system() -> HapticSystem:
     """Get the global haptic system instance"""
     return haptic_system
+
 
 def trigger_haptic_feedback(pattern: str, intensity: str = "moderate", duration: float = 2.0):
     """Convenience function to trigger haptic feedback"""
@@ -341,9 +353,7 @@ def trigger_haptic_feedback(pattern: str, intensity: str = "moderate", duration:
         haptic_intensity = HapticIntensity(intensity.upper())
 
         feedback = HapticFeedback(
-            pattern=haptic_pattern,
-            intensity=haptic_intensity,
-            duration=duration
+            pattern=haptic_pattern, intensity=haptic_intensity, duration=duration
         )
 
         return haptic_system.start_haptic_feedback(feedback)

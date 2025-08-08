@@ -4,28 +4,31 @@ Test Script for Emotion Quantization Autopilot
 Validates system functionality and integration
 """
 
-import sys
 import json
-import time
+import sys
 import tempfile
+import time
 from pathlib import Path
 
 # Add parent directory for imports
 sys.path.append(str(Path(__file__).parent.parent))
+
 
 def test_imports():
     """Test that all components can be imported"""
     print("🧪 Testing imports...")
 
     try:
-        from idle_monitor import IdleMonitor, IdleConfig
+        from idle_monitor import IdleConfig, IdleMonitor
+
         print("   ✅ idle_monitor imported successfully")
     except ImportError as e:
         print(f"   ❌ idle_monitor import failed: {e}")
         return False
 
     try:
-        from quant_autopilot import QuantizationAutopilot, AutopilotDatabase
+        from quant_autopilot import AutopilotDatabase, QuantizationAutopilot
+
         print("   ✅ quant_autopilot imported successfully")
     except ImportError as e:
         print(f"   ❌ quant_autopilot import failed: {e}")
@@ -33,19 +36,20 @@ def test_imports():
 
     return True
 
+
 def test_idle_monitor():
     """Test idle monitoring functionality"""
     print("\n🧪 Testing idle monitor...")
 
     try:
-        from idle_monitor import IdleMonitor, IdleConfig
+        from idle_monitor import IdleConfig, IdleMonitor
 
         # Create test configuration
         config = IdleConfig(
             min_idle_minutes=1,
             cpu_threshold_percent=90,  # Very permissive for testing
             memory_threshold_percent=95,
-            check_interval_seconds=1
+            check_interval_seconds=1,
         )
 
         # Create monitor with temporary log directory
@@ -58,7 +62,9 @@ def test_idle_monitor():
 
             # Test metrics
             metrics = monitor.get_system_metrics()
-            print(f"   ✅ Metrics: CPU {metrics.cpu_percent:.1f}%, MEM {metrics.memory_percent:.1f}%")
+            print(
+                f"   ✅ Metrics: CPU {metrics.cpu_percent:.1f}%, MEM {metrics.memory_percent:.1f}%"
+            )
 
             # Test callbacks
             callback_called = False
@@ -84,16 +90,18 @@ def test_idle_monitor():
         print(f"   ❌ Idle monitor test failed: {e}")
         return False
 
+
 def test_autopilot_database():
     """Test autopilot database functionality"""
     print("\n🧪 Testing autopilot database...")
 
     try:
-        from quant_autopilot import AutopilotDatabase, AutopilotRun, QuantizationJob
         from datetime import datetime
 
+        from quant_autopilot import AutopilotDatabase, AutopilotRun, QuantizationJob
+
         # Create test database
-        with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as temp_file:
+        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as temp_file:
             db_path = temp_file.name
 
         try:
@@ -105,7 +113,7 @@ def test_autopilot_database():
                 job_id="test-job-1",
                 base_model="test-model",
                 quantization_method="q4_K_M",
-                priority=5
+                priority=5,
             )
 
             job_id = db.add_quantization_job(job)
@@ -129,7 +137,7 @@ def test_autopilot_database():
                 target_size_gb=24.0,
                 result_summary="Test run",
                 judgment_score=0.85,
-                success=True
+                success=True,
             )
 
             run_id = db.add_autopilot_run(run)
@@ -149,6 +157,7 @@ def test_autopilot_database():
         print(f"   ❌ Database test failed: {e}")
         return False
 
+
 def test_configuration():
     """Test configuration loading and validation"""
     print("\n🧪 Testing configuration...")
@@ -160,7 +169,7 @@ def test_configuration():
             print(f"   ❌ Configuration file not found: {config_path}")
             return False
 
-        with open(config_path, 'r') as f:
+        with open(config_path) as f:
             config = json.load(f)
 
         print("   ✅ Configuration loaded successfully")
@@ -170,7 +179,7 @@ def test_configuration():
             "min_idle_minutes",
             "max_active_loops_per_day",
             "target_model_size_range_gb",
-            "preferred_base_models"
+            "preferred_base_models",
         ]
 
         missing_keys = [key for key in required_keys if key not in config]
@@ -196,13 +205,14 @@ def test_configuration():
         print(f"   ❌ Configuration test failed: {e}")
         return False
 
+
 def test_integration():
     """Test component integration"""
     print("\n🧪 Testing component integration...")
 
     try:
-        from quant_autopilot import QuantizationAutopilot
         from idle_monitor import create_idle_monitor_from_config
+        from quant_autopilot import QuantizationAutopilot
 
         # Test creating autopilot from config
         config_path = "autopilot_config.json"
@@ -215,9 +225,7 @@ def test_integration():
 
         # Test adding a job
         job_id = autopilot.add_quantization_job(
-            base_model="test-model",
-            quantization_method="q4_K_M",
-            priority=1
+            base_model="test-model", quantization_method="q4_K_M", priority=1
         )
         print(f"   ✅ Job added: {job_id}")
 
@@ -231,6 +239,7 @@ def test_integration():
         print(f"   ❌ Integration test failed: {e}")
         return False
 
+
 def main():
     """Run all tests"""
     print("🧪 Emotion Quantization Autopilot Test Suite")
@@ -241,7 +250,7 @@ def main():
         ("Idle Monitor Test", test_idle_monitor),
         ("Database Test", test_autopilot_database),
         ("Configuration Test", test_configuration),
-        ("Integration Test", test_integration)
+        ("Integration Test", test_integration),
     ]
 
     passed = 0
@@ -269,6 +278,7 @@ def main():
     else:
         print("⚠️  Some tests failed. Check system setup.")
         return 1
+
 
 if __name__ == "__main__":
     exit(main())

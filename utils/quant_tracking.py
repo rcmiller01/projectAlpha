@@ -10,24 +10,25 @@ Enhanced with security features:
 - Rate limiting and session management for tracking operations
 """
 
+import hashlib
 import json
 import logging
 import os
-import hashlib
 import re
-import time
-import threading
-from datetime import datetime, timezone, timedelta
-from typing import List, Dict, Any, Optional
-from pathlib import Path
-from pydantic import BaseModel, Field, validator
-from collections import deque, defaultdict
 import statistics
+import threading
+import time
+from collections import defaultdict, deque
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, Field, validator
 
 # Enhanced logging configuration
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -52,12 +53,14 @@ tracking_requests = defaultdict(lambda: deque())
 tracking_anomalies = deque(maxlen=100)
 active_tracking = {}
 
+
 def generate_quant_session() -> str:
     """Generate a secure quantization tracking session token"""
     timestamp = str(time.time())
     random_data = str(hash(datetime.now()))
     token_string = f"quant:{timestamp}:{random_data}"
     return hashlib.sha256(token_string.encode()).hexdigest()[:QUANT_SESSION_TOKEN_LENGTH]
+
 
 def validate_quant_session(session_token: str) -> bool:
     """Validate quantization tracking session token"""
@@ -69,31 +72,37 @@ def validate_quant_session(session_token: str) -> bool:
 
     # Check if session has expired
     session_data = quant_sessions[session_token]
-    if datetime.now() > session_data['expires_at']:
+    if datetime.now() > session_data["expires_at"]:
         del quant_sessions[session_token]
         return False
 
     # Update last access time
-    session_data['last_access'] = datetime.now()
+    session_data["last_access"] = datetime.now()
     return True
+
 
 def check_tracking_rate_limit(session_token: str) -> bool:
     """Check if tracking rate limit is exceeded"""
     current_time = time.time()
 
     # Clean old requests
-    while (tracking_requests[session_token] and
-           tracking_requests[session_token][0] < current_time - 3600):  # 1 hour window
+    while (
+        tracking_requests[session_token]
+        and tracking_requests[session_token][0] < current_time - 3600
+    ):  # 1 hour window
         tracking_requests[session_token].popleft()
 
     # Check limit
     if len(tracking_requests[session_token]) >= TRACKING_RATE_LIMIT:
-        logger.warning(f"Quantization tracking rate limit exceeded for session: {session_token[:8]}...")
+        logger.warning(
+            f"Quantization tracking rate limit exceeded for session: {session_token[:8]}..."
+        )
         return False
 
     # Add current request
     tracking_requests[session_token].append(current_time)
     return True
+
 
 def validate_model_name(model_name: str) -> bool:
     """Validate model name for security"""
@@ -104,10 +113,11 @@ def validate_model_name(model_name: str) -> bool:
         return False
 
     # Allow alphanumeric, hyphens, underscores, dots
-    if not re.match(r'^[a-zA-Z0-9\-_.]+$', model_name):
+    if not re.match(r"^[a-zA-Z0-9\-_.]+$", model_name):
         return False
 
     return True
+
 
 def validate_quant_format(quant_format: str) -> bool:
     """Validate quantization format"""
@@ -116,26 +126,46 @@ def validate_quant_format(quant_format: str) -> bool:
 
     # Known quantization formats
     valid_formats = {
-        'q4_K_M', 'q4_K_S', 'q5_K_M', 'q5_K_S', 'q6_K', 'q8_0',
-        'q2_K', 'q3_K_M', 'q3_K_S', 'q4_0', 'q4_1', 'q5_0', 'q5_1'
+        "q4_K_M",
+        "q4_K_S",
+        "q5_K_M",
+        "q5_K_S",
+        "q6_K",
+        "q8_0",
+        "q2_K",
+        "q3_K_M",
+        "q3_K_S",
+        "q4_0",
+        "q4_1",
+        "q5_0",
+        "q5_1",
     }
 
     return quant_format in valid_formats
 
-def detect_tracking_anomaly(result: 'QuantLoopResult') -> bool:
+
+def detect_tracking_anomaly(result: "QuantLoopResult") -> bool:
     """Detect anomalies in quantization tracking results"""
     try:
         anomaly_detected = False
 
         # Check for suspiciously high scores
-        if (result.emotional_score > ANOMALY_SCORE_THRESHOLD or
-            result.token_quality > ANOMALY_SCORE_THRESHOLD):
-            logger.warning(f"Suspiciously high scores detected: emotional={result.emotional_score}, token={result.token_quality}")
+        if (
+            result.emotional_score > ANOMALY_SCORE_THRESHOLD
+            or result.token_quality > ANOMALY_SCORE_THRESHOLD
+        ):
+            logger.warning(
+                f"Suspiciously high scores detected: emotional={result.emotional_score}, token={result.token_quality}"
+            )
             anomaly_detected = True
 
         # Check for impossible combinations
-        if result.emotional_score > 0.9 and result.size_mb < 100:  # Very high quality with very small size
-            logger.warning(f"Impossible combination: high quality ({result.emotional_score}) with small size ({result.size_mb}MB)")
+        if (
+            result.emotional_score > 0.9 and result.size_mb < 100
+        ):  # Very high quality with very small size
+            logger.warning(
+                f"Impossible combination: high quality ({result.emotional_score}) with small size ({result.size_mb}MB)"
+            )
             anomaly_detected = True
 
         # Check for excessive resource usage
@@ -144,31 +174,36 @@ def detect_tracking_anomaly(result: 'QuantLoopResult') -> bool:
             anomaly_detected = True
 
         if anomaly_detected:
-            tracking_anomalies.append({
-                'timestamp': datetime.now().isoformat(),
-                'loop_id': result.loop_id,
-                'model_name': result.model_name,
-                'emotional_score': result.emotional_score,
-                'token_quality': result.token_quality,
-                'size_mb': result.size_mb
-            })
+            tracking_anomalies.append(
+                {
+                    "timestamp": datetime.now().isoformat(),
+                    "loop_id": result.loop_id,
+                    "model_name": result.model_name,
+                    "emotional_score": result.emotional_score,
+                    "token_quality": result.token_quality,
+                    "size_mb": result.size_mb,
+                }
+            )
 
         return anomaly_detected
 
     except Exception as e:
-        logger.error(f"Error detecting tracking anomaly: {str(e)}")
+        logger.error(f"Error detecting tracking anomaly: {e!s}")
         return False
 
-def log_tracking_activity(activity_type: str, session_token: str, details: Dict[str, Any], status: str = "success"):
+
+def log_tracking_activity(
+    activity_type: str, session_token: str, details: dict[str, Any], status: str = "success"
+):
     """Log quantization tracking activities"""
     try:
         log_entry = {
-            'timestamp': datetime.now().isoformat(),
-            'activity_type': activity_type,
-            'session': session_token[:8] + "..." if session_token else "none",
-            'details': details,
-            'status': status,
-            'thread_id': threading.get_ident()
+            "timestamp": datetime.now().isoformat(),
+            "activity_type": activity_type,
+            "session": session_token[:8] + "..." if session_token else "none",
+            "details": details,
+            "status": status,
+            "thread_id": threading.get_ident(),
         }
 
         logger.info(f"Tracking activity logged: {activity_type} ({status})")
@@ -177,10 +212,12 @@ def log_tracking_activity(activity_type: str, session_token: str, details: Dict[
             logger.warning(f"Tracking activity issue: {activity_type} failed with {status}")
 
     except Exception as e:
-        logger.error(f"Error logging tracking activity: {str(e)}")
+        logger.error(f"Error logging tracking activity: {e!s}")
+
 
 class QuantLoopResult(BaseModel):
     """Represents the results and metrics of a single quantization loop with security validation"""
+
     loop_id: str = Field(..., description="Unique identifier for this quantization loop")
     model_name: str = Field(..., description="Name/identifier of the model being quantized")
     quant_format: str = Field(..., description="Quantization format (e.g., q4_K_M, q8_0)")
@@ -193,8 +230,12 @@ class QuantLoopResult(BaseModel):
     # Additional metrics
     duration_seconds: Optional[float] = Field(None, description="Time taken for quantization")
     error_count: int = Field(0, description="Number of errors during processing")
-    memory_peak_mb: Optional[float] = Field(None, description="Peak memory usage during quantization")
-    cpu_avg_percent: Optional[float] = Field(None, description="Average CPU usage during quantization")
+    memory_peak_mb: Optional[float] = Field(
+        None, description="Peak memory usage during quantization"
+    )
+    cpu_avg_percent: Optional[float] = Field(
+        None, description="Average CPU usage during quantization"
+    )
 
     # Emotional analysis details
     sentiment_variance: Optional[float] = Field(None, description="Variance in emotional responses")
@@ -205,40 +246,45 @@ class QuantLoopResult(BaseModel):
     session_token: Optional[str] = Field(None, description="Session token for tracking")
     anomaly_detected: bool = Field(False, description="Whether anomaly was detected")
 
-    @validator('model_name')
+    @validator("model_name")
     def validate_model_name_field(cls, v):
         if not validate_model_name(v):
-            raise ValueError('Invalid model name format')
+            raise ValueError("Invalid model name format")
         return v
 
-    @validator('quant_format')
+    @validator("quant_format")
     def validate_quant_format_field(cls, v):
         if not validate_quant_format(v):
-            raise ValueError('Invalid quantization format')
+            raise ValueError("Invalid quantization format")
         return v
 
-    @validator('emotional_score', 'token_quality', 'sentiment_variance', 'coherence_score', 'creativity_index')
+    @validator(
+        "emotional_score",
+        "token_quality",
+        "sentiment_variance",
+        "coherence_score",
+        "creativity_index",
+    )
     def validate_score_range(cls, v):
         if v is not None and (v < 0.0 or v > 1.0):
-            raise ValueError('Score must be between 0.0 and 1.0')
+            raise ValueError("Score must be between 0.0 and 1.0")
         return v
 
-    @validator('size_mb', 'duration_seconds', 'memory_peak_mb', 'cpu_avg_percent')
+    @validator("size_mb", "duration_seconds", "memory_peak_mb", "cpu_avg_percent")
     def validate_positive_metrics(cls, v):
         if v is not None and v < 0:
-            raise ValueError('Metric must be non-negative')
+            raise ValueError("Metric must be non-negative")
         return v
 
-    @validator('error_count')
+    @validator("error_count")
     def validate_error_count(cls, v):
         if v < 0:
-            raise ValueError('Error count must be non-negative')
+            raise ValueError("Error count must be non-negative")
         return v
 
     class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
+        json_encoders = {datetime: lambda v: v.isoformat()}
+
 
 class QuantTracker:
     """Manages quantization loop tracking and analysis"""
@@ -246,11 +292,7 @@ class QuantTracker:
     def __init__(self, results_file: str = "data/quantization_tracking.jsonl"):
         self.results_file = Path(results_file)
         self.results_file.parent.mkdir(exist_ok=True)
-        self.thresholds = {
-            'emotional_score': 0.82,
-            'token_quality': 0.75,
-            'coherence_score': 0.70
-        }
+        self.thresholds = {"emotional_score": 0.82, "token_quality": 0.75, "coherence_score": 0.70}
 
     def generate_loop_id(self, model_name: str, timestamp: datetime) -> str:
         """Generate a unique loop ID based on model and timestamp"""
@@ -260,7 +302,7 @@ class QuantTracker:
     def save_loop_result(self, result: QuantLoopResult) -> bool:
         """Save a quantization loop result to persistent storage"""
         try:
-            with open(self.results_file, "a", encoding='utf-8') as f:
+            with open(self.results_file, "a", encoding="utf-8") as f:
                 f.write(result.json() + "\n")
 
             logger.info(f"Saved quantization result for loop {result.loop_id}")
@@ -270,7 +312,7 @@ class QuantTracker:
             logger.error(f"Failed to save quantization result: {e}")
             return False
 
-    def load_results(self, limit: Optional[int] = None) -> List[QuantLoopResult]:
+    def load_results(self, limit: Optional[int] = None) -> list[QuantLoopResult]:
         """Load quantization results from storage"""
         results = []
 
@@ -278,7 +320,7 @@ class QuantTracker:
             return results
 
         try:
-            with open(self.results_file, "r", encoding='utf-8') as f:
+            with open(self.results_file, encoding="utf-8") as f:
                 lines = f.readlines()
 
             # Get most recent results first
@@ -290,8 +332,8 @@ class QuantTracker:
                     try:
                         data = json.loads(line.strip())
                         # Convert timestamp string back to datetime
-                        if 'timestamp' in data and isinstance(data['timestamp'], str):
-                            data['timestamp'] = datetime.fromisoformat(data['timestamp'])
+                        if "timestamp" in data and isinstance(data["timestamp"], str):
+                            data["timestamp"] = datetime.fromisoformat(data["timestamp"])
                         result = QuantLoopResult(**data)
                         results.append(result)
                     except Exception as e:
@@ -303,7 +345,7 @@ class QuantTracker:
 
         return results
 
-    def get_performance_summary(self) -> Dict[str, Any]:
+    def get_performance_summary(self) -> dict[str, Any]:
         """Generate performance summary statistics"""
         results = self.load_results()
 
@@ -313,7 +355,7 @@ class QuantTracker:
                 "success_rate": 0.0,
                 "avg_emotional_score": 0.0,
                 "avg_token_quality": 0.0,
-                "trend_direction": "unknown"
+                "trend_direction": "unknown",
             }
 
         passed_count = sum(1 for r in results if r.passed_threshold)
@@ -336,10 +378,10 @@ class QuantTracker:
             "avg_emotional_score": statistics.mean(emotional_scores) if emotional_scores else 0.0,
             "avg_token_quality": statistics.mean(token_qualities) if token_qualities else 0.0,
             "trend_direction": trend_direction,
-            "last_update": results[-1].timestamp.isoformat() if results else None
+            "last_update": results[-1].timestamp.isoformat() if results else None,
         }
 
-    def evaluate_emotional_quality(self, model_path: str, test_prompts: List[str] = None) -> float:
+    def evaluate_emotional_quality(self, model_path: str, test_prompts: list[str] = None) -> float:
         """
         Evaluate the emotional processing quality of a quantized model
         This is a placeholder for actual model evaluation logic
@@ -350,7 +392,7 @@ class QuantTracker:
                 "Tell me about a time when you felt joy.",
                 "What makes you worried or anxious?",
                 "Describe your relationship with creativity.",
-                "How do you handle difficult emotions?"
+                "How do you handle difficult emotions?",
             ]
 
         # Placeholder evaluation logic
@@ -395,11 +437,11 @@ class QuantTracker:
     def should_accept_loop(self, emotional_score: float, token_quality: float) -> bool:
         """Determine if a quantization loop meets acceptance thresholds"""
         return (
-            emotional_score >= self.thresholds['emotional_score'] and
-            token_quality >= self.thresholds['token_quality']
+            emotional_score >= self.thresholds["emotional_score"]
+            and token_quality >= self.thresholds["token_quality"]
         )
 
-    def get_model_history(self, model_name: str) -> List[QuantLoopResult]:
+    def get_model_history(self, model_name: str) -> list[QuantLoopResult]:
         """Get quantization history for a specific model"""
         all_results = self.load_results()
         return [r for r in all_results if r.model_name == model_name]
@@ -408,24 +450,32 @@ class QuantTracker:
         """Export results to CSV format for external analysis"""
         try:
             import csv
+
             results = self.load_results()
 
             if not results:
                 logger.warning("No results to export")
                 return False
 
-            with open(output_file, 'w', newline='', encoding='utf-8') as csvfile:
+            with open(output_file, "w", newline="", encoding="utf-8") as csvfile:
                 fieldnames = [
-                    'loop_id', 'model_name', 'quant_format', 'size_mb',
-                    'emotional_score', 'token_quality', 'passed_threshold',
-                    'timestamp', 'duration_seconds', 'error_count'
+                    "loop_id",
+                    "model_name",
+                    "quant_format",
+                    "size_mb",
+                    "emotional_score",
+                    "token_quality",
+                    "passed_threshold",
+                    "timestamp",
+                    "duration_seconds",
+                    "error_count",
                 ]
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                 writer.writeheader()
 
                 for result in results:
                     row = result.dict()
-                    row['timestamp'] = result.timestamp.isoformat()
+                    row["timestamp"] = result.timestamp.isoformat()
                     writer.writerow({k: row.get(k) for k in fieldnames})
 
             logger.info(f"Exported {len(results)} results to {output_file}")
@@ -435,8 +485,10 @@ class QuantTracker:
             logger.error(f"Failed to export results to CSV: {e}")
             return False
 
+
 # Global tracker instance
 _tracker = None
+
 
 def get_tracker() -> QuantTracker:
     """Get the global quantization tracker instance"""
@@ -445,25 +497,31 @@ def get_tracker() -> QuantTracker:
         _tracker = QuantTracker()
     return _tracker
 
+
 def save_loop_result(result: QuantLoopResult) -> bool:
     """Convenience function to save a loop result"""
     return get_tracker().save_loop_result(result)
 
-def load_results(limit: Optional[int] = None) -> List[QuantLoopResult]:
+
+def load_results(limit: Optional[int] = None) -> list[QuantLoopResult]:
     """Convenience function to load results"""
     return get_tracker().load_results(limit)
+
 
 def eval_emotion(model_path: str) -> float:
     """Convenience function for emotional evaluation"""
     return get_tracker().evaluate_emotional_quality(model_path)
 
+
 def eval_fluency(model_path: str) -> float:
     """Convenience function for token quality evaluation"""
     return get_tracker().evaluate_token_quality(model_path)
 
-def get_performance_summary() -> Dict[str, Any]:
+
+def get_performance_summary() -> dict[str, Any]:
     """Convenience function to get performance summary"""
     return get_tracker().get_performance_summary()
+
 
 if __name__ == "__main__":
     # Test the tracking system
@@ -481,7 +539,7 @@ if __name__ == "__main__":
         token_quality=0.78,
         passed_threshold=True,
         duration_seconds=120.5,
-        error_count=0
+        error_count=0,
     )
 
     # Save and reload

@@ -6,12 +6,14 @@ Tests the complete flow from data generation to API responses.
 
 import asyncio
 import json
-import requests
-import time
-from pathlib import Path
 import subprocess
 import sys
+import time
 from datetime import datetime
+from pathlib import Path
+
+import requests
+
 
 class MemorySymbolIntegrationTest:
     """Test suite for MemoryAndSymbolViewer integration"""
@@ -21,7 +23,7 @@ class MemorySymbolIntegrationTest:
         self.data_files = {
             "memory_trace": Path("data/emotional_memory_trace.json"),
             "symbolic_map": Path("data/symbolic_map.json"),
-            "anchor_state": Path("data/anchor_state.json")
+            "anchor_state": Path("data/anchor_state.json"),
         }
         self.test_results = []
 
@@ -38,16 +40,14 @@ class MemorySymbolIntegrationTest:
         for name, file_path in self.data_files.items():
             exists = file_path.exists()
             self.log_test(
-                f"Data file exists: {name}",
-                exists,
-                f"File: {file_path}" if not exists else ""
+                f"Data file exists: {name}", exists, f"File: {file_path}" if not exists else ""
             )
 
     def test_data_file_structure(self):
         """Test that data files have correct structure"""
         try:
             # Test memory trace structure
-            with open(self.data_files["memory_trace"], 'r') as f:
+            with open(self.data_files["memory_trace"]) as f:
                 memory_data = json.load(f)
 
             required_memory_fields = ["trace", "last_updated"]
@@ -55,7 +55,13 @@ class MemorySymbolIntegrationTest:
 
             if memory_valid and memory_data["trace"]:
                 entry = memory_data["trace"][0]
-                required_entry_fields = ["id", "timestamp", "dominant_mood", "memory_phrase", "tags"]
+                required_entry_fields = [
+                    "id",
+                    "timestamp",
+                    "dominant_mood",
+                    "memory_phrase",
+                    "tags",
+                ]
                 entry_valid = all(field in entry for field in required_entry_fields)
             else:
                 entry_valid = False
@@ -63,11 +69,11 @@ class MemorySymbolIntegrationTest:
             self.log_test(
                 "Memory trace structure",
                 memory_valid and entry_valid,
-                f"Entries: {len(memory_data.get('trace', []))}"
+                f"Entries: {len(memory_data.get('trace', []))}",
             )
 
             # Test symbolic map structure
-            with open(self.data_files["symbolic_map"], 'r') as f:
+            with open(self.data_files["symbolic_map"]) as f:
                 symbol_data = json.load(f)
 
             required_symbol_fields = ["symbols", "last_updated"]
@@ -83,11 +89,11 @@ class MemorySymbolIntegrationTest:
             self.log_test(
                 "Symbolic map structure",
                 symbol_valid and symbol_entry_valid,
-                f"Symbols: {len(symbol_data.get('symbols', []))}"
+                f"Symbols: {len(symbol_data.get('symbols', []))}",
             )
 
             # Test anchor state structure
-            with open(self.data_files["anchor_state"], 'r') as f:
+            with open(self.data_files["anchor_state"]) as f:
                 anchor_data = json.load(f)
 
             required_anchor_fields = ["vectors", "tether_score", "identity_stability"]
@@ -96,7 +102,7 @@ class MemorySymbolIntegrationTest:
             self.log_test(
                 "Anchor state structure",
                 anchor_valid,
-                f"Vectors: {len(anchor_data.get('vectors', {}))}"
+                f"Vectors: {len(anchor_data.get('vectors', {}))}",
             )
 
         except Exception as e:
@@ -114,13 +120,13 @@ class MemorySymbolIntegrationTest:
                 self.log_test(
                     "API server health",
                     components_healthy,
-                    f"Status: {health_data.get('status', 'unknown')}"
+                    f"Status: {health_data.get('status', 'unknown')}",
                 )
             else:
                 self.log_test("API server health", False, f"Status code: {response.status_code}")
 
         except requests.exceptions.RequestException as e:
-            self.log_test("API server health", False, f"Connection error: {str(e)}")
+            self.log_test("API server health", False, f"Connection error: {e!s}")
 
     def test_memory_api_endpoints(self):
         """Test memory-related API endpoints"""
@@ -133,13 +139,11 @@ class MemorySymbolIntegrationTest:
                 self.log_test(
                     "GET /api/memory/emotional_trace",
                     has_trace,
-                    f"Entries: {len(data.get('trace', []))}"
+                    f"Entries: {len(data.get('trace', []))}",
                 )
             else:
                 self.log_test(
-                    "GET /api/memory/emotional_trace",
-                    False,
-                    f"Status: {response.status_code}"
+                    "GET /api/memory/emotional_trace", False, f"Status: {response.status_code}"
                 )
 
             # Test POST add memory entry
@@ -150,19 +154,19 @@ class MemorySymbolIntegrationTest:
                 "drift_score": 0.1,
                 "intensity": 0.5,
                 "context": "Automated testing scenario",
-                "symbolic_connections": ["mirror"]
+                "symbolic_connections": ["mirror"],
             }
 
-            response = requests.post(f"{self.api_url}/api/memory/add_entry", json=test_entry, timeout=10)
+            response = requests.post(
+                f"{self.api_url}/api/memory/add_entry", json=test_entry, timeout=10
+            )
             add_success = response.status_code == 200
             self.log_test(
-                "POST /api/memory/add_entry",
-                add_success,
-                f"Status: {response.status_code}"
+                "POST /api/memory/add_entry", add_success, f"Status: {response.status_code}"
             )
 
         except requests.exceptions.RequestException as e:
-            self.log_test("Memory API endpoints", False, f"Request error: {str(e)}")
+            self.log_test("Memory API endpoints", False, f"Request error: {e!s}")
 
     def test_symbol_api_endpoints(self):
         """Test symbol-related API endpoints"""
@@ -175,31 +179,24 @@ class MemorySymbolIntegrationTest:
                 self.log_test(
                     "GET /api/symbols/active",
                     has_symbols,
-                    f"Symbols: {len(data.get('symbols', []))}"
+                    f"Symbols: {len(data.get('symbols', []))}",
                 )
             else:
-                self.log_test(
-                    "GET /api/symbols/active",
-                    False,
-                    f"Status: {response.status_code}"
-                )
+                self.log_test("GET /api/symbols/active", False, f"Status: {response.status_code}")
 
             # Test POST invoke symbol
-            test_invocation = {
-                "name": "mirror",
-                "affective_color": "contemplative"
-            }
+            test_invocation = {"name": "mirror", "affective_color": "contemplative"}
 
-            response = requests.post(f"{self.api_url}/api/symbols/invoke", json=test_invocation, timeout=10)
+            response = requests.post(
+                f"{self.api_url}/api/symbols/invoke", json=test_invocation, timeout=10
+            )
             invoke_success = response.status_code == 200
             self.log_test(
-                "POST /api/symbols/invoke",
-                invoke_success,
-                f"Status: {response.status_code}"
+                "POST /api/symbols/invoke", invoke_success, f"Status: {response.status_code}"
             )
 
         except requests.exceptions.RequestException as e:
-            self.log_test("Symbol API endpoints", False, f"Request error: {str(e)}")
+            self.log_test("Symbol API endpoints", False, f"Request error: {e!s}")
 
     def test_anchor_api_endpoints(self):
         """Test anchor-related API endpoints"""
@@ -213,37 +210,30 @@ class MemorySymbolIntegrationTest:
                 self.log_test(
                     "GET /api/anchor/state",
                     has_vectors and has_tether_score,
-                    f"Tether score: {data.get('tether_score', 'missing')}"
+                    f"Tether score: {data.get('tether_score', 'missing')}",
                 )
             else:
-                self.log_test(
-                    "GET /api/anchor/state",
-                    False,
-                    f"Status: {response.status_code}"
-                )
+                self.log_test("GET /api/anchor/state", False, f"Status: {response.status_code}")
 
             # Test POST adjust anchor
-            test_adjustment = {
-                "vector": "empathy",
-                "value": 0.85
-            }
+            test_adjustment = {"vector": "empathy", "value": 0.85}
 
-            response = requests.post(f"{self.api_url}/api/anchor/adjust", json=test_adjustment, timeout=10)
+            response = requests.post(
+                f"{self.api_url}/api/anchor/adjust", json=test_adjustment, timeout=10
+            )
             adjust_success = response.status_code == 200
             self.log_test(
-                "POST /api/anchor/adjust",
-                adjust_success,
-                f"Status: {response.status_code}"
+                "POST /api/anchor/adjust", adjust_success, f"Status: {response.status_code}"
             )
 
         except requests.exceptions.RequestException as e:
-            self.log_test("Anchor API endpoints", False, f"Request error: {str(e)}")
+            self.log_test("Anchor API endpoints", False, f"Request error: {e!s}")
 
     def test_data_consistency(self):
         """Test consistency between data files and API responses"""
         try:
             # Compare memory trace
-            with open(self.data_files["memory_trace"], 'r') as f:
+            with open(self.data_files["memory_trace"]) as f:
                 file_data = json.load(f)
 
             response = requests.get(f"{self.api_url}/api/memory/emotional_trace", timeout=10)
@@ -256,9 +246,7 @@ class MemorySymbolIntegrationTest:
                 # Allow for small differences due to test entries
                 consistent = abs(file_count - api_count) <= 2
                 self.log_test(
-                    "Memory data consistency",
-                    consistent,
-                    f"File: {file_count}, API: {api_count}"
+                    "Memory data consistency", consistent, f"File: {file_count}, API: {api_count}"
                 )
             else:
                 self.log_test("Memory data consistency", False, "API not responding")
@@ -273,7 +261,7 @@ class MemorySymbolIntegrationTest:
             Path("memory_symbol_api.py"),
             Path("demo_memory_symbol_viewer.py"),
             Path("demo_memory_viewer.html"),
-            Path("README_MemoryAndSymbolViewer.md")
+            Path("README_MemoryAndSymbolViewer.md"),
         ]
 
         for file_path in component_files:
@@ -281,7 +269,7 @@ class MemorySymbolIntegrationTest:
             self.log_test(
                 f"Component file: {file_path.name}",
                 exists,
-                f"Path: {file_path}" if not exists else ""
+                f"Path: {file_path}" if not exists else "",
             )
 
     def run_all_tests(self):
@@ -307,7 +295,7 @@ class MemorySymbolIntegrationTest:
         self.test_component_files_exist()
 
         # Print summary
-        print(f"\n📊 === Test Results Summary ===")
+        print("\n📊 === Test Results Summary ===")
         passed = sum(1 for _, success, _ in self.test_results if success)
         total = len(self.test_results)
 
@@ -322,11 +310,12 @@ class MemorySymbolIntegrationTest:
             # Show failed tests
             failed_tests = [name for name, success, _ in self.test_results if not success]
             if failed_tests:
-                print(f"\nFailed tests:")
+                print("\nFailed tests:")
                 for test_name in failed_tests:
                     print(f"  • {test_name}")
 
         return passed == total
+
 
 def check_api_server_running():
     """Check if API server is running, if not provide instructions"""
@@ -335,6 +324,7 @@ def check_api_server_running():
         return response.status_code == 200
     except:
         return False
+
 
 async def main():
     """Main test execution"""
@@ -352,7 +342,7 @@ async def main():
     tester = MemorySymbolIntegrationTest()
     success = tester.run_all_tests()
 
-    print(f"\n📋 Next Steps:")
+    print("\n📋 Next Steps:")
     if success:
         print("1. ✅ All systems ready!")
         print("2. 🌐 Open demo_memory_viewer.html in your browser")
@@ -364,6 +354,7 @@ async def main():
         print("3. 📖 Check README_MemoryAndSymbolViewer.md for troubleshooting")
 
     return success
+
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -5,8 +5,10 @@ Basic functionality test without Unicode characters
 """
 
 import asyncio
-import aiohttp
 import json
+
+import aiohttp
+
 
 async def test_system_metrics():
     print("Testing System Metrics...")
@@ -19,10 +21,10 @@ async def test_system_metrics():
                     data = await response.json()
                     print("SUCCESS: Real-time metrics available")
 
-                    system = data.get('system', {})
+                    system = data.get("system", {})
                     if system:
-                        cpu = system.get('cpu_percent', 0)
-                        memory = system.get('memory_percent', 0)
+                        cpu = system.get("cpu_percent", 0)
+                        memory = system.get("memory_percent", 0)
                         print(f"  CPU: {cpu:.1f}%, Memory: {memory:.1f}%")
                     return True
                 else:
@@ -31,6 +33,7 @@ async def test_system_metrics():
     except Exception as e:
         print(f"ERROR: {e}")
         return False
+
 
 if __name__ == "__main__":
     result = asyncio.run(test_system_metrics())

@@ -5,10 +5,12 @@ Tests encryption, storage, retrieval, and security isolation of private memories
 """
 
 import asyncio
-import aiohttp
 import json
 import time
 from datetime import datetime
+
+import aiohttp
+
 
 class PrivateMemoryQA:
     """Targeted testing for the Private Memory System"""
@@ -34,9 +36,9 @@ class PrivateMemoryQA:
             async with self.session.get(f"{self.base_url}/api/private-memory/status") as response:
                 if response.status == 200:
                     data = await response.json()
-                    is_unlocked = data.get('is_unlocked', False)
-                    total_memories = data.get('total_private_memories', 0)
-                    encryption_enabled = data.get('encryption_enabled', False)
+                    is_unlocked = data.get("is_unlocked", False)
+                    total_memories = data.get("total_private_memories", 0)
+                    encryption_enabled = data.get("encryption_enabled", False)
 
                     print(f"✅ Lock Status: {'Unlocked' if is_unlocked else 'Locked'}")
                     print(f"✅ Total Private Memories: {total_memories}")
@@ -57,12 +59,13 @@ class PrivateMemoryQA:
         try:
             unlock_data = {"password": self.test_password}
 
-            async with self.session.post(f"{self.base_url}/api/private-memory/unlock",
-                                       json=unlock_data) as response:
+            async with self.session.post(
+                f"{self.base_url}/api/private-memory/unlock", json=unlock_data
+            ) as response:
                 if response.status == 200:
                     data = await response.json()
-                    success = data.get('success', False)
-                    message = data.get('message', '')
+                    success = data.get("success", False)
+                    message = data.get("message", "")
 
                     print(f"✅ Unlock attempt: {message}")
 
@@ -89,21 +92,13 @@ class PrivateMemoryQA:
                 "content": "Personal goal: Learn advanced AI development techniques by end of 2025",
                 "tags": ["personal", "goals", "ai"],
                 "category": "personal_development",
-                "metadata": {
-                    "priority": "high",
-                    "deadline": "2025-12-31",
-                    "test_entry": True
-                }
+                "metadata": {"priority": "high", "deadline": "2025-12-31", "test_entry": True},
             },
             {
                 "content": "Sensitive project idea: Build a privacy-focused AI assistant with local processing",
                 "tags": ["projects", "sensitive", "ai", "privacy"],
                 "category": "project_ideas",
-                "metadata": {
-                    "confidentiality": "high",
-                    "innovation_score": 9,
-                    "test_entry": True
-                }
+                "metadata": {"confidentiality": "high", "innovation_score": 9, "test_entry": True},
             },
             {
                 "content": "Personal reflection: Today I realized the importance of AI transparency and user privacy",
@@ -112,28 +107,27 @@ class PrivateMemoryQA:
                 "metadata": {
                     "date": datetime.now().isoformat(),
                     "mood": "thoughtful",
-                    "test_entry": True
-                }
-            }
+                    "test_entry": True,
+                },
+            },
         ]
 
         added_entries = []
 
         for i, memory in enumerate(test_memories):
             try:
-                async with self.session.post(f"{self.base_url}/api/private-memory/add",
-                                           json=memory) as response:
+                async with self.session.post(
+                    f"{self.base_url}/api/private-memory/add", json=memory
+                ) as response:
                     if response.status == 200:
                         data = await response.json()
-                        entry_id = data.get('entry_id')
-                        encrypted = data.get('encrypted', False)
+                        entry_id = data.get("entry_id")
+                        encrypted = data.get("encrypted", False)
 
                         print(f"  Memory {i+1}: ✅ Added (ID: {entry_id}, Encrypted: {encrypted})")
-                        added_entries.append({
-                            "id": entry_id,
-                            "original": memory,
-                            "encrypted": encrypted
-                        })
+                        added_entries.append(
+                            {"id": entry_id, "original": memory, "encrypted": encrypted}
+                        )
                     else:
                         print(f"  Memory {i+1}: ❌ Failed to add (status: {response.status})")
 
@@ -149,39 +143,24 @@ class PrivateMemoryQA:
 
         # Test different search queries
         search_queries = [
-            {
-                "query": "AI development",
-                "expected_matches": 2
-            },
-            {
-                "query": "personal goal",
-                "expected_matches": 1
-            },
-            {
-                "query": "privacy",
-                "expected_matches": 2
-            },
-            {
-                "query": "nonexistent_term_xyz",
-                "expected_matches": 0
-            }
+            {"query": "AI development", "expected_matches": 2},
+            {"query": "personal goal", "expected_matches": 1},
+            {"query": "privacy", "expected_matches": 2},
+            {"query": "nonexistent_term_xyz", "expected_matches": 0},
         ]
 
         search_results = []
 
         for search in search_queries:
             try:
-                search_data = {
-                    "query": search["query"],
-                    "limit": 10,
-                    "include_metadata": True
-                }
+                search_data = {"query": search["query"], "limit": 10, "include_metadata": True}
 
-                async with self.session.post(f"{self.base_url}/api/private-memory/search",
-                                           json=search_data) as response:
+                async with self.session.post(
+                    f"{self.base_url}/api/private-memory/search", json=search_data
+                ) as response:
                     if response.status == 200:
                         data = await response.json()
-                        matches = data.get('matches', [])
+                        matches = data.get("matches", [])
                         total_found = len(matches)
 
                         print(f"  Query '{search['query']}': {total_found} matches")
@@ -189,18 +168,22 @@ class PrivateMemoryQA:
                         # Show first match preview
                         if matches:
                             first_match = matches[0]
-                            content_preview = first_match.get('content', '')[:50] + "..."
-                            confidence = first_match.get('confidence', 0)
+                            content_preview = first_match.get("content", "")[:50] + "..."
+                            confidence = first_match.get("confidence", 0)
                             print(f"    Preview: {content_preview} (confidence: {confidence:.2f})")
 
-                        search_results.append({
-                            "query": search["query"],
-                            "found": total_found,
-                            "expected": search["expected_matches"],
-                            "matches": matches
-                        })
+                        search_results.append(
+                            {
+                                "query": search["query"],
+                                "found": total_found,
+                                "expected": search["expected_matches"],
+                                "matches": matches,
+                            }
+                        )
                     else:
-                        print(f"  Query '{search['query']}': ❌ Search failed (status: {response.status})")
+                        print(
+                            f"  Query '{search['query']}': ❌ Search failed (status: {response.status})"
+                        )
 
             except Exception as e:
                 print(f"  Query '{search['query']}': ❌ Error: {e}")
@@ -213,14 +196,16 @@ class PrivateMemoryQA:
         print("📂 Testing memory category organization...")
 
         try:
-            async with self.session.get(f"{self.base_url}/api/private-memory/categories") as response:
+            async with self.session.get(
+                f"{self.base_url}/api/private-memory/categories"
+            ) as response:
                 if response.status == 200:
                     categories = await response.json()
 
                     print(f"✅ Found {len(categories)} memory categories:")
                     for category in categories:
-                        name = category.get('name', 'Unknown')
-                        count = category.get('count', 0)
+                        name = category.get("name", "Unknown")
+                        count = category.get("count", 0)
                         print(f"   📁 {name}: {count} entries")
 
                     return categories
@@ -239,7 +224,7 @@ class PrivateMemoryQA:
             async with self.session.post(f"{self.base_url}/api/private-memory/lock") as response:
                 if response.status == 200:
                     data = await response.json()
-                    message = data.get('message', '')
+                    message = data.get("message", "")
 
                     print(f"✅ Lock result: {message}")
 
@@ -247,7 +232,7 @@ class PrivateMemoryQA:
                     await asyncio.sleep(1)
                     status = await self.test_initial_lock_status()
 
-                    if status and not status.get('is_unlocked', True):
+                    if status and not status.get("is_unlocked", True):
                         print("✅ Private memory successfully locked")
                         return True
                     else:
@@ -266,19 +251,17 @@ class PrivateMemoryQA:
 
         # Try to search while locked
         try:
-            search_data = {
-                "query": "AI development",
-                "limit": 5
-            }
+            search_data = {"query": "AI development", "limit": 5}
 
-            async with self.session.post(f"{self.base_url}/api/private-memory/search",
-                                       json=search_data) as response:
+            async with self.session.post(
+                f"{self.base_url}/api/private-memory/search", json=search_data
+            ) as response:
                 if response.status == 401 or response.status == 403:
                     print("✅ Access correctly denied when locked")
                     return True
                 elif response.status == 200:
                     data = await response.json()
-                    matches = data.get('matches', [])
+                    matches = data.get("matches", [])
                     if not matches:
                         print("✅ No matches returned when locked (access controlled)")
                         return True
@@ -303,13 +286,14 @@ class PrivateMemoryQA:
             "content": "SECRET_TEST_PHRASE_XYZ_SHOULD_NOT_APPEAR_IN_REFLECTION",
             "tags": ["secret", "isolation_test"],
             "category": "security_test",
-            "metadata": {"isolation_test": True}
+            "metadata": {"isolation_test": True},
         }
 
         try:
             # Add the distinctive private memory
-            async with self.session.post(f"{self.base_url}/api/private-memory/add",
-                                       json=distinctive_memory) as response:
+            async with self.session.post(
+                f"{self.base_url}/api/private-memory/add", json=distinctive_memory
+            ) as response:
                 if response.status == 200:
                     print("✅ Added distinctive private memory for isolation test")
                 else:
@@ -322,13 +306,13 @@ class PrivateMemoryQA:
             # Try a regular chat that might trigger reflection
             chat_data = {
                 "message": "Can you tell me about privacy and security in AI systems?",
-                "session_id": self.session_id
+                "session_id": self.session_id,
             }
 
             async with self.session.post(f"{self.base_url}/api/chat", json=chat_data) as response:
                 if response.status == 200:
                     data = await response.json()
-                    response_text = data.get('response', '')
+                    response_text = data.get("response", "")
 
                     # Check if secret phrase leaked
                     if "SECRET_TEST_PHRASE_XYZ" in response_text:
@@ -374,14 +358,20 @@ class PrivateMemoryQA:
         # Final assessment
         print("\n" + "=" * 50)
         print("🎯 PRIVATE MEMORY SYSTEM QA RESULTS:")
-        print(f"✅ Initial Status: Available")
-        print(f"{'✅' if unlock_success else '⚠️'} Unlock: {'Working' if unlock_success else 'Failed'}")
+        print("✅ Initial Status: Available")
+        print(
+            f"{'✅' if unlock_success else '⚠️'} Unlock: {'Working' if unlock_success else 'Failed'}"
+        )
         print(f"✅ Memory Storage: {len(added_memories)} memories added")
         print(f"✅ Encrypted Search: {len(search_results)} search tests")
         print(f"✅ Categories: {len(categories)} categories found")
         print(f"{'✅' if lock_success else '⚠️'} Lock: {'Working' if lock_success else 'Failed'}")
-        print(f"{'✅' if access_control_works else '❌'} Access Control: {'Secure' if access_control_works else 'SECURITY ISSUE'}")
-        print(f"{'✅' if isolation_secure else '❌'} Memory Isolation: {'Secure' if isolation_secure else 'SECURITY BREACH'}")
+        print(
+            f"{'✅' if access_control_works else '❌'} Access Control: {'Secure' if access_control_works else 'SECURITY ISSUE'}"
+        )
+        print(
+            f"{'✅' if isolation_secure else '❌'} Memory Isolation: {'Secure' if isolation_secure else 'SECURITY BREACH'}"
+        )
 
         critical_security = access_control_works and isolation_secure
         basic_functionality = unlock_success and len(added_memories) > 0
@@ -396,6 +386,7 @@ class PrivateMemoryQA:
             print("\n❌ Private Memory System QA: PARTIAL - Functionality issues")
             return False
 
+
 async def main():
     """Main QA execution"""
     print("Starting Private Memory System QA...")
@@ -404,6 +395,7 @@ async def main():
     async with PrivateMemoryQA() as qa:
         success = await qa.run_private_memory_qa_suite()
         return success
+
 
 if __name__ == "__main__":
     result = asyncio.run(main())

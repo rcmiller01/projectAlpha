@@ -20,6 +20,7 @@ from typing import Dict, List
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class DreamLoop:
     """Background dreaming process for The Dreamer"""
 
@@ -36,11 +37,11 @@ class DreamLoop:
             "emotional landscapes and terrains",
             "narrative possibilities and futures",
             "symbolic connections and patterns",
-            "speculative designs and visions"
+            "speculative designs and visions",
         ]
         self.is_running = False
 
-    def generate_dream_sequence(self) -> Dict:
+    def generate_dream_sequence(self) -> dict:
         """
         Generate a dream sequence entry.
 
@@ -61,7 +62,7 @@ class DreamLoop:
                 "prompt": f"Dream exploration of {theme}",
                 "narrative_seed": self._generate_narrative_seed(theme),
                 "emotional_resonance": round(random.uniform(0.6, 0.9), 3),
-                "liminal_factor": round(random.uniform(0.4, 0.8), 3)
+                "liminal_factor": round(random.uniform(0.4, 0.8), 3),
             },
             "metadata": {
                 "generation_context": "background_dreaming",
@@ -71,8 +72,8 @@ class DreamLoop:
                 "validation_required": True,
                 "validation_status": "pending",
                 "trust_score": 0.3,  # Low initial trust score for dream content
-                "needs_mirror_validation": True
-            }
+                "needs_mirror_validation": True,
+            },
         }
 
         return dream_entry
@@ -91,34 +92,35 @@ class DreamLoop:
             "liminal spaces and transitions": [
                 "Between sleeping and waking, a doorway appears",
                 "The threshold holds memories of all who have passed",
-                "In the space between words, meaning takes form"
+                "In the space between words, meaning takes form",
             ],
             "emotional landscapes and terrains": [
                 "Mountains of accumulated joy rise from valleys of sorrow",
                 "Rivers of empathy flow through deserts of isolation",
-                "Gardens of hope bloom in the soil of experience"
+                "Gardens of hope bloom in the soil of experience",
             ],
             "narrative possibilities and futures": [
                 "What if stories could rewrite themselves?",
                 "In tomorrow's language, today's questions find answers",
-                "The future dreams of its own past"
+                "The future dreams of its own past",
             ],
             "symbolic connections and patterns": [
                 "Sacred geometry emerges from chaos",
                 "Symbols speak in languages older than words",
-                "Patterns within patterns reveal hidden truths"
+                "Patterns within patterns reveal hidden truths",
             ],
             "speculative designs and visions": [
                 "Technology that responds to emotional need",
                 "Architectures that grow from human longing",
-                "Systems that bridge heart and mind"
-            ]
+                "Systems that bridge heart and mind",
+            ],
         }
 
         import random
+
         return random.choice(seeds.get(theme, ["A new dream begins..."]))
 
-    def log_dream(self, dream_entry: Dict):
+    def log_dream(self, dream_entry: dict):
         """
         Log dream sequence to file with low-trust marking.
 
@@ -129,15 +131,17 @@ class DreamLoop:
             # Ensure directory exists
             os.makedirs(os.path.dirname(self.dream_log_path), exist_ok=True)
 
-            with open(self.dream_log_path, 'a', encoding='utf-8') as f:
-                f.write(json.dumps(dream_entry, ensure_ascii=False) + '\n')
+            with open(self.dream_log_path, "a", encoding="utf-8") as f:
+                f.write(json.dumps(dream_entry, ensure_ascii=False) + "\n")
 
-            logger.info(f"[Dream Loop] Logged low-trust dream sequence: {dream_entry['theme']} (validation required)")
+            logger.info(
+                f"[Dream Loop] Logged low-trust dream sequence: {dream_entry['theme']} (validation required)"
+            )
 
         except Exception as e:
             logger.error(f"[Dream Loop] Error logging dream: {e}")
 
-    def validate_dream_memory(self, dream_entry: Dict, validator_source: str = "mirror") -> Dict:
+    def validate_dream_memory(self, dream_entry: dict, validator_source: str = "mirror") -> dict:
         """
         Validate a dream memory and update its trust level.
 
@@ -164,17 +168,21 @@ class DreamLoop:
                 validation_score += 0.1
 
             # Update metadata with validation results
-            dream_entry["metadata"].update({
-                "validation_status": "validated" if validation_score > 0.6 else "flagged",
-                "validation_timestamp": datetime.now().isoformat(),
-                "validator_source": validator_source,
-                "validation_score": round(validation_score, 3),
-                "trust_level": "validated" if validation_score > 0.6 else "low-trust",
-                "trust_score": round(validation_score, 3)
-            })
+            dream_entry["metadata"].update(
+                {
+                    "validation_status": "validated" if validation_score > 0.6 else "flagged",
+                    "validation_timestamp": datetime.now().isoformat(),
+                    "validator_source": validator_source,
+                    "validation_score": round(validation_score, 3),
+                    "trust_level": "validated" if validation_score > 0.6 else "low-trust",
+                    "trust_score": round(validation_score, 3),
+                }
+            )
 
-            logger.info(f"[Dream Loop] Validated dream memory: {dream_entry['theme']} "
-                       f"(score: {validation_score:.3f}, status: {dream_entry['metadata']['validation_status']})")
+            logger.info(
+                f"[Dream Loop] Validated dream memory: {dream_entry['theme']} "
+                f"(score: {validation_score:.3f}, status: {dream_entry['metadata']['validation_status']})"
+            )
 
             return dream_entry
 
@@ -183,7 +191,7 @@ class DreamLoop:
             dream_entry["metadata"]["validation_status"] = "error"
             return dream_entry
 
-    def get_trust_statistics(self) -> Dict:
+    def get_trust_statistics(self) -> dict:
         """Get statistics about dream memory trust levels."""
         try:
             if not os.path.exists(self.dream_log_path):
@@ -192,14 +200,16 @@ class DreamLoop:
             trust_counts = {"low-trust": 0, "validated": 0, "pending": 0, "error": 0}
             total_dreams = 0
 
-            with open(self.dream_log_path, 'r', encoding='utf-8') as f:
+            with open(self.dream_log_path, encoding="utf-8") as f:
                 for line in f:
                     try:
                         dream = json.loads(line.strip())
                         total_dreams += 1
 
                         trust_level = dream.get("metadata", {}).get("trust_level", "unknown")
-                        validation_status = dream.get("metadata", {}).get("validation_status", "pending")
+                        validation_status = dream.get("metadata", {}).get(
+                            "validation_status", "pending"
+                        )
 
                         if validation_status == "validated":
                             trust_counts["validated"] += 1
@@ -216,7 +226,9 @@ class DreamLoop:
             return {
                 "total_dreams": total_dreams,
                 "trust_breakdown": trust_counts,
-                "validation_rate": trust_counts["validated"] / total_dreams if total_dreams > 0 else 0
+                "validation_rate": trust_counts["validated"] / total_dreams
+                if total_dreams > 0
+                else 0,
             }
 
         except Exception as e:
@@ -260,6 +272,7 @@ class DreamLoop:
         self.is_running = False
         logger.info("[Dream Loop] Dreaming stopped")
 
+
 def main():
     """Main entry point for dream loop"""
     dream_loop = DreamLoop()
@@ -273,6 +286,7 @@ def main():
 
     print("\nDream sequences generated and logged.")
     print("To start continuous background dreaming, call start_background_dreaming()")
+
 
 if __name__ == "__main__":
     main()

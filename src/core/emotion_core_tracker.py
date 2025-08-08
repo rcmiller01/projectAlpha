@@ -4,11 +4,12 @@ Enhanced Database Schema for Emotional Quantization Autopilot
 Extends the existing emotion_training.db with additional fields for autopilot integration
 """
 
-import sqlite3
 import logging
+import sqlite3
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
-from datetime import datetime
+
 
 class EmotionalQuantDatabase:
     """Enhanced database for emotional quantization tracking with autopilot integration"""
@@ -27,7 +28,8 @@ class EmotionalQuantDatabase:
 
         try:
             # Create core tables first if they don't exist
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS autopilot_runs (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     run_id TEXT UNIQUE NOT NULL,
@@ -44,9 +46,11 @@ class EmotionalQuantDatabase:
                     execution_time_minutes REAL,
                     created_at TEXT
                 )
-            """)
+            """
+            )
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS quantization_queue (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     job_id TEXT UNIQUE NOT NULL,
@@ -59,9 +63,11 @@ class EmotionalQuantDatabase:
                     completed_at TEXT,
                     run_id TEXT
                 )
-            """)
+            """
+            )
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS training_iterations (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     model_name TEXT NOT NULL,
@@ -81,23 +87,27 @@ class EmotionalQuantDatabase:
                     notes TEXT,
                     config_hash TEXT
                 )
-            """)
+            """
+            )
 
             # Check if we need to add autopilot integration fields
             self._add_autopilot_integration_fields(cursor)
 
             # Create autopilot state table for resumption
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS autopilot_state (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     state_key TEXT UNIQUE NOT NULL,
                     state_value TEXT NOT NULL,
                     updated_at TEXT NOT NULL
                 )
-            """)
+            """
+            )
 
             # Create enhanced evaluation results table
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS evaluation_results (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     autopilot_run_id TEXT NOT NULL,
@@ -117,10 +127,12 @@ class EmotionalQuantDatabase:
                     error_message TEXT,
                     created_at TEXT NOT NULL
                 )
-            """)
+            """
+            )
 
             # Create model lineage tracking table
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS model_lineage (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     model_path TEXT UNIQUE NOT NULL,
@@ -135,10 +147,12 @@ class EmotionalQuantDatabase:
                     performance_rank INTEGER,
                     notes TEXT
                 )
-            """)
+            """
+            )
 
             # Create performance comparison table
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS performance_comparisons (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     comparison_id TEXT NOT NULL,
@@ -150,7 +164,8 @@ class EmotionalQuantDatabase:
                     comparison_date TEXT NOT NULL,
                     evaluator_notes TEXT
                 )
-            """)
+            """
+            )
 
             conn.commit()
             self.logger.info("🗄️ Database schema initialized/upgraded successfully")
@@ -169,63 +184,82 @@ class EmotionalQuantDatabase:
             cursor.execute("PRAGMA table_info(autopilot_runs)")
             columns = [col[1] for col in cursor.fetchall()]
 
-            if 'emotional_deviation' not in columns:
+            if "emotional_deviation" not in columns:
                 cursor.execute("ALTER TABLE autopilot_runs ADD COLUMN emotional_deviation REAL")
 
-            if 'selected_as_seed' not in columns:
-                cursor.execute("ALTER TABLE autopilot_runs ADD COLUMN selected_as_seed BOOLEAN DEFAULT FALSE")
+            if "selected_as_seed" not in columns:
+                cursor.execute(
+                    "ALTER TABLE autopilot_runs ADD COLUMN selected_as_seed BOOLEAN DEFAULT FALSE"
+                )
 
-            if 'seed_selection_date' not in columns:
+            if "seed_selection_date" not in columns:
                 cursor.execute("ALTER TABLE autopilot_runs ADD COLUMN seed_selection_date TEXT")
 
-            if 'performance_rank' not in columns:
+            if "performance_rank" not in columns:
                 cursor.execute("ALTER TABLE autopilot_runs ADD COLUMN performance_rank INTEGER")
 
             # Add fields to training_iterations table if missing
             cursor.execute("PRAGMA table_info(training_iterations)")
             columns = [col[1] for col in cursor.fetchall()]
 
-            if 'autopilot_run_id' not in columns:
+            if "autopilot_run_id" not in columns:
                 cursor.execute("ALTER TABLE training_iterations ADD COLUMN autopilot_run_id TEXT")
 
-            if 'baseline_comparison_score' not in columns:
-                cursor.execute("ALTER TABLE training_iterations ADD COLUMN baseline_comparison_score REAL")
+            if "baseline_comparison_score" not in columns:
+                cursor.execute(
+                    "ALTER TABLE training_iterations ADD COLUMN baseline_comparison_score REAL"
+                )
 
             self.logger.info("📊 Autopilot integration fields added to existing tables")
 
         except Exception as e:
             self.logger.warning(f"⚠️ Could not add autopilot fields (may already exist): {e}")
 
-    def log_autopilot_run(self,
-                         run_id: str,
-                         model_path: str,
-                         base_model: str,
-                         quantization_method: str,
-                         judgment_score: float,
-                         emotional_deviation: float,
-                         execution_time_minutes: float,
-                         success: bool,
-                         result_summary: str = "",
-                         error_message: str = "") -> int:
+    def log_autopilot_run(
+        self,
+        run_id: str,
+        model_path: str,
+        base_model: str,
+        quantization_method: str,
+        judgment_score: float,
+        emotional_deviation: float,
+        execution_time_minutes: float,
+        success: bool,
+        result_summary: str = "",
+        error_message: str = "",
+    ) -> int:
         """Log an autopilot run with enhanced tracking"""
 
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
         try:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO autopilot_runs (
                     run_id, trigger_type, timestamp, model_path, base_model,
                     quantization_method, target_size_gb, result_summary,
                     judgment_score, success, error_message, execution_time_minutes,
                     emotional_deviation, created_at
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                run_id, "idle_triggered", datetime.now().isoformat(),
-                model_path, base_model, quantization_method, 24.0,
-                result_summary, judgment_score, success, error_message,
-                execution_time_minutes, emotional_deviation, datetime.now().isoformat()
-            ))
+            """,
+                (
+                    run_id,
+                    "idle_triggered",
+                    datetime.now().isoformat(),
+                    model_path,
+                    base_model,
+                    quantization_method,
+                    24.0,
+                    result_summary,
+                    judgment_score,
+                    success,
+                    error_message,
+                    execution_time_minutes,
+                    emotional_deviation,
+                    datetime.now().isoformat(),
+                ),
+            )
 
             run_db_id = cursor.lastrowid
             conn.commit()
@@ -240,16 +274,15 @@ class EmotionalQuantDatabase:
         finally:
             conn.close()
 
-    def log_evaluation_result(self,
-                             autopilot_run_id: str,
-                             judgment_result) -> int:
+    def log_evaluation_result(self, autopilot_run_id: str, judgment_result) -> int:
         """Log detailed evaluation results"""
 
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
         try:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO evaluation_results (
                     autopilot_run_id, model_path, base_model, quantization_method,
                     judgment_score, fluency_score, emotional_intensity_score,
@@ -257,16 +290,26 @@ class EmotionalQuantDatabase:
                     evaluation_count, reflection_notes, evaluation_time_seconds,
                     success, error_message, created_at
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                autopilot_run_id, judgment_result.model_path, judgment_result.base_model,
-                judgment_result.quantization_method, judgment_result.judgment_score,
-                judgment_result.fluency_score, judgment_result.emotional_intensity_score,
-                judgment_result.emotional_match_score, judgment_result.empathy_score,
-                judgment_result.baseline_preference, judgment_result.evaluation_count,
-                judgment_result.reflection_notes, judgment_result.evaluation_time_seconds,
-                judgment_result.success, judgment_result.error_message,
-                datetime.now().isoformat()
-            ))
+            """,
+                (
+                    autopilot_run_id,
+                    judgment_result.model_path,
+                    judgment_result.base_model,
+                    judgment_result.quantization_method,
+                    judgment_result.judgment_score,
+                    judgment_result.fluency_score,
+                    judgment_result.emotional_intensity_score,
+                    judgment_result.emotional_match_score,
+                    judgment_result.empathy_score,
+                    judgment_result.baseline_preference,
+                    judgment_result.evaluation_count,
+                    judgment_result.reflection_notes,
+                    judgment_result.evaluation_time_seconds,
+                    judgment_result.success,
+                    judgment_result.error_message,
+                    datetime.now().isoformat(),
+                ),
+            )
 
             eval_id = cursor.lastrowid
             conn.commit()
@@ -281,27 +324,36 @@ class EmotionalQuantDatabase:
         finally:
             conn.close()
 
-    def track_model_lineage(self,
-                           model_path: str,
-                           parent_model: Optional[str],
-                           quantization_method: str,
-                           generation: int,
-                           size_mb: float) -> int:
+    def track_model_lineage(
+        self,
+        model_path: str,
+        parent_model: Optional[str],
+        quantization_method: str,
+        generation: int,
+        size_mb: float,
+    ) -> int:
         """Track model lineage and relationships"""
 
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
         try:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT OR REPLACE INTO model_lineage (
                     model_path, parent_model, quantization_method, generation,
                     size_mb, creation_timestamp
                 ) VALUES (?, ?, ?, ?, ?, ?)
-            """, (
-                model_path, parent_model, quantization_method, generation,
-                size_mb, datetime.now().isoformat()
-            ))
+            """,
+                (
+                    model_path,
+                    parent_model,
+                    quantization_method,
+                    generation,
+                    size_mb,
+                    datetime.now().isoformat(),
+                ),
+            )
 
             lineage_id = cursor.lastrowid
             conn.commit()
@@ -323,17 +375,23 @@ class EmotionalQuantDatabase:
         cursor = conn.cursor()
 
         try:
-            cursor.execute("""
+            cursor.execute(
+                """
                 UPDATE model_lineage
                 SET is_seed_candidate = TRUE, performance_rank = ?
                 WHERE model_path = ?
-            """, (performance_rank, model_path))
+            """,
+                (performance_rank, model_path),
+            )
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 UPDATE autopilot_runs
                 SET performance_rank = ?
                 WHERE model_path = ?
-            """, (performance_rank, model_path))
+            """,
+                (performance_rank, model_path),
+            )
 
             conn.commit()
 
@@ -361,17 +419,23 @@ class EmotionalQuantDatabase:
             # Select the new seed
             current_time = datetime.now().isoformat()
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 UPDATE model_lineage
                 SET selected_as_seed = TRUE, seed_selection_date = ?
                 WHERE model_path = ?
-            """, (current_time, model_path))
+            """,
+                (current_time, model_path),
+            )
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 UPDATE autopilot_runs
                 SET selected_as_seed = TRUE, seed_selection_date = ?
                 WHERE model_path = ?
-            """, (current_time, model_path))
+            """,
+                (current_time, model_path),
+            )
 
             conn.commit()
 
@@ -409,10 +473,13 @@ class EmotionalQuantDatabase:
         cursor = conn.cursor()
 
         try:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT OR REPLACE INTO autopilot_state (state_key, state_value, updated_at)
                 VALUES (?, ?, ?)
-            """, (key, value, datetime.now().isoformat()))
+            """,
+                (key, value, datetime.now().isoformat()),
+            )
 
             conn.commit()
             return True
@@ -432,44 +499,46 @@ class EmotionalQuantDatabase:
 
         try:
             # Get recent performance metrics
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT quantization_method, AVG(judgment_score), COUNT(*), AVG(emotional_deviation)
                 FROM autopilot_runs
                 WHERE success = TRUE AND timestamp > datetime('now', '-30 days')
                 GROUP BY quantization_method
                 ORDER BY AVG(judgment_score) DESC
-            """)
+            """
+            )
 
             performance_by_method = []
             for row in cursor.fetchall():
-                performance_by_method.append({
-                    "method": row[0],
-                    "avg_score": row[1],
-                    "run_count": row[2],
-                    "avg_deviation": row[3]
-                })
+                performance_by_method.append(
+                    {
+                        "method": row[0],
+                        "avg_score": row[1],
+                        "run_count": row[2],
+                        "avg_deviation": row[3],
+                    }
+                )
 
             # Get seed candidates
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT model_path, performance_rank, judgment_score
                 FROM autopilot_runs
                 WHERE is_seed_candidate = TRUE OR selected_as_seed = TRUE
                 ORDER BY performance_rank
                 LIMIT 5
-            """)
+            """
+            )
 
             seed_candidates = []
             for row in cursor.fetchall():
-                seed_candidates.append({
-                    "model_path": row[0],
-                    "rank": row[1],
-                    "score": row[2]
-                })
+                seed_candidates.append({"model_path": row[0], "rank": row[1], "score": row[2]})
 
             return {
                 "performance_by_method": performance_by_method,
                 "seed_candidates": seed_candidates,
-                "last_updated": datetime.now().isoformat()
+                "last_updated": datetime.now().isoformat(),
             }
 
         except Exception as e:
@@ -477,6 +546,7 @@ class EmotionalQuantDatabase:
             return {}
         finally:
             conn.close()
+
 
 if __name__ == "__main__":
     # Test the enhanced database
@@ -493,7 +563,7 @@ if __name__ == "__main__":
         emotional_deviation=0.05,
         execution_time_minutes=45.0,
         success=True,
-        result_summary="Successful quantization"
+        result_summary="Successful quantization",
     )
 
     print(f"✅ Test run logged with ID: {db_id}")

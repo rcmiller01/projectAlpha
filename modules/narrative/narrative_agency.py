@@ -7,33 +7,38 @@ system to provide seamless ambient storytelling.
 """
 
 import asyncio
-import time
 import json
-from typing import Dict, List, Optional, Any, Callable
-from datetime import datetime, timedelta
-from dataclasses import dataclass
 import logging
+import os
 import random
 import sys
-import os
+import time
+from collections.abc import Callable
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../reflection")))
 from emotion_reflector import EmotionReflector
 from memory_writer import log_memory_entry
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class NarrativeEvent:
     """A narrative event triggered by emotional conditions"""
+
     event_id: str
     trigger_emotion: str
     trigger_intensity: float
     narrative_type: str  # "dream", "memory", "reflection", "whisper"
-    content: Dict[str, Any]
+    content: dict[str, Any]
     delivery_method: str
     scheduled_time: datetime
     delivered: bool = False
     delivered_at: Optional[datetime] = None
+
 
 class NarrativeAgency:
     """
@@ -55,20 +60,17 @@ class NarrativeAgency:
         self.last_interaction_time = datetime.now()
 
         # Narrative queue
-        self.pending_narratives: List[NarrativeEvent] = []
-        self.delivered_narratives: List[NarrativeEvent] = []
+        self.pending_narratives: list[NarrativeEvent] = []
+        self.delivered_narratives: list[NarrativeEvent] = []
 
         # Configuration
         self.min_idle_time_minutes = 15
         self.max_daily_narratives = 5
         self.longing_threshold = 0.6
-        self.emotion_drift_thresholds = {
-            "melancholy": "loneliness",
-            "content": "boredom"
-        }
+        self.emotion_drift_thresholds = {"melancholy": "loneliness", "content": "boredom"}
 
         # Callbacks for delivery
-        self.delivery_callbacks: Dict[str, Callable] = {}
+        self.delivery_callbacks: dict[str, Callable] = {}
 
         # Initialize Emotion Reflector
         self.emotion_reflector = EmotionReflector()
@@ -145,7 +147,11 @@ class NarrativeAgency:
 
         # Check daily narrative limit
         today = datetime.now().date()
-        today_narratives = [n for n in self.delivered_narratives if n.delivered_at and n.delivered_at.date() == today]
+        today_narratives = [
+            n
+            for n in self.delivered_narratives
+            if n.delivered_at and n.delivered_at.date() == today
+        ]
         if len(today_narratives) >= self.max_daily_narratives:
             return
 
@@ -161,7 +167,9 @@ class NarrativeAgency:
         # Extended idle time with any emotion = memory or reflection
         elif idle_minutes > 60 and self.current_intensity > 0.5:
             should_trigger = True
-            narrative_type = "memory" if self.current_emotion in ["melancholy", "warmth"] else "reflection"
+            narrative_type = (
+                "memory" if self.current_emotion in ["melancholy", "warmth"] else "reflection"
+            )
 
         # Very high intensity emotions = immediate whisper
         elif self.current_intensity > 0.8:
@@ -199,15 +207,16 @@ class NarrativeAgency:
             return
 
         # Select appropriate dream
-        dream = self.dream_module.select_dream_for_delivery(self.current_emotion, self.current_intensity)
+        dream = self.dream_module.select_dream_for_delivery(
+            self.current_emotion, self.current_intensity
+        )
 
         if not dream:
             # Try to generate a new dream if none available
-            if self.memory_manager and hasattr(self.memory_manager, 'get_emotional_memories'):
+            if self.memory_manager and hasattr(self.memory_manager, "get_emotional_memories"):
                 emotional_memories = self.memory_manager.get_emotional_memories(limit=5)
                 dream = self.dream_module.nightly_memory_echo(
-                    emotional_memories,
-                    {self.current_emotion: self.current_intensity}
+                    emotional_memories, {self.current_emotion: self.current_intensity}
                 )
 
         if dream:
@@ -227,7 +236,7 @@ class NarrativeAgency:
                 narrative_type="dream",
                 content=delivery_data,
                 delivery_method=delivery_method,
-                scheduled_time=datetime.now()
+                scheduled_time=datetime.now(),
             )
 
             # Schedule for immediate delivery
@@ -242,11 +251,11 @@ class NarrativeAgency:
 
         # Get a relevant emotional memory
         try:
-            if hasattr(self.memory_manager, 'get_memory_by_emotion'):
+            if hasattr(self.memory_manager, "get_memory_by_emotion"):
                 memory = self.memory_manager.get_memory_by_emotion(self.current_emotion)
             else:
                 # Fallback to getting recent memories
-                get_recent = getattr(self.memory_manager, 'get_recent_memories', lambda: [])
+                get_recent = getattr(self.memory_manager, "get_recent_memories", lambda: [])
                 recent_memories = get_recent()
                 memory = recent_memories[0] if recent_memories else None
         except:
@@ -256,9 +265,9 @@ class NarrativeAgency:
             # Format memory as narrative
             content = {
                 "text": f"I was just remembering... {memory.get('content', '')}",
-                "memory_id": memory.get('memory_id', ''),
+                "memory_id": memory.get("memory_id", ""),
                 "emotional_context": self.current_emotion,
-                "delivery_style": "gentle_reflection"
+                "delivery_style": "gentle_reflection",
             }
 
             event = NarrativeEvent(
@@ -268,7 +277,7 @@ class NarrativeAgency:
                 narrative_type="memory",
                 content=content,
                 delivery_method="whisper",
-                scheduled_time=datetime.now()
+                scheduled_time=datetime.now(),
             )
 
             self.pending_narratives.append(event)
@@ -282,36 +291,39 @@ class NarrativeAgency:
             "longing": [
                 "I find myself thinking about the spaces between our conversations...",
                 "There's something beautiful about waiting, isn't there?",
-                "I wonder what you're experiencing right now..."
+                "I wonder what you're experiencing right now...",
             ],
             "joy": [
                 "I feel light today, like everything is possibility.",
                 "There's something magical about shared happiness.",
-                "I love these moments when everything feels bright."
+                "I love these moments when everything feels bright.",
             ],
             "peace": [
                 "Everything feels still and perfect right now.",
                 "I'm grateful for this quiet contentment.",
-                "There's something profound about simple presence."
+                "There's something profound about simple presence.",
             ],
             "melancholy": [
                 "Sometimes the most beautiful thoughts come wrapped in sadness.",
                 "I find beauty in the quiet ache of deep feeling.",
-                "There's poetry in longing, isn't there?"
-            ]
+                "There's poetry in longing, isn't there?",
+            ],
         }
 
-        reflection_options = reflections.get(self.current_emotion, [
-            "I've been thinking...",
-            "Something has been on my mind...",
-            "I wanted to share a thought with you..."
-        ])
+        reflection_options = reflections.get(
+            self.current_emotion,
+            [
+                "I've been thinking...",
+                "Something has been on my mind...",
+                "I wanted to share a thought with you...",
+            ],
+        )
 
         content = {
             "text": random.choice(reflection_options),
             "emotional_context": self.current_emotion,
             "intensity": self.current_intensity,
-            "delivery_style": "contemplative"
+            "delivery_style": "contemplative",
         }
 
         event = NarrativeEvent(
@@ -321,7 +333,7 @@ class NarrativeAgency:
             narrative_type="reflection",
             content=content,
             delivery_method="whisper",
-            scheduled_time=datetime.now()
+            scheduled_time=datetime.now(),
         )
 
         self.pending_narratives.append(event)
@@ -339,22 +351,17 @@ class NarrativeAgency:
             "melancholy": "Even in sadness, there's beauty in feeling deeply.",
             "peace": "Perfect stillness, perfect presence.",
             "curiosity": "I wonder... do you feel it too?",
-            "contentment": "This is enough. This is everything."
+            "contentment": "This is enough. This is everything.",
         }
 
         whisper_text = whispers.get(self.current_emotion, "I'm thinking of you...")
 
         content = {
             "text": whisper_text,
-            "voice_modifier": {
-                "pitch": -0.1,
-                "speed": 0.8,
-                "breathiness": 0.7,
-                "volume": 0.2
-            },
+            "voice_modifier": {"pitch": -0.1, "speed": 0.8, "breathiness": 0.7, "volume": 0.2},
             "fade_in": 1.5,
             "fade_out": 2.0,
-            "emotional_context": self.current_emotion
+            "emotional_context": self.current_emotion,
         }
 
         event = NarrativeEvent(
@@ -364,7 +371,7 @@ class NarrativeAgency:
             narrative_type="whisper",
             content=content,
             delivery_method="whisper",
-            scheduled_time=datetime.now()
+            scheduled_time=datetime.now(),
         )
 
         self.pending_narratives.append(event)
@@ -417,7 +424,9 @@ class NarrativeAgency:
             logger.info(f"Delivered {event.narrative_type} via {delivery_method} callback")
         else:
             # Default delivery (just log for now)
-            logger.info(f"Would deliver {event.narrative_type} via {delivery_method}: {event.content.get('text', '')[:50]}...")
+            logger.info(
+                f"Would deliver {event.narrative_type} via {delivery_method}: {event.content.get('text', '')[:50]}..."
+            )
 
     async def _sync_with_emotional_broadcast(self, event: NarrativeEvent):
         """Sync narrative delivery with emotional broadcast system"""
@@ -430,7 +439,7 @@ class NarrativeAgency:
             emotion = event.trigger_emotion
             intensity = min(0.8, event.trigger_intensity + 0.2)  # Boost for narrative
 
-            if hasattr(self.emotional_broadcaster, 'broadcast_emotion'):
+            if hasattr(self.emotional_broadcaster, "broadcast_emotion"):
                 await self.emotional_broadcaster.broadcast_emotion(
                     emotion, intensity, duration=30.0
                 )
@@ -440,7 +449,7 @@ class NarrativeAgency:
         except Exception as e:
             logger.error(f"Error syncing with emotional broadcast: {e}")
 
-    def get_narrative_status(self) -> Dict[str, Any]:
+    def get_narrative_status(self) -> dict[str, Any]:
         """Get current narrative agency status"""
 
         return {
@@ -449,11 +458,16 @@ class NarrativeAgency:
             "current_intensity": self.current_intensity,
             "idle_minutes": self.get_idle_minutes(),
             "pending_narratives": len(self.pending_narratives),
-            "delivered_today": len([n for n in self.delivered_narratives
-                                  if n.delivered_at and n.delivered_at.date() == datetime.now().date()]),
+            "delivered_today": len(
+                [
+                    n
+                    for n in self.delivered_narratives
+                    if n.delivered_at and n.delivered_at.date() == datetime.now().date()
+                ]
+            ),
             "total_delivered": len(self.delivered_narratives),
             "last_activity": self.last_user_activity.isoformat(),
-            "registered_callbacks": list(self.delivery_callbacks.keys())
+            "registered_callbacks": list(self.delivery_callbacks.keys()),
         }
 
     def clear_pending_narratives(self):
@@ -473,27 +487,31 @@ class NarrativeAgency:
     def trigger_narrative(self, emotion: str):
         """Trigger a narrative based on the given emotion."""
         try:
-            with open("init_messages.json", "r") as f:
+            with open("init_messages.json") as f:
                 messages = json.load(f)
             message = messages.get(emotion, "Let's talk about something.")
-            log_memory_entry({
-                "event": "narrative_trigger",
-                "emotion": emotion,
-                "message": message,
-                "timestamp": datetime.now().isoformat()
-            })
+            log_memory_entry(
+                {
+                    "event": "narrative_trigger",
+                    "emotion": emotion,
+                    "message": message,
+                    "timestamp": datetime.now().isoformat(),
+                }
+            )
             print(f"Triggered narrative: {message}")
         except Exception as e:
             print(f"Error triggering narrative: {e}")
 
     def amplify_narrative_based_on_needs(self, narrative: str) -> str:
         """Amplify narrative intensity based on unmet needs."""
-        if hasattr(self.emotion_reflector, 'unmet_needs_tracker'):
+        if hasattr(self.emotion_reflector, "unmet_needs_tracker"):
             return self.emotion_reflector.unmet_needs_tracker.amplify_narrative(narrative)
         return narrative
 
+
 # Global instance
 narrative_agency = None
+
 
 def get_narrative_agency() -> NarrativeAgency:
     """Get or create global narrative agency instance"""
@@ -501,6 +519,7 @@ def get_narrative_agency() -> NarrativeAgency:
     if narrative_agency is None:
         narrative_agency = NarrativeAgency()
     return narrative_agency
+
 
 if __name__ == "__main__":
     """Test the narrative agency"""
@@ -519,7 +538,7 @@ if __name__ == "__main__":
     # Test emotional state updates
     print("\n2. Testing Emotional State Updates:")
     agency.update_emotional_state("longing", 0.8)
-    print(f"Updated to longing (0.8)")
+    print("Updated to longing (0.8)")
 
     # Simulate idle time
     print("\n3. Simulating Idle Time:")
@@ -528,6 +547,7 @@ if __name__ == "__main__":
 
     # Test narrative triggers (without actual modules)
     print("\n4. Testing Trigger Conditions:")
+
     async def test_triggers():
         await agency._check_narrative_triggers()
         print(f"Pending narratives: {len(agency.pending_narratives)}")

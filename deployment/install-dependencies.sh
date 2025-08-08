@@ -31,7 +31,7 @@ if ! command -v docker &> /dev/null; then
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
     sudo apt-get update
     sudo apt-get install -y docker-ce docker-ce-cli containerd.io
-    sudo usermod -aG docker $USER
+    sudo usermod -aG docker "$USER"
     echo "✅ Docker installed successfully"
 else
     echo "✅ Docker already installed"
@@ -106,7 +106,7 @@ sudo apt-get install -y \
 # Create system directories
 echo "📁 Creating system directories..."
 sudo mkdir -p /opt/emotionalai/{models,data,logs,cache}
-sudo chown -R $USER:$USER /opt/emotionalai
+sudo chown -R "$USER":"$USER" /opt/emotionalai
 
 # Set up firewall (if ufw is available)
 if command -v ufw &> /dev/null; then

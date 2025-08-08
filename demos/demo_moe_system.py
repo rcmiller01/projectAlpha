@@ -3,26 +3,26 @@ Demonstration of Mixture-of-Experts (MoE) System
 Shows dynamic expert routing and RAM management
 """
 
+import logging
 import os
 import sys
-import logging
-from typing import Dict, Any
+from typing import Any, Dict
 
 # Setup path for imports
-sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
+sys.path.append(os.path.join(os.path.dirname(__file__), "src"))
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
+
 def demo_moe_classification():
     """Demonstrate intent classification"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("MoE INTENT CLASSIFICATION DEMONSTRATION")
-    print("="*60)
+    print("=" * 60)
 
     try:
         from src.core.moe_loader import IntentClassifier
@@ -37,7 +37,7 @@ def demo_moe_classification():
             "Prove that the square root of 2 is irrational",
             "Write a creative poem about the ocean",
             "Help me recall what we discussed yesterday",
-            "Design a ritual for new beginnings"
+            "Design a ritual for new beginnings",
         ]
 
         for prompt in test_prompts:
@@ -52,11 +52,12 @@ def demo_moe_classification():
     except Exception as e:
         logger.error(f"Classification demo failed: {e}")
 
+
 def demo_moe_registry():
     """Demonstrate expert registry"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("MoE EXPERT REGISTRY DEMONSTRATION")
-    print("="*60)
+    print("=" * 60)
 
     try:
         from src.core.init_models import MOE_EXPERT_REGISTRY, initialize_moe_system
@@ -68,7 +69,9 @@ def demo_moe_registry():
         for expert_id, config in MOE_EXPERT_REGISTRY.items():
             size_gb = config["size_gb"]
             total_size += size_gb
-            print(f"  {expert_id:20} | {size_gb:4.1f}GB | {config['domain']:20} | {config['description']}")
+            print(
+                f"  {expert_id:20} | {size_gb:4.1f}GB | {config['domain']:20} | {config['description']}"
+            )
 
         print(f"\nTotal registry size: {total_size:.1f}GB")
 
@@ -86,14 +89,15 @@ def demo_moe_registry():
     except Exception as e:
         logger.error(f"Registry demo failed: {e}")
 
+
 def demo_conductor_integration():
     """Demonstrate conductor model suite with MoE"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("CONDUCTOR SUITE + MoE INTEGRATION DEMONSTRATION")
-    print("="*60)
+    print("=" * 60)
 
     try:
-        from src.core.init_models import load_conductor_models, get_moe_configuration
+        from src.core.init_models import get_moe_configuration, load_conductor_models
 
         # Show MoE configuration
         config = get_moe_configuration()
@@ -116,7 +120,7 @@ def demo_conductor_integration():
             test_prompts = [
                 "Debug this Python function",
                 "I need creative inspiration",
-                "Analyze this logical argument"
+                "Analyze this logical argument",
             ]
 
             for prompt in test_prompts:
@@ -132,11 +136,12 @@ def demo_conductor_integration():
     except Exception as e:
         logger.error(f"Integration demo failed: {e}")
 
+
 def demo_memory_management():
     """Demonstrate RAM management and expert loading"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("MoE RAM MANAGEMENT DEMONSTRATION")
-    print("="*60)
+    print("=" * 60)
 
     try:
         from src.core.init_models import initialize_moe_system
@@ -149,7 +154,7 @@ def demo_memory_management():
             print("❌ MoE system not available")
             return
 
-        print(f"✅ MoE system created")
+        print("✅ MoE system created")
         print(f"   RAM limit: {moe_system.ram_limit}GB")
         print(f"   Current usage: {moe_system.ram_used}GB")
 
@@ -167,15 +172,18 @@ def demo_memory_management():
             print(f"  Would fit in RAM: {would_fit}")
 
             if not would_fit:
-                print(f"  Would require eviction of {moe_system.ram_used + expert_info.size_gb - moe_system.ram_limit:.1f}GB")
+                print(
+                    f"  Would require eviction of {moe_system.ram_used + expert_info.size_gb - moe_system.ram_limit:.1f}GB"
+                )
 
         # Show statistics
-        print(f"\nMoE Statistics:")
+        print("\nMoE Statistics:")
         for key, value in moe_system.stats.items():
             print(f"  {key}: {value}")
 
     except Exception as e:
         logger.error(f"Memory management demo failed: {e}")
+
 
 def main():
     """Run all MoE demonstrations"""
@@ -188,9 +196,9 @@ def main():
         demo_conductor_integration()
         demo_memory_management()
 
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("✅ MoE DEMONSTRATION COMPLETE")
-        print("="*60)
+        print("=" * 60)
         print("Key Features Demonstrated:")
         print("• Intent classification for expert routing")
         print("• Expert registry with RAM size tracking")
@@ -206,6 +214,7 @@ def main():
     except Exception as e:
         logger.error(f"Demo failed: {e}")
         print("❌ Demo encountered errors - check logs for details")
+
 
 if __name__ == "__main__":
     main()

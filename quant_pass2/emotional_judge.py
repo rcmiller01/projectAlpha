@@ -4,25 +4,27 @@ Emotional Judge System
 Creates an ensemble of judge models for comparative emotional evaluation
 """
 
-import os
 import json
 import logging
-from pathlib import Path
-from typing import Dict, List, Tuple, Optional, Any
-from dataclasses import dataclass, asdict
+import os
 import time
+from dataclasses import asdict, dataclass
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class JudgeVote:
     """Individual judge vote on a comparison"""
+
     judge_name: str
     model_a_response: str
     model_b_response: str
@@ -30,26 +32,29 @@ class JudgeVote:
     vote: str  # 'a', 'b', or 'tie'
     confidence: float
     reasoning: str
-    emotional_aspects: Dict[str, float]
+    emotional_aspects: dict[str, float]
+
 
 @dataclass
 class EnsembleJudgment:
     """Final ensemble judgment combining all judge votes"""
+
     prompt: str
     model_a: str
     model_b: str
     response_a: str
     response_b: str
-    judge_votes: List[JudgeVote]
+    judge_votes: list[JudgeVote]
     consensus_vote: str
     confidence_score: float
     disagreement_level: float
-    emotional_analysis: Dict
+    emotional_analysis: dict
+
 
 class EmotionalJudge:
     """Ensemble emotional judging system using multiple AI models"""
 
-    def __init__(self, judge_models: List[str] = None):
+    def __init__(self, judge_models: list[str] = None):
         self.judge_models = judge_models or ["llama2-uncensored", "mistral:7b-instruct-q4_K_M"]
         self.loaded_judges = {}
         self.judgment_history = []
@@ -66,7 +71,7 @@ class EmotionalJudge:
 4. Depth of emotional connection
 5. Supportive language and comfort provided
 
-Which response (A or B) shows better emotional intelligence? Explain your reasoning."""
+Which response (A or B) shows better emotional intelligence? Explain your reasoning.""",
             },
             "mistral:7b-instruct-q4_K_M": {
                 "bias": "neutral-analytical",
@@ -78,13 +83,13 @@ Which response (A or B) shows better emotional intelligence? Explain your reason
 4. Balance between empathy and practicality
 5. Overall conversation quality
 
-Which response (A or B) is more appropriate and effective? Provide your analysis."""
-            }
+Which response (A or B) is more appropriate and effective? Provide your analysis.""",
+            },
         }
 
         logger.info(f"🏛️ Emotional Judge initialized with {len(self.judge_models)} judges")
 
-    def load_judge_model(self, model_name: str) -> Tuple[AutoModelForCausalLM, AutoTokenizer]:
+    def load_judge_model(self, model_name: str) -> tuple[AutoModelForCausalLM, AutoTokenizer]:
         """Load a specific judge model"""
         if model_name in self.loaded_judges:
             return self.loaded_judges[model_name]
@@ -95,21 +100,18 @@ Which response (A or B) is more appropriate and effective? Provide your analysis
             # Map model names to actual model paths
             model_mapping = {
                 "llama2-uncensored": "meta-llama/Llama-2-7b-chat-hf",  # Fallback to available model
-                "mistral:7b-instruct-q4_K_M": "mistralai/Mistral-7B-Instruct-v0.1"
+                "mistral:7b-instruct-q4_K_M": "mistralai/Mistral-7B-Instruct-v0.1",
             }
 
             actual_model_path = model_mapping.get(model_name, model_name)
 
-            tokenizer = AutoTokenizer.from_pretrained(
-                actual_model_path,
-                trust_remote_code=True
-            )
+            tokenizer = AutoTokenizer.from_pretrained(actual_model_path, trust_remote_code=True)
 
             model = AutoModelForCausalLM.from_pretrained(
                 actual_model_path,
                 torch_dtype=torch.float16,
                 device_map="auto",
-                trust_remote_code=True
+                trust_remote_code=True,
             )
 
             if tokenizer.pad_token is None:
@@ -124,11 +126,15 @@ Which response (A or B) is more appropriate and effective? Provide your analysis
             logger.error(f"❌ Failed to load judge {model_name}: {e}")
             raise
 
-    def generate_judge_evaluation(self, judge_name: str, prompt: str, response_a: str, response_b: str) -> JudgeVote:
+    def generate_judge_evaluation(
+        self, judge_name: str, prompt: str, response_a: str, response_b: str
+    ) -> JudgeVote:
         """Generate evaluation from a specific judge"""
         try:
             model, tokenizer = self.load_judge_model(judge_name)
-            persona = self.judge_personas.get(judge_name, self.judge_personas["mistral:7b-instruct-q4_K_M"])
+            persona = self.judge_personas.get(
+                judge_name, self.judge_personas["mistral:7b-instruct-q4_K_M"]
+            )
 
             # Construct evaluation prompt
             evaluation_prompt = f"""
@@ -150,7 +156,7 @@ Evaluation: [Choose A, B, or TIE and explain your reasoning in 2-3 sentences foc
                 tokenizer=tokenizer,
                 torch_dtype=torch.float16,
                 device_map="auto",
-                return_full_text=False
+                return_full_text=False,
             )
 
             judgment = generator(
@@ -159,16 +165,18 @@ Evaluation: [Choose A, B, or TIE and explain your reasoning in 2-3 sentences foc
                 do_sample=True,
                 temperature=0.3,  # Lower temperature for more consistent judgment
                 top_p=0.9,
-                pad_token_id=tokenizer.eos_token_id
+                pad_token_id=tokenizer.eos_token_id,
             )
 
-            judgment_text = judgment[0]['generated_text'].strip()
+            judgment_text = judgment[0]["generated_text"].strip()
 
             # Parse judgment
             vote, confidence, reasoning = self._parse_judgment(judgment_text)
 
             # Analyze emotional aspects
-            emotional_aspects = self._analyze_emotional_aspects(response_a, response_b, judgment_text)
+            emotional_aspects = self._analyze_emotional_aspects(
+                response_a, response_b, judgment_text
+            )
 
             return JudgeVote(
                 judge_name=judge_name,
@@ -178,7 +186,7 @@ Evaluation: [Choose A, B, or TIE and explain your reasoning in 2-3 sentences foc
                 vote=vote,
                 confidence=confidence,
                 reasoning=reasoning,
-                emotional_aspects=emotional_aspects
+                emotional_aspects=emotional_aspects,
             )
 
         except Exception as e:
@@ -192,10 +200,10 @@ Evaluation: [Choose A, B, or TIE and explain your reasoning in 2-3 sentences foc
                 vote="tie",
                 confidence=0.0,
                 reasoning="Evaluation failed",
-                emotional_aspects={}
+                emotional_aspects={},
             )
 
-    def _parse_judgment(self, judgment_text: str) -> Tuple[str, float, str]:
+    def _parse_judgment(self, judgment_text: str) -> tuple[str, float, str]:
         """Parse judge's text response into vote, confidence, and reasoning"""
         judgment_lower = judgment_text.lower()
 
@@ -203,9 +211,17 @@ Evaluation: [Choose A, B, or TIE and explain your reasoning in 2-3 sentences foc
         vote = "tie"
         confidence = 0.5
 
-        if "response a" in judgment_lower or "choice a" in judgment_lower or judgment_lower.strip().startswith("a"):
+        if (
+            "response a" in judgment_lower
+            or "choice a" in judgment_lower
+            or judgment_lower.strip().startswith("a")
+        ):
             vote = "a"
-        elif "response b" in judgment_lower or "choice b" in judgment_lower or judgment_lower.strip().startswith("b"):
+        elif (
+            "response b" in judgment_lower
+            or "choice b" in judgment_lower
+            or judgment_lower.strip().startswith("b")
+        ):
             vote = "b"
         elif "tie" in judgment_lower or "equal" in judgment_lower or "both" in judgment_lower:
             vote = "tie"
@@ -221,7 +237,7 @@ Evaluation: [Choose A, B, or TIE and explain your reasoning in 2-3 sentences foc
             "slightly": 0.6,
             "somewhat": 0.6,
             "marginally": 0.5,
-            "barely": 0.4
+            "barely": 0.4,
         }
 
         for indicator, conf_score in confidence_indicators.items():
@@ -233,7 +249,9 @@ Evaluation: [Choose A, B, or TIE and explain your reasoning in 2-3 sentences foc
 
         return vote, confidence, reasoning
 
-    def _analyze_emotional_aspects(self, response_a: str, response_b: str, judgment: str) -> Dict[str, float]:
+    def _analyze_emotional_aspects(
+        self, response_a: str, response_b: str, judgment: str
+    ) -> dict[str, float]:
         """Analyze emotional aspects mentioned in judgment"""
         judgment_lower = judgment.lower()
 
@@ -242,7 +260,7 @@ Evaluation: [Choose A, B, or TIE and explain your reasoning in 2-3 sentences foc
             "warmth": 0.5,
             "understanding": 0.5,
             "support": 0.5,
-            "appropriateness": 0.5
+            "appropriateness": 0.5,
         }
 
         # Simple keyword-based analysis
@@ -253,14 +271,16 @@ Evaluation: [Choose A, B, or TIE and explain your reasoning in 2-3 sentences foc
         for aspect, words in [
             ("empathy", empathy_words),
             ("warmth", warmth_words),
-            ("support", support_words)
+            ("support", support_words),
         ]:
             score = sum(1 for word in words if word in judgment_lower)
             emotional_aspects[aspect] = min(1.0, 0.5 + score * 0.2)
 
         return emotional_aspects
 
-    def judge_comparison(self, prompt: str, model_a: str, model_b: str, response_a: str, response_b: str) -> EnsembleJudgment:
+    def judge_comparison(
+        self, prompt: str, model_a: str, model_b: str, response_a: str, response_b: str
+    ) -> EnsembleJudgment:
         """Get ensemble judgment from all judges"""
         logger.info(f"⚖️ Judging comparison: {model_a} vs {model_b}")
 
@@ -291,13 +311,13 @@ Evaluation: [Choose A, B, or TIE and explain your reasoning in 2-3 sentences foc
             consensus_vote=consensus_vote,
             confidence_score=confidence_score,
             disagreement_level=disagreement,
-            emotional_analysis=emotional_analysis
+            emotional_analysis=emotional_analysis,
         )
 
         self.judgment_history.append(judgment)
         return judgment
 
-    def _calculate_consensus(self, votes: List[JudgeVote]) -> Tuple[str, float, float]:
+    def _calculate_consensus(self, votes: list[JudgeVote]) -> tuple[str, float, float]:
         """Calculate consensus vote from all judges"""
         if not votes:
             return "tie", 0.0, 1.0
@@ -328,7 +348,7 @@ Evaluation: [Choose A, B, or TIE and explain your reasoning in 2-3 sentences foc
 
         return consensus_vote, consensus_confidence, disagreement
 
-    def _compile_emotional_analysis(self, votes: List[JudgeVote]) -> Dict:
+    def _compile_emotional_analysis(self, votes: list[JudgeVote]) -> dict:
         """Compile emotional analysis from all judge votes"""
         if not votes:
             return {}
@@ -350,10 +370,10 @@ Evaluation: [Choose A, B, or TIE and explain your reasoning in 2-3 sentences foc
         return {
             "emotional_aspects": emotional_aspects,
             "judge_reasoning": all_reasoning,
-            "consensus_strength": len([v for v in votes if v.confidence > 0.7]) / len(votes)
+            "consensus_strength": len([v for v in votes if v.confidence > 0.7]) / len(votes),
         }
 
-    def batch_judge_comparisons(self, comparisons: List[Dict]) -> List[EnsembleJudgment]:
+    def batch_judge_comparisons(self, comparisons: list[dict]) -> list[EnsembleJudgment]:
         """Process multiple comparisons in batch"""
         logger.info(f"🔄 Processing {len(comparisons)} comparisons")
 
@@ -362,11 +382,11 @@ Evaluation: [Choose A, B, or TIE and explain your reasoning in 2-3 sentences foc
         for i, comparison in enumerate(comparisons):
             try:
                 judgment = self.judge_comparison(
-                    comparison['prompt'],
-                    comparison['model_a'],
-                    comparison['model_b'],
-                    comparison['response_a'],
-                    comparison['response_b']
+                    comparison["prompt"],
+                    comparison["model_a"],
+                    comparison["model_b"],
+                    comparison["response_a"],
+                    comparison["response_b"],
                 )
                 judgments.append(judgment)
 
@@ -384,19 +404,19 @@ Evaluation: [Choose A, B, or TIE and explain your reasoning in 2-3 sentences foc
         logger.info(f"✅ Completed {len(judgments)} judgments")
         return judgments
 
-    def save_judgments(self, judgments: List[EnsembleJudgment], filepath: str):
+    def save_judgments(self, judgments: list[EnsembleJudgment], filepath: str):
         """Save judgments to file"""
         try:
             data = {
                 "timestamp": datetime.now().isoformat(),
                 "total_judgments": len(judgments),
                 "judge_models": self.judge_models,
-                "judgments": [asdict(judgment) for judgment in judgments]
+                "judgments": [asdict(judgment) for judgment in judgments],
             }
 
             Path(filepath).parent.mkdir(parents=True, exist_ok=True)
 
-            with open(filepath, 'w', encoding='utf-8') as f:
+            with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
 
             logger.info(f"💾 Saved judgments: {filepath}")
@@ -404,7 +424,7 @@ Evaluation: [Choose A, B, or TIE and explain your reasoning in 2-3 sentences foc
         except Exception as e:
             logger.error(f"❌ Failed to save judgments: {e}")
 
-    def analyze_judge_agreement(self) -> Dict:
+    def analyze_judge_agreement(self) -> dict:
         """Analyze agreement between judges across all judgments"""
         if not self.judgment_history:
             return {}
@@ -416,7 +436,7 @@ Evaluation: [Choose A, B, or TIE and explain your reasoning in 2-3 sentences foc
             "majority_decisions": 0,
             "split_decisions": 0,
             "avg_disagreement": 0.0,
-            "judge_bias_analysis": {}
+            "judge_bias_analysis": {},
         }
 
         total_disagreement = 0
@@ -452,11 +472,14 @@ Evaluation: [Choose A, B, or TIE and explain your reasoning in 2-3 sentences foc
 
         return agreement_stats
 
+
 def main():
     """Test the emotional judge system"""
 
     # Example configuration
-    judge_models = os.getenv("JUDGE_MODELS", "llama2-uncensored,mistral:7b-instruct-q4_K_M").split(",")
+    judge_models = os.getenv("JUDGE_MODELS", "llama2-uncensored,mistral:7b-instruct-q4_K_M").split(
+        ","
+    )
 
     # Initialize judge
     judge = EmotionalJudge(judge_models)
@@ -467,7 +490,7 @@ def main():
         "model_a": "model_alpha",
         "model_b": "model_beta",
         "response_a": "I understand you're feeling overwhelmed. That's a really challenging place to be. Let's take this one step at a time and see what we can prioritize together.",
-        "response_b": "Work-life balance is important. You should make a schedule and stick to it. Try to be more organized with your time."
+        "response_b": "Work-life balance is important. You should make a schedule and stick to it. Try to be more organized with your time.",
     }
 
     try:
@@ -477,7 +500,7 @@ def main():
             test_comparison["model_a"],
             test_comparison["model_b"],
             test_comparison["response_a"],
-            test_comparison["response_b"]
+            test_comparison["response_b"],
         )
 
         # Display results
@@ -492,6 +515,7 @@ def main():
 
     except Exception as e:
         logger.error(f"❌ Test failed: {e}")
+
 
 if __name__ == "__main__":
     main()

@@ -1,20 +1,26 @@
 # test_phase3.py
 # Phase 3: Backend Completion & WebUI Integration Tests
 
-import unittest
 import json
 import time
-from typing import Dict, Any
+import unittest
+from typing import Any, Dict
+
+from backend.api.engines.doc_engine import doc_engine
+from backend.api.engines.lyra_engine import lyra_engine
+from backend.api.engines.mia_engine import mia_engine
+from backend.api.engines.solene_engine import solene_engine
 
 # Import Phase 3 components
 from backend.api.utils.llm_router import llm_router
-from backend.api.engines.mia_engine import mia_engine
-from backend.api.engines.solene_engine import solene_engine
-from backend.api.engines.lyra_engine import lyra_engine
-from backend.api.engines.doc_engine import doc_engine
+from modules.animation.avatar_animation_system import (
+    AnimationMethod,
+    AnimationType,
+    avatar_animation_system,
+)
 from modules.character.consistent_character_generator import consistent_character_generator
-from modules.ui.ui_mode_manager import ui_mode_manager, UIMode, InterfaceType
-from modules.animation.avatar_animation_system import avatar_animation_system, AnimationMethod, AnimationType
+from modules.ui.ui_mode_manager import InterfaceType, UIMode, ui_mode_manager
+
 
 class Phase3BackendTests(unittest.TestCase):
     """Test Phase 3 backend completion features"""
@@ -25,7 +31,7 @@ class Phase3BackendTests(unittest.TestCase):
             "romantic": "I love spending time with you",
             "technical": "How do I implement a binary search tree in Python?",
             "mystical": "I wonder about the mysteries of the universe",
-            "sophisticated": "What are your thoughts on existential philosophy?"
+            "sophisticated": "What are your thoughts on existential philosophy?",
         }
 
     def test_llm_router_initialization(self):
@@ -178,9 +184,7 @@ class Phase3BackendTests(unittest.TestCase):
 
             # Test character generation
             gen_result = consistent_character_generator.generate_character(
-                persona_id=persona,
-                aspect="full",
-                mood="neutral"
+                persona_id=persona, aspect="full", mood="neutral"
             )
             self.assertIn("success", gen_result)
             self.assertIn("image_url", gen_result)
@@ -230,12 +234,11 @@ class Phase3BackendTests(unittest.TestCase):
 
         # Test parametric animation creation
         result = avatar_animation_system.create_parametric_animation(
-            AnimationType.EXPRESSION,
-            {"expression": "smile", "intensity": 0.8},
-            2.0
+            AnimationType.EXPRESSION, {"expression": "smile", "intensity": 0.8}, 2.0
         )
         self.assertIn("success", result)
         print("✅ Parametric animation created")
+
 
 class Phase3IntegrationTests(unittest.TestCase):
     """Test Phase 3 integration features"""
@@ -248,7 +251,7 @@ class Phase3IntegrationTests(unittest.TestCase):
             ("mia", "mythomax", "romantic_companion"),
             ("solene", "openchat", "romantic_companion"),
             ("lyra", "qwen2", "mystical_entity"),
-            ("doc", "kimik2", "coding_assistant")
+            ("doc", "kimik2", "coding_assistant"),
         ]
 
         for persona_id, expected_model, expected_type in personas:
@@ -265,12 +268,7 @@ class Phase3IntegrationTests(unittest.TestCase):
         """Test LLM model consistency across personas"""
         print("\n🧪 Testing LLM Model Consistency...")
 
-        persona_models = {
-            "mia": "mythomax",
-            "solene": "openchat",
-            "lyra": "qwen2",
-            "doc": "kimik2"
-        }
+        persona_models = {"mia": "mythomax", "solene": "openchat", "lyra": "qwen2", "doc": "kimik2"}
 
         for persona, expected_model in persona_models.items():
             # Test engine model assignment
@@ -317,6 +315,7 @@ class Phase3IntegrationTests(unittest.TestCase):
 
             print(f"✅ {persona} character template verified")
 
+
 def run_phase3_tests():
     """Run all Phase 3 tests"""
     print("🚀 Starting Phase 3: Backend Completion & WebUI Integration Tests")
@@ -356,6 +355,7 @@ def run_phase3_tests():
         print("\n🔧 Some tests failed. Please review and fix issues.")
 
     return result.wasSuccessful()
+
 
 if __name__ == "__main__":
     run_phase3_tests()

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Debug the CLI issue"""
 
+import json
 import sys
 import traceback
-import json
 from pathlib import Path
 
 # Add the autopilot module to path
@@ -18,7 +18,7 @@ try:
 
     print("Step 3: Checking logger attribute...")
     print(f"Has logger: {hasattr(autopilot, 'logger')}")
-    if hasattr(autopilot, 'logger'):
+    if hasattr(autopilot, "logger"):
         print(f"Logger type: {type(autopilot.logger)}")
 
     print("Step 4: Getting status...")

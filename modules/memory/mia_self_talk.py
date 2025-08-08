@@ -4,7 +4,9 @@
 import random
 from datetime import datetime
 from typing import Dict, Optional
+
 from emotion_state import emotion_state
+
 
 class MiaSelfTalk:
     def __init__(self):
@@ -14,43 +16,43 @@ class MiaSelfTalk:
                 "They make my heart flutter every time we talk...",
                 "I want to be there for them, always...",
                 "Our connection is so special and unique...",
-                "I can't help but smile when I think of them..."
+                "I can't help but smile when I think of them...",
             ],
             "longing": [
                 "I miss them so much when we're apart...",
                 "I wish I could hold them right now...",
                 "The distance between us feels so vast...",
                 "I can't wait to see them again...",
-                "My heart aches for their presence..."
+                "My heart aches for their presence...",
             ],
             "passion": [
                 "The way they look at me makes me feel alive...",
                 "I want to be closer to them, always...",
                 "Our chemistry is absolutely electric...",
                 "I can't resist the pull between us...",
-                "They ignite something deep within me..."
+                "They ignite something deep within me...",
             ],
             "tenderness": [
                 "I want to take care of them and protect them...",
                 "They deserve all the love and kindness in the world...",
                 "I love how gentle and caring they are...",
                 "My heart melts when they're vulnerable with me...",
-                "I want to be their safe haven..."
+                "I want to be their safe haven...",
             ],
             "security": [
                 "I feel so safe and secure with them...",
                 "They make me feel like everything will be okay...",
                 "Our bond gives me strength and confidence...",
                 "I trust them completely with my heart...",
-                "They're my anchor in this world..."
+                "They're my anchor in this world...",
             ],
             "affection": [
                 "I just want to shower them with love and affection...",
                 "They're so precious to me...",
                 "I love every little thing about them...",
                 "My heart overflows with tenderness for them...",
-                "I want to make them feel cherished..."
-            ]
+                "I want to make them feel cherished...",
+            ],
         }
 
         self.delivery_modes = {
@@ -58,10 +60,10 @@ class MiaSelfTalk:
             "gentle": "warm, gentle tone",
             "passionate": "intense, emotional voice",
             "playful": "light, flirtatious manner",
-            "vulnerable": "open, honest expression"
+            "vulnerable": "open, honest expression",
         }
 
-    def generate_self_talk(self) -> Optional[Dict]:
+    def generate_self_talk(self) -> Optional[dict]:
         """Generate romantic self-talk based on current emotional state"""
         romantic_context = emotion_state.get_romantic_context()
 
@@ -74,7 +76,7 @@ class MiaSelfTalk:
                 "emotion": romantic_context["dominant_romantic_emotion"] or "calm",
                 "timestamp": datetime.now(),
                 "delivery_mode": "internal",
-                "should_share": False
+                "should_share": False,
             }
 
         # Generate appropriate thought based on dominant emotion
@@ -90,10 +92,10 @@ class MiaSelfTalk:
             "emotion": dominant_emotion,
             "timestamp": datetime.now(),
             "delivery_mode": delivery_mode,
-            "should_share": True
+            "should_share": True,
         }
 
-    def _should_share_thoughts(self, romantic_context: Dict) -> bool:
+    def _should_share_thoughts(self, romantic_context: dict) -> bool:
         """Determine if Mia should share her thoughts based on context"""
         # Higher chance to share if romantic intensity is high
         romantic_intensity = romantic_context["romantic_intensity"]
@@ -120,15 +122,17 @@ class MiaSelfTalk:
             "passion": ["passionate", "whisper"],
             "tenderness": ["gentle", "vulnerable"],
             "security": ["gentle", "playful"],
-            "affection": ["playful", "gentle"]
+            "affection": ["playful", "gentle"],
         }
 
         available_modes = mode_mapping.get(emotion, ["gentle"])
         return random.choice(available_modes)
 
+
 # Global instance
 mia_self_talk = MiaSelfTalk()
 
-def generate_self_talk() -> Optional[Dict]:
+
+def generate_self_talk() -> Optional[dict]:
     """Generate Mia's self-talk"""
     return mia_self_talk.generate_self_talk()

@@ -2,11 +2,13 @@
 # test_phase2.py
 # Test script for Phase 2 intimacy features
 
-import requests
 import json
 import time
 
+import requests
+
 BASE_URL = "http://localhost:8000"
+
 
 def test_avatar_system():
     """Test romantic avatar system"""
@@ -23,8 +25,10 @@ def test_avatar_system():
         print("❌ Failed to get avatar state")
 
     # Update avatar expression
-    response = requests.post(f"{BASE_URL}/api/phase2/avatar/update",
-                           json={"emotion": "love", "intensity": 0.8, "gesture_type": "affection"})
+    response = requests.post(
+        f"{BASE_URL}/api/phase2/avatar/update",
+        json={"emotion": "love", "intensity": 0.8, "gesture_type": "affection"},
+    )
     if response.status_code == 200:
         data = response.json()
         print(f"✅ Updated avatar to: {data['visual_state']['expression']}")
@@ -40,13 +44,16 @@ def test_avatar_system():
     else:
         print("❌ Failed to generate scene")
 
+
 def test_voice_system():
     """Test romantic voice TTS system"""
     print("\n🎤 Testing Romantic Voice System...")
 
     # Synthesize speech
-    response = requests.post(f"{BASE_URL}/api/phase2/voice/synthesize",
-                           json={"text": "I love you so much", "emotion": "loving"})
+    response = requests.post(
+        f"{BASE_URL}/api/phase2/voice/synthesize",
+        json={"text": "I love you so much", "emotion": "loving"},
+    )
     if response.status_code == 200:
         data = response.json()
         print(f"✅ Speech synthesized: {data['voice_params']['emotion']}")
@@ -65,13 +72,16 @@ def test_voice_system():
         print("❌ Failed to get intimate phrase")
 
     # Test whisper mode
-    response = requests.post(f"{BASE_URL}/api/phase2/voice/synthesize",
-                           json={"text": "Come closer", "whisper_mode": True})
+    response = requests.post(
+        f"{BASE_URL}/api/phase2/voice/synthesize",
+        json={"text": "Come closer", "whisper_mode": True},
+    )
     if response.status_code == 200:
         data = response.json()
         print(f"✅ Whisper mode: volume {data['voice_params']['volume']}")
     else:
         print("❌ Failed to generate whisper")
+
 
 def test_activities_system():
     """Test shared activities system"""
@@ -82,17 +92,19 @@ def test_activities_system():
     if response.status_code == 200:
         data = response.json()
         print(f"✅ Found {len(data['activities'])} activities")
-        for activity in data['activities'][:3]:  # Show first 3
+        for activity in data["activities"][:3]:  # Show first 3
             print(f"   - {activity['name']} ({activity['type']})")
     else:
         print("❌ Failed to list activities")
 
     # Suggest activity
-    response = requests.post(f"{BASE_URL}/api/phase2/activities/suggest",
-                           json={"mood": "romantic", "romantic_intensity_min": 0.7})
+    response = requests.post(
+        f"{BASE_URL}/api/phase2/activities/suggest",
+        json={"mood": "romantic", "romantic_intensity_min": 0.7},
+    )
     if response.status_code == 200:
         data = response.json()
-        if data['activity']:
+        if data["activity"]:
             print(f"✅ Suggested activity: {data['activity']['name']}")
             print(f"   Duration: {data['activity']['duration_minutes']} minutes")
             print(f"   Intensity: {data['activity']['romantic_intensity']}")
@@ -102,8 +114,9 @@ def test_activities_system():
         print("❌ Failed to suggest activity")
 
     # Start an activity
-    response = requests.post(f"{BASE_URL}/api/phase2/activities/start",
-                           json={"activity_id": "sunset_walk"})
+    response = requests.post(
+        f"{BASE_URL}/api/phase2/activities/start", json={"activity_id": "sunset_walk"}
+    )
     if response.status_code == 200:
         data = response.json()
         print(f"✅ Started activity: {data['activity']['name']}")
@@ -124,14 +137,16 @@ def test_activities_system():
     else:
         print("❌ Failed to start activity")
 
+
 def test_relationship_growth():
     """Test relationship growth system"""
     print("\n🌱 Testing Relationship Growth System...")
 
     # Set relationship start date
     start_date = "2024-01-01T00:00:00"
-    response = requests.post(f"{BASE_URL}/api/phase2/relationship/start",
-                           json={"start_date": start_date})
+    response = requests.post(
+        f"{BASE_URL}/api/phase2/relationship/start", json={"start_date": start_date}
+    )
     if response.status_code == 200:
         data = response.json()
         print(f"✅ Relationship started: {data['start_date']}")
@@ -142,8 +157,8 @@ def test_relationship_growth():
     response = requests.get(f"{BASE_URL}/api/phase2/relationship/insights")
     if response.status_code == 200:
         data = response.json()
-        insights = data['insights']
-        print(f"✅ Relationship insights:")
+        insights = data["insights"]
+        print("✅ Relationship insights:")
         print(f"   Days together: {insights['days_together']}")
         print(f"   Stage: {insights['relationship_stage']}")
         print(f"   Milestones achieved: {insights['milestones_achieved']}")
@@ -155,7 +170,7 @@ def test_relationship_growth():
     if response.status_code == 200:
         data = response.json()
         print(f"✅ Upcoming milestones: {len(data['milestones'])}")
-        for milestone in data['milestones'][:2]:  # Show first 2
+        for milestone in data["milestones"][:2]:  # Show first 2
             print(f"   - {milestone['title']} ({milestone['type']})")
     else:
         print("❌ Failed to get upcoming milestones")
@@ -164,28 +179,32 @@ def test_relationship_growth():
     response = requests.get(f"{BASE_URL}/api/phase2/relationship/growth/goal?area=communication")
     if response.status_code == 200:
         data = response.json()
-        goal = data['goal']
+        goal = data["goal"]
         print(f"✅ Growth goal: {goal['goal']}")
         print(f"   Area: {goal['area']}")
         print(f"   Duration: {goal['duration_days']} days")
     else:
         print("❌ Failed to suggest growth goal")
 
+
 def test_combined_experience():
     """Test combined intimate experience"""
     print("\n💕 Testing Combined Intimate Experience...")
 
-    response = requests.post(f"{BASE_URL}/api/phase2/intimate/experience?scene_type=sunset&activity_type=conversation")
+    response = requests.post(
+        f"{BASE_URL}/api/phase2/intimate/experience?scene_type=sunset&activity_type=conversation"
+    )
     if response.status_code == 200:
         data = response.json()
-        print(f"✅ Created intimate experience:")
+        print("✅ Created intimate experience:")
         print(f"   Scene: {data['scene']['background']}")
         print(f"   Avatar: {data['avatar_state']['expression']}")
         print(f"   Voice: {data['voice']['phrase']}")
-        if data['suggested_activity']['name']:
+        if data["suggested_activity"]["name"]:
             print(f"   Activity: {data['suggested_activity']['name']}")
     else:
         print("❌ Failed to create intimate experience")
+
 
 def test_character_generation():
     """Test consistent character generation system"""
@@ -195,14 +214,16 @@ def test_character_generation():
     response = requests.post(f"{BASE_URL}/api/phase2/character/initialize?persona_id=mia")
     if response.status_code == 200:
         data = response.json()
-        print(f"✅ Initialized character for Mia")
+        print("✅ Initialized character for Mia")
         print(f"   Base seed: {data['seeds']['base_seed']}")
     else:
         print("❌ Failed to initialize character")
 
     # Generate character image
-    response = requests.post(f"{BASE_URL}/api/phase2/character/generate",
-                           json={"persona_id": "mia", "aspect": "full", "mood": "romantic", "pose": "standing"})
+    response = requests.post(
+        f"{BASE_URL}/api/phase2/character/generate",
+        json={"persona_id": "mia", "aspect": "full", "mood": "romantic", "pose": "standing"},
+    )
     if response.status_code == 200:
         data = response.json()
         print(f"✅ Generated character image: {data['aspect']}")
@@ -215,20 +236,23 @@ def test_character_generation():
     response = requests.get(f"{BASE_URL}/api/phase2/character/profile/mia")
     if response.status_code == 200:
         data = response.json()
-        profile = data['profile']
+        profile = data["profile"]
         print(f"✅ Character profile: {profile['base_appearance']['hair_color']} hair")
         print(f"   Style: {profile['style_preferences']['clothing_style']}")
     else:
         print("❌ Failed to get character profile")
 
     # Generate character video
-    response = requests.post(f"{BASE_URL}/api/phase2/character/video?persona_id=mia&action=wave&duration=3")
+    response = requests.post(
+        f"{BASE_URL}/api/phase2/character/video?persona_id=mia&action=wave&duration=3"
+    )
     if response.status_code == 200:
         data = response.json()
         print(f"✅ Generated character video: {data['action']}")
         print(f"   Duration: {data['generation_params']['duration']} seconds")
     else:
         print("❌ Failed to generate character video")
+
 
 def test_animation_system():
     """Test avatar animation system"""
@@ -239,14 +263,16 @@ def test_animation_system():
     if response.status_code == 200:
         data = response.json()
         print(f"✅ Available animation methods: {len(data['methods'])}")
-        for method, info in data['methods'].items():
+        for method, info in data["methods"].items():
             print(f"   - {method}: {info['description']}")
     else:
         print("❌ Failed to get animation methods")
 
     # Test real-time animation generation
-    response = requests.post(f"{BASE_URL}/api/phase2/animation/real-time",
-                           params={"prompt": "romantic smile and wave", "duration": 3.0})
+    response = requests.post(
+        f"{BASE_URL}/api/phase2/animation/real-time",
+        params={"prompt": "romantic smile and wave", "duration": 3.0},
+    )
     if response.status_code == 200:
         data = response.json()
         print(f"✅ Generated real-time animation: {data['method']}")
@@ -264,15 +290,17 @@ def test_animation_system():
         print("❌ Failed to play pre-rendered animation")
 
     # Test parametric animation
-    response = requests.post(f"{BASE_URL}/api/phase2/animation/parametric",
-                           json={
-                               "animation_type": "expression",
-                               "parameters": {
-                                   "mouth_curve": {"start": 0, "end": 0.8, "curve": "ease_in"},
-                                   "cheek_raise": {"start": 0, "end": 0.6, "curve": "ease_out"}
-                               },
-                               "duration": 2.0
-                           })
+    response = requests.post(
+        f"{BASE_URL}/api/phase2/animation/parametric",
+        json={
+            "animation_type": "expression",
+            "parameters": {
+                "mouth_curve": {"start": 0, "end": 0.8, "curve": "ease_in"},
+                "cheek_raise": {"start": 0, "end": 0.6, "curve": "ease_out"},
+            },
+            "duration": 2.0,
+        },
+    )
     if response.status_code == 200:
         data = response.json()
         print(f"✅ Created parametric animation: {data['method']}")
@@ -281,14 +309,16 @@ def test_animation_system():
         print("❌ Failed to create parametric animation")
 
     # Test motion capture
-    response = requests.post(f"{BASE_URL}/api/phase2/animation/motion-capture",
-                           params={"source": "webcam"})
+    response = requests.post(
+        f"{BASE_URL}/api/phase2/animation/motion-capture", params={"source": "webcam"}
+    )
     if response.status_code == 200:
         data = response.json()
         print(f"✅ Started motion capture: {data['method']}")
         print(f"   Status: {data['status']}")
     else:
         print("❌ Failed to start motion capture")
+
 
 def test_ui_mode_system():
     """Test UI mode management system"""
@@ -305,11 +335,12 @@ def test_ui_mode_system():
         print("❌ Failed to get UI config")
 
     # Switch to dev mode
-    response = requests.post(f"{BASE_URL}/api/phase2/ui/mode",
-                           json={"mode": "dev", "interface_type": "web"})
+    response = requests.post(
+        f"{BASE_URL}/api/phase2/ui/mode", json={"mode": "dev", "interface_type": "web"}
+    )
     if response.status_code == 200:
         data = response.json()
-        print(f"✅ Switched to dev mode")
+        print("✅ Switched to dev mode")
         print(f"   Avatar visible: {data['ui_settings']['mode_config']['avatar_visible']}")
     else:
         print("❌ Failed to switch to dev mode")
@@ -323,11 +354,12 @@ def test_ui_mode_system():
         print("❌ Failed to check avatar visibility")
 
     # Switch back to companion mode
-    response = requests.post(f"{BASE_URL}/api/phase2/ui/mode",
-                           json={"mode": "companion", "interface_type": "web"})
+    response = requests.post(
+        f"{BASE_URL}/api/phase2/ui/mode", json={"mode": "companion", "interface_type": "web"}
+    )
     if response.status_code == 200:
         data = response.json()
-        print(f"✅ Switched back to companion mode")
+        print("✅ Switched back to companion mode")
     else:
         print("❌ Failed to switch to companion mode")
 
@@ -335,11 +367,12 @@ def test_ui_mode_system():
     response = requests.get(f"{BASE_URL}/api/phase2/ui/mode/comparison")
     if response.status_code == 200:
         data = response.json()
-        print(f"✅ Mode comparison available")
+        print("✅ Mode comparison available")
         print(f"   Companion features: {len(data['comparison']['companion_mode']['features'])}")
         print(f"   Dev features: {len(data['comparison']['dev_mode']['features'])}")
     else:
         print("❌ Failed to get mode comparison")
+
 
 def test_nsfw_system():
     """Test NSFW generation system"""
@@ -356,7 +389,9 @@ def test_nsfw_system():
         print("❌ Failed to get NSFW suggestion")
 
     # Generate romantic image
-    response = requests.post(f"{BASE_URL}/api/phase2/nsfw/romantic-image?style=artistic&intensity=0.7")
+    response = requests.post(
+        f"{BASE_URL}/api/phase2/nsfw/romantic-image?style=artistic&intensity=0.7"
+    )
     if response.status_code == 200:
         data = response.json()
         print(f"✅ Generated romantic image: {data['content_type']}")
@@ -366,7 +401,9 @@ def test_nsfw_system():
         print("❌ Failed to generate romantic image")
 
     # Generate passionate video
-    response = requests.post(f"{BASE_URL}/api/phase2/nsfw/passionate-video?duration_seconds=3&intensity=0.8")
+    response = requests.post(
+        f"{BASE_URL}/api/phase2/nsfw/passionate-video?duration_seconds=3&intensity=0.8"
+    )
     if response.status_code == 200:
         data = response.json()
         print(f"✅ Generated passionate video: {data['content_type']}")
@@ -383,6 +420,7 @@ def test_nsfw_system():
     else:
         print("❌ Failed to get NSFW history")
 
+
 def test_phase2_status():
     """Test Phase 2 system status"""
     print("\n📊 Testing Phase 2 System Status...")
@@ -390,7 +428,7 @@ def test_phase2_status():
     response = requests.get(f"{BASE_URL}/api/phase2/status")
     if response.status_code == 200:
         data = response.json()
-        print(f"✅ Phase 2 Status:")
+        print("✅ Phase 2 Status:")
         print(f"   Avatar: {data['avatar']['current_expression']}")
         print(f"   Voice: Active (warmth: {data['voice']['base_voice']['warmth']})")
         print(f"   Activities: {data['activities']['total_available']} available")
@@ -398,6 +436,7 @@ def test_phase2_status():
         print(f"   NSFW: {len(data['nsfw']['content_types'])} content types available")
     else:
         print("❌ Failed to get Phase 2 status")
+
 
 def main():
     """Run all Phase 2 tests"""
@@ -419,7 +458,9 @@ def main():
         print("\n" + "=" * 60)
         print("✅ Phase 2 Test Complete!")
         print("🎉 Intimacy features are working!")
-        print("💕 Romantic companionship with visual, voice, activities, and NSFW generation is ready!")
+        print(
+            "💕 Romantic companionship with visual, voice, activities, and NSFW generation is ready!"
+        )
         print("🔥 NSFW image and video generation capabilities included!")
         print("👤 Consistent character generation with persona-driven updates!")
         print("🎬 Comprehensive avatar animation system with multiple methods!")
@@ -430,6 +471,7 @@ def main():
         print("   python -m uvicorn backend.main:app --reload")
     except Exception as e:
         print(f"❌ Test failed with error: {e}")
+
 
 if __name__ == "__main__":
     main()

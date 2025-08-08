@@ -5,15 +5,16 @@ MongoDB schema design for the unified companion system with collections
 for user data, interactions, psychological state, and system memory.
 """
 
-from typing import Dict, List, Any, Optional, Union
-from datetime import datetime, timedelta
-from dataclasses import dataclass, asdict, field
-from enum import Enum
 import asyncio
 import logging
+from dataclasses import asdict, dataclass, field
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Dict, List, Optional, Union
 
 # Note: motor package will be installed in production
 # from motor.motor_asyncio import AsyncIOMotorClient
+
 
 class InteractionType(Enum):
     EMOTIONAL_SUPPORT = "emotional_support"
@@ -22,6 +23,7 @@ class InteractionType(Enum):
     INTEGRATED_SUPPORT = "integrated_support"
     GENERAL_CONVERSATION = "general_conversation"
     CRISIS_SUPPORT = "crisis_support"
+
 
 class EmotionalState(Enum):
     STABLE = "stable"
@@ -33,15 +35,17 @@ class EmotionalState(Enum):
     OVERWHELMED = "overwhelmed"
     CONFUSED = "confused"
 
+
 @dataclass
 class UserProfile:
     """Core user profile information"""
+
     user_id: str
     created_at: datetime
     last_active: datetime
     display_name: Optional[str] = None
-    preferences: Optional[Dict[str, Any]] = field(default_factory=dict)
-    adaptive_profile: Optional[Dict[str, Any]] = field(default_factory=dict)
+    preferences: Optional[dict[str, Any]] = field(default_factory=dict)
+    adaptive_profile: Optional[dict[str, Any]] = field(default_factory=dict)
 
     def to_dict(self):
         return {
@@ -50,12 +54,14 @@ class UserProfile:
             "last_active": self.last_active,
             "display_name": self.display_name,
             "preferences": self.preferences or {},
-            "adaptive_profile": self.adaptive_profile or {}
+            "adaptive_profile": self.adaptive_profile or {},
         }
+
 
 @dataclass
 class InteractionRecord:
     """Individual interaction record"""
+
     interaction_id: str
     user_id: str
     session_id: str
@@ -63,12 +69,12 @@ class InteractionRecord:
     user_input: str
     companion_response: str
     interaction_type: InteractionType
-    context_analysis: Dict[str, Any]
-    emotional_state: Dict[str, float]
-    technical_context: Dict[str, Any]
-    creative_context: Dict[str, Any]
-    guidance_used: Dict[str, Any]
-    response_metrics: Dict[str, Any]
+    context_analysis: dict[str, Any]
+    emotional_state: dict[str, float]
+    technical_context: dict[str, Any]
+    creative_context: dict[str, Any]
+    guidance_used: dict[str, Any]
+    response_metrics: dict[str, Any]
 
     def to_dict(self):
         return {
@@ -84,20 +90,22 @@ class InteractionRecord:
             "technical_context": self.technical_context,
             "creative_context": self.creative_context,
             "guidance_used": self.guidance_used,
-            "response_metrics": self.response_metrics
+            "response_metrics": self.response_metrics,
         }
+
 
 @dataclass
 class SessionRecord:
     """Session-level interaction data"""
+
     session_id: str
     user_id: str
     start_time: datetime
     end_time: Optional[datetime]
     total_interactions: int
-    primary_focuses: List[str]
-    emotional_trajectory: List[Dict[str, Any]]
-    session_summary: Dict[str, Any]
+    primary_focuses: list[str]
+    emotional_trajectory: list[dict[str, Any]]
+    session_summary: dict[str, Any]
 
     def to_dict(self):
         return {
@@ -108,22 +116,24 @@ class SessionRecord:
             "total_interactions": self.total_interactions,
             "primary_focuses": self.primary_focuses,
             "emotional_trajectory": self.emotional_trajectory,
-            "session_summary": self.session_summary
+            "session_summary": self.session_summary,
         }
+
 
 @dataclass
 class PsychologicalState:
     """Comprehensive psychological state tracking"""
+
     user_id: str
     timestamp: datetime
-    emotional_indicators: Dict[str, float]
-    stress_levels: Dict[str, float]
-    attachment_patterns: Dict[str, Any]
-    creative_state: Dict[str, Any]
-    technical_confidence: Dict[str, float]
-    support_needs: List[str]
-    risk_factors: Dict[str, float]
-    growth_indicators: Dict[str, float]
+    emotional_indicators: dict[str, float]
+    stress_levels: dict[str, float]
+    attachment_patterns: dict[str, Any]
+    creative_state: dict[str, Any]
+    technical_confidence: dict[str, float]
+    support_needs: list[str]
+    risk_factors: dict[str, float]
+    growth_indicators: dict[str, float]
 
     def to_dict(self):
         return {
@@ -136,12 +146,14 @@ class PsychologicalState:
             "technical_confidence": self.technical_confidence,
             "support_needs": self.support_needs,
             "risk_factors": self.risk_factors,
-            "growth_indicators": self.growth_indicators
+            "growth_indicators": self.growth_indicators,
         }
+
 
 @dataclass
 class MemoryFragment:
     """Individual memory fragment for context continuity"""
+
     memory_id: str
     user_id: str
     content: str
@@ -150,8 +162,8 @@ class MemoryFragment:
     created_at: datetime
     last_accessed: datetime
     access_count: int
-    related_interactions: List[str]
-    tags: List[str]
+    related_interactions: list[str]
+    tags: list[str]
     tone: Optional[str] = None
     sentiment: float = 0.0
     time_of_day: Optional[str] = None
@@ -170,8 +182,9 @@ class MemoryFragment:
             "tags": self.tags,
             "tone": self.tone,
             "sentiment": self.sentiment,
-            "time_of_day": self.time_of_day
+            "time_of_day": self.time_of_day,
         }
+
 
 class UnifiedCompanionDatabase:
     """
@@ -192,7 +205,7 @@ class UnifiedCompanionDatabase:
             "sessions": "session_records",
             "psychology": "psychological_states",
             "memory": "memory_fragments",
-            "analytics": "system_analytics"
+            "analytics": "system_analytics",
         }
 
     async def initialize(self):
@@ -229,7 +242,9 @@ class UnifiedCompanionDatabase:
         await self.db[self.collections["interactions"]].create_index("user_id")
         await self.db[self.collections["interactions"]].create_index("session_id")
         await self.db[self.collections["interactions"]].create_index("timestamp")
-        await self.db[self.collections["interactions"]].create_index([("user_id", 1), ("timestamp", -1)])
+        await self.db[self.collections["interactions"]].create_index(
+            [("user_id", 1), ("timestamp", -1)]
+        )
         await self.db[self.collections["interactions"]].create_index("interaction_type")
 
         # Session records indexes
@@ -240,7 +255,9 @@ class UnifiedCompanionDatabase:
         # Psychological states indexes
         await self.db[self.collections["psychology"]].create_index("user_id")
         await self.db[self.collections["psychology"]].create_index("timestamp")
-        await self.db[self.collections["psychology"]].create_index([("user_id", 1), ("timestamp", -1)])
+        await self.db[self.collections["psychology"]].create_index(
+            [("user_id", 1), ("timestamp", -1)]
+        )
 
         # Memory fragments indexes
         await self.db[self.collections["memory"]].create_index("user_id")
@@ -248,7 +265,9 @@ class UnifiedCompanionDatabase:
         await self.db[self.collections["memory"]].create_index("importance_score")
         await self.db[self.collections["memory"]].create_index("last_accessed")
         await self.db[self.collections["memory"]].create_index("tags")
-        await self.db[self.collections["memory"]].create_index([("user_id", 1), ("importance_score", -1)])
+        await self.db[self.collections["memory"]].create_index(
+            [("user_id", 1), ("importance_score", -1)]
+        )
 
     # User Profile Operations
     async def create_user_profile(self, user_profile: UserProfile) -> bool:
@@ -271,20 +290,19 @@ class UnifiedCompanionDatabase:
                     last_active=doc["last_active"],
                     display_name=doc.get("display_name"),
                     preferences=doc.get("preferences", {}),
-                    adaptive_profile=doc.get("adaptive_profile", {})
+                    adaptive_profile=doc.get("adaptive_profile", {}),
                 )
             return None
         except Exception as e:
             self.logger.error(f"Error getting user profile: {e}")
             return None
 
-    async def update_user_profile(self, user_id: str, updates: Dict[str, Any]) -> bool:
+    async def update_user_profile(self, user_id: str, updates: dict[str, Any]) -> bool:
         """Update user profile"""
         try:
             updates["last_active"] = datetime.now()
             result = await self.db[self.collections["users"]].update_one(
-                {"user_id": user_id},
-                {"$set": updates}
+                {"user_id": user_id}, {"$set": updates}
             )
             return result.modified_count > 0
         except Exception as e:
@@ -295,18 +313,25 @@ class UnifiedCompanionDatabase:
     async def save_interaction(self, interaction: InteractionRecord) -> bool:
         """Save an interaction record"""
         try:
-            result = await self.db[self.collections["interactions"]].insert_one(interaction.to_dict())
+            result = await self.db[self.collections["interactions"]].insert_one(
+                interaction.to_dict()
+            )
             return result.inserted_id is not None
         except Exception as e:
             self.logger.error(f"Error saving interaction: {e}")
             return False
 
-    async def get_recent_interactions(self, user_id: str, limit: int = 20) -> List[InteractionRecord]:
+    async def get_recent_interactions(
+        self, user_id: str, limit: int = 20
+    ) -> list[InteractionRecord]:
         """Get recent interactions for a user"""
         try:
-            cursor = self.db[self.collections["interactions"]].find(
-                {"user_id": user_id}
-            ).sort("timestamp", -1).limit(limit)
+            cursor = (
+                self.db[self.collections["interactions"]]
+                .find({"user_id": user_id})
+                .sort("timestamp", -1)
+                .limit(limit)
+            )
 
             interactions = []
             async for doc in cursor:
@@ -323,7 +348,7 @@ class UnifiedCompanionDatabase:
                     technical_context=doc["technical_context"],
                     creative_context=doc["creative_context"],
                     guidance_used=doc["guidance_used"],
-                    response_metrics=doc["response_metrics"]
+                    response_metrics=doc["response_metrics"],
                 )
                 interactions.append(interaction)
 
@@ -332,12 +357,14 @@ class UnifiedCompanionDatabase:
             self.logger.error(f"Error getting recent interactions: {e}")
             return []
 
-    async def get_session_interactions(self, session_id: str) -> List[InteractionRecord]:
+    async def get_session_interactions(self, session_id: str) -> list[InteractionRecord]:
         """Get all interactions for a specific session"""
         try:
-            cursor = self.db[self.collections["interactions"]].find(
-                {"session_id": session_id}
-            ).sort("timestamp", 1)
+            cursor = (
+                self.db[self.collections["interactions"]]
+                .find({"session_id": session_id})
+                .sort("timestamp", 1)
+            )
 
             interactions = []
             async for doc in cursor:
@@ -354,7 +381,7 @@ class UnifiedCompanionDatabase:
                     technical_context=doc["technical_context"],
                     creative_context=doc["creative_context"],
                     guidance_used=doc["guidance_used"],
-                    response_metrics=doc["response_metrics"]
+                    response_metrics=doc["response_metrics"],
                 )
                 interactions.append(interaction)
 
@@ -373,12 +400,11 @@ class UnifiedCompanionDatabase:
             self.logger.error(f"Error creating session: {e}")
             return False
 
-    async def update_session(self, session_id: str, updates: Dict[str, Any]) -> bool:
+    async def update_session(self, session_id: str, updates: dict[str, Any]) -> bool:
         """Update session record"""
         try:
             result = await self.db[self.collections["sessions"]].update_one(
-                {"session_id": session_id},
-                {"$set": updates}
+                {"session_id": session_id}, {"$set": updates}
             )
             return result.modified_count > 0
         except Exception as e:
@@ -398,7 +424,7 @@ class UnifiedCompanionDatabase:
                     total_interactions=doc["total_interactions"],
                     primary_focuses=doc["primary_focuses"],
                     emotional_trajectory=doc["emotional_trajectory"],
-                    session_summary=doc["session_summary"]
+                    session_summary=doc["session_summary"],
                 )
             return None
         except Exception as e:
@@ -419,8 +445,7 @@ class UnifiedCompanionDatabase:
         """Get latest psychological state for user"""
         try:
             doc = await self.db[self.collections["psychology"]].find_one(
-                {"user_id": user_id},
-                sort=[("timestamp", -1)]
+                {"user_id": user_id}, sort=[("timestamp", -1)]
             )
             if doc:
                 return PsychologicalState(
@@ -433,20 +458,24 @@ class UnifiedCompanionDatabase:
                     technical_confidence=doc["technical_confidence"],
                     support_needs=doc["support_needs"],
                     risk_factors=doc["risk_factors"],
-                    growth_indicators=doc["growth_indicators"]
+                    growth_indicators=doc["growth_indicators"],
                 )
             return None
         except Exception as e:
             self.logger.error(f"Error getting psychological state: {e}")
             return None
 
-    async def get_psychological_trend(self, user_id: str, days: int = 30) -> List[PsychologicalState]:
+    async def get_psychological_trend(
+        self, user_id: str, days: int = 30
+    ) -> list[PsychologicalState]:
         """Get psychological state trend over time"""
         try:
             start_date = datetime.now() - timedelta(days=days)
-            cursor = self.db[self.collections["psychology"]].find(
-                {"user_id": user_id, "timestamp": {"$gte": start_date}}
-            ).sort("timestamp", 1)
+            cursor = (
+                self.db[self.collections["psychology"]]
+                .find({"user_id": user_id, "timestamp": {"$gte": start_date}})
+                .sort("timestamp", 1)
+            )
 
             states = []
             async for doc in cursor:
@@ -460,7 +489,7 @@ class UnifiedCompanionDatabase:
                     technical_confidence=doc["technical_confidence"],
                     support_needs=doc["support_needs"],
                     risk_factors=doc["risk_factors"],
-                    growth_indicators=doc["growth_indicators"]
+                    growth_indicators=doc["growth_indicators"],
                 )
                 states.append(state)
 
@@ -479,8 +508,9 @@ class UnifiedCompanionDatabase:
             self.logger.error(f"Error saving memory fragment: {e}")
             return False
 
-    async def get_relevant_memories(self, user_id: str, memory_type: str = None,
-                                  tags: List[str] = None, limit: int = 10) -> List[MemoryFragment]:
+    async def get_relevant_memories(
+        self, user_id: str, memory_type: str = None, tags: list[str] = None, limit: int = 10
+    ) -> list[MemoryFragment]:
         """Get relevant memory fragments for context"""
         try:
             query = {"user_id": user_id}
@@ -491,9 +521,12 @@ class UnifiedCompanionDatabase:
             if tags:
                 query["tags"] = {"$in": tags}
 
-            cursor = self.db[self.collections["memory"]].find(query).sort(
-                "importance_score", -1
-            ).limit(limit)
+            cursor = (
+                self.db[self.collections["memory"]]
+                .find(query)
+                .sort("importance_score", -1)
+                .limit(limit)
+            )
 
             memories = []
             async for doc in cursor:
@@ -507,7 +540,7 @@ class UnifiedCompanionDatabase:
                     last_accessed=doc["last_accessed"],
                     access_count=doc["access_count"],
                     related_interactions=doc["related_interactions"],
-                    tags=doc["tags"]
+                    tags=doc["tags"],
                 )
                 memories.append(memory)
 
@@ -521,10 +554,7 @@ class UnifiedCompanionDatabase:
         try:
             result = await self.db[self.collections["memory"]].update_one(
                 {"memory_id": memory_id},
-                {
-                    "$set": {"last_accessed": datetime.now()},
-                    "$inc": {"access_count": 1}
-                }
+                {"$set": {"last_accessed": datetime.now()}, "$inc": {"access_count": 1}},
             )
             return result.modified_count > 0
         except Exception as e:
@@ -532,7 +562,7 @@ class UnifiedCompanionDatabase:
             return False
 
     # Analytics Operations
-    async def get_user_analytics(self, user_id: str, days: int = 30) -> Dict[str, Any]:
+    async def get_user_analytics(self, user_id: str, days: int = 30) -> dict[str, Any]:
         """Get user interaction analytics"""
         try:
             start_date = datetime.now() - timedelta(days=days)
@@ -540,26 +570,30 @@ class UnifiedCompanionDatabase:
             # Interaction count by type
             interaction_pipeline = [
                 {"$match": {"user_id": user_id, "timestamp": {"$gte": start_date}}},
-                {"$group": {"_id": "$interaction_type", "count": {"$sum": 1}}}
+                {"$group": {"_id": "$interaction_type", "count": {"$sum": 1}}},
             ]
 
             interaction_stats = {}
-            async for doc in self.db[self.collections["interactions"]].aggregate(interaction_pipeline):
+            async for doc in self.db[self.collections["interactions"]].aggregate(
+                interaction_pipeline
+            ):
                 interaction_stats[doc["_id"]] = doc["count"]
 
             # Emotional state trends
             emotional_pipeline = [
                 {"$match": {"user_id": user_id, "timestamp": {"$gte": start_date}}},
                 {"$sort": {"timestamp": 1}},
-                {"$project": {"timestamp": 1, "emotional_indicators": 1}}
+                {"$project": {"timestamp": 1, "emotional_indicators": 1}},
             ]
 
             emotional_trend = []
             async for doc in self.db[self.collections["psychology"]].aggregate(emotional_pipeline):
-                emotional_trend.append({
-                    "timestamp": doc["timestamp"],
-                    "emotional_indicators": doc["emotional_indicators"]
-                })
+                emotional_trend.append(
+                    {
+                        "timestamp": doc["timestamp"],
+                        "emotional_indicators": doc["emotional_indicators"],
+                    }
+                )
 
             return {
                 "user_id": user_id,
@@ -567,7 +601,7 @@ class UnifiedCompanionDatabase:
                 "interaction_statistics": interaction_stats,
                 "emotional_trend": emotional_trend,
                 "total_interactions": sum(interaction_stats.values()),
-                "generated_at": datetime.now()
+                "generated_at": datetime.now(),
             }
 
         except Exception as e:

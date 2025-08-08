@@ -6,24 +6,25 @@ Focuses on testing what can be realistically tested given the current architectu
 """
 
 import asyncio
-import tempfile
-import shutil
-from pathlib import Path
-from datetime import datetime, date, timedelta
-from typing import Dict, Any, List
 import json
-import sys
 import os
+import shutil
+import sys
+import tempfile
+from datetime import date, datetime, timedelta
+from pathlib import Path
+from typing import Any, Dict, List
 
 # Add the parent directory to sys.path to import our modules
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from memory.recall_engine import TrueRecallEngine, MemoryEvent
-from memory.memory_graph import MemoryGraph
-from memory.salience_scoring import SalienceScorer
 from memory.emotion_tagger import EmotionTagger
+from memory.memory_graph import MemoryGraph
+from memory.recall_engine import MemoryEvent, TrueRecallEngine
 from memory.reflection_agent import ReflectionAgent
+from memory.salience_scoring import SalienceScorer
 from memory.storage.memory_store import MemoryStore
+
 
 class TestEmotionTagger:
     """Test the emotion tagging system."""
@@ -38,7 +39,16 @@ class TestEmotionTagger:
         assert len(self.tagger.emotion_lexicon) > 0
 
         # Test emotion lexicon contains expected emotions
-        required_emotions = ['joy', 'sadness', 'anger', 'fear', 'trust', 'disgust', 'surprise', 'anticipation']
+        required_emotions = [
+            "joy",
+            "sadness",
+            "anger",
+            "fear",
+            "trust",
+            "disgust",
+            "surprise",
+            "anticipation",
+        ]
         for emotion in required_emotions:
             assert emotion in self.tagger.emotion_lexicon
             assert len(self.tagger.emotion_lexicon[emotion]) > 0
@@ -53,10 +63,11 @@ class TestEmotionTagger:
 
     def test_tone_patterns_exist(self):
         """Test that tone patterns are defined."""
-        assert hasattr(self.tagger, 'tone_patterns')
+        assert hasattr(self.tagger, "tone_patterns")
         assert isinstance(self.tagger.tone_patterns, dict)
-        assert 'positive' in self.tagger.tone_patterns
-        assert 'negative' in self.tagger.tone_patterns
+        assert "positive" in self.tagger.tone_patterns
+        assert "negative" in self.tagger.tone_patterns
+
 
 class TestSalienceScorer:
     """Test the salience scoring system."""
@@ -68,16 +79,17 @@ class TestSalienceScorer:
     def test_initialization(self):
         """Test that salience scorer initializes correctly."""
         assert self.scorer is not None
-        assert hasattr(self.scorer, 'weights')
+        assert hasattr(self.scorer, "weights")
         assert isinstance(self.scorer.weights, dict)
 
     def test_weight_configuration(self):
         """Test that weights are properly configured."""
-        expected_weights = ['emotion_intensity', 'recency', 'content_type', 'actor_significance']
+        expected_weights = ["emotion_intensity", "recency", "content_type", "actor_significance"]
         for weight in expected_weights:
             assert weight in self.scorer.weights
             assert isinstance(self.scorer.weights[weight], (int, float))
             assert 0 <= self.scorer.weights[weight] <= 1
+
 
 class TestMemoryStore:
     """Test the memory storage system."""
@@ -89,45 +101,44 @@ class TestMemoryStore:
 
         try:
             # Test memory store creation
-            memory_store = MemoryStore(temp_dir, {
-                'use_sqlite': True,
-                'use_jsonl': True,
-                'auto_backup': False
-            })
+            memory_store = MemoryStore(
+                temp_dir, {"use_sqlite": True, "use_jsonl": True, "auto_backup": False}
+            )
             await memory_store.initialize()
 
             # Test event storage
             event_data = {
-                'id': 'test_event_001',
-                'timestamp': datetime.now().isoformat(),
-                'actor': 'user',
-                'event_type': 'test',
-                'content': 'Test event for storage verification',
-                'tone': 'neutral',
-                'emotion_tags': ['calm'],
-                'salience': 0.5,
-                'related_ids': [],
-                'metadata': {'test': True}
+                "id": "test_event_001",
+                "timestamp": datetime.now().isoformat(),
+                "actor": "user",
+                "event_type": "test",
+                "content": "Test event for storage verification",
+                "tone": "neutral",
+                "emotion_tags": ["calm"],
+                "salience": 0.5,
+                "related_ids": [],
+                "metadata": {"test": True},
             }
 
             success = await memory_store.store_event(event_data)
             assert success
 
             # Test event retrieval
-            events = await memory_store.retrieve_events(event_ids=['test_event_001'])
+            events = await memory_store.retrieve_events(event_ids=["test_event_001"])
             assert len(events) == 1
-            assert events[0]['id'] == 'test_event_001'
-            assert events[0]['content'] == 'Test event for storage verification'
+            assert events[0]["id"] == "test_event_001"
+            assert events[0]["content"] == "Test event for storage verification"
 
             # Test storage stats
             stats = await memory_store.get_storage_stats()
-            assert 'total_events' in stats
-            assert stats['total_events'] >= 1
+            assert "total_events" in stats
+            assert stats["total_events"] >= 1
 
             await memory_store.close()
 
         finally:
             shutil.rmtree(temp_dir)
+
 
 class TestTrueRecallEngine:
     """Test the main True Recall engine."""
@@ -140,11 +151,8 @@ class TestTrueRecallEngine:
         try:
             # Initialize the engine with correct config format
             config = {
-                'storage_path': temp_dir,
-                'storage_config': {
-                    'use_sqlite': True,
-                    'use_jsonl': True
-                }
+                "storage_path": temp_dir,
+                "storage_config": {"use_sqlite": True, "use_jsonl": True},
             }
 
             engine = TrueRecallEngine(config)
@@ -154,20 +162,20 @@ class TestTrueRecallEngine:
 
             # Test event recording
             await engine.record_event(
-                actor='user',
-                event_type='thought',
-                content='Testing the True Recall system with this thought'
+                actor="user",
+                event_type="thought",
+                content="Testing the True Recall system with this thought",
             )
 
             # Test event recall
             recent_events = await engine.recall_events(limit=5)
             assert len(recent_events) == 1
-            assert recent_events[0].content == 'Testing the True Recall system with this thought'
+            assert recent_events[0].content == "Testing the True Recall system with this thought"
 
             # Test daily reflection
             daily_reflection = await engine.reflect_on_day()
             print(f"Daily reflection keys: {list(daily_reflection.keys())}")
-            assert 'summary' in daily_reflection
+            assert "summary" in daily_reflection
             # The reflection should have some content, so let's just check that
             assert len(daily_reflection) > 0
 
@@ -181,6 +189,7 @@ class TestTrueRecallEngine:
         finally:
             shutil.rmtree(temp_dir)
 
+
 class TestReflectionAgent:
     """Test the reflection agent system."""
 
@@ -190,11 +199,9 @@ class TestReflectionAgent:
         temp_dir = tempfile.mkdtemp()
 
         try:
-            memory_store = MemoryStore(temp_dir, {
-                'use_sqlite': True,
-                'use_jsonl': False,
-                'auto_backup': False
-            })
+            memory_store = MemoryStore(
+                temp_dir, {"use_sqlite": True, "use_jsonl": False, "auto_backup": False}
+            )
             await memory_store.initialize()
 
             memory_graph = MemoryGraph(memory_store)
@@ -204,14 +211,15 @@ class TestReflectionAgent:
             tomorrow = date.today() + timedelta(days=1)
             reflection = await reflection_agent.generate_daily_reflection(tomorrow)
 
-            assert 'summary' in reflection
-            assert 'date' in reflection
-            assert reflection['reflection_type'] == 'minimal'
+            assert "summary" in reflection
+            assert "date" in reflection
+            assert reflection["reflection_type"] == "minimal"
 
             await memory_store.close()
 
         finally:
             shutil.rmtree(temp_dir)
+
 
 class TestIntegration:
     """Integration tests for the complete system."""
@@ -223,11 +231,8 @@ class TestIntegration:
         try:
             # Initialize the complete system with correct config format
             config = {
-                'storage_path': temp_dir,
-                'storage_config': {
-                    'use_sqlite': True,
-                    'use_jsonl': True
-                }
+                "storage_path": temp_dir,
+                "storage_config": {"use_sqlite": True, "use_jsonl": True},
             }
 
             engine = TrueRecallEngine(config)
@@ -235,20 +240,16 @@ class TestIntegration:
 
             # Record a series of events
             events_to_record = [
-                ('user', 'thought', 'Starting my day with planning'),
-                ('user', 'observation', 'The weather looks good today'),
-                ('user', 'decision', 'I will focus on my project today'),
-                ('user', 'achievement', 'Successfully completed a milestone'),
-                ('user', 'reflection', 'Today was productive')
+                ("user", "thought", "Starting my day with planning"),
+                ("user", "observation", "The weather looks good today"),
+                ("user", "decision", "I will focus on my project today"),
+                ("user", "achievement", "Successfully completed a milestone"),
+                ("user", "reflection", "Today was productive"),
             ]
 
             # Record events
             for actor, event_type, content in events_to_record:
-                await engine.record_event(
-                    actor=actor,
-                    event_type=event_type,
-                    content=content
-                )
+                await engine.record_event(actor=actor, event_type=event_type, content=content)
 
             # Test recall functionality
             all_events = await engine.recall_events(limit=10)
@@ -256,11 +257,11 @@ class TestIntegration:
 
             # Test emotional timeline
             timeline = await engine.get_emotional_timeline(days=1)
-            assert 'timeline' in timeline
+            assert "timeline" in timeline
 
             # Test daily reflection
             daily_reflection = await engine.reflect_on_day()
-            assert 'summary' in daily_reflection
+            assert "summary" in daily_reflection
 
             # Test identity continuity analysis
             identity_analysis = await engine.get_identity_continuity(days=1)
@@ -273,6 +274,7 @@ class TestIntegration:
 
         finally:
             shutil.rmtree(temp_dir)
+
 
 # Test runner functions
 def run_basic_tests():
@@ -307,6 +309,7 @@ def run_basic_tests():
 
     print("\n🎯 Basic tests completed!")
 
+
 async def run_async_tests():
     """Run async tests that require storage setup."""
     print("\n📍 Testing Storage and Integration...")
@@ -335,9 +338,11 @@ async def run_async_tests():
     except Exception as e:
         print(f"❌ Async tests failed: {e}")
         import traceback
+
         traceback.print_exc()
 
     print("\n🎉 All tests completed successfully!")
+
 
 # Main test execution
 if __name__ == "__main__":
@@ -351,5 +356,7 @@ if __name__ == "__main__":
     asyncio.run(run_async_tests())
 
     print("\n✨ Test suite execution complete!")
-    print("📊 All components tested: Emotion Analysis, Salience Scoring, Memory Storage, Reflection Agent, Integration")
+    print(
+        "📊 All components tested: Emotion Analysis, Salience Scoring, Memory Storage, Reflection Agent, Integration"
+    )
     print("🚀 True Recall system is ready for deployment!")

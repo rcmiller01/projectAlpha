@@ -2,14 +2,16 @@
 # Visual mood-driven avatar system with romantic expressions
 
 import json
-import time
+import math
 import threading
-from typing import Dict, List, Optional, Tuple, Any
+import time
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
+
 import numpy as np
-import math
+
 
 class AvatarExpression(Enum):
     HAPPY = "happy"

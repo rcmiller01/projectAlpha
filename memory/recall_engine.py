@@ -7,37 +7,40 @@ a unified API for memory operations.
 """
 
 import asyncio
-import logging
 import json
-from typing import Dict, Any, List, Optional, Union
+import logging
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from dataclasses import dataclass, asdict
+from typing import Any, Dict, List, Optional, Union
 
-from .memory_graph import MemoryGraph
-from .salience_scoring import SalienceScorer
 from .emotion_tagger import EmotionTagger
+from .memory_graph import MemoryGraph
 from .reflection_agent import ReflectionAgent
+from .salience_scoring import SalienceScorer
 from .storage.memory_store import MemoryStore
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class MemoryEvent:
     """Represents a single memory event in the True Recall system."""
+
     id: str
     timestamp: str
     actor: str  # "user" or "dolphin" or "system"
     event_type: str  # "decision", "observation", "emotion", "question", "reflection"
     content: str
     tone: str
-    emotion_tags: List[str]
+    emotion_tags: list[str]
     salience: float
-    related_ids: List[str]
-    metadata: Dict[str, Any] = None
+    related_ids: list[str]
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
+
 
 class TrueRecallEngine:
     """
@@ -48,20 +51,19 @@ class TrueRecallEngine:
     for emotionally intelligent AI agents.
     """
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] = None):
         """Initialize the True Recall engine."""
         self.config = config or {}
 
         # Initialize subsystems
-        storage_path = self.config.get('storage_path', 'memory_data')
-        storage_config = self.config.get('storage_config', {})
+        storage_path = self.config.get("storage_path", "memory_data")
+        storage_config = self.config.get("storage_config", {})
         self.memory_store = MemoryStore(storage_path, storage_config)
         self.memory_graph = MemoryGraph(self.memory_store)
-        self.salience_scorer = SalienceScorer(self.config.get('salience', {}))
-        self.emotion_tagger = EmotionTagger(self.config.get('emotion', {}))
+        self.salience_scorer = SalienceScorer(self.config.get("salience", {}))
+        self.emotion_tagger = EmotionTagger(self.config.get("emotion", {}))
         self.reflection_agent = ReflectionAgent(
-            self.memory_graph,
-            self.config.get('reflection', {})
+            self.memory_graph, self.config.get("reflection", {})
         )
 
         # System state
@@ -70,12 +72,14 @@ class TrueRecallEngine:
 
         logger.info("🧠 True Recall engine initialized")
 
-    async def record_event(self,
-                          actor: str,
-                          event_type: str,
-                          content: str,
-                          related_context: Optional[List[str]] = None,
-                          metadata: Optional[Dict[str, Any]] = None) -> MemoryEvent:
+    async def record_event(
+        self,
+        actor: str,
+        event_type: str,
+        content: str,
+        related_context: Optional[list[str]] = None,
+        metadata: Optional[dict[str, Any]] = None,
+    ) -> MemoryEvent:
         """
         Record a new memory event with full processing.
 
@@ -118,11 +122,11 @@ class TrueRecallEngine:
                 actor=actor,
                 event_type=event_type,
                 content=content,
-                tone=emotion_analysis.get('tone', 'neutral'),
-                emotion_tags=emotion_analysis.get('emotions', []),
+                tone=emotion_analysis.get("tone", "neutral"),
+                emotion_tags=emotion_analysis.get("emotions", []),
                 salience=salience_score,
                 related_ids=related_ids,
-                metadata=metadata or {}
+                metadata=metadata or {},
             )
 
             # Store the event
@@ -138,14 +142,16 @@ class TrueRecallEngine:
             logger.error(f"❌ Failed to record event: {e}")
             raise
 
-    async def recall_events(self,
-                           query: str = None,
-                           actor: str = None,
-                           event_type: str = None,
-                           emotion_tags: List[str] = None,
-                           time_range: tuple = None,
-                           min_salience: float = 0.0,
-                           limit: int = 20) -> List[MemoryEvent]:
+    async def recall_events(
+        self,
+        query: str = None,
+        actor: str = None,
+        event_type: str = None,
+        emotion_tags: list[str] = None,
+        time_range: tuple = None,
+        min_salience: float = 0.0,
+        limit: int = 20,
+    ) -> list[MemoryEvent]:
         """
         Recall events based on various criteria.
 
@@ -171,7 +177,7 @@ class TrueRecallEngine:
                 emotion_tags=emotion_tags,
                 time_range=time_range,
                 min_salience=min_salience,
-                limit=limit
+                limit=limit,
             )
 
             logger.info(f"📚 Found {len(events)} matching events")
@@ -181,10 +187,9 @@ class TrueRecallEngine:
             logger.error(f"❌ Failed to recall events: {e}")
             return []
 
-    async def recall_context(self,
-                           reference_event_id: str,
-                           context_window: int = 5,
-                           time_window_hours: int = 24) -> Dict[str, Any]:
+    async def recall_context(
+        self, reference_event_id: str, context_window: int = 5, time_window_hours: int = 24
+    ) -> dict[str, Any]:
         """
         Recall contextual events around a reference event.
 
@@ -201,7 +206,7 @@ class TrueRecallEngine:
 
             reference_event = await self.memory_graph.get_event(reference_event_id)
             if not reference_event:
-                return {'reference_event': None, 'context': []}
+                return {"reference_event": None, "context": []}
 
             # Get temporal context
             ref_time = datetime.fromisoformat(reference_event.timestamp)
@@ -213,26 +218,22 @@ class TrueRecallEngine:
             )
 
             # Get related events
-            related_events = await self.memory_graph.get_related_events(
-                reference_event_id, depth=2
-            )
+            related_events = await self.memory_graph.get_related_events(reference_event_id, depth=2)
 
             return {
-                'reference_event': reference_event,
-                'temporal_context': context_events,
-                'related_events': related_events,
-                'context_summary': await self._generate_context_summary(
+                "reference_event": reference_event,
+                "temporal_context": context_events,
+                "related_events": related_events,
+                "context_summary": await self._generate_context_summary(
                     reference_event, context_events, related_events
-                )
+                ),
             }
 
         except Exception as e:
             logger.error(f"❌ Failed to recall context: {e}")
-            return {'reference_event': None, 'context': []}
+            return {"reference_event": None, "context": []}
 
-    async def get_emotional_timeline(self,
-                                   days: int = 7,
-                                   actor: str = None) -> Dict[str, Any]:
+    async def get_emotional_timeline(self, days: int = 7, actor: str = None) -> dict[str, Any]:
         """
         Generate an emotional timeline showing mood patterns over time.
 
@@ -250,9 +251,7 @@ class TrueRecallEngine:
             start_time = end_time - timedelta(days=days)
 
             events = await self.recall_events(
-                actor=actor,
-                time_range=(start_time, end_time),
-                limit=1000
+                actor=actor, time_range=(start_time, end_time), limit=1000
             )
 
             timeline = await self.emotion_tagger.generate_emotional_timeline(
@@ -265,7 +264,7 @@ class TrueRecallEngine:
             logger.error(f"❌ Failed to generate emotional timeline: {e}")
             return {}
 
-    async def reflect_on_day(self, target_date: datetime = None) -> Dict[str, Any]:
+    async def reflect_on_day(self, target_date: datetime = None) -> dict[str, Any]:
         """
         Generate a daily reflection summary for a specific date.
 
@@ -290,14 +289,14 @@ class TrueRecallEngine:
                 await self.record_event(
                     actor="system",
                     event_type="reflection",
-                    content=reflection['summary'],
+                    content=reflection["summary"],
                     metadata={
-                        'reflection_type': 'daily',
-                        'target_date': target_date.isoformat(),
-                        'key_themes': reflection.get('key_themes', []),
-                        'emotional_summary': reflection.get('emotional_summary', {}),
-                        'salience_stats': reflection.get('salience_stats', {})
-                    }
+                        "reflection_type": "daily",
+                        "target_date": target_date.isoformat(),
+                        "key_themes": reflection.get("key_themes", []),
+                        "emotional_summary": reflection.get("emotional_summary", {}),
+                        "salience_stats": reflection.get("salience_stats", {}),
+                    },
                 )
 
             return reflection
@@ -306,7 +305,7 @@ class TrueRecallEngine:
             logger.error(f"❌ Failed to generate daily reflection: {e}")
             return {}
 
-    async def get_identity_continuity(self, days: int = 30) -> Dict[str, Any]:
+    async def get_identity_continuity(self, days: int = 30) -> dict[str, Any]:
         """
         Analyze identity continuity and self-awareness patterns.
 
@@ -323,23 +322,20 @@ class TrueRecallEngine:
             start_time = end_time - timedelta(days=days)
 
             # Get all events in the time range
-            events = await self.recall_events(
-                time_range=(start_time, end_time),
-                limit=2000
-            )
+            events = await self.recall_events(time_range=(start_time, end_time), limit=2000)
 
             # Analyze patterns
             continuity_analysis = {
-                'time_range': {
-                    'start': start_time.isoformat(),
-                    'end': end_time.isoformat(),
-                    'days': days
+                "time_range": {
+                    "start": start_time.isoformat(),
+                    "end": end_time.isoformat(),
+                    "days": days,
                 },
-                'event_statistics': self._analyze_event_patterns(events),
-                'emotional_patterns': await self._analyze_emotional_patterns(events),
-                'decision_patterns': self._analyze_decision_patterns(events),
-                'identity_themes': await self._extract_identity_themes(events),
-                'continuity_score': self._calculate_continuity_score(events)
+                "event_statistics": self._analyze_event_patterns(events),
+                "emotional_patterns": await self._analyze_emotional_patterns(events),
+                "decision_patterns": self._analyze_decision_patterns(events),
+                "identity_themes": await self._extract_identity_themes(events),
+                "continuity_score": self._calculate_continuity_score(events),
             }
 
             return continuity_analysis
@@ -353,26 +349,26 @@ class TrueRecallEngine:
         today = datetime.now().date()
         yesterday = today - timedelta(days=1)
 
-        if (self.last_reflection_date is None or
-            self.last_reflection_date < yesterday):
-
+        if self.last_reflection_date is None or self.last_reflection_date < yesterday:
             # Check if we have events from yesterday to reflect on
             events = await self.recall_events(
                 time_range=(
                     datetime.combine(yesterday, datetime.min.time()),
-                    datetime.combine(today, datetime.min.time())
+                    datetime.combine(today, datetime.min.time()),
                 ),
-                limit=100
+                limit=100,
             )
 
             if events:
                 await self.reflect_on_day(yesterday)
                 self.last_reflection_date = yesterday
 
-    async def _generate_context_summary(self,
-                                      reference_event: MemoryEvent,
-                                      context_events: List[MemoryEvent],
-                                      related_events: List[MemoryEvent]) -> str:
+    async def _generate_context_summary(
+        self,
+        reference_event: MemoryEvent,
+        context_events: list[MemoryEvent],
+        related_events: list[MemoryEvent],
+    ) -> str:
         """Generate a summary of the context around an event."""
         summary_parts = []
 
@@ -389,7 +385,7 @@ class TrueRecallEngine:
 
         return "; ".join(summary_parts)
 
-    def _analyze_event_patterns(self, events: List[MemoryEvent]) -> Dict[str, Any]:
+    def _analyze_event_patterns(self, events: list[MemoryEvent]) -> dict[str, Any]:
         """Analyze patterns in event data."""
         if not events:
             return {}
@@ -416,43 +412,54 @@ class TrueRecallEngine:
             total_salience += event.salience
 
         return {
-            'total_events': len(events),
-            'average_salience': total_salience / len(events),
-            'event_types': event_types,
-            'actors': actors,
-            'top_emotions': dict(sorted(emotions.items(), key=lambda x: x[1], reverse=True)[:10])
+            "total_events": len(events),
+            "average_salience": total_salience / len(events),
+            "event_types": event_types,
+            "actors": actors,
+            "top_emotions": dict(sorted(emotions.items(), key=lambda x: x[1], reverse=True)[:10]),
         }
 
-    async def _analyze_emotional_patterns(self, events: List[MemoryEvent]) -> Dict[str, Any]:
+    async def _analyze_emotional_patterns(self, events: list[MemoryEvent]) -> dict[str, Any]:
         """Analyze emotional patterns in the events."""
         return await self.emotion_tagger.analyze_emotional_patterns(events)
 
-    def _analyze_decision_patterns(self, events: List[MemoryEvent]) -> Dict[str, Any]:
+    def _analyze_decision_patterns(self, events: list[MemoryEvent]) -> dict[str, Any]:
         """Analyze decision-making patterns."""
-        decision_events = [e for e in events if e.event_type == 'decision']
+        decision_events = [e for e in events if e.event_type == "decision"]
 
         if not decision_events:
-            return {'decision_count': 0}
+            return {"decision_count": 0}
 
         # Analyze decision characteristics
         high_salience_decisions = [e for e in decision_events if e.salience > 0.7]
         emotional_decisions = [e for e in decision_events if len(e.emotion_tags) > 0]
 
         return {
-            'decision_count': len(decision_events),
-            'high_salience_decisions': len(high_salience_decisions),
-            'emotional_decisions': len(emotional_decisions),
-            'average_decision_salience': sum(e.salience for e in decision_events) / len(decision_events)
+            "decision_count": len(decision_events),
+            "high_salience_decisions": len(high_salience_decisions),
+            "emotional_decisions": len(emotional_decisions),
+            "average_decision_salience": sum(e.salience for e in decision_events)
+            / len(decision_events),
         }
 
-    async def _extract_identity_themes(self, events: List[MemoryEvent]) -> List[str]:
+    async def _extract_identity_themes(self, events: list[MemoryEvent]) -> list[str]:
         """Extract recurring themes that relate to identity."""
         # This would use more sophisticated NLP in a full implementation
         # For now, we'll use simple keyword analysis
 
         identity_keywords = [
-            'identity', 'self', 'personality', 'character', 'values', 'beliefs',
-            'purpose', 'goals', 'dreams', 'fears', 'strengths', 'weaknesses'
+            "identity",
+            "self",
+            "personality",
+            "character",
+            "values",
+            "beliefs",
+            "purpose",
+            "goals",
+            "dreams",
+            "fears",
+            "strengths",
+            "weaknesses",
         ]
 
         themes = []
@@ -463,7 +470,7 @@ class TrueRecallEngine:
 
         return themes[:10]  # Top 10 themes
 
-    def _calculate_continuity_score(self, events: List[MemoryEvent]) -> float:
+    def _calculate_continuity_score(self, events: list[MemoryEvent]) -> float:
         """Calculate a continuity score based on event patterns."""
         if not events:
             return 0.0
@@ -475,21 +482,20 @@ class TrueRecallEngine:
 
         actor_consistency = len(set(e.actor for e in events)) / len(events)
         emotional_variety = len(set(tag for e in events for tag in e.emotion_tags))
-        decision_count = len([e for e in events if e.event_type == 'decision'])
+        decision_count = len([e for e in events if e.event_type == "decision"])
 
         # Normalize and combine factors
         continuity_score = (
-            (1 - actor_consistency) * 0.3 +  # Lower variety = higher continuity
-            min(emotional_variety / 20, 1.0) * 0.3 +  # Some emotional variety is good
-            min(decision_count / len(events) * 2, 1.0) * 0.4  # Active decision making
+            (1 - actor_consistency) * 0.3  # Lower variety = higher continuity
+            + min(emotional_variety / 20, 1.0) * 0.3  # Some emotional variety is good
+            + min(decision_count / len(events) * 2, 1.0) * 0.4  # Active decision making
         )
 
         return min(continuity_score, 1.0)
 
-    async def export_memory_snapshot(self,
-                                   start_date: datetime = None,
-                                   end_date: datetime = None,
-                                   format: str = 'json') -> Dict[str, Any]:
+    async def export_memory_snapshot(
+        self, start_date: datetime = None, end_date: datetime = None, format: str = "json"
+    ) -> dict[str, Any]:
         """Export a snapshot of memories for backup or analysis."""
         try:
             if end_date is None:
@@ -497,23 +503,14 @@ class TrueRecallEngine:
             if start_date is None:
                 start_date = end_date - timedelta(days=30)
 
-            events = await self.recall_events(
-                time_range=(start_date, end_date),
-                limit=10000
-            )
+            events = await self.recall_events(time_range=(start_date, end_date), limit=10000)
 
             snapshot = {
-                'export_timestamp': datetime.now().isoformat(),
-                'time_range': {
-                    'start': start_date.isoformat(),
-                    'end': end_date.isoformat()
-                },
-                'event_count': len(events),
-                'events': [asdict(event) for event in events],
-                'system_info': {
-                    'engine_version': '1.0.0',
-                    'export_format': format
-                }
+                "export_timestamp": datetime.now().isoformat(),
+                "time_range": {"start": start_date.isoformat(), "end": end_date.isoformat()},
+                "event_count": len(events),
+                "events": [asdict(event) for event in events],
+                "system_info": {"engine_version": "1.0.0", "export_format": format},
             }
 
             logger.info(f"📤 Exported memory snapshot: {len(events)} events")
@@ -523,30 +520,31 @@ class TrueRecallEngine:
             logger.error(f"❌ Failed to export memory snapshot: {e}")
             return {}
 
-    async def get_system_stats(self) -> Dict[str, Any]:
+    async def get_system_stats(self) -> dict[str, Any]:
         """Get comprehensive system statistics."""
         try:
             # Get basic stats
             stats = await self.memory_store.get_storage_stats()
-            total_events = stats.get('total_events', 0)
+            total_events = stats.get("total_events", 0)
             storage_stats = await self.memory_store.get_storage_stats()
 
             # Get recent activity
             recent_events = await self.recall_events(
-                time_range=(datetime.now() - timedelta(days=7), datetime.now()),
-                limit=1000
+                time_range=(datetime.now() - timedelta(days=7), datetime.now()), limit=1000
             )
 
             return {
-                'system_info': {
-                    'total_events': total_events,
-                    'storage_stats': storage_stats,
-                    'last_reflection': self.last_reflection_date.isoformat() if self.last_reflection_date else None
+                "system_info": {
+                    "total_events": total_events,
+                    "storage_stats": storage_stats,
+                    "last_reflection": self.last_reflection_date.isoformat()
+                    if self.last_reflection_date
+                    else None,
                 },
-                'recent_activity': self._analyze_event_patterns(recent_events),
-                'memory_graph_stats': await self.memory_graph.get_graph_stats(),
-                'emotion_stats': await self.emotion_tagger.get_emotion_stats(),
-                'salience_stats': await self.salience_scorer.get_scoring_stats()
+                "recent_activity": self._analyze_event_patterns(recent_events),
+                "memory_graph_stats": await self.memory_graph.get_graph_stats(),
+                "emotion_stats": await self.emotion_tagger.get_emotion_stats(),
+                "salience_stats": await self.salience_scorer.get_scoring_stats(),
             }
 
         except Exception as e:

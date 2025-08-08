@@ -4,17 +4,19 @@ Quantization Autopilot Integration Test
 Demonstrates the complete emotional quantization autopilot workflow
 """
 
-import time
 import json
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 # Fix Windows console encoding
-if sys.platform == 'win32':
+if sys.platform == "win32":
     import codecs
-    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
-    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+
+    sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer, "strict")
+    sys.stderr = codecs.getwriter("utf-8")(sys.stderr.buffer, "strict")
+
 
 def test_integrated_workflow():
     """Test the complete integrated workflow"""
@@ -24,11 +26,18 @@ def test_integrated_workflow():
 
     # Test 1: Check integration status
     print("\nTest 1: Integration Status")
-    result = subprocess.run([
-        "python", "emotion_quant_autopilot/quant_autopilot.py",
-        "--config", "emotion_quant_autopilot/autopilot_config.json",
-        "integration"
-    ], capture_output=True, text=True)
+    result = subprocess.run(
+        [
+            "python",
+            "emotion_quant_autopilot/quant_autopilot.py",
+            "--config",
+            "emotion_quant_autopilot/autopilot_config.json",
+            "integration",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
 
     if result.returncode == 0:
         print("[OK] Integration status check passed")
@@ -49,11 +58,13 @@ def test_integrated_workflow():
         result = quantize_model(
             base_model="test-model",
             quantization_method="q4_K_M",
-            config={"backend": "mock", "output_dir": "test_output"}
+            config={"backend": "mock", "output_dir": "test_output"},
         )
 
         if result.success:
-            print(f"   [OK] Quantizer: {result.model_size_mb:.1f}MB in {result.duration_seconds:.1f}s")
+            print(
+                f"   [OK] Quantizer: {result.model_size_mb:.1f}MB in {result.duration_seconds:.1f}s"
+            )
         else:
             print(f"   [FAIL] Quantizer failed: {result.error_message}")
 
@@ -69,11 +80,13 @@ def test_integrated_workflow():
             model_path="test_output/test-model_q4_K_M_20250729_120000.mock",
             base_model="test-model",
             quantization_method="q4_K_M",
-            config={"silent_mode": True, "evaluation_count": 5}
+            config={"silent_mode": True, "evaluation_count": 5},
         )
 
         if result.success:
-            print(f"   [OK] Judge: Score {result.judgment_score:.3f}, Notes: {result.reflection_notes[:50]}...")
+            print(
+                f"   [OK] Judge: Score {result.judgment_score:.3f}, Notes: {result.reflection_notes[:50]}..."
+            )
         else:
             print(f"   [FAIL] Judge failed: {result.error_message}")
 
@@ -97,7 +110,7 @@ def test_integrated_workflow():
             emotional_deviation=0.05,
             execution_time_minutes=10.0,
             success=True,
-            result_summary="Integration test"
+            result_summary="Integration test",
         )
 
         print(f"   [OK] Database: Logged run with ID {run_id}")
@@ -110,10 +123,7 @@ def test_integrated_workflow():
     try:
         from autopilot_state import AutopilotStateManager
 
-        state_mgr = AutopilotStateManager(
-            "test_state.json",
-            {"enable_watchdog": False}
-        )
+        state_mgr = AutopilotStateManager("test_state.json", {"enable_watchdog": False})
 
         state_mgr.start_autopilot("test_job", "test_run")
         status = state_mgr.get_status_summary()
@@ -128,11 +138,24 @@ def test_integrated_workflow():
     print("\nTest 3: End-to-End Workflow Simulation")
 
     # Add a test job
-    result = subprocess.run([
-        "python", "emotion_quant_autopilot/quant_autopilot.py",
-        "--config", "emotion_quant_autopilot/autopilot_config.json",
-        "add-job", "--model", "llama2-test", "--quant", "q6_K", "--priority", "1"
-    ], capture_output=True, text=True)
+    result = subprocess.run(
+        [
+            "python",
+            "emotion_quant_autopilot/quant_autopilot.py",
+            "--config",
+            "emotion_quant_autopilot/autopilot_config.json",
+            "add-job",
+            "--model",
+            "llama2-test",
+            "--quant",
+            "q6_K",
+            "--priority",
+            "1",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
 
     if result.returncode == 0:
         print("[OK] Test job added successfully")
@@ -142,11 +165,18 @@ def test_integrated_workflow():
         print(result.stderr)
 
     # Check queue
-    result = subprocess.run([
-        "python", "emotion_quant_autopilot/quant_autopilot.py",
-        "--config", "emotion_quant_autopilot/autopilot_config.json",
-        "queue"
-    ], capture_output=True, text=True)
+    result = subprocess.run(
+        [
+            "python",
+            "emotion_quant_autopilot/quant_autopilot.py",
+            "--config",
+            "emotion_quant_autopilot/autopilot_config.json",
+            "queue",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
 
     if result.returncode == 0:
         print("[OK] Queue status retrieved")
@@ -163,8 +193,12 @@ def test_integrated_workflow():
             config = json.load(f)
 
         required_sections = [
-            "idle_monitoring", "safety_limits", "evaluation_settings",
-            "output_paths", "notifications", "target_model_size_range_gb"
+            "idle_monitoring",
+            "safety_limits",
+            "evaluation_settings",
+            "output_paths",
+            "notifications",
+            "target_model_size_range_gb",
         ]
 
         missing_sections = [s for s in required_sections if s not in config]
@@ -173,7 +207,9 @@ def test_integrated_workflow():
             print("[OK] Configuration is complete")
             print(f"   Target size: {config['target_model_size_range_gb']}GB")
             print(f"   Max daily runs: {config.get('max_active_loops_per_day', 3)}")
-            print(f"   Evaluation prompts: {config['evaluation_settings']['evaluation_prompt_count']}")
+            print(
+                f"   Evaluation prompts: {config['evaluation_settings']['evaluation_prompt_count']}"
+            )
         else:
             print(f"[FAIL] Missing configuration sections: {missing_sections}")
     else:
@@ -187,10 +223,11 @@ def test_integrated_workflow():
 
     # Check 1: Components available
     try:
-        from quantize_model import ModelQuantizer
-        from judge_emotion import EmotionalJudge
-        from emotion_core_tracker import EmotionalQuantDatabase
         from autopilot_state import AutopilotStateManager
+        from emotion_core_tracker import EmotionalQuantDatabase
+        from judge_emotion import EmotionalJudge
+        from quantize_model import ModelQuantizer
+
         readiness_score += 1
         print("[OK] All components importable")
     except ImportError as e:
@@ -227,17 +264,25 @@ def test_integrated_workflow():
     # Check 5: Idle monitoring
     try:
         import psutil
+
         readiness_score += 1
         print("[OK] System monitoring available")
     except ImportError:
         print("[FAIL] System monitoring not available")
 
     # Check 6: CLI functionality
-    result = subprocess.run([
-        "python", "emotion_quant_autopilot/quant_autopilot.py",
-        "--config", "emotion_quant_autopilot/autopilot_config.json",
-        "status"
-    ], capture_output=True, text=True)
+    result = subprocess.run(
+        [
+            "python",
+            "emotion_quant_autopilot/quant_autopilot.py",
+            "--config",
+            "emotion_quant_autopilot/autopilot_config.json",
+            "status",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
 
     if result.returncode == 0:
         readiness_score += 1
@@ -247,12 +292,16 @@ def test_integrated_workflow():
 
     # Final assessment
     print("\n" + "=" * 60)
-    print(f"Integration Readiness: {readiness_score}/{total_checks} ({readiness_score/total_checks*100:.0f}%)")
+    print(
+        f"Integration Readiness: {readiness_score}/{total_checks} ({readiness_score/total_checks*100:.0f}%)"
+    )
 
     if readiness_score == total_checks:
         print("FULLY INTEGRATED - Ready for autonomous operation!")
         print("\nTo start autonomous quantization:")
-        print("   python emotion_quant_autopilot/quant_autopilot.py --config emotion_quant_autopilot/autopilot_config.json start")
+        print(
+            "   python emotion_quant_autopilot/quant_autopilot.py --config emotion_quant_autopilot/autopilot_config.json start"
+        )
     elif readiness_score >= total_checks * 0.8:
         print("MOSTLY INTEGRATED - Ready with minor limitations")
     elif readiness_score >= total_checks * 0.6:
@@ -269,6 +318,7 @@ def test_integrated_workflow():
     print("   6. System state persisted for crash recovery")
 
     return readiness_score == total_checks
+
 
 if __name__ == "__main__":
     success = test_integrated_workflow()

@@ -12,15 +12,15 @@ This module implements a meta-watcher that monitors Mirror's responsiveness
 and triggers Anchor intervention if Mirror becomes unresponsive.
 """
 
-import logging
-import time
-import threading
 import hashlib
+import logging
 import re
+import threading
+import time
+from collections import defaultdict, deque
 from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, Callable, Tuple
-from collections import deque, defaultdict
 from enum import Enum
+from typing import Any, Callable, Dict, Optional, Tuple
 
 # Enhanced logging configuration
 logging.basicConfig(

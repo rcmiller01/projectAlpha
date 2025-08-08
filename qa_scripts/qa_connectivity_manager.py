@@ -5,10 +5,12 @@ Tests connectivity monitoring, service detection, and offline/online routing fal
 """
 
 import asyncio
-import aiohttp
 import json
 import time
 from datetime import datetime
+
+import aiohttp
+
 
 class ConnectivityManagerQA:
     """Targeted testing for the Connectivity Manager"""
@@ -33,16 +35,16 @@ class ConnectivityManagerQA:
             async with self.session.get(f"{self.base_url}/api/connectivity/status") as response:
                 if response.status == 200:
                     data = await response.json()
-                    mode = data.get('current_mode', 'unknown')
-                    services = data.get('services', {})
+                    mode = data.get("current_mode", "unknown")
+                    services = data.get("services", {})
 
                     print(f"✅ Current connectivity mode: {mode}")
                     print(f"✅ Monitoring {len(services)} services:")
 
                     for service_id, service_data in services.items():
-                        status = "🟢" if service_data.get('available') else "🔴"
-                        name = service_data.get('name', service_id)
-                        uptime = service_data.get('uptime_percentage', 0)
+                        status = "🟢" if service_data.get("available") else "🔴"
+                        name = service_data.get("name", service_id)
+                        uptime = service_data.get("uptime_percentage", 0)
                         print(f"   {status} {name}: {uptime:.1f}% uptime")
 
                     return data
@@ -64,11 +66,11 @@ class ConnectivityManagerQA:
 
                     print(f"✅ Found {len(services)} monitored services:")
                     for service in services:
-                        service_id = service.get('id', 'unknown')
-                        name = service.get('name', 'Unknown')
-                        url = service.get('url', 'No URL')
-                        available = service.get('available', False)
-                        last_check = service.get('last_check', 'Never')
+                        service_id = service.get("id", "unknown")
+                        name = service.get("name", "Unknown")
+                        url = service.get("url", "No URL")
+                        available = service.get("available", False)
+                        last_check = service.get("last_check", "Never")
 
                         status_icon = "🟢" if available else "🔴"
                         print(f"   {status_icon} {name} ({service_id})")
@@ -88,16 +90,18 @@ class ConnectivityManagerQA:
         print("🔄 Forcing connectivity check...")
 
         try:
-            async with self.session.post(f"{self.base_url}/api/connectivity/force-check") as response:
+            async with self.session.post(
+                f"{self.base_url}/api/connectivity/force-check"
+            ) as response:
                 if response.status == 200:
                     data = await response.json()
                     print(f"✅ Connectivity check completed: {data.get('message')}")
 
                     # Show updated status
-                    results = data.get('results', {})
+                    results = data.get("results", {})
                     for service_id, result in results.items():
-                        status = "🟢" if result.get('available') else "🔴"
-                        response_time = result.get('response_time_ms', 'N/A')
+                        status = "🟢" if result.get("available") else "🔴"
+                        response_time = result.get("response_time_ms", "N/A")
                         print(f"   {status} {service_id}: {response_time}ms")
 
                     return data
@@ -113,19 +117,21 @@ class ConnectivityManagerQA:
         print("🧭 Testing routing adjustments...")
 
         try:
-            async with self.session.get(f"{self.base_url}/api/connectivity/routing-adjustments") as response:
+            async with self.session.get(
+                f"{self.base_url}/api/connectivity/routing-adjustments"
+            ) as response:
                 if response.status == 200:
                     data = await response.json()
-                    prefer_local = data.get('prefer_local', False)
-                    routing_reason = data.get('routing_reason', 'Unknown')
-                    adjustments = data.get('adjustments', {})
+                    prefer_local = data.get("prefer_local", False)
+                    routing_reason = data.get("routing_reason", "Unknown")
+                    adjustments = data.get("adjustments", {})
 
-                    print(f"✅ Routing preferences:")
+                    print("✅ Routing preferences:")
                     print(f"   Prefer Local: {prefer_local}")
                     print(f"   Reason: {routing_reason}")
 
                     if adjustments:
-                        print(f"   Active Adjustments:")
+                        print("   Active Adjustments:")
                         for adjustment, value in adjustments.items():
                             print(f"     • {adjustment}: {value}")
 
@@ -148,11 +154,12 @@ class ConnectivityManagerQA:
                 "name": "Test Unreachable Service",
                 "url": "http://definitely-unreachable-test-service.invalid",
                 "timeout": 1,
-                "critical": True
+                "critical": True,
             }
 
-            async with self.session.post(f"{self.base_url}/api/connectivity/add-service",
-                                       json=fake_service) as response:
+            async with self.session.post(
+                f"{self.base_url}/api/connectivity/add-service", json=fake_service
+            ) as response:
                 if response.status == 200:
                     print("✅ Added unreachable test service")
 
@@ -177,11 +184,11 @@ class ConnectivityManagerQA:
             async with self.session.get(f"{self.base_url}/api/connectivity/status") as response:
                 if response.status == 200:
                     data = await response.json()
-                    mode = data.get('current_mode', 'unknown')
-                    services = data.get('services', {})
+                    mode = data.get("current_mode", "unknown")
+                    services = data.get("services", {})
 
                     # Count failed services
-                    failed_services = [s for s in services.values() if not s.get('available', True)]
+                    failed_services = [s for s in services.values() if not s.get("available", True)]
                     total_services = len(services)
 
                     print(f"✅ Connectivity mode after simulation: {mode}")
@@ -208,20 +215,20 @@ class ConnectivityManagerQA:
             chat_data = {
                 "message": "Help me write a complex Python algorithm for sorting large datasets",
                 "session_id": self.session_id,
-                "persona": "technical"  # Technical persona prefers cloud AI
+                "persona": "technical",  # Technical persona prefers cloud AI
             }
 
             async with self.session.post(f"{self.base_url}/api/chat", json=chat_data) as response:
                 if response.status == 200:
                     data = await response.json()
-                    handler = data.get('handler', 'unknown')
-                    routing_reason = data.get('routing_reason', 'unknown')
+                    handler = data.get("handler", "unknown")
+                    routing_reason = data.get("routing_reason", "unknown")
 
                     print(f"✅ Chat routed to: {handler}")
                     print(f"✅ Routing reason: {routing_reason}")
 
                     # Check if it was routed locally due to connectivity issues
-                    if 'local' in handler.lower() or 'dolphin' in handler.lower():
+                    if "local" in handler.lower() or "dolphin" in handler.lower():
                         print("✅ Successfully fell back to local processing")
                         return True
                     else:
@@ -284,13 +291,15 @@ class ConnectivityManagerQA:
         print(f"✅ Routing Adjustments: {routing_data is not None}")
         print(f"✅ Failure Simulation: {failure_simulated}")
         print(f"✅ Offline Detection: {len(failed_services)} failures detected")
-        print(f"{'✅' if fallback_worked else '⚠️'} Fallback Routing: {'Working' if fallback_worked else 'Not clearly demonstrated'}")
+        print(
+            f"{'✅' if fallback_worked else '⚠️'} Fallback Routing: {'Working' if fallback_worked else 'Not clearly demonstrated'}"
+        )
 
         success_criteria = [
             initial_status is not None,
             len(services) > 0,
             force_check_result is not None,
-            routing_data is not None
+            routing_data is not None,
         ]
 
         if all(success_criteria):
@@ -300,6 +309,7 @@ class ConnectivityManagerQA:
             print("\n❌ Connectivity Manager QA: PARTIAL - Some features may need attention")
             return False
 
+
 async def main():
     """Main QA execution"""
     print("Starting Connectivity Manager QA...")
@@ -308,6 +318,7 @@ async def main():
     async with ConnectivityManagerQA() as qa:
         success = await qa.run_connectivity_qa_suite()
         return success
+
 
 if __name__ == "__main__":
     result = asyncio.run(main())
