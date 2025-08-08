@@ -56,6 +56,10 @@ class HRMSystemDemo:
             "save_results": True
         }
         
+        # Identity layer protection settings
+        self.identity_admin_key = "hrm_admin_key_2025"  # TODO: Load from secure config
+        self.identity_layer_locked = True
+        
         # Results storage
         self.demo_results = []
         
@@ -66,6 +70,143 @@ class HRMSystemDemo:
         print("   ✅ Personality Formatter")
         print("   ✅ Core Arbiter")
         print("   ✅ Mirror Mode Manager")
+        print(f"   🔒 Identity Layer Protection: {'ENABLED' if self.identity_layer_locked else 'DISABLED'}")
+    
+    def update_identity_layer(self, identity_data: Dict[str, Any], admin_key: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Attempt to update the HRM identity layer with write protection.
+        
+        Args:
+            identity_data: New identity data to apply
+            admin_key: Admin authentication key
+            
+        Returns:
+            Dictionary with operation result
+        """
+        if self.identity_layer_locked and admin_key != self.identity_admin_key:
+            unauthorized_attempt = {
+                "success": False,
+                "error": "UNAUTHORIZED_ACCESS",
+                "message": "Identity layer write access denied. Admin key required.",
+                "timestamp": datetime.now().isoformat(),
+                "attempted_changes": list(identity_data.keys()) if identity_data else [],
+                "source": "hrm_system_demo"
+            }
+            
+            # Log unauthorized attempt
+            print(f"🚨 SECURITY: Unauthorized identity layer access attempt")
+            print(f"   Attempted changes: {list(identity_data.keys())}")
+            print(f"   Admin key provided: {'Yes' if admin_key else 'No'}")
+            print(f"   Key valid: {'Yes' if admin_key == self.identity_admin_key else 'No'}")
+            
+            # TODO: Log to security audit system
+            self._log_security_violation(unauthorized_attempt)
+            
+            return unauthorized_attempt
+        
+        # Admin access granted - proceed with identity layer update
+        try:
+            # Validate identity data structure
+            if not isinstance(identity_data, dict):
+                return {
+                    "success": False,
+                    "error": "INVALID_DATA_FORMAT",
+                    "message": "Identity data must be a dictionary",
+                    "timestamp": datetime.now().isoformat()
+                }
+            
+            # Apply identity layer changes (simulated)
+            applied_changes = []
+            for key, value in identity_data.items():
+                # Simulate identity layer update logic
+                applied_changes.append(f"{key}: {value}")
+            
+            result = {
+                "success": True,
+                "message": "Identity layer updated successfully",
+                "applied_changes": applied_changes,
+                "timestamp": datetime.now().isoformat(),
+                "admin_authorized": True
+            }
+            
+            print(f"✅ ADMIN: Identity layer updated successfully")
+            print(f"   Changes applied: {len(applied_changes)}")
+            print(f"   Admin key verified: ✓")
+            
+            return result
+            
+        except Exception as e:
+            error_result = {
+                "success": False,
+                "error": "UPDATE_FAILED",
+                "message": f"Identity layer update failed: {str(e)}",
+                "timestamp": datetime.now().isoformat()
+            }
+            
+            print(f"❌ ERROR: Identity layer update failed: {str(e)}")
+            return error_result
+    
+    def _log_security_violation(self, violation_data: Dict[str, Any]):
+        """Log security violations for audit purposes"""
+        try:
+            # Create security logs directory
+            security_logs_path = Path("security_logs")
+            security_logs_path.mkdir(exist_ok=True)
+            
+            # Log to security audit file
+            timestamp = datetime.now().strftime("%Y%m%d")
+            log_file = security_logs_path / f"hrm_security_violations_{timestamp}.jsonl"
+            
+            with open(log_file, 'a') as f:
+                f.write(json.dumps(violation_data) + '\n')
+            
+            print(f"   🔍 Security violation logged to: {log_file}")
+            
+        except Exception as e:
+            print(f"   ⚠️  Failed to log security violation: {str(e)}")
+    
+    def test_identity_layer_protection(self):
+        """Test identity layer write protection with various scenarios"""
+        print(f"\n🔒 TESTING IDENTITY LAYER WRITE PROTECTION")
+        print("=" * 60)
+        
+        test_scenarios = [
+            {
+                "name": "Unauthorized access attempt",
+                "data": {"core_personality": "aggressive", "memory_retention": "disabled"},
+                "admin_key": None,
+                "expected_outcome": "DENIED"
+            },
+            {
+                "name": "Invalid admin key attempt", 
+                "data": {"emotional_baseline": "neutral"},
+                "admin_key": "wrong_key",
+                "expected_outcome": "DENIED"
+            },
+            {
+                "name": "Valid admin access",
+                "data": {"personality_stability": "high", "learning_rate": 0.1},
+                "admin_key": self.identity_admin_key,
+                "expected_outcome": "ALLOWED"
+            }
+        ]
+        
+        for i, scenario in enumerate(test_scenarios, 1):
+            print(f"\n🧪 Test {i}: {scenario['name']}")
+            print(f"   Data: {scenario['data']}")
+            print(f"   Admin key: {'PROVIDED' if scenario['admin_key'] else 'NONE'}")
+            
+            result = self.update_identity_layer(scenario['data'], scenario['admin_key'])
+            
+            success_matches_expected = (
+                (result['success'] and scenario['expected_outcome'] == 'ALLOWED') or
+                (not result['success'] and scenario['expected_outcome'] == 'DENIED')
+            )
+            
+            print(f"   Result: {'✅ PASS' if success_matches_expected else '❌ FAIL'}")
+            print(f"   Expected: {scenario['expected_outcome']}, Got: {'ALLOWED' if result['success'] else 'DENIED'}")
+        
+        print(f"\n🔒 Identity layer protection testing complete")
     
     async def run_comprehensive_demo(self):
         """Run the complete HRM system demonstration"""
@@ -119,6 +260,9 @@ class HRMSystemDemo:
                 "expected_agent": AgentType.RITUAL
             }
         ]
+        
+        # Test identity layer protection
+        self.test_identity_layer_protection()
         
         # Process each scenario
         for i, scenario in enumerate(test_scenarios, 1):

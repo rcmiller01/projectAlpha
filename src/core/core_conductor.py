@@ -281,6 +281,17 @@ class CoreConductor:
         self.operation_count = 0
         self.last_validation = datetime.now()
         
+        # Safe-mode configuration for meta-watchdog failures
+        self.safe_mode_enabled = False
+        self.safe_mode_reason = None
+        self.safe_mode_timestamp = None
+        self.watchdog_failure_count = 0
+        self.max_watchdog_failures = 3
+        self.safe_mode_operations = set([
+            "get_status", "basic_generate", "emergency_shutdown", 
+            "validate_session", "check_safety"
+        ])
+        
         # Register conductor-specific tools
         self._register_conductor_tools()
         
@@ -411,6 +422,12 @@ class CoreConductor:
             ValueError: If the specified role is not available or session is invalid
         """
         try:
+            # Check safe-mode restrictions first
+            allowed, reason = self.check_safe_mode_restriction("generate")
+            if not allowed:
+                logger.warning(f"Generate operation blocked by safe-mode: {reason}")
+                return self.safe_mode_generate(prompt, context)
+            
             # Validate session
             if not self.validate_session(session_token):
                 log_conductor_activity("generate", session_token or self.session_token, 
@@ -829,6 +846,164 @@ class CoreConductor:
     def save_state(self) -> bool:
         """Save conductor state and memory"""
         return self.hrm_router.save_all()
+    
+    def handle_meta_watchdog_failure(self, failure_reason: str, failure_context: Dict[str, Any] = None) -> bool:
+        """
+        Handle meta-watchdog failure by enabling safe-mode behavior.
+        
+        Args:
+            failure_reason: Reason for the watchdog failure
+            failure_context: Additional context about the failure
+            
+        Returns:
+            True if safe-mode was enabled successfully
+        """
+        try:
+            with self._lock:
+                self.watchdog_failure_count += 1
+                
+                logger.warning(f"Meta-watchdog failure detected (count: {self.watchdog_failure_count}): {failure_reason}")
+                
+                # Enable safe-mode if failure threshold reached
+                if self.watchdog_failure_count >= self.max_watchdog_failures:
+                    self.safe_mode_enabled = True
+                    self.safe_mode_reason = failure_reason
+                    self.safe_mode_timestamp = datetime.now()
+                    
+                    log_conductor_activity("safe_mode_enabled", self.session_token, {
+                        "reason": failure_reason,
+                        "failure_count": self.watchdog_failure_count,
+                        "context": failure_context or {}
+                    }, "watchdog_failure")
+                    
+                    logger.critical(f"Conductor entering safe-mode due to repeated meta-watchdog failures: {failure_reason}")
+                    return True
+                else:
+                    logger.warning(f"Meta-watchdog failure recorded. Safe-mode threshold not reached ({self.watchdog_failure_count}/{self.max_watchdog_failures})")
+                    return False
+                    
+        except Exception as e:
+            logger.error(f"Error handling meta-watchdog failure: {e}")
+            # Force safe-mode on error handling failure
+            self.safe_mode_enabled = True
+            self.safe_mode_reason = f"Error handling watchdog failure: {str(e)}"
+            self.safe_mode_timestamp = datetime.now()
+            return True
+    
+    def check_safe_mode_restriction(self, operation: str) -> tuple[bool, str]:
+        """
+        Check if an operation is allowed in safe-mode.
+        
+        Args:
+            operation: Name of the operation to check
+            
+        Returns:
+            Tuple of (allowed, reason_if_blocked)
+        """
+        if not self.safe_mode_enabled:
+            return True, ""
+        
+        if operation in self.safe_mode_operations:
+            return True, ""
+        
+        return False, f"Operation '{operation}' blocked by safe-mode (reason: {self.safe_mode_reason})"
+    
+    def get_safe_mode_status(self) -> Dict[str, Any]:
+        """Get current safe-mode status and configuration."""
+        return {
+            "safe_mode_enabled": self.safe_mode_enabled,
+            "safe_mode_reason": self.safe_mode_reason,
+            "safe_mode_timestamp": self.safe_mode_timestamp.isoformat() if self.safe_mode_timestamp else None,
+            "watchdog_failure_count": self.watchdog_failure_count,
+            "max_watchdog_failures": self.max_watchdog_failures,
+            "allowed_operations": list(self.safe_mode_operations),
+            "can_exit_safe_mode": self.watchdog_failure_count < self.max_watchdog_failures
+        }
+    
+    def try_exit_safe_mode(self, admin_override: bool = False) -> tuple[bool, str]:
+        """
+        Attempt to exit safe-mode if conditions are met.
+        
+        Args:
+            admin_override: Administrative override to force exit
+            
+        Returns:
+            Tuple of (success, message)
+        """
+        if not self.safe_mode_enabled:
+            return True, "Not in safe-mode"
+        
+        try:
+            with self._lock:
+                # Check if conditions allow safe-mode exit
+                if admin_override:
+                    self.safe_mode_enabled = False
+                    self.safe_mode_reason = None
+                    self.safe_mode_timestamp = None
+                    self.watchdog_failure_count = 0
+                    
+                    log_conductor_activity("safe_mode_exit", self.session_token, {
+                        "method": "admin_override"
+                    })
+                    
+                    logger.info("Safe-mode disabled via administrative override")
+                    return True, "Safe-mode disabled via admin override"
+                
+                # Check if enough time has passed and failure count is acceptable
+                if self.safe_mode_timestamp:
+                    time_in_safe_mode = datetime.now() - self.safe_mode_timestamp
+                    if time_in_safe_mode.total_seconds() > 300:  # 5 minutes minimum
+                        if self.watchdog_failure_count < self.max_watchdog_failures:
+                            self.safe_mode_enabled = False
+                            self.safe_mode_reason = None
+                            self.safe_mode_timestamp = None
+                            
+                            log_conductor_activity("safe_mode_exit", self.session_token, {
+                                "method": "automatic",
+                                "time_in_safe_mode": time_in_safe_mode.total_seconds()
+                            })
+                            
+                            logger.info("Safe-mode automatically disabled after recovery period")
+                            return True, "Safe-mode disabled after recovery period"
+                
+                return False, "Safe-mode exit conditions not met"
+                
+        except Exception as e:
+            logger.error(f"Error attempting to exit safe-mode: {e}")
+            return False, f"Error during safe-mode exit: {str(e)}"
+    
+    def safe_mode_generate(self, prompt: str, context: Optional[Dict[str, Any]] = None) -> str:
+        """
+        Generate a safe, limited response when in safe-mode.
+        
+        Args:
+            prompt: Input prompt
+            context: Optional context
+            
+        Returns:
+            Safe-mode response
+        """
+        try:
+            safe_response = f"""[SAFE-MODE ACTIVE]
+Reason: {self.safe_mode_reason}
+Time in safe-mode: {datetime.now() - self.safe_mode_timestamp if self.safe_mode_timestamp else 'unknown'}
+
+Limited response: The conductor is currently operating in safe-mode due to meta-watchdog failures. 
+Only essential operations are available. Please check system status and consider administrative intervention.
+
+Original prompt (truncated): {prompt[:100]}...
+"""
+            
+            log_conductor_activity("safe_mode_generate", self.session_token, {
+                "prompt_length": len(prompt),
+                "response_type": "safe_mode_limited"
+            })
+            
+            return safe_response
+            
+        except Exception as e:
+            logger.error(f"Error in safe-mode generation: {e}")
+            return f"[SAFE-MODE ERROR] Unable to generate safe response: {str(e)}"
 
 
 def example_conductor_usage():

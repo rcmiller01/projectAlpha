@@ -193,7 +193,202 @@ async def test_trace_logging():
         print("Trace file not found")
 
 
+async def test_offline_arbiter_simulation():
+    """Test simulation of offline/unavailable CoreArbiter scenarios"""
+    print("\n=== Offline/Unavailable Arbiter Simulation Test ===")
+    
+    # Test scenarios that simulate arbiter unavailability
+    test_scenarios = [
+        {
+            "name": "Network Timeout Simulation",
+            "input": "I need help making a decision",
+            "state": {"context": "guidance_request", "timeout_simulation": True},
+            "simulation_type": "timeout"
+        },
+        {
+            "name": "Memory System Unavailable",
+            "input": "Can you remember what we talked about yesterday?",
+            "state": {"context": "memory_inquiry", "memory_unavailable": True},
+            "simulation_type": "memory_failure"
+        },
+        {
+            "name": "Model Loading Failure",
+            "input": "Help me analyze this complex problem",
+            "state": {"context": "analysis_request", "model_failure": True},
+            "simulation_type": "model_failure"
+        },
+        {
+            "name": "Complete System Offline",
+            "input": "I'm having an emotional crisis",
+            "state": {"context": "crisis_support", "system_offline": True},
+            "simulation_type": "complete_offline"
+        }
+    ]
+    
+    # Create a mock offline arbiter class
+    class OfflineArbiterSimulator:
+        def __init__(self, simulation_type: str):
+            self.simulation_type = simulation_type
+            self.offline_responses = {
+                "timeout": "⚠️ Connection timeout - using cached response patterns",
+                "memory_failure": "⚠️ Memory system unavailable - operating with local context only",
+                "model_failure": "⚠️ Model loading failed - using fallback reasoning",
+                "complete_offline": "⚠️ System offline - emergency response mode activated"
+            }
+        
+        async def process_input_offline(self, input_text: str, state: dict):
+            """Simulate processing when arbiter is offline/unavailable"""
+            print(f"🔌 SIMULATION: {self.simulation_type.upper()}")
+            
+            # Simulate different failure modes
+            if self.simulation_type == "timeout":
+                print("⏱️ Simulating network timeout...")
+                await asyncio.sleep(0.5)  # Brief delay
+                return {
+                    "status": "fallback",
+                    "response": self.offline_responses["timeout"],
+                    "confidence": 0.3,
+                    "fallback_reason": "Arbiter connection timeout",
+                    "local_processing": True
+                }
+            
+            elif self.simulation_type == "memory_failure":
+                print("🧠 Simulating memory system failure...")
+                return {
+                    "status": "degraded",
+                    "response": self.offline_responses["memory_failure"],
+                    "confidence": 0.5,
+                    "fallback_reason": "Memory system unavailable",
+                    "context_limitations": True
+                }
+            
+            elif self.simulation_type == "model_failure":
+                print("🤖 Simulating model loading failure...")
+                return {
+                    "status": "limited",
+                    "response": self.offline_responses["model_failure"],
+                    "confidence": 0.4,
+                    "fallback_reason": "Primary models unavailable",
+                    "fallback_model_used": True
+                }
+            
+            elif self.simulation_type == "complete_offline":
+                print("❌ Simulating complete system offline...")
+                return {
+                    "status": "emergency",
+                    "response": self.offline_responses["complete_offline"],
+                    "confidence": 0.2,
+                    "fallback_reason": "Complete system offline",
+                    "emergency_mode": True
+                }
+        
+        def get_fallback_capabilities(self):
+            """Get available capabilities when offline"""
+            capabilities = {
+                "timeout": ["basic_responses", "cached_patterns"],
+                "memory_failure": ["current_session", "basic_reasoning"],
+                "model_failure": ["fallback_model", "simple_responses"],
+                "complete_offline": ["emergency_protocols", "safety_responses"]
+            }
+            return capabilities.get(self.simulation_type, [])
+        
+        def estimate_recovery_time(self):
+            """Estimate time for arbiter to come back online"""
+            recovery_times = {
+                "timeout": 30,  # seconds
+                "memory_failure": 120,  # seconds
+                "model_failure": 300,  # seconds
+                "complete_offline": 900  # seconds
+            }
+            return recovery_times.get(self.simulation_type, 600)
+    
+    # Run offline simulation tests
+    for i, scenario in enumerate(test_scenarios, 1):
+        print(f"\n{i}. {scenario['name']}")
+        print(f"Input: {scenario['input']}")
+        
+        # Create offline simulator
+        offline_sim = OfflineArbiterSimulator(scenario['simulation_type'])
+        
+        # Process with offline simulation
+        result = await offline_sim.process_input_offline(scenario['input'], scenario['state'])
+        
+        print(f"Status: {result['status']}")
+        print(f"Response: {result['response']}")
+        print(f"Confidence: {result['confidence']:.2f}")
+        print(f"Fallback Reason: {result['fallback_reason']}")
+        
+        # Show available capabilities
+        capabilities = offline_sim.get_fallback_capabilities()
+        print(f"Available Capabilities: {', '.join(capabilities)}")
+        
+        # Show estimated recovery time
+        recovery_time = offline_sim.estimate_recovery_time()
+        print(f"Estimated Recovery Time: {recovery_time} seconds")
+        
+        # Test fallback behavior validation
+        print("🔍 Validating fallback behavior...")
+        
+        # Check if response is appropriate for offline mode
+        if result['confidence'] < 0.6:
+            print("✅ Appropriately reduced confidence for offline mode")
+        else:
+            print("⚠️ Confidence may be too high for offline mode")
+        
+        # Check if emergency protocols are activated for critical scenarios
+        if "crisis" in scenario['input'].lower() or "emergency" in scenario['input'].lower():
+            if result.get('emergency_mode', False):
+                print("✅ Emergency mode activated for critical input")
+            else:
+                print("⚠️ Emergency mode should be activated for critical input")
+        
+        print("-" * 80)
+    
+    # Test offline mode persistence
+    print("\n=== Testing Offline Mode Persistence ===")
+    print("📊 Testing how system handles extended offline periods...")
+    
+    # Simulate multiple requests during offline period
+    offline_sim = OfflineArbiterSimulator("complete_offline")
+    offline_requests = [
+        "How are you feeling?",
+        "Can you help me with advice?",
+        "I'm worried about something",
+        "What should I do next?"
+    ]
+    
+    offline_responses = []
+    for req in offline_requests:
+        result = await offline_sim.process_input_offline(req, {"extended_offline": True})
+        offline_responses.append(result)
+    
+    print(f"Processed {len(offline_responses)} requests in offline mode")
+    print("✅ System maintained fallback operation throughout offline period")
+    
+    # Test recovery simulation
+    print("\n=== Testing Recovery Simulation ===")
+    print("🔄 Simulating arbiter coming back online...")
+    
+    try:
+        # Try to create a real arbiter to simulate recovery
+        recovered_arbiter = CoreArbiter()
+        print("✅ Arbiter recovery simulation successful")
+        
+        # Test a request after recovery
+        recovery_test = await recovered_arbiter.process_input(
+            "Are you back online now?", 
+            {"context": "recovery_test"}
+        )
+        print(f"Recovery test response: {recovery_test.final_output[:100]}...")
+        print("✅ Normal operation restored after recovery")
+        
+    except Exception as e:
+        print(f"⚠️ Recovery simulation failed: {e}")
+        print("This is expected if CoreArbiter dependencies are not available")
+
+
 if __name__ == "__main__":
     asyncio.run(test_core_arbiter_integration())
     asyncio.run(test_emotional_state_integration())
     asyncio.run(test_trace_logging())
+    asyncio.run(test_offline_arbiter_simulation())

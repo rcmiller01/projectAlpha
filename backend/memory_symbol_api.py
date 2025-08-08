@@ -314,6 +314,7 @@ def log_request_info():
     logger.info(f"Incoming request: {request.method} {request.url} - Headers: {dict(request.headers)}")
 
 @app.route('/api/memory/emotional_trace', methods=['GET'])
+@rate_limit
 def get_emotional_trace():
     """Get emotional memory trace"""
     auth_response = authenticate_request()
@@ -336,6 +337,7 @@ def get_emotional_trace():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/memory/add_entry', methods=['POST'])
+@rate_limit
 def add_memory_entry():
     """Add new emotional memory entry"""
     auth_response = authenticate_request()
@@ -379,6 +381,7 @@ def add_memory_entry():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/symbols/active', methods=['GET'])
+@rate_limit
 def get_symbolic_map():
     """Get active symbolic map"""
     auth_response = authenticate_request()
@@ -401,6 +404,7 @@ def get_symbolic_map():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/symbols/invoke', methods=['POST'])
+@rate_limit
 def invoke_symbol():
     """Record symbol invocation"""
     auth_response = authenticate_request()
@@ -463,6 +467,7 @@ def invoke_symbol():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/anchor/state', methods=['GET'])
+@rate_limit
 def get_anchor_state():
     """Get current anchor/identity state"""
     auth_response = authenticate_request()
@@ -476,6 +481,7 @@ def get_anchor_state():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/anchor/adjust', methods=['POST'])
+@rate_limit
 def adjust_anchor_baseline():
     """Adjust anchor baseline values"""
     auth_response = authenticate_request()
@@ -571,6 +577,7 @@ def adjust_anchor_baseline():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/anchor/simulate_drift', methods=['POST'])
+@rate_limit
 def simulate_drift():
     """Simulate natural drift for demonstration purposes"""
     auth_response = authenticate_request()
@@ -620,6 +627,7 @@ def simulate_drift():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/memory/query', methods=['POST'])
+@rate_limit
 def query_memory():
     """Endpoint to query memory with context window smoothing."""
     auth_response = authenticate_request()
@@ -654,6 +662,7 @@ def smooth_context_window(results, query, window_size=5):
     return filtered_results[:window_size]
 
 @app.route('/api/health', methods=['GET'])
+@rate_limit
 def health_check():
     """Health check endpoint"""
     return jsonify({

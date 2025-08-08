@@ -56,12 +56,37 @@ def load_anchor_weights(config_path: str = 'config/anchor_settings.json') -> Dic
         }
 
 
+def load_affective_config(config_path: str = 'config/anchor_settings.json') -> Dict[str, float]:
+    """Load affective delta configuration from JSON file.
+    
+    Args:
+        config_path: Path to the anchor settings JSON file
+        
+    Returns:
+        Dictionary of affective delta settings
+    """
+    try:
+        with open(config_path, 'r') as f:
+            cfg = json.load(f)
+            affective_config = cfg.get('affective_delta', {})
+            logger.info(f"Loaded affective delta config from {config_path}: {affective_config}")
+            return affective_config
+    except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
+        logger.warning(f"Failed to load affective delta config from {config_path}: {e}")
+        logger.info("Using default affective delta configuration")
+        return {
+            'drift_scaling_factor': float(os.getenv('AFFECTIVE_DRIFT_SCALING', '0.1')),
+            'max_penalty_threshold': float(os.getenv('AFFECTIVE_MAX_PENALTY', '0.3'))
+        }
+
+
 class AnchorAIInterface:
     """Enhanced interface to communicate with Anchor AI, loading real configuration."""
     
     def __init__(self, config_path: str = 'config/anchor_settings.json'):
         self.config_path = config_path
         self.anchor_weights = load_anchor_weights(config_path)
+        self.affective_config = load_affective_config(config_path)
     
     def parse_reflection_insights(self, insights_path='emotion_logs/anchor_insights.json'):
         """
@@ -71,8 +96,13 @@ class AnchorAIInterface:
             insights_path: Path to the anchor insights JSON file
             
         Returns:
-            float: Penalty score (0.0 to 0.3) based on emotional drift
+            float: Penalty score based on emotional drift (configurable thresholds)
         """
+        # Reload configuration to get latest settings
+        self.affective_config = load_affective_config(self.config_path)
+        drift_scaling_factor = self.affective_config.get('drift_scaling_factor', 0.1)
+        max_penalty_threshold = self.affective_config.get('max_penalty_threshold', 0.3)
+        
         try:
             # Handle relative paths
             if not os.path.isabs(insights_path):
@@ -100,17 +130,20 @@ class AnchorAIInterface:
                 if seed_key.lower() in ['faith', 'love', 'compassion', 'hope']:
                     emotion_weight = 1.5  # Sacred emotions get higher penalty weight
                 
-                penalty += drift_score * 0.1 * emotion_weight  # Adjust scaling factor as needed
+                # Use configurable drift scaling factor instead of hardcoded 0.1
+                penalty += drift_score * drift_scaling_factor * emotion_weight
                 drift_count += 1
                 
                 logger.info(f"[AnchorAI] Emotional drift detected for '{seed_key}': "
-                          f"{drift_score:.3f} drift, {violations}/{mentions} violations")
+                          f"{drift_score:.3f} drift, {violations}/{mentions} violations "
+                          f"(scaling_factor={drift_scaling_factor})")
 
         if drift_count > 0:
             logger.warning(f"[AnchorAI] Total emotional drift penalty: {penalty:.3f} "
-                         f"across {drift_count} emotions")
+                         f"across {drift_count} emotions (max_threshold={max_penalty_threshold})")
 
-        return round(min(penalty, 0.3), 3)  # Cap penalty at 30%
+        # Use configurable max penalty threshold instead of hardcoded 0.3
+        return round(min(penalty, max_penalty_threshold), 3)
         
     def score_alignment(self, candidate: QuantizationCandidate) -> float:
         """Return alignment score based on real anchor configuration."""
