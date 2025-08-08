@@ -5,22 +5,46 @@ Anchor System - Safety and Approval Mechanism
 This module implements the Anchor system that prevents uncontrolled autopilot
 actions by requiring confirmation before external or core memory changes.
 
-Enhanced with security features:
+Enhanced with security features and dry-run support:
 - Confirmation requirement for all anchor actions
 - Rate limiting for approval requests
 - Comprehensive audit logging
 - Input validation and sanitization
+- Dry-run mode for safe testing
 """
 
 import hashlib
 import logging
+import os
 import re
+import sys
 import threading
 import time
 from collections import defaultdict, deque
 from datetime import datetime, timedelta
 from enum import Enum
+from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+# Add project root to path for imports
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+# Import dry-run utilities
+try:
+    from common.dryrun import dry_log, is_dry_run
+
+    DRY_RUN_AVAILABLE = True
+except ImportError:
+    print("Warning: Dry-run utilities not available")
+    DRY_RUN_AVAILABLE = False
+
+    def is_dry_run():
+        return False
+
+    def dry_log(logger, event, details):
+        pass
+
 
 # Enhanced logging configuration
 logging.basicConfig(
@@ -221,7 +245,7 @@ class AnchorSystem:
         self, autopilot_action: dict[str, Any], requester_id: str = "autopilot"
     ) -> AnchorResponse:
         """
-        Request confirmation for an autopilot action with enhanced security.
+        Request confirmation for an autopilot action with enhanced security and dry-run support.
 
         Args:
             autopilot_action (Dict[str, Any]): Action details requiring approval
@@ -231,6 +255,21 @@ class AnchorSystem:
             AnchorResponse: Approval decision
         """
         start_time = time.time()
+
+        # Check dry-run mode first
+        dry = is_dry_run()
+        if dry:
+            dry_log(
+                logger,
+                "anchor.confirm.simulated",
+                {
+                    "proposed": str(autopilot_action)[:256],
+                    "requester": requester_id,
+                    "action_type": autopilot_action.get("action_type", "unknown"),
+                },
+            )
+            # Return simulated approval with metadata
+            return AnchorResponse.APPROVED
 
         try:
             with anchor_lock:

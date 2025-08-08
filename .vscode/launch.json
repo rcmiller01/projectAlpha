@@ -1,0 +1,67 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: HRM API (Debug)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/backend/hrm_api.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+                "DRY_RUN_MODE": "true",
+                "LOG_LEVEL": "DEBUG"
+            }
+        },
+        {
+            "name": "Python: HRM Router (Debug)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/backend/hrm_router.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+                "DRY_RUN_MODE": "true",
+                "LOG_LEVEL": "DEBUG"
+            }
+        },
+        {
+            "name": "Python: Test HRM Policy",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "tests/test_hrm_policy.py",
+                "-v",
+                "--tb=short"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+                "TEST_MODE": "true",
+                "DRY_RUN_MODE": "true"
+            }
+        },
+        {
+            "name": "Python: Test MoE Arbitration",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "tests/test_moe_arbitration.py",
+                "-v",
+                "--tb=short"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+                "TEST_MODE": "true",
+                "DRY_RUN_MODE": "true"
+            }
+        }
+    ]
+}

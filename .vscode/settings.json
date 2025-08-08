@@ -1,0 +1,51 @@
+{
+    "python.analysis.typeCheckingMode": "strict",
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.completeFunctionParens": true,
+    "python.analysis.diagnosticMode": "workspace",
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
+    "python.linting.flake8Enabled": true,
+    "python.linting.mypyEnabled": true,
+    "python.linting.lintOnSave": true,
+    "python.formatting.provider": "black",
+    "python.formatting.blackArgs": [
+        "--line-length",
+        "88"
+    ],
+    "python.defaultInterpreterPath": "./venv/Scripts/python.exe",
+    "files.associations": {
+        "*.yaml": "yaml",
+        "*.yml": "yaml"
+    },
+    "editor.rulers": [
+        88
+    ],
+    "editor.formatOnSave": true,
+    "python.analysis.extraPaths": [
+        "./src",
+        "./backend",
+        "./hrm",
+        "./agents"
+    ],
+    "python.analysis.stubPath": "./typings",
+    "search.exclude": {
+        "**/__pycache__": true,
+        "**/node_modules": true,
+        "**/*.pyc": true,
+        "**/logs": true,
+        "**/data": true
+    },
+    "terminal.integrated.env.windows": {
+        "DRY_RUN": "true",
+        "PYTHONPATH": "${workspaceFolder}"
+    },
+    "terminal.integrated.env.linux": {
+        "DRY_RUN": "true",
+        "PYTHONPATH": "${workspaceFolder}"
+    },
+    "terminal.integrated.env.osx": {
+        "DRY_RUN": "true",
+        "PYTHONPATH": "${workspaceFolder}"
+    }
+}
