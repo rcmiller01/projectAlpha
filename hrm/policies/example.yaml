@@ -1,0 +1,34 @@
+# hrm/policies/example.yaml
+rules:
+  - layer: identity
+    action: read
+    allow: true
+    requires_admin: false
+    reason: "Identity is readable."
+
+  - layer: identity
+    action: write
+    allow: false
+    requires_admin: true
+    reason: "Identity is admin-controlled and effectively immutable."
+
+  - layer: beliefs
+    action: write
+    allow: true
+    requires_admin: false
+    requires_evidence: true
+    reason: "Beliefs require evidence + provenance."
+
+  - layer: beliefs
+    action: read
+    allow: true
+
+  - layer: ephemeral
+    action: write
+    allow: true
+    ttl_seconds: 604800  # 7 days
+    reason: "Ephemeral memories auto-expire."
+
+  - layer: ephemeral
+    action: read
+    allow: true

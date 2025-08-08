@@ -286,7 +286,7 @@ def store_model_checksum(model_path: str, checksum: str) -> bool:
         return False
 
 
-def get_model_info(model: ModelInterface) -> dict[str, Any]:
+def get_model_info(model: "ModelInterface") -> dict[str, Any]:
     """Get comprehensive model information including verification status."""
     info = {
         "model_type": type(model).__name__,
@@ -634,6 +634,23 @@ def get_moe_configuration() -> dict[str, Any]:
     }
 
 
+def _resolve_conductor_default_model() -> str:
+    """Resolve default conductor model honoring GPT-5 Preview flag."""
+    try:
+        from config.settings import is_feature_enabled, get_settings
+
+        if is_feature_enabled("gpt5_preview"):
+            settings = get_settings()
+            model = getattr(settings, "GPT5_PREVIEW_MODEL", None) or "gpt-5-preview"
+            logger.info(f"GPT-5 Preview enabled. Using conductor default: {model}")
+            return model
+    except Exception as e:
+        logger.warning(f"Could not resolve GPT-5 preview setting, falling back to standard default: {e}")
+
+    # Standard fallback default if feature disabled or config unavailable
+    return "gpt-oss-20b"
+
+
 def load_conductor_models(use_moe: bool = True) -> dict[str, Any]:
     """
     Load all standard conductor models with role-specific defaults.
@@ -648,8 +665,10 @@ def load_conductor_models(use_moe: bool = True) -> dict[str, Any]:
     logger.info("Loading conductor model suite...")
 
     # Standard models
+    conductor_default = _resolve_conductor_default_model()
+
     models = {
-        "conductor": load_model("CONDUCTOR_MODEL", "gpt-oss-20b"),
+        "conductor": load_model("CONDUCTOR_MODEL", conductor_default),
         "logic": load_model("LOGIC_MODEL", "deepseek-coder:1.3b"),
         "emotion": load_model("EMOTION_MODEL", "mistral:7b"),
         "creative": load_model("CREATIVE_MODEL", "mixtral:8x7b"),
@@ -678,9 +697,11 @@ def load_slim_models() -> dict[str, ModelInterface]:
     """
     logger.info("Loading SLiM agent model suite...")
 
+    conductor_default = _resolve_conductor_default_model()
+
     models = {
         # Main conductor
-        "conductor": load_model("CONDUCTOR_MODEL", "gpt-oss-20b"),
+        "conductor": load_model("CONDUCTOR_MODEL", conductor_default),
         # Left Brain (Logic) SLiMs - 4 agents
         "logic_high": load_model("LOGIC_HIGH_MODEL", "phi4-mini-reasoning:3.8b"),
         "logic_code": load_model("LOGIC_CODE_MODEL", "qwen2.5-coder:3b"),
@@ -708,9 +729,11 @@ def load_all_models() -> dict[str, ModelInterface]:
     """
     logger.info("Loading complete model suite (Conductor + SLiMs)...")
 
+    conductor_default = _resolve_conductor_default_model()
+
     models = {
         # Main conductor
-        "conductor": load_model("CONDUCTOR_MODEL", "gpt-oss-20b"),
+        "conductor": load_model("CONDUCTOR_MODEL", conductor_default),
         # Legacy role mappings for backward compatibility
         "logic": load_model("LOGIC_MODEL", "deepseek-coder:1.3b"),
         "emotion": load_model("EMOTION_MODEL", "mistral:7b"),
@@ -733,8 +756,8 @@ def load_all_models() -> dict[str, ModelInterface]:
     return models
 
 
-def get_model_info(model: ModelInterface) -> dict[str, Any]:
-    """Get information about a loaded model"""
+def get_model_basic_info(model) -> dict[str, Any]:
+    """Get basic information about a loaded model (used in example_usage)."""
     info = {"type": type(model).__name__, "available": True}
 
     if hasattr(model, "model_name"):
@@ -761,15 +784,15 @@ def example_usage():
     conductor_model = load_model("CONDUCTOR_MODEL", "llama3.1:8b")
     logic_model = load_model("LOGIC_MODEL", "deepseek-coder:1.3b")
 
-    print(f"   Conductor model: {get_model_info(conductor_model)}")
-    print(f"   Logic model: {get_model_info(logic_model)}")
+    print(f"   Conductor model: {get_model_basic_info(conductor_model)}")
+    print(f"   Logic model: {get_model_basic_info(logic_model)}")
 
     # Load complete conductor suite
     print("\n2. Loading conductor model suite:")
     models = load_conductor_models()
 
     for role, model in models.items():
-        info = get_model_info(model)
+        info = get_model_basic_info(model)
         print(f"   {role}: {info['type']} ({info.get('model_name', 'unknown')})")
 
     # Test model generation

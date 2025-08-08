@@ -54,6 +54,12 @@ class ProjectAlphaSettings(BaseModel):
     EMOTION_LOOP_ENABLED: bool = Field(default=True, description="Enable emotional processing loop")
     AUTOPILOT_ENABLED: bool = Field(default=True, description="Enable autopilot mode")
     SAFE_MODE_FORCE: bool = Field(default=False, description="Force safe mode (kill switch)")
+    GPT5_PREVIEW_ENABLED: bool = Field(
+        default=True, description="Enable GPT-5 (Preview) model routing for all clients"
+    )
+    GPT5_PREVIEW_MODEL: Optional[str] = Field(
+        default="gpt-5-preview", description="Model identifier to use when GPT-5 preview is enabled"
+    )
 
     # === Security Configuration ===
     ADMIN_MASTER_KEY: Optional[str] = Field(
@@ -170,6 +176,8 @@ def load_settings() -> ProjectAlphaSettings:
         "EMOTION_LOOP_ENABLED": os.getenv("EMOTION_LOOP_ENABLED", "true").lower() == "true",
         "AUTOPILOT_ENABLED": os.getenv("AUTOPILOT_ENABLED", "true").lower() == "true",
         "SAFE_MODE_FORCE": os.getenv("SAFE_MODE_FORCE", "false").lower() == "true",
+    "GPT5_PREVIEW_ENABLED": os.getenv("GPT5_PREVIEW_ENABLED", "true").lower() == "true",
+    "GPT5_PREVIEW_MODEL": os.getenv("GPT5_PREVIEW_MODEL", "gpt-5-preview"),
         # Security
         "ADMIN_MASTER_KEY": os.getenv("ADMIN_MASTER_KEY"),
         # Graceful degradation
@@ -238,6 +246,8 @@ def log_configuration_summary(settings: ProjectAlphaSettings) -> None:
             "emotion_loop": settings.EMOTION_LOOP_ENABLED,
             "autopilot": settings.AUTOPILOT_ENABLED,
             "safe_mode_forced": settings.SAFE_MODE_FORCE,
+            "gpt5_preview": settings.GPT5_PREVIEW_ENABLED,
+            "gpt5_preview_model": settings.GPT5_PREVIEW_MODEL,
         },
         "security": {
             "admin_key": "***configured***" if settings.ADMIN_MASTER_KEY else "not_set",
@@ -272,6 +282,7 @@ def is_feature_enabled(feature_name: str) -> bool:
         "debug": current_settings.DEBUG,
         "gpu": current_settings.GPU_ENABLED,
         "cluster": current_settings.CLUSTER_ENABLED,
+    "gpt5_preview": current_settings.GPT5_PREVIEW_ENABLED,
     }
     return feature_map.get(feature_name, False)
 

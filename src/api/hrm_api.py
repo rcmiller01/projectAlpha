@@ -185,7 +185,7 @@ system_metrics = {
 
 
 @app.on_event("startup")
-async def startup_event():
+async def startup_event() -> None:
     """Initialize HRM system components on startup"""
     global hrm_router, subagent_router, personality_formatter, core_arbiter
 
@@ -210,7 +210,7 @@ async def startup_event():
 
 
 @app.post("/hrm/process", response_model=HRMProcessResponse)
-async def process_message(request: HRMProcessRequest, background_tasks: BackgroundTasks):
+async def process_message(request: HRMProcessRequest, background_tasks: BackgroundTasks) -> HRMProcessResponse:
     """
     Process a message through the complete HRM pipeline
 
@@ -297,7 +297,7 @@ async def process_message(request: HRMProcessRequest, background_tasks: Backgrou
 
 
 @app.get("/hrm/status", response_model=HRMStatusResponse)
-async def get_system_status():
+async def get_system_status() -> HRMStatusResponse:
     """Get comprehensive HRM system status and health information"""
 
     try:
@@ -456,7 +456,7 @@ async def update_configuration(
 
 
 @app.get("/hrm/analytics", response_model=HRMAnalyticsResponse)
-async def get_analytics():
+async def get_analytics() -> HRMAnalyticsResponse:
     """Get comprehensive system analytics and performance metrics"""
 
     try:
@@ -499,7 +499,7 @@ async def get_analytics():
 
 
 @app.get("/hrm/health")
-async def health_check():
+async def health_check() -> dict[str, Any]:
     """Simple health check endpoint"""
     return {
         "status": "healthy"
@@ -516,7 +516,7 @@ async def health_check():
 
 
 @app.get("/")
-async def root():
+async def root() -> dict[str, Any]:
     """Root endpoint with API information"""
     return {
         "name": "HRM System API",
@@ -536,7 +536,7 @@ async def root():
 
 # Error handlers
 @app.exception_handler(Exception)
-async def general_exception_handler(request, exc):
+async def general_exception_handler(request: Any, exc: Exception) -> dict[str, Any]:
     """General exception handler"""
     logger.error(f"❌ Unhandled exception: {exc!s}")
     return {

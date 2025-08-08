@@ -7,7 +7,11 @@ RUN groupadd -r projectalpha && useradd -r -g projectalpha projectalpha
 # Set up directory structure with proper permissions
 WORKDIR /app
 RUN mkdir -p /app/logs /app/data /app/tmp \
-    && chown -R projectalpha:projectalpha /app
+    && chown -R projectalpha:projectalpha /app \
+    && chmod -R u+rwX,go-rwx /app
+
+# Declare writable mount points (root FS can be read-only at runtime)
+VOLUME ["/app/logs", "/app/data", "/app/tmp"]
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \

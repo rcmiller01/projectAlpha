@@ -125,7 +125,7 @@ async def update_anchor_settings(settings: AnchorSettings) -> dict[str, Any]:
 
 
 @app.get("/health")
-async def health_check():
+async def health_check() -> dict[str, Any]:
     """Health check endpoint."""
     return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
 

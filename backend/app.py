@@ -10,6 +10,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
+from typing import Any, Dict
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -59,7 +60,7 @@ app.add_middleware(
 
 
 @app.on_event("startup")
-async def startup_event():
+async def startup_event() -> None:
     """Application startup event."""
     logger.info("🔧 ProjectAlpha Backend startup complete")
 
@@ -79,13 +80,13 @@ async def startup_event():
 
 
 @app.on_event("shutdown")
-async def shutdown_event():
+async def shutdown_event() -> None:
     """Application shutdown event."""
     logger.info("⏹️  ProjectAlpha Backend shutting down")
 
 
 @app.get("/")
-async def root():
+async def root() -> Dict[str, Any]:
     """Root endpoint with system status."""
     return {
         "name": "ProjectAlpha Backend",
@@ -101,7 +102,7 @@ async def root():
 
 
 @app.get("/health")
-async def health_check():
+async def health_check() -> Dict[str, Any]:
     """Enhanced health check endpoint with dependency status."""
     from datetime import datetime
 
@@ -142,13 +143,8 @@ async def health_check():
         deps_status["hrm"] = False
         overall_status = "degraded"
 
-    # Determine final status
-    if all(deps_status.values()):
-        overall_status = "up"
-    elif any(deps_status.values()):
-        overall_status = "degraded"
-    else:
-        overall_status = "down"
+    # Determine final status (strict up/down per requirements)
+    overall_status = "up" if all(deps_status.values()) else "down"
 
     return {
         "status": overall_status,
@@ -164,7 +160,7 @@ async def health_check():
 
 
 @app.get("/config")
-async def get_config_summary():
+async def get_config_summary() -> Dict[str, Any]:
     """Get non-sensitive configuration summary."""
     if not settings:
         return {

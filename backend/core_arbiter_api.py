@@ -18,7 +18,7 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from flask import Flask, g, jsonify, request
+from flask import Flask, Response, g, jsonify, request
 from flask_cors import CORS
 
 # Add project root to path for imports
@@ -182,7 +182,7 @@ def get_arbiter():
 @app.route('/api/arbiter/process', methods=['POST'])
 @require_scope(['system:operate', 'user:basic'])
 @validate_json_schema(PROCESS_INPUT_SCHEMA)
-def process_input():
+def process_input() -> Response:
     """Process user input through CoreArbiter with RBAC"""
     try:
         # Get validated data
@@ -237,7 +237,7 @@ def process_input():
 
 @app.route('/api/arbiter/status', methods=['GET'])
 @require_scope(['system:operate', 'user:basic'])
-def get_status():
+def get_status() -> Response:
     """Get current arbiter system status with RBAC"""
     try:
         arbiter = get_arbiter()
@@ -263,7 +263,7 @@ def get_status():
         }
     }
 })
-def set_strategy():
+def set_strategy() -> Response:
     """Change weighting strategy (system access required)"""
     try:
         data = g.validated_data
@@ -299,32 +299,9 @@ def set_strategy():
         audit_action('arbiter_strategy_failed', error=str(e), success=False)
         logger.error(f"Error setting strategy: {e}")
         return jsonify({'error': str(e)}), 500
-            logger.warning(f"No JSON data in strategy request from {source_ip}")
-            return jsonify({'error': 'JSON data required'}), 400
-
-        strategy_name = data.get('strategy', 'harmonic')
-
-        # Validate strategy
-        try:
-            strategy = WeightingStrategy(strategy_name)
-        except ValueError:
-            return jsonify({'error': f'Invalid strategy: {strategy_name}'}), 400
-
-        arbiter = get_arbiter()
-        arbiter.set_weighting_strategy(strategy)
-
-        return jsonify({
-            'status': 'success',
-            'strategy': strategy.value,
-            'message': f'Strategy changed to {strategy.value}'
-        })
-
-    except Exception as e:
-        logger.error(f"Error setting strategy: {e}")
-        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/arbiter/regulate', methods=['POST'])
-def regulate_system():
+def regulate_system() -> Response:
     """Perform system regulation"""
     try:
         loop = asyncio.new_event_loop()
@@ -351,7 +328,7 @@ def regulate_system():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/emotional_state', methods=['GET'])
-def get_emotional_state():
+def get_emotional_state() -> Response:
     """Get current emotional state for UI"""
     try:
         # Load from file or generate current state
@@ -387,7 +364,7 @@ def get_emotional_state():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/symbolic_response', methods=['POST'])
-def generate_symbolic_response():
+def generate_symbolic_response() -> Response:
     """Generate symbolic/ritual response"""
     try:
         data = request.json
@@ -425,7 +402,7 @@ def generate_symbolic_response():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/log_emotional_message', methods=['POST'])
-def log_emotional_message():
+def log_emotional_message() -> Response:
     """Log message with emotional context"""
     try:
         data = request.json
@@ -465,7 +442,7 @@ def log_emotional_message():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/arbiter/traces', methods=['GET'])
-def get_traces():
+def get_traces() -> Response:
     """Get arbiter decision traces"""
     try:
         trace_path = Path("logs/core_arbiter_trace.json")
@@ -491,7 +468,7 @@ def get_traces():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/chat', methods=['POST'])
-def chat_with_arbiter():
+def chat_with_arbiter() -> Response:
     """Main chat endpoint using CoreArbiter"""
     try:
         data = request.json
@@ -557,7 +534,7 @@ def chat_with_arbiter():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/health', methods=['GET'])
-def health_check():
+def health_check() -> Response:
     """Health check endpoint"""
     try:
         status = "healthy"

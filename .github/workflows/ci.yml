@@ -86,8 +86,7 @@ jobs:
 
       - name: Run MyPy type checking
         run: |
-          mypy src/ backend/ --config-file=pyproject.toml --no-error-summary
-        continue-on-error: false
+          mypy --config-file=pyproject.toml src/ backend/
 
       - name: Generate MyPy report
         run: |
@@ -98,7 +97,7 @@ jobs:
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: mypy-report-${{ matrix.python-version }}
+          name: mypy-report
           path: mypy-report/
 
   # Security scanning
@@ -244,11 +243,12 @@ jobs:
           pip install -e ".[dev]"
 
       - name: Run chaos tests
+        env:
+          CHAOS_TESTING: true
         run: |
           pytest tests/test_chaos_supervision.py -v \
                  -m "chaos" \
                  --tb=short --durations=10
-        env: CHAOS_TESTING=true
 
   # Documentation and examples
   docs:

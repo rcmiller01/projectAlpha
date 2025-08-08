@@ -38,6 +38,17 @@ class MemorySystem:
         self.long_term_memory = self._load_long_term()
         self.current_session_id = None
 
+        # Ephemeral TTL configuration (default 7 days)
+        try:
+            ttl_days = int(os.getenv("EPHEMERAL_TTL_DAYS", "7"))
+        except ValueError:
+            ttl_days = 7
+        self.ephemeral_ttl = timedelta(days=max(0, ttl_days))
+
+        # TTL cleanup log path
+        self.ttl_cleanup_log_path = Path("logs/memory_ttl_cleanup.jsonl")
+        self.ttl_cleanup_log_path.parent.mkdir(parents=True, exist_ok=True)
+
         allowed = os.getenv("ALLOWED_PERSONAS", "")
         self.authorized_personas = [p.strip().lower() for p in allowed.split(",") if p.strip()]
         self.persona_token = os.getenv("PERSONA_TOKEN", "")
@@ -98,6 +109,14 @@ class MemorySystem:
             "lonely",
             "scared",
         }
+
+        # Run TTL cleanup for ephemeral on startup
+        try:
+            removed = self.cleanup_ephemeral()
+            if removed > 0:
+                logger.info(f"Ephemeral TTL cleanup removed {removed} expired entries on init")
+        except Exception as e:
+            logger.warning(f"Ephemeral TTL cleanup on init failed: {e}")
 
         logger.info("🧠 Memory System initialized")
 
@@ -630,13 +649,19 @@ class MemorySystem:
             "last_accessed": datetime.now().isoformat(),
         }
 
-        # Add to layer
+    # Add to layer
         self.long_term_memory[layer].append(memory_entry)
 
         # Log the addition
         logger.info(f"Added memory to {layer} layer (importance: {importance:.2f})")
 
-        # Save to disk
+        # Apply TTL cleanup for ephemeral and save to disk
+        if layer == "ephemeral":
+            try:
+                self.cleanup_ephemeral()
+            except Exception as e:
+                logger.warning(f"Ephemeral TTL cleanup on write failed: {e}")
+
         self._save_long_term()
 
         return True
@@ -786,3 +811,66 @@ class MemorySystem:
         self._save_long_term()
 
         return pruning_results
+
+    # --- TTL retention for ephemeral layer ---
+    def _parse_iso(self, ts: str) -> Optional[datetime]:
+        try:
+            return datetime.fromisoformat(ts)
+        except Exception:
+            return None
+
+    def cleanup_ephemeral(self) -> int:
+        """Remove ephemeral entries older than TTL. Returns number removed and logs deletions."""
+        try:
+            layer = "ephemeral"
+            items = self.long_term_memory.get(layer, [])
+
+            if not items or self.ephemeral_ttl.total_seconds() <= 0:
+                return 0
+
+            now = datetime.now()
+            cutoff = now - self.ephemeral_ttl
+
+            kept: list[dict[str, Any]] = []
+            removed: list[dict[str, Any]] = []
+
+            for item in items:
+                ts = item.get("timestamp") or item.get("last_accessed")
+                dt = self._parse_iso(ts) if isinstance(ts, str) else None
+                if dt and dt < cutoff:
+                    removed.append(item)
+                else:
+                    kept.append(item)
+
+            if removed:
+                self.long_term_memory[layer] = kept
+                self._save_long_term()
+                # Log one batch event with summaries
+                try:
+                    event = {
+                        "timestamp": now.isoformat(),
+                        "layer": layer,
+                        "removed_count": len(removed),
+                        "cutoff": cutoff.isoformat(),
+                        "pre_count": len(items),
+                        "post_count": len(kept),
+                        "samples": [
+                            {
+                                "content_preview": (r.get("content", "")[:100] or ""),
+                                "importance": r.get("importance"),
+                                "timestamp": r.get("timestamp"),
+                                "user_id": (r.get("metadata", {}) or {}).get("user_id"),
+                            }
+                            for r in removed[:5]
+                        ],
+                    }
+                    with open(self.ttl_cleanup_log_path, "a", encoding="utf-8") as f:
+                        f.write(json.dumps(event, separators=(",", ":")) + "\n")
+                except Exception as e2:
+                    logger.warning(f"Failed to log TTL cleanup event: {e2}")
+                return len(removed)
+
+            return 0
+        except Exception as e:
+            logger.error(f"Error during ephemeral TTL cleanup: {e}")
+            return 0

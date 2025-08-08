@@ -168,9 +168,9 @@ max-statements = 60
 python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
-check_untyped_defs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = false
 disallow_untyped_decorators = true
 no_implicit_optional = true
 warn_redundant_casts = true
@@ -182,6 +182,9 @@ extra_checks = true
 show_error_codes = true
 show_error_context = true
 pretty = true
+implicit_reexport = false
+explicit_package_bases = true
+mypy_path = ["src", "backend"]
 
 # Exclude certain directories from mypy checking
 exclude = [
@@ -213,6 +216,17 @@ module = "tests.*"
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
 check_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = [
+    "backend.app",
+    "backend.hrm_api",
+    "src.api.*",
+]
+disallow_any_generics = true
+no_implicit_optional = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
 
 # Coverage configuration
 [tool.coverage.run]

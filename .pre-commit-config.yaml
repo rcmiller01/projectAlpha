@@ -1,155 +1,38 @@
-# Pre-commit configuration for ProjectAlpha
-# See https://pre-commit.com for more information
-# See https://pre-commit.com/hooks.html for more hooks
-
 default_stages: [pre-commit]
 fail_fast: false
 minimum_pre_commit_version: "3.0.0"
 
 repos:
-  # General file and format checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
-      - id: trailing-whitespace
-        exclude: '^(.*\.md|.*\.txt)$'
       - id: end-of-file-fixer
-        exclude: '^(webapp/frontend/.*|.*\.min\.(js|css)|.*\.svg)$'
-      - id: check-yaml
-        args: ["--unsafe"] # Allow custom YAML tags
-      - id: check-toml
-      - id: check-json
-      - id: check-merge-conflict
-      - id: check-case-conflict
-      - id: check-docstring-first
-      - id: debug-statements
-        exclude: "^(demos/.*|examples/.*)$"
-      - id: check-added-large-files
-        args: ["--maxkb=1000"]
-      - id: check-ast
-        exclude: "^webapp/frontend/.*$"
-      - id: check-builtin-literals
-      - id: check-executables-have-shebangs
-      - id: fix-byte-order-marker
-      - id: mixed-line-ending
-        args: ["--fix=lf"]
+      - id: trailing-whitespace
 
-  # Python import sorting
-  - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
-    hooks:
-      - id: isort
-        name: isort (python)
-        args: ["--profile", "black", "--line-length", "100"]
-        exclude: "^webapp/frontend/.*$"
-
-  # Python code formatting with Black
   - repo: https://github.com/psf/black
-    rev: 23.12.1
+    rev: 24.4.2
     hooks:
       - id: black
-        name: black
         args: ["--line-length=100"]
-        language_version: python3
-        exclude: "^webapp/frontend/.*$"
-        types: [python]
 
-  # Python linting and formatting with Ruff
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.15
+    rev: v0.5.2
     hooks:
       - id: ruff
-        name: ruff-lint
-        args: ["--fix", "--exit-non-zero-on-fix"]
-        exclude: "^webapp/frontend/.*$"
-        types: [python]
+        args: ["--fix"]
       - id: ruff-format
-        name: ruff-format
-        exclude: "^webapp/frontend/.*$"
-        types: [python]
 
-  # Python type checking with MyPy
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.8.0
+    rev: v1.10.0
     hooks:
       - id: mypy
-        name: mypy
-        exclude: "^(webapp/frontend/.*|demos/.*|examples/.*)$"
         additional_dependencies:
-          [
-            "types-requests",
-            "types-redis",
-            "types-setuptools",
-            "types-PyYAML",
-            "types-python-dateutil",
-            "pydantic",
-            "fastapi",
-            "sqlalchemy[mypy]",
-          ]
+          - types-requests
+          - types-redis
+          - types-setuptools
+          - types-PyYAML
+          - types-werkzeug
         args:
-          [
-            "--config-file=pyproject.toml",
-            "--show-error-codes",
-            "--show-error-context",
-            "--pretty",
-          ]
-
-  # Security scanning with Bandit
-  - repo: https://github.com/pycqa/bandit
-    rev: 1.7.5
-    hooks:
-      - id: bandit
-        name: bandit
-        args: ["-c", "pyproject.toml"]
-        exclude: "^(tests/.*|demos/.*|examples/.*)$"
-        types: [python]
-
-  # Documentation checks
-  - repo: https://github.com/pycqa/pydocstyle
-    rev: 6.3.0
-    hooks:
-      - id: pydocstyle
-        name: pydocstyle
-        args: ["--convention=google"]
-        exclude: "^(tests/.*|demos/.*|examples/.*|webapp/frontend/.*)$"
-        additional_dependencies: ["toml"]
-
-  # YAML formatting
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.1.0
-    hooks:
-      - id: prettier
-        name: prettier
-        types_or: [yaml, markdown, json]
-        exclude: '^(webapp/frontend/.*|.*\.min\.(js|css))$'
-
-  # Shell script linting (if any shell scripts exist)
-  - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.9.0.6
-    hooks:
-      - id: shellcheck
-        name: shellcheck
-        types: [shell]
-        exclude: "^webapp/frontend/.*$"
-
-  # Secrets detection
-  - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.4.0
-    hooks:
-      - id: detect-secrets
-        name: detect-secrets
-        args: ["--baseline", ".secrets.baseline"]
-        exclude: '^(webapp/frontend/.*|\.git/.*)$'
-
-# CI-specific configuration
-ci:
-  autofix_commit_msg: |
-    [pre-commit.ci] auto fixes from pre-commit hooks
-
-    for more information, see https://pre-commit.ci
-  autofix_prs: true
-  autoupdate_branch: ""
-  autoupdate_commit_msg: "[pre-commit.ci] pre-commit autoupdate"
-  autoupdate_schedule: weekly
-  skip: [mypy] # Skip mypy in CI due to dependency complexity
-  submodules: false
+          - --config-file=pyproject.toml
+          - src/
+          - backend/

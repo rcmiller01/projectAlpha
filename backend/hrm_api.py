@@ -9,9 +9,9 @@ import sys
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional, Tuple
 
-from flask import Flask, g, jsonify, request
+from flask import Flask, Response, g, jsonify, request
 from flask_cors import CORS
 
 # Add project root to path for imports
@@ -28,6 +28,7 @@ from common.security import (
     require_scope,
     validate_json_schema,
 )
+from backend.data_portability import erase_user_data, export_user_data
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -78,6 +79,25 @@ EPHEMERAL_UPDATE_SCHEMA = {
     },
 }
 
+# Data portability schemas
+DATA_EXPORT_SCHEMA = {
+    "type": "object",
+    "required": ["user_id"],
+    "properties": {
+        "user_id": {"type": "string", "minLength": 1},
+        "include_identity": {"type": "boolean"},
+    },
+}
+
+DATA_ERASE_SCHEMA = {
+    "type": "object",
+    "required": ["user_id"],
+    "properties": {
+        "user_id": {"type": "string", "minLength": 1},
+        "erase_identity": {"type": "boolean"},
+    },
+}
+
 
 def load_layer_data(layer_path: Path) -> dict[str, Any]:
     """Load layer data from file."""
@@ -107,7 +127,7 @@ def save_layer_data(layer_path: Path, data: dict[str, Any]) -> None:
 # Identity Layer Endpoints (Admin only)
 @app.route("/api/hrm/identity", methods=["GET"])
 @require_layer_access("identity")
-def get_identity():
+def get_identity() -> Response:
     """Get identity layer data (admin only)."""
     try:
         data = load_layer_data(IDENTITY_PATH)
@@ -121,7 +141,7 @@ def get_identity():
 @app.route("/api/hrm/identity", methods=["POST"])
 @require_layer_access("identity")
 @validate_json_schema(IDENTITY_UPDATE_SCHEMA)
-def update_identity():
+def update_identity() -> Response:
     """Update identity layer data (admin only)."""
     try:
         current_data = load_layer_data(IDENTITY_PATH)
@@ -144,7 +164,7 @@ def update_identity():
 # Beliefs Layer Endpoints (Admin/System only)
 @app.route("/api/hrm/beliefs", methods=["GET"])
 @require_scope(["beliefs:read"])
-def get_beliefs():
+def get_beliefs() -> Response:
     """Get beliefs layer data (admin/system only)."""
     try:
         data = load_layer_data(BELIEFS_PATH)
@@ -158,7 +178,7 @@ def get_beliefs():
 @app.route("/api/hrm/beliefs", methods=["POST"])
 @require_scope(["beliefs:write"])
 @validate_json_schema(BELIEFS_UPDATE_SCHEMA)
-def update_beliefs():
+def update_beliefs() -> Response:
     """Update beliefs layer data (admin/system only)."""
     try:
         current_data = load_layer_data(BELIEFS_PATH)
@@ -181,7 +201,7 @@ def update_beliefs():
 # Ephemeral Layer Endpoints (All authenticated users)
 @app.route("/api/hrm/ephemeral", methods=["GET"])
 @require_scope(["ephemeral:read"])
-def get_ephemeral():
+def get_ephemeral() -> Response:
     """Get ephemeral layer data (all authenticated users)."""
     try:
         data = load_layer_data(EPHEMERAL_PATH)
@@ -195,7 +215,7 @@ def get_ephemeral():
 @app.route("/api/hrm/ephemeral", methods=["POST"])
 @require_scope(["ephemeral:write"])
 @validate_json_schema(EPHEMERAL_UPDATE_SCHEMA)
-def update_ephemeral():
+def update_ephemeral() -> Response:
     """Update ephemeral layer data (all authenticated users)."""
     try:
         current_data = load_layer_data(EPHEMERAL_PATH)
@@ -218,7 +238,7 @@ def update_ephemeral():
 # System Status Endpoint
 @app.route("/api/hrm/status", methods=["GET"])
 @require_scope(["system:operate", "user:basic"])
-def get_system_status():
+def get_system_status() -> Response:
     """Get HRM system status."""
     try:
         token = extract_token()
@@ -237,6 +257,79 @@ def get_system_status():
 
         return jsonify(status)
     except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# Data Portability Endpoints
+@app.route("/api/data/export", methods=["POST"])
+@validate_json_schema(DATA_EXPORT_SCHEMA)
+def export_data() -> Response:
+    """Export user data across layers (admin or user with scope)."""
+    try:
+        token = extract_token()
+        token_type = get_token_type(token) if token else None
+        scopes = getattr(g, "security_context", {}).get("scopes", set())
+
+        body = g.validated_data
+        user_id = body["user_id"]
+        include_identity = bool(body.get("include_identity", False))
+
+        # Authorization: admin OR user exporting own data with appropriate scope
+        permitted = False
+        if token_type == "admin":
+            permitted = True
+        elif token_type == "user" and ("user:basic" in scopes or "ephemeral:read" in scopes):
+            permitted = True
+
+        if not permitted:
+            audit_action("export_denied", success=False, target_user=user_id)
+            return jsonify({"error": "Forbidden"}), 403
+
+        # Policy: by default, identity is excluded unless admin
+        if include_identity and token_type != "admin":
+            include_identity = False
+
+        data = export_user_data(user_id, include_identity=include_identity)
+        audit_action("export_success", success=True, target_user=user_id)
+        return jsonify(data)
+    except Exception as e:
+        audit_action("export_error", success=False, error=str(e))
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/data/erase", methods=["POST"])
+@validate_json_schema(DATA_ERASE_SCHEMA)
+def erase_data() -> Response:
+    """Erase user data (admin or user with erase scope for own data)."""
+    try:
+        token = extract_token()
+        token_type = get_token_type(token) if token else None
+        scopes = getattr(g, "security_context", {}).get("scopes", set())
+
+        body = g.validated_data
+        user_id = body["user_id"]
+        erase_identity = bool(body.get("erase_identity", False))
+
+        # Authorization: admin can erase; user can erase own ephemeral/beliefs with scope
+        permitted = False
+        if token_type == "admin":
+            permitted = True
+        elif token_type == "user" and ("ephemeral:write" in scopes or "user:basic" in scopes):
+            permitted = True
+
+        if not permitted:
+            audit_action("erase_denied", success=False, target_user=user_id)
+            return jsonify({"error": "Forbidden"}), 403
+
+        # Policy: identity erase requires admin
+        if erase_identity and token_type != "admin":
+            erase_identity = False
+
+        results = erase_user_data(user_id, erase_identity=erase_identity)
+        audit_action("erase_success", success=True, target_user=user_id, details=results)
+        return jsonify({"success": True, **results})
+    except Exception as e:
+        audit_action("erase_error", success=False, error=str(e))
         return jsonify({"error": str(e)}), 500
 
 

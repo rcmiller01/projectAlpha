@@ -8,7 +8,7 @@ services:
     environment:
       - PYTHONPATH=/app
       - LOG_LEVEL=INFO
-      - SAFE_MODE_FORCE=false
+      - SAFE_MODE_FORCE=${SAFE_MODE_FORCE:-false}
     volumes:
       - ./logs:/app/logs:rw
       - ./data:/app/data:rw
@@ -24,7 +24,7 @@ services:
       - SETUID
     security_opt:
       - no-new-privileges:true
-    user: "1000:1000"
+    user: "projectalpha"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -32,8 +32,6 @@ services:
       retries: 3
       start_period: 40s
     restart: unless-stopped
-    networks:
-      - projectalpha-network
 
   redis:
     image: redis:7-alpine
@@ -50,7 +48,6 @@ services:
       - SETUID
     security_opt:
       - no-new-privileges:true
-    user: "999:999"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 30s
@@ -58,8 +55,6 @@ services:
       retries: 3
       start_period: 10s
     restart: unless-stopped
-    networks:
-      - projectalpha-network
 
   mongodb:
     image: mongo:7
@@ -80,7 +75,6 @@ services:
       - DAC_OVERRIDE
     security_opt:
       - no-new-privileges:true
-    user: "999:999"
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 30s
@@ -88,18 +82,3 @@ services:
       retries: 3
       start_period: 40s
     restart: unless-stopped
-    networks:
-      - projectalpha-network
-
-networks:
-  projectalpha-network:
-    driver: bridge
-    driver_opts:
-      com.docker.network.bridge.enable_icc: "true"
-      com.docker.network.bridge.enable_ip_masquerade: "true"
-
-volumes:
-  redis_data:
-    driver: local
-  mongodb_data:
-    driver: local
