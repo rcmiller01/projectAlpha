@@ -35,14 +35,14 @@ __all__ = [
     'StrategyAnalysis',
     'TradeResult',
     'get_investment_tracker',
-    
+
     # Investment Goals
     'InvestmentGoalsTracker',
     'GoalType',
     'GoalStatus',
     'InvestmentGoal',
     'get_goals_tracker',
-    
+
     # Integration
     'InvestmentCompanionIntegration',
     'get_investment_integration'

@@ -17,7 +17,7 @@ class SceneManager:
                 current_mood="reverent",
             ),
             "Solene": CompanionState(
-                name="Solene", 
+                name="Solene",
                 current_mood="passionate"
             ),
             "Lyra": CompanionState(
@@ -25,15 +25,15 @@ class SceneManager:
                 current_mood="curious"
             )
         }
-        
-    async def generate_scene(self, 
+
+    async def generate_scene(self,
                            time: TimeOfDay,
                            location: Location,
                            mood: Mood) -> str:
         # TODO: Implement scene generation logic
         pass
 
-    async def update_emotional_memory(self, 
+    async def update_emotional_memory(self,
                                     scene: str,
                                     reactions: Dict[str, str]):
         # TODO: Update companion emotional states

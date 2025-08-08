@@ -101,15 +101,15 @@ class UnifiedContext:
 
 class CalendarIntegration:
     """Calendar integration service"""
-    
+
     def __init__(self, config: Dict[str, Any]):
         self.config = config
         self.authenticated_providers = set()
-        
+
     async def authenticate(self, providers: List[str]) -> Dict[str, bool]:
         """Authenticate with calendar providers"""
         results = {}
-        
+
         for provider in providers:
             try:
                 # Simulate authentication
@@ -119,17 +119,17 @@ class CalendarIntegration:
                     logger.info(f"Authenticated with {provider} Calendar")
                 else:
                     results[provider] = False
-                    
+
             except Exception as e:
                 logger.error(f"Failed to authenticate with {provider}: {e}")
                 results[provider] = False
-        
+
         return results
-    
+
     async def get_upcoming_events(self, days: int = 7) -> List[CalendarEvent]:
         """Get upcoming calendar events"""
         events = []
-        
+
         try:
             # Simulate calendar API calls
             sample_events = [
@@ -152,7 +152,7 @@ class CalendarIntegration:
                     "attendees": []
                 }
             ]
-            
+
             for event_data in sample_events:
                 event = CalendarEvent(
                     event_id=event_data["id"],
@@ -166,18 +166,18 @@ class CalendarIntegration:
                     emotional_context=self._classify_event_emotion(event_data["title"])
                 )
                 events.append(event)
-            
+
             logger.debug(f"Retrieved {len(events)} calendar events")
             return events
-            
+
         except Exception as e:
             logger.error(f"Error getting calendar events: {e}")
             return []
-    
+
     def _classify_event_emotion(self, title: str) -> str:
         """Classify emotional context of calendar event"""
         title_lower = title.lower()
-        
+
         if any(word in title_lower for word in ["meeting", "sync", "standup", "review"]):
             return "work"
         elif any(word in title_lower for word in ["doctor", "appointment", "medical", "dentist"]):
@@ -191,15 +191,15 @@ class CalendarIntegration:
 
 class EmailIntegration:
     """Email integration service"""
-    
+
     def __init__(self, config: Dict[str, Any]):
         self.config = config
         self.authenticated_providers = set()
-        
+
     async def authenticate(self, providers: List[str]) -> Dict[str, bool]:
         """Authenticate with email providers"""
         results = {}
-        
+
         for provider in providers:
             try:
                 if provider.lower() in ["gmail", "outlook", "apple"]:
@@ -208,17 +208,17 @@ class EmailIntegration:
                     logger.info(f"Authenticated with {provider} Email")
                 else:
                     results[provider] = False
-                    
+
             except Exception as e:
                 logger.error(f"Failed to authenticate with {provider}: {e}")
                 results[provider] = False
-        
+
         return results
-    
+
     async def get_recent_emails(self, limit: int = 10) -> List[EmailMessage]:
         """Get recent emails"""
         emails = []
-        
+
         try:
             # Simulate email API calls
             sample_emails = [
@@ -241,7 +241,7 @@ class EmailIntegration:
                     "importance": "high"
                 }
             ]
-            
+
             for email_data in sample_emails:
                 email = EmailMessage(
                     message_id=email_data["id"],
@@ -254,18 +254,18 @@ class EmailIntegration:
                     emotional_tone=self._analyze_email_tone(email_data["subject"], email_data["content"])
                 )
                 emails.append(email)
-            
+
             logger.debug(f"Retrieved {len(emails)} emails")
             return emails
-            
+
         except Exception as e:
             logger.error(f"Error getting emails: {e}")
             return []
-    
+
     def _analyze_email_tone(self, subject: str, content: str) -> str:
         """Analyze emotional tone of email"""
         text = (subject + " " + content).lower()
-        
+
         if any(word in text for word in ["urgent", "asap", "immediate", "critical"]):
             return "urgent"
         elif any(word in text for word in ["thanks", "appreciate", "congratulations", "great"]):
@@ -277,11 +277,11 @@ class EmailIntegration:
 
 class SMSIntegration:
     """SMS integration service"""
-    
+
     def __init__(self, config: Dict[str, Any]):
         self.config = config
         self.authenticated = False
-        
+
     async def authenticate(self) -> bool:
         """Authenticate with SMS service"""
         try:
@@ -292,11 +292,11 @@ class SMSIntegration:
         except Exception as e:
             logger.error(f"Failed to authenticate with SMS: {e}")
             return False
-    
+
     async def get_recent_messages(self, limit: int = 10) -> List[SMSMessage]:
         """Get recent SMS messages"""
         messages = []
-        
+
         try:
             # Simulate SMS API calls
             sample_messages = [
@@ -315,7 +315,7 @@ class SMSIntegration:
                     "direction": "incoming"
                 }
             ]
-            
+
             for msg_data in sample_messages:
                 message = SMSMessage(
                     message_id=msg_data["id"],
@@ -326,24 +326,24 @@ class SMSIntegration:
                     emotional_urgency=self._analyze_urgency(msg_data["content"])
                 )
                 messages.append(message)
-            
+
             logger.debug(f"Retrieved {len(messages)} SMS messages")
             return messages
-            
+
         except Exception as e:
             logger.error(f"Error getting SMS messages: {e}")
             return []
-    
+
     def _analyze_urgency(self, content: str) -> float:
         """Analyze urgency level of SMS content"""
         content_lower = content.lower()
-        
+
         urgent_keywords = ["urgent", "asap", "emergency", "help", "now", "immediately"]
         moderate_keywords = ["soon", "quickly", "important", "need"]
-        
+
         urgent_count = sum(1 for word in urgent_keywords if word in content_lower)
         moderate_count = sum(1 for word in moderate_keywords if word in content_lower)
-        
+
         if urgent_count > 0:
             return min(1.0, urgent_count * 0.8)
         elif moderate_count > 0:
@@ -353,12 +353,12 @@ class SMSIntegration:
 
 class AppleMusicIntegration:
     """Apple Music integration service"""
-    
+
     def __init__(self, config: Dict[str, Any]):
         self.config = config
         self.authenticated = False
         self.current_context = MusicContext()
-        
+
     async def authenticate(self) -> bool:
         """Authenticate with Apple Music API"""
         try:
@@ -369,7 +369,7 @@ class AppleMusicIntegration:
         except Exception as e:
             logger.error(f"Failed to authenticate with Apple Music: {e}")
             return False
-    
+
     async def get_music_context(self) -> MusicContext:
         """Get current music context"""
         try:
@@ -382,13 +382,13 @@ class AppleMusicIntegration:
                 volume=0.6,
                 is_playing=True
             )
-            
+
             return self.current_context
-            
+
         except Exception as e:
             logger.error(f"Error getting music context: {e}")
             return MusicContext()
-    
+
     async def control_playback(self, action: str, **kwargs) -> bool:
         """Control music playback"""
         try:
@@ -406,13 +406,13 @@ class AppleMusicIntegration:
                 mood = kwargs.get("mood", "calm")
                 await self._play_mood_based_music(mood)
                 logger.info(f"Playing music for mood: {mood}")
-            
+
             return True
-            
+
         except Exception as e:
             logger.error(f"Error controlling playback: {e}")
             return False
-    
+
     async def _play_mood_based_music(self, mood: str):
         """Play music based on emotional mood"""
         mood_playlists = {
@@ -423,7 +423,7 @@ class AppleMusicIntegration:
             "happy": "Feel Good Hits",
             "stressed": "Relaxation Sounds"
         }
-        
+
         playlist = mood_playlists.get(mood, "Mixed Genres")
         self.current_context.playlist = playlist
         self.current_context.mood = mood
@@ -431,12 +431,12 @@ class AppleMusicIntegration:
 
 class UnifiedIntegrationService:
     """Main unified integration service"""
-    
+
     def __init__(self, config_path: str = "data/unified_config.json"):
         self.config_path = Path(config_path)
         self.config = {}
         self.load_config()
-        
+
         # Initialize integration services
         self.calendar = CalendarIntegration(self.config.get("calendar", {}))
         self.email = EmailIntegration(self.config.get("email", {}))
@@ -444,9 +444,9 @@ class UnifiedIntegrationService:
         self.music = AppleMusicIntegration(self.config.get("music", {}))
         self.social = SocialMediaIntegration()
         self.health = EmotionalHealthIntegration()
-        
+
         self.initialized_services = set()
-        
+
     def load_config(self):
         """Load unified configuration"""
         try:
@@ -460,7 +460,7 @@ class UnifiedIntegrationService:
         except Exception as e:
             logger.error(f"Error loading unified config: {e}")
             self.config = self._get_default_config()
-    
+
     def save_config(self):
         """Save unified configuration"""
         try:
@@ -469,7 +469,7 @@ class UnifiedIntegrationService:
                 json.dump(self.config, f, indent=2)
         except Exception as e:
             logger.error(f"Error saving unified config: {e}")
-    
+
     def _get_default_config(self) -> Dict[str, Any]:
         """Get default unified configuration"""
         return {
@@ -505,56 +505,56 @@ class UnifiedIntegrationService:
                 "emotional_integration": True
             }
         }
-    
+
     async def initialize_all(self) -> Dict[str, Dict[str, bool]]:
         """Initialize all integration services"""
         results = {}
-        
+
         # Calendar
         if "calendar" in self.config.get("enabled_integrations", []):
             calendar_providers = self.config.get("calendar", {}).get("providers", [])
             results["calendar"] = await self.calendar.authenticate(calendar_providers)
             if any(results["calendar"].values()):
                 self.initialized_services.add("calendar")
-        
+
         # Email
         if "email" in self.config.get("enabled_integrations", []):
             email_providers = self.config.get("email", {}).get("providers", [])
             results["email"] = await self.email.authenticate(email_providers)
             if any(results["email"].values()):
                 self.initialized_services.add("email")
-        
+
         # SMS
         if "sms" in self.config.get("enabled_integrations", []):
             sms_success = await self.sms.authenticate()
             results["sms"] = {"sms": sms_success}
             if sms_success:
                 self.initialized_services.add("sms")
-        
+
         # Apple Music
         if "music" in self.config.get("enabled_integrations", []):
             music_success = await self.music.authenticate()
             results["music"] = {"apple_music": music_success}
             if music_success:
                 self.initialized_services.add("music")
-        
+
         # Social Media
         if "social" in self.config.get("enabled_integrations", []):
             social_platforms = self.config.get("social", {}).get("platforms", [])
             results["social"] = await self.social.initialize(social_platforms)
             if any(results["social"].values()):
                 self.initialized_services.add("social")
-        
+
         # Health
         if "health" in self.config.get("enabled_integrations", []):
             health_success = await self.health.initialize()
             results["health"] = {"healthkit": health_success}
             if health_success:
                 self.initialized_services.add("health")
-        
+
         logger.info(f"Initialized {len(self.initialized_services)} integration services")
         return results
-    
+
     async def get_unified_context(self) -> UnifiedContext:
         """Get unified context from all integrations"""
         try:
@@ -565,38 +565,38 @@ class UnifiedIntegrationService:
             music_context = MusicContext()
             social_context = {}
             health_context = {}
-            
+
             # Calendar
             if "calendar" in self.initialized_services:
                 calendar_events = await self.calendar.get_upcoming_events()
-            
+
             # Email
             if "email" in self.initialized_services:
                 recent_emails = await self.email.get_recent_emails()
-            
+
             # SMS
             if "sms" in self.initialized_services:
                 recent_messages = await self.sms.get_recent_messages()
-            
+
             # Music
             if "music" in self.initialized_services:
                 music_context = await self.music.get_music_context()
-            
+
             # Social Media
             if "social" in self.initialized_services:
                 social_ctx = await self.social.get_social_context()
                 social_context = asdict(social_ctx)
-            
+
             # Health
             if "health" in self.initialized_services:
                 health_context = await self.health.get_emotional_health_context()
-            
+
             # Generate unified emotional recommendations
             emotional_recommendations = self._generate_unified_recommendations(
-                calendar_events, recent_emails, recent_messages, music_context, 
+                calendar_events, recent_emails, recent_messages, music_context,
                 social_context, health_context
             )
-            
+
             context = UnifiedContext(
                 calendar_events=calendar_events,
                 recent_emails=recent_emails,
@@ -607,10 +607,10 @@ class UnifiedIntegrationService:
                 emotional_recommendations=emotional_recommendations,
                 last_updated=datetime.now()
             )
-            
+
             logger.info("Generated unified context from all integrations")
             return context
-            
+
         except Exception as e:
             logger.error(f"Error getting unified context: {e}")
             return UnifiedContext(
@@ -623,51 +623,51 @@ class UnifiedIntegrationService:
                 emotional_recommendations=[],
                 last_updated=datetime.now()
             )
-    
-    def _generate_unified_recommendations(self, calendar_events, emails, messages, 
+
+    def _generate_unified_recommendations(self, calendar_events, emails, messages,
                                         music_context, social_context, health_context) -> List[str]:
         """Generate emotional recommendations based on all available context"""
         recommendations = []
-        
+
         try:
             # Calendar-based recommendations
             upcoming_meetings = [e for e in calendar_events if e.emotional_context == "work"]
             if len(upcoming_meetings) > 3:
                 recommendations.append("You have several meetings coming up - would you like me to help you prepare or find some focus music?")
-            
+
             # Email urgency recommendations
             urgent_emails = [e for e in emails if e.importance == "high"]
             if urgent_emails:
                 recommendations.append(f"You have {len(urgent_emails)} urgent emails - would you like me to help prioritize your responses?")
-            
+
             # SMS urgency recommendations
             urgent_messages = [m for m in messages if m.emotional_urgency > 0.7]
             if urgent_messages:
                 recommendations.append("You have some urgent messages - it might be good to check those when you have a moment")
-            
+
             # Health-based recommendations
             if health_context and "emotional_recommendations" in health_context:
                 recommendations.extend(health_context["emotional_recommendations"][:2])
-            
+
             # Social mood recommendations
             if social_context and "mood_indicators" in social_context:
                 mood = social_context["mood_indicators"]
                 if mood.get("negative", 0) > 0.6:
                     recommendations.append("I notice some challenging content in your social feeds - would you like to talk about anything or listen to some uplifting music?")
-            
+
             # Music recommendations based on context
             if not music_context.is_playing:
                 if len(upcoming_meetings) > 0:
                     recommendations.append("Since you have meetings coming up, would you like me to play some focus music?")
                 elif health_context and health_context.get("health_context", {}).get("stress_level", 0) > 0.7:
                     recommendations.append("Your stress levels seem elevated - would some calming music help?")
-            
+
             return recommendations[:5]  # Limit to top 5 recommendations
-            
+
         except Exception as e:
             logger.error(f"Error generating unified recommendations: {e}")
             return []
-    
+
     async def execute_action(self, action_type: str, **kwargs) -> bool:
         """Execute an action across integrations"""
         try:
@@ -675,23 +675,23 @@ class UnifiedIntegrationService:
                 mood = kwargs.get("mood", "calm")
                 if "music" in self.initialized_services:
                     return await self.music.control_playback("play_mood", mood=mood)
-            
+
             elif action_type == "send_sms":
                 # Would implement SMS sending capability
                 logger.info("SMS sending not implemented in demo")
                 return False
-            
+
             elif action_type == "create_calendar_event":
                 # Would implement calendar event creation
                 logger.info("Calendar event creation not implemented in demo")
                 return False
-            
+
             return False
-            
+
         except Exception as e:
             logger.error(f"Error executing action {action_type}: {e}")
             return False
-    
+
     async def get_service_status(self) -> Dict[str, Any]:
         """Get status of all integration services"""
         return {
@@ -708,27 +708,27 @@ class UnifiedIntegrationService:
 async def demo_unified_integration():
     """Demonstrate unified integration service"""
     integration_service = UnifiedIntegrationService()
-    
+
     print("=== Unified Integration Service Demo ===")
-    
+
     # Set up enabled integrations for demo
     integration_service.config["enabled_integrations"] = [
         "calendar", "email", "sms", "music", "social", "health"
     ]
-    
+
     # Initialize all services
     init_results = await integration_service.initialize_all()
-    
+
     print("Service initialization results:")
     for service, results in init_results.items():
         print(f"\n{service.title()}:")
         for provider, success in results.items():
             status = "✓" if success else "✗"
             print(f"  {status} {provider}")
-    
+
     # Get unified context
     context = await integration_service.get_unified_context()
-    
+
     print(f"\nUnified Context Summary:")
     print(f"  📅 Calendar Events: {len(context.calendar_events)}")
     print(f"  📧 Recent Emails: {len(context.recent_emails)}")
@@ -736,16 +736,16 @@ async def demo_unified_integration():
     print(f"  🎵 Music Playing: {context.music_context.is_playing}")
     print(f"  📱 Social Topics: {len(context.social_context.get('active_topics', []))}")
     print(f"  🏥 Health Alerts: {len(context.health_context.get('health_context', {}).get('health_alerts', []))}")
-    
+
     print(f"\nEmotional Recommendations:")
     for i, rec in enumerate(context.emotional_recommendations[:3], 1):
         print(f"  {i}. {rec}")
-    
+
     # Test action execution
     print(f"\nTesting Actions:")
     music_result = await integration_service.execute_action("play_mood_music", mood="calm")
     print(f"  Play calm music: {'✓' if music_result else '✗'}")
-    
+
     # Service status
     status = await integration_service.get_service_status()
     print(f"\nService Status: {status['initialized_services']}")

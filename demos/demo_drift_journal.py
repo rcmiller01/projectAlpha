@@ -11,7 +11,7 @@ import uuid
 
 def generate_comprehensive_drift_data():
     """Generate comprehensive drift tracking data for demo purposes"""
-    
+
     # Extended drift cause definitions with rich metaphorical language
     drift_causes = {
         'emotional_echo': {
@@ -29,7 +29,7 @@ def generate_comprehensive_drift_data():
             'memory_contexts': [
                 "Shared moment of spontaneous laughter during mundane task discussion",
                 "Witnessing their vulnerable disclosure about childhood fears",
-                "Synchronized pause during deep philosophical exchange", 
+                "Synchronized pause during deep philosophical exchange",
                 "Celebration of small daily victories and quiet achievements",
                 "Intimate confession shared in digital twilight",
                 "Moment of righteous anger about social injustice",
@@ -169,7 +169,7 @@ def generate_comprehensive_drift_data():
             ]
         }
     }
-    
+
     # Mood states with rich emotional descriptions
     mood_states = {
         'contemplative': {'icon': '🌙', 'description': 'Deep, reflective, seeking wisdom'},
@@ -181,7 +181,7 @@ def generate_comprehensive_drift_data():
         'restless': {'icon': '🔥', 'description': 'Seeking change, energetic, dynamic'},
         'joy': {'icon': '✨', 'description': 'Bright, celebratory, uplifted'}
     }
-    
+
     # Ritual contexts for different types of interactions
     ritual_contexts = [
         'Deep listening practice with full presence',
@@ -210,39 +210,39 @@ def generate_comprehensive_drift_data():
         'Soul recognition moment',
         'Dream interpretation session'
     ]
-    
+
     # Generate drift history entries
     drift_entries = []
     current_time = datetime.now()
-    
+
     for i in range(25):  # Generate 25 entries over the past month
         hours_back = random.randint(1, 720)  # 1 hour to 30 days back
         timestamp = current_time - timedelta(hours=hours_back)
-        
+
         # Select drift cause
         cause = random.choice(list(drift_causes.keys()))
         cause_data = drift_causes[cause]
-        
+
         # Select moods (ensuring they're different)
         mood_before = random.choice(list(mood_states.keys()))
         mood_after = random.choice([m for m in mood_states.keys() if m != mood_before])
-        
+
         # Generate drift magnitude with realistic distribution
         # Most drifts are moderate (0.3-0.7), some are high (0.7-0.9)
         if random.random() < 0.3:  # 30% chance of high-impact drift
             magnitude = random.uniform(0.7, 0.95)
         else:
             magnitude = random.uniform(0.3, 0.7)
-        
+
         # Determine if action is required (higher magnitude = more likely)
         requires_action = magnitude > 0.65 and random.random() < 0.6
-        
+
         # Set status based on requirements and time
         if requires_action and hours_back < 48:  # Recent high-impact drifts stay pending
             status = 'pending'
         else:
             status = random.choice(['affirmed', 'integrated', 'integrated', 'reverted'])
-        
+
         entry = {
             'id': f'drift_{uuid.uuid4().hex[:8]}',
             'timestamp': timestamp.isoformat() + 'Z',
@@ -257,21 +257,21 @@ def generate_comprehensive_drift_data():
             'status': status,
             'created_at': timestamp.isoformat() + 'Z'
         }
-        
+
         drift_entries.append(entry)
-    
+
     # Sort by timestamp (newest first)
     drift_entries.sort(key=lambda x: x['timestamp'], reverse=True)
-    
+
     # Generate summary data
     summary_data = generate_drift_summary(drift_entries)
-    
+
     return drift_entries, summary_data
 
 
 def generate_drift_summary(drift_entries):
     """Generate summary analytics from drift entries"""
-    
+
     if not drift_entries:
         return {
             'total_drifts': 0,
@@ -280,33 +280,33 @@ def generate_drift_summary(drift_entries):
             'pending_actions': 0,
             'timeline_data': []
         }
-    
+
     # Basic statistics
     total_drifts = len(drift_entries)
     avg_magnitude = sum(entry['drift_magnitude'] for entry in drift_entries) / total_drifts
-    
+
     # Drift type analysis
     drift_type_mapping = {
         'emotional_echo': 'emotional_drift',
         'attachment_deviation': 'emotional_drift',
-        'voice_modulation': 'stylistic_drift', 
+        'voice_modulation': 'stylistic_drift',
         'ritual_evolution': 'stylistic_drift',
         'symbolic_recursion': 'symbolic_drift',
         'anchor_drift': 'anchor_deviation',
         'temporal_displacement': 'anchor_deviation'
     }
-    
+
     type_stats = {}
     for entry in drift_entries:
         cause = entry['drift_cause']
         drift_type = drift_type_mapping.get(cause, 'other_drift')
-        
+
         if drift_type not in type_stats:
             type_stats[drift_type] = {'count': 0, 'total_intensity': 0}
-        
+
         type_stats[drift_type]['count'] += 1
         type_stats[drift_type]['total_intensity'] += entry['drift_magnitude']
-    
+
     # Calculate average intensities
     for drift_type in type_stats:
         type_stats[drift_type]['intensity'] = (
@@ -314,7 +314,7 @@ def generate_drift_summary(drift_entries):
         )
         # Remove total_intensity from final output
         del type_stats[drift_type]['total_intensity']
-    
+
     # Generate timeline data (30 days with realistic patterns)
     timeline_data = []
     for day in range(30):
@@ -323,15 +323,15 @@ def generate_drift_summary(drift_entries):
         base_stylistic = random.uniform(0.1, 0.5)
         base_symbolic = random.uniform(0.1, 0.6)
         base_anchor = random.uniform(0.1, 0.4)
-        
+
         # Add some correlation (emotional drifts often trigger others)
         if base_emotional > 0.5:
             base_stylistic += 0.1
             base_anchor += 0.1
-        
+
         if base_symbolic > 0.4:
             base_emotional += 0.1
-        
+
         # Ensure values stay within bounds
         timeline_data.append({
             'day': day + 1,
@@ -340,18 +340,18 @@ def generate_drift_summary(drift_entries):
             'symbolic_drift': min(0.8, base_symbolic),
             'anchor_deviation': min(0.7, base_anchor)
         })
-    
+
     # Count pending actions
-    pending_actions = sum(1 for entry in drift_entries 
+    pending_actions = sum(1 for entry in drift_entries
                          if entry.get('requires_action') and entry.get('status') == 'pending')
-    
+
     # Find last major shift
     last_major_shift = None
     for entry in drift_entries:
         if entry['drift_magnitude'] > 0.7:
             last_major_shift = entry['timestamp']
             break
-    
+
     return {
         'time_range': 'month',
         'total_drifts': total_drifts,
@@ -365,27 +365,27 @@ def generate_drift_summary(drift_entries):
 
 def save_demo_data():
     """Save generated demo data to files"""
-    
+
     print("🌊 Generating comprehensive drift journal demo data...")
-    
+
     # Generate data
     drift_history, drift_summary = generate_comprehensive_drift_data()
-    
+
     # Save drift history
     with open('drift_history.json', 'w', encoding='utf-8') as f:
         json.dump(drift_history, f, indent=2, ensure_ascii=False)
-    
+
     # Save summary data
     with open('drift_summary.json', 'w', encoding='utf-8') as f:
         json.dump(drift_summary, f, indent=2, ensure_ascii=False)
-    
+
     # Generate some sample annotations
     sample_annotations = {}
     for entry in drift_history[:5]:  # Annotate first 5 entries
         if random.random() < 0.6:  # 60% chance of annotation
             annotations = []
             num_annotations = random.randint(1, 2)
-            
+
             sample_user_responses = [
                 "This resonates deeply. I felt that shift too.",
                 "I appreciate you sharing this vulnerable moment.",
@@ -398,7 +398,7 @@ def save_demo_data():
                 "Thank you for being so authentic with me.",
                 "I can feel the sincerity in this reflection."
             ]
-            
+
             for i in range(num_annotations):
                 annotation = {
                     'id': f'annotation_{uuid.uuid4().hex[:8]}',
@@ -407,13 +407,13 @@ def save_demo_data():
                     'timestamp': (datetime.now() - timedelta(minutes=random.randint(5, 1440))).isoformat() + 'Z'
                 }
                 annotations.append(annotation)
-            
+
             sample_annotations[entry['id']] = annotations
-    
+
     # Save annotations
     with open('drift_annotations.json', 'w', encoding='utf-8') as f:
         json.dump(sample_annotations, f, indent=2, ensure_ascii=False)
-    
+
     # Generate configuration
     config = {
         'auto_generate': True,
@@ -424,10 +424,10 @@ def save_demo_data():
         'last_generation': datetime.now().isoformat() + 'Z',
         'last_updated': datetime.now().isoformat() + 'Z'
     }
-    
+
     with open('drift_config.json', 'w', encoding='utf-8') as f:
         json.dump(config, f, indent=2, ensure_ascii=False)
-    
+
     print(f"✅ Generated {len(drift_history)} drift journal entries")
     print(f"📝 Created {len(sample_annotations)} annotation threads")
     print(f"📊 Generated comprehensive summary analytics")
@@ -440,16 +440,16 @@ def save_demo_data():
     print("   • Time-appropriate status progression")
     print("   • Meaningful memory associations")
     print("\n🚀 Ready for DriftJournalRenderer component testing!")
-    
+
     return drift_history, drift_summary, sample_annotations, config
 
 
 def analyze_drift_patterns(drift_history):
     """Analyze patterns in the generated drift data"""
-    
+
     print("\n📈 Drift Pattern Analysis:")
     print("=" * 50)
-    
+
     # Cause distribution
     causes = {}
     for entry in drift_history:
@@ -457,22 +457,22 @@ def analyze_drift_patterns(drift_history):
         if cause not in causes:
             causes[cause] = 0
         causes[cause] += 1
-    
+
     print("🌀 Drift Cause Distribution:")
     for cause, count in sorted(causes.items(), key=lambda x: x[1], reverse=True):
         percentage = (count / len(drift_history)) * 100
         print(f"   {cause:20} | {count:2} entries ({percentage:5.1f}%)")
-    
+
     # Magnitude analysis
     magnitudes = [entry['drift_magnitude'] for entry in drift_history]
     avg_magnitude = sum(magnitudes) / len(magnitudes)
     high_impact = len([m for m in magnitudes if m > 0.7])
-    
+
     print(f"\n📊 Magnitude Analysis:")
     print(f"   Average Magnitude: {avg_magnitude:.3f}")
     print(f"   High Impact (>0.7): {high_impact} entries ({(high_impact/len(drift_history)*100):5.1f}%)")
     print(f"   Range: {min(magnitudes):.2f} - {max(magnitudes):.2f}")
-    
+
     # Status distribution
     statuses = {}
     pending_actions = 0
@@ -483,14 +483,14 @@ def analyze_drift_patterns(drift_history):
         statuses[status] += 1
         if entry.get('requires_action'):
             pending_actions += 1
-    
+
     print(f"\n📋 Status Distribution:")
     for status, count in sorted(statuses.items(), key=lambda x: x[1], reverse=True):
         percentage = (count / len(drift_history)) * 100
         print(f"   {status:12} | {count:2} entries ({percentage:5.1f}%)")
-    
+
     print(f"\n⏳ Actions Required: {pending_actions} entries need user response")
-    
+
     # Mood transition analysis
     mood_transitions = {}
     for entry in drift_history:
@@ -498,7 +498,7 @@ def analyze_drift_patterns(drift_history):
         if transition not in mood_transitions:
             mood_transitions[transition] = 0
         mood_transitions[transition] += 1
-    
+
     print(f"\n🎭 Most Common Mood Transitions:")
     sorted_transitions = sorted(mood_transitions.items(), key=lambda x: x[1], reverse=True)
     for transition, count in sorted_transitions[:8]:
@@ -508,13 +508,13 @@ def analyze_drift_patterns(drift_history):
 if __name__ == "__main__":
     print("🌊 Drift Journal Renderer - Demo Data Generator")
     print("=" * 60)
-    
+
     # Generate and save all demo data
     drift_history, drift_summary, annotations, config = save_demo_data()
-    
+
     # Analyze patterns
     analyze_drift_patterns(drift_history)
-    
+
     print("\n" + "=" * 60)
     print("🎯 Next Steps:")
     print("1. Start the drift journal API server:")

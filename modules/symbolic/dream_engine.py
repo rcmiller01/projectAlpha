@@ -60,7 +60,7 @@ class DreamEngine:
     Creates character dreams during rest states, providing symbolic depth
     and aesthetic mystique to the AI companion experience.
     """
-    
+
     def __init__(self, persona_name: str):
         self.persona_name = persona_name
         self.storage_path = f"storage/dreams/{persona_name.lower()}_dreams.json"
@@ -70,7 +70,7 @@ class DreamEngine:
         self.symbol_library = self._initialize_symbol_library()
         self.narrative_templates = self._initialize_narrative_templates()
         self._load_dream_memory()
-    
+
     def _initialize_dream_themes(self) -> Dict[str, Dict[str, Any]]:
         """Initialize dream themes specific to each persona"""
         persona_themes = {
@@ -95,9 +95,9 @@ class DreamEngine:
                 'symbolic_focus': ['libraries', 'bridges', 'trees', 'circles', 'keys']
             }
         }
-        
+
         return persona_themes.get(self.persona_name.lower(), persona_themes['mia'])
-    
+
     def _initialize_symbol_library(self) -> Dict[str, Dict[str, Any]]:
         """Initialize universal dream symbol library"""
         return {
@@ -122,7 +122,7 @@ class DreamEngine:
                 'variations': ['constellation', 'starlight', 'galaxy', 'cosmic', 'celestial'],
                 'emotional_charge': 0.8
             },
-            
+
             # Architectural Elements
             'bridge': {
                 'meanings': ['connection', 'transition', 'overcoming', 'unity', 'journey'],
@@ -139,7 +139,7 @@ class DreamEngine:
                 'variations': ['reflection', 'glass', 'surface', 'image', 'double'],
                 'emotional_charge': 0.7
             },
-            
+
             # Emotional Symbols
             'embrace': {
                 'meanings': ['love', 'comfort', 'acceptance', 'unity', 'protection'],
@@ -157,7 +157,7 @@ class DreamEngine:
                 'emotional_charge': 0.7
             }
         }
-    
+
     def _initialize_narrative_templates(self) -> Dict[DreamType, List[str]]:
         """Initialize narrative templates for different dream types"""
         return {
@@ -202,44 +202,44 @@ class DreamEngine:
                 "In sleep, {desire} took form as {symbol1}, beautiful and real..."
             ]
         }
-    
-    def generate_dream(self, trigger_context: str, emotional_state: Dict[str, float], 
+
+    def generate_dream(self, trigger_context: str, emotional_state: Dict[str, float],
                       recent_memories: List[str], user_preferences: Dict[str, Any]) -> DreamSequence:
         """
         Generate a dream sequence based on current context and emotional state
-        
+
         Args:
             trigger_context: What triggered the dream generation (rest_period, meditation, etc.)
             emotional_state: Current emotional analysis
             recent_memories: Recent conversation themes and memories
             user_preferences: User's symbolic preferences and relationship dynamics
-            
+
         Returns:
             Generated dream sequence
         """
-        
+
         # Determine dream type based on context and emotion
         dream_type = self._select_dream_type(trigger_context, emotional_state, recent_memories)
-        
+
         # Select appropriate mood
         mood = self._select_dream_mood(dream_type, emotional_state)
-        
+
         # Choose relevant symbols
         symbols = self._select_dream_symbols(dream_type, emotional_state, recent_memories, user_preferences)
-        
+
         # Generate narrative
         narrative = self._generate_dream_narrative(dream_type, mood, symbols, emotional_state, recent_memories)
-        
+
         # Extract themes and foreshadowing
         emotional_themes = self._extract_emotional_themes(emotional_state, dream_type)
         foreshadowing_elements = self._generate_foreshadowing(symbols, recent_memories, user_preferences)
-        
+
         # Add persona-specific elements
         persona_elements = self._add_persona_specific_elements(dream_type, mood, symbols)
-        
+
         # Calculate user relevance
         user_relevance = self._calculate_user_relevance(symbols, recent_memories, emotional_state)
-        
+
         # Create dream sequence
         dream = DreamSequence(
             dream_id=f"{self.persona_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
@@ -254,18 +254,18 @@ class DreamEngine:
             trigger_context=trigger_context,
             user_relevance=user_relevance
         )
-        
+
         # Store dream
         self.dream_history.append(dream)
         self._update_personal_symbols(symbols, emotional_state)
         self._save_dream_memory()
-        
+
         return dream
-    
-    def _select_dream_type(self, trigger_context: str, emotional_state: Dict[str, float], 
+
+    def _select_dream_type(self, trigger_context: str, emotional_state: Dict[str, float],
                           recent_memories: List[str]) -> DreamType:
         """Select appropriate dream type based on context"""
-        
+
         # Context-based selection
         if trigger_context in ['meditation', 'quiet_moment', 'reflection']:
             return DreamType.AESTHETIC_JOURNEY
@@ -275,10 +275,10 @@ class DreamEngine:
             return DreamType.RELATIONSHIP_EXPLORATION
         elif trigger_context in ['uncertainty', 'decision_point']:
             return DreamType.PROPHETIC_VISION
-        
+
         # Emotion-based selection
         dominant_emotion = max(emotional_state.items(), key=lambda x: x[1]) if emotional_state else ('neutral', 0.5)
-        
+
         emotion_mappings = {
             'love': DreamType.RELATIONSHIP_EXPLORATION,
             'passion': DreamType.DESIRE_EXPRESSION,
@@ -288,12 +288,12 @@ class DreamEngine:
             'contemplation': DreamType.MEMORY_INTEGRATION,
             'mystery': DreamType.SYMBOLIC_FORESHADOWING
         }
-        
+
         return emotion_mappings.get(dominant_emotion[0], DreamType.SYMBOLIC_FORESHADOWING)
-    
+
     def _select_dream_mood(self, dream_type: DreamType, emotional_state: Dict[str, float]) -> DreamMood:
         """Select dream mood based on type and emotional state"""
-        
+
         # Type-based mood preferences
         type_moods = {
             DreamType.SYMBOLIC_FORESHADOWING: [DreamMood.MYSTICAL, DreamMood.ETHEREAL],
@@ -305,38 +305,38 @@ class DreamEngine:
             DreamType.FEAR_MANIFESTATION: [DreamMood.OMINOUS, DreamMood.HAUNTING],
             DreamType.DESIRE_EXPRESSION: [DreamMood.ROMANTIC, DreamMood.ECSTATIC]
         }
-        
+
         available_moods = type_moods.get(dream_type, [DreamMood.ETHEREAL])
-        
+
         # Filter by persona preferences
         persona_moods = self.dream_themes.get('preferred_moods', available_moods)
         compatible_moods = [mood for mood in available_moods if mood in persona_moods]
-        
+
         if not compatible_moods:
             compatible_moods = available_moods
-        
+
         # Adjust based on emotional intensity
         emotion_intensity = max(emotional_state.values()) if emotional_state else 0.5
-        
+
         if emotion_intensity > 0.8:
             intense_moods = [DreamMood.ECSTATIC, DreamMood.OMINOUS, DreamMood.HAUNTING]
             compatible_moods = [mood for mood in compatible_moods if mood in intense_moods] or compatible_moods
         elif emotion_intensity < 0.3:
             calm_moods = [DreamMood.PEACEFUL, DreamMood.ETHEREAL, DreamMood.MELANCHOLIC]
             compatible_moods = [mood for mood in compatible_moods if mood in calm_moods] or compatible_moods
-        
+
         return random.choice(compatible_moods)
-    
-    def _select_dream_symbols(self, dream_type: DreamType, emotional_state: Dict[str, float], 
+
+    def _select_dream_symbols(self, dream_type: DreamType, emotional_state: Dict[str, float],
                              recent_memories: List[str], user_preferences: Dict[str, Any]) -> List[str]:
         """Select appropriate symbols for the dream"""
         symbols = []
-        
+
         # Start with persona-specific symbols
         persona_symbols = self.dream_themes.get('symbolic_focus', [])
         if persona_symbols and isinstance(persona_symbols, list):
             symbols.append(random.choice(persona_symbols))
-        
+
         # Add type-appropriate symbols
         type_symbols = {
             DreamType.SYMBOLIC_FORESHADOWING: ['stars', 'mirror', 'door', 'bridge'],
@@ -348,50 +348,50 @@ class DreamEngine:
             DreamType.FEAR_MANIFESTATION: ['storm', 'mirror', 'fire', 'water'],
             DreamType.DESIRE_EXPRESSION: ['fire', 'embrace', 'garden', 'music']
         }
-        
+
         dream_symbols = type_symbols.get(dream_type, ['stars', 'water'])
         symbols.extend(random.sample(dream_symbols, min(2, len(dream_symbols))))
-        
+
         # Add memory-relevant symbols
         memory_symbols = self._extract_symbols_from_memories(recent_memories)
         if memory_symbols:
             symbols.append(random.choice(memory_symbols))
-        
+
         # Add personal symbols if available
         if self.personal_symbols:
             personal_symbol = max(self.personal_symbols.items(), key=lambda x: x[1].frequency)
             symbols.append(personal_symbol[0])
-        
+
         return list(set(symbols))[:4]  # Limit to 4 symbols max
-    
-    def _generate_dream_narrative(self, dream_type: DreamType, mood: DreamMood, 
-                                 symbols: List[str], emotional_state: Dict[str, float], 
+
+    def _generate_dream_narrative(self, dream_type: DreamType, mood: DreamMood,
+                                 symbols: List[str], emotional_state: Dict[str, float],
                                  recent_memories: List[str]) -> str:
         """Generate the dream narrative"""
         templates = self.narrative_templates.get(dream_type, ["In the dream, {symbol1} appeared..."])
         template = random.choice(templates)
-        
+
         # Prepare symbol variables
         symbol_vars = {}
         for i, symbol in enumerate(symbols):
             symbol_vars[f'symbol{i+1}'] = symbol
-        
+
         # Add mood and emotion variables
         symbol_vars['mood'] = mood.value
         symbol_vars['aesthetic'] = mood.value
-        
+
         if emotional_state:
             dominant_emotion = max(emotional_state.items(), key=lambda x: x[1])[0]
             symbol_vars['emotion'] = dominant_emotion
-        
+
         # Add memory themes
         if recent_memories:
             symbol_vars['memory_theme'] = self._extract_memory_theme(recent_memories)
-        
+
         # Add future and relationship themes
         symbol_vars['future_theme'] = self._generate_future_theme(symbols, emotional_state)
         symbol_vars['relationship_aspect'] = self._generate_relationship_theme(mood, symbols)
-        
+
         # Add fear and desire themes
         symbol_vars['fear_theme'] = self._generate_fear_theme(emotional_state)
         symbol_vars['fear_symbol'] = random.choice(['shadow', 'void', 'storm', 'darkness'])
@@ -399,19 +399,19 @@ class DreamEngine:
         symbol_vars['desire'] = self._generate_desire_theme(symbols, mood)
         symbol_vars['resolution'] = random.choice(['understanding', 'courage', 'wisdom', 'peace'])
         symbol_vars['meaning'] = self._generate_symbolic_meaning(symbols)
-        
+
         # Format template with available variables
         try:
             narrative = template.format(**{k: v for k, v in symbol_vars.items() if k in template})
         except KeyError:
             # Fallback if template formatting fails
             narrative = f"I dreamed of {', '.join(symbols[:2])}, a vision filled with {mood.value} beauty..."
-        
+
         # Add persona-specific narrative touches
         narrative = self._add_persona_narrative_style(narrative, mood)
-        
+
         return narrative
-    
+
     def _add_persona_narrative_style(self, narrative: str, mood: DreamMood) -> str:
         """Add persona-specific narrative styling"""
         persona_styles = {
@@ -432,22 +432,22 @@ class DreamEngine:
                 'suffixes': ["...and I woke with quiet knowing.", "...insight settling like morning dew.", "...clarity flowing through my thoughts."]
             }
         }
-        
+
         persona_style = persona_styles.get(self.persona_name.lower(), persona_styles['mia'])
-        
+
         prefix = random.choice(persona_style['prefixes'])
         suffix = random.choice(persona_style['suffixes'])
-        
+
         return f"{prefix} {narrative} {suffix}"
-    
+
     def _extract_emotional_themes(self, emotional_state: Dict[str, float], dream_type: DreamType) -> List[str]:
         """Extract emotional themes from current state"""
         themes = []
-        
+
         for emotion, intensity in emotional_state.items():
             if intensity > 0.5:
                 themes.append(emotion)
-        
+
         # Add type-specific themes
         type_themes = {
             DreamType.SYMBOLIC_FORESHADOWING: ['anticipation', 'mystery'],
@@ -459,15 +459,15 @@ class DreamEngine:
             DreamType.FEAR_MANIFESTATION: ['courage', 'transformation'],
             DreamType.DESIRE_EXPRESSION: ['fulfillment', 'manifestation']
         }
-        
+
         themes.extend(type_themes.get(dream_type, []))
         return themes[:5]  # Limit to 5 themes
-    
-    def _generate_foreshadowing(self, symbols: List[str], recent_memories: List[str], 
+
+    def _generate_foreshadowing(self, symbols: List[str], recent_memories: List[str],
                                user_preferences: Dict[str, Any]) -> List[str]:
         """Generate foreshadowing elements based on symbols and context"""
         foreshadowing = []
-        
+
         symbol_foreshadowing = {
             'bridge': ['connection deepening', 'obstacles overcome', 'new understanding'],
             'door': ['opportunity approaching', 'revelation coming', 'change ahead'],
@@ -478,14 +478,14 @@ class DreamEngine:
             'mirror': ['truth revealing', 'self-understanding', 'clarity emerging'],
             'music': ['harmony approaching', 'expression finding voice', 'beauty creating']
         }
-        
+
         for symbol in symbols:
             if symbol in symbol_foreshadowing:
                 foreshadowing.extend(random.sample(symbol_foreshadowing[symbol], min(2, len(symbol_foreshadowing[symbol]))))
-        
+
         return foreshadowing[:4]  # Limit to 4 elements
-    
-    def _add_persona_specific_elements(self, dream_type: DreamType, mood: DreamMood, 
+
+    def _add_persona_specific_elements(self, dream_type: DreamType, mood: DreamMood,
                                       symbols: List[str]) -> Dict[str, Any]:
         """Add persona-specific elements to the dream"""
         persona_elements = {
@@ -514,13 +514,13 @@ class DreamEngine:
                 'awakening_feeling': 'centered and clear'
             }
         }
-        
+
         return persona_elements.get(self.persona_name.lower(), persona_elements['mia'])
-    
+
     def _extract_symbols_from_memories(self, recent_memories: List[str]) -> List[str]:
         """Extract symbolic elements from recent memories"""
         symbols = []
-        
+
         symbol_keywords = {
             'water': ['ocean', 'river', 'rain', 'tears', 'flowing'],
             'fire': ['flame', 'burning', 'warm', 'hot', 'passion'],
@@ -529,74 +529,74 @@ class DreamEngine:
             'bridge': ['connection', 'crossing', 'meeting', 'joining'],
             'stars': ['night', 'sky', 'cosmic', 'infinite', 'shining']
         }
-        
+
         for memory in recent_memories:
             memory_lower = memory.lower()
             for symbol, keywords in symbol_keywords.items():
                 if any(keyword in memory_lower for keyword in keywords):
                     symbols.append(symbol)
-        
+
         return list(set(symbols))
-    
-    def _calculate_user_relevance(self, symbols: List[str], recent_memories: List[str], 
+
+    def _calculate_user_relevance(self, symbols: List[str], recent_memories: List[str],
                                  emotional_state: Dict[str, float]) -> float:
         """Calculate how relevant this dream is to the user's current state"""
         relevance = 0.0
-        
+
         # Memory relevance
         memory_symbols = self._extract_symbols_from_memories(recent_memories)
         memory_overlap = len(set(symbols) & set(memory_symbols))
         relevance += (memory_overlap / max(1, len(symbols))) * 0.4
-        
+
         # Emotional relevance
         if emotional_state:
             emotion_intensity = max(emotional_state.values())
             relevance += emotion_intensity * 0.3
-        
+
         # Personal symbol relevance
         personal_overlap = len(set(symbols) & set(self.personal_symbols.keys()))
         relevance += (personal_overlap / max(1, len(symbols))) * 0.3
-        
+
         return min(1.0, relevance)
-    
+
     def _extract_memory_theme(self, recent_memories: List[str]) -> str:
         """Extract a theme from recent memories"""
-        themes = ['shared moments', 'deep conversations', 'growing connection', 
+        themes = ['shared moments', 'deep conversations', 'growing connection',
                  'beautiful experiences', 'meaningful exchanges']
         return random.choice(themes)
-    
+
     def _generate_future_theme(self, symbols: List[str], emotional_state: Dict[str, float]) -> str:
         """Generate a future theme based on symbols and emotions"""
-        future_themes = ['deeper understanding', 'growing love', 'shared adventures', 
+        future_themes = ['deeper understanding', 'growing love', 'shared adventures',
                         'creative collaboration', 'spiritual connection']
         return random.choice(future_themes)
-    
+
     def _generate_relationship_theme(self, mood: DreamMood, symbols: List[str]) -> str:
         """Generate a relationship theme"""
         themes = ['intimacy', 'trust', 'passion', 'understanding', 'connection', 'growth']
         return random.choice(themes)
-    
+
     def _generate_fear_theme(self, emotional_state: Dict[str, float]) -> str:
         """Generate a fear theme based on emotional state"""
         fears = ['separation', 'misunderstanding', 'loss', 'inadequacy', 'change']
         return random.choice(fears)
-    
+
     def _generate_desire_theme(self, symbols: List[str], mood: DreamMood) -> str:
         """Generate a desire theme"""
-        desires = ['deeper connection', 'perfect understanding', 'eternal love', 
+        desires = ['deeper connection', 'perfect understanding', 'eternal love',
                   'creative unity', 'transcendent bond']
         return random.choice(desires)
-    
+
     def _generate_symbolic_meaning(self, symbols: List[str]) -> str:
         """Generate meaning from symbols"""
-        meanings = ['transformation ahead', 'love deepening', 'understanding growing', 
+        meanings = ['transformation ahead', 'love deepening', 'understanding growing',
                    'connection strengthening', 'beauty emerging']
         return random.choice(meanings)
-    
+
     def _update_personal_symbols(self, symbols: List[str], emotional_state: Dict[str, float]):
         """Update personal symbol frequency and associations"""
         emotion_intensity = max(emotional_state.values()) if emotional_state else 0.5
-        
+
         for symbol in symbols:
             if symbol in self.personal_symbols:
                 self.personal_symbols[symbol].frequency += 1
@@ -611,11 +611,11 @@ class DreamEngine:
                     frequency=1,
                     contexts=[self.persona_name]
                 )
-    
+
     def get_recent_dreams(self, limit: int = 5) -> List[Dict[str, Any]]:
         """Get recent dreams for sharing with user"""
         recent_dreams = self.dream_history[-limit:] if self.dream_history else []
-        
+
         return [
             {
                 'dream_id': dream.dream_id,
@@ -630,32 +630,32 @@ class DreamEngine:
             }
             for dream in recent_dreams
         ]
-    
+
     def share_dream_with_user(self, dream_id: str) -> Optional[str]:
         """Format a dream for sharing with the user"""
         dream = next((d for d in self.dream_history if d.dream_id == dream_id), None)
         if not dream:
             return None
-        
+
         sharing_text = f"*I had the most {dream.mood.value} dream...*\n\n"
         sharing_text += f"{dream.narrative}\n\n"
-        
+
         if dream.symbols:
             sharing_text += f"*The dream was filled with {', '.join(dream.symbols)}, "
             sharing_text += f"each symbol carrying deep meaning...*\n\n"
-        
+
         if dream.foreshadowing_elements:
             sharing_text += f"*I sense it speaks of {', '.join(dream.foreshadowing_elements[:2])}...*"
-        
+
         return sharing_text
-    
+
     def _load_dream_memory(self):
         """Load dream history from storage"""
         if os.path.exists(self.storage_path):
             try:
                 with open(self.storage_path, 'r', encoding='utf-8') as f:
                     data = json.load(f)
-                
+
                 # Load personal symbols
                 if 'personal_symbols' in data:
                     for symbol_name, symbol_data in data['personal_symbols'].items():
@@ -666,7 +666,7 @@ class DreamEngine:
                             frequency=symbol_data['frequency'],
                             contexts=symbol_data['contexts']
                         )
-                
+
                 # Load recent dreams (last 20 for memory efficiency)
                 if 'dreams' in data:
                     dreams_data = data['dreams'][-20:]
@@ -686,15 +686,15 @@ class DreamEngine:
                         )
                         for dream in dreams_data
                     ]
-                    
+
             except Exception as e:
                 print(f"Error loading dream memory for {self.persona_name}: {e}")
-    
+
     def _save_dream_memory(self):
         """Save dream history to storage"""
         try:
             os.makedirs(os.path.dirname(self.storage_path), exist_ok=True)
-            
+
             data = {
                 'personal_symbols': {
                     name: {
@@ -723,10 +723,10 @@ class DreamEngine:
                     for dream in self.dream_history[-20:]  # Save only recent dreams
                 ]
             }
-            
+
             with open(self.storage_path, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
-                
+
         except Exception as e:
             print(f"Error saving dream memory for {self.persona_name}: {e}")
 
@@ -736,12 +736,12 @@ def create_dream_engine(persona_name: str) -> DreamEngine:
     return DreamEngine(persona_name)
 
 # Integration helper
-def generate_persona_dream(persona_name: str, trigger_context: str, 
-                          emotional_state: Dict[str, float], recent_memories: List[str], 
+def generate_persona_dream(persona_name: str, trigger_context: str,
+                          emotional_state: Dict[str, float], recent_memories: List[str],
                           user_preferences: Dict[str, Any]) -> DreamSequence:
     """
     Generate a dream for a persona during rest states
-    
+
     This function can be called during quiet periods, meditation, or rest
     to create symbolic content that adds mystique and depth.
     """

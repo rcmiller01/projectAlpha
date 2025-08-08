@@ -55,13 +55,13 @@ class InnerMonologue:
 
             if idle_time > self.idle_threshold_seconds:
                 logger.info(f"User has been idle for {idle_time:.0f} seconds. Triggering inner reflection.")
-                
+
                 # Trigger a daily reflection cycle
                 try:
                     summary = self.emotion_reflector.run_daily_reflection()
                     logger.info(f"Inner reflection complete. Dominant emotion: {summary.dominant_emotion}")
                     # Reset timer after reflection to avoid continuous looping
-                    self.record_user_interaction() 
+                    self.record_user_interaction()
                 except Exception as e:
                     logger.error(f"An error occurred during inner reflection: {e}")
 
@@ -101,7 +101,7 @@ async def main():
             await asyncio.sleep(5)
             monologue.record_user_interaction()
             print(f"[{time.time():.0f}] User interaction occurred.")
-        
+
         print("\nSimulating user going idle. Reflection should trigger in 10 seconds.")
         await asyncio.sleep(35) # Wait for reflection to run and then some
 
@@ -116,5 +116,5 @@ if __name__ == "__main__":
     # To run this example, you might need to ensure the data directories exist
     if not os.path.exists("data/reflection"):
         os.makedirs("data/reflection")
-        
+
     asyncio.run(main())

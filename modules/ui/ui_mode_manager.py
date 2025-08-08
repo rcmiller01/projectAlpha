@@ -30,7 +30,7 @@ class UIModeManager:
         self.current_mode = UIMode.COMPANION
         self.current_interface = InterfaceType.WEB
         self.ui_settings = {}
-        
+
         # Mode-specific configurations
         self.mode_configs = {
             UIMode.COMPANION: {
@@ -82,7 +82,7 @@ class UIModeManager:
                 }
             }
         }
-        
+
         # Interface-specific configurations
         self.interface_configs = {
             InterfaceType.WEB: {
@@ -104,10 +104,10 @@ class UIModeManager:
                 "screen_size": "desktop"
             }
         }
-        
+
         # Initialize default settings
         self._initialize_settings()
-    
+
     def _initialize_settings(self):
         """Initialize default UI settings"""
         self.ui_settings = {
@@ -117,39 +117,39 @@ class UIModeManager:
             "interface_config": self.interface_configs[self.current_interface],
             "last_updated": datetime.now().isoformat()
         }
-    
+
     def switch_mode(self, new_mode: UIMode) -> Dict:
         """Switch between companion and dev modes"""
         if new_mode not in self.mode_configs:
             return {"error": "Invalid UI mode"}
-        
+
         self.current_mode = new_mode
         self.ui_settings["current_mode"] = new_mode.value
         self.ui_settings["mode_config"] = self.mode_configs[new_mode]
         self.ui_settings["last_updated"] = datetime.now().isoformat()
-        
+
         return {
             "message": f"Switched to {new_mode.value} mode",
             "new_mode": new_mode.value,
             "ui_settings": self.ui_settings
         }
-    
+
     def set_interface_type(self, interface_type: InterfaceType) -> Dict:
         """Set interface type (web, mobile, desktop)"""
         if interface_type not in self.interface_configs:
             return {"error": "Invalid interface type"}
-        
+
         self.current_interface = interface_type
         self.ui_settings["current_interface"] = interface_type.value
         self.ui_settings["interface_config"] = self.interface_configs[interface_type]
         self.ui_settings["last_updated"] = datetime.now().isoformat()
-        
+
         return {
             "message": f"Interface set to {interface_type.value}",
             "interface_type": interface_type.value,
             "ui_settings": self.ui_settings
         }
-    
+
     def get_current_ui_config(self) -> Dict:
         """Get current UI configuration"""
         return {
@@ -160,31 +160,31 @@ class UIModeManager:
             "theme": self.ui_settings["mode_config"]["theme"],
             "layout": self.ui_settings["mode_config"]["layout"]
         }
-    
+
     def is_avatar_visible(self) -> bool:
         """Check if avatar should be visible in current mode"""
         return self.ui_settings["mode_config"]["avatar_visible"]
-    
+
     def is_feature_enabled(self, feature: str) -> bool:
         """Check if a specific feature is enabled in current mode"""
         features = self.ui_settings["mode_config"]["features"]
         return features.get(feature, False)
-    
+
     def get_persona_config(self, persona_id: str) -> Dict:
         """Get configuration for a specific persona in current mode"""
         personas = self.ui_settings["mode_config"]["personas"]
         return personas.get(persona_id, {})
-    
+
     def is_persona_avatar_enabled(self, persona_id: str) -> bool:
         """Check if avatar is enabled for a specific persona in current mode"""
         persona_config = self.get_persona_config(persona_id)
         return persona_config.get("avatar_enabled", False)
-    
+
     def is_persona_emotional_hooks_enabled(self, persona_id: str) -> bool:
         """Check if emotional hooks are enabled for a specific persona in current mode"""
         persona_config = self.get_persona_config(persona_id)
         return persona_config.get("emotional_hooks", False)
-    
+
     def get_available_personas(self) -> Dict:
         """Get all available personas and their configurations"""
         return {
@@ -195,43 +195,43 @@ class UIModeManager:
                 "description": "Adaptive AI companion with contextual personality adaptation"
             }
         }
-    
+
     def get_ui_elements_config(self) -> Dict:
         """Get UI elements configuration for current mode"""
         return self.ui_settings["mode_config"]["ui_elements"]
-    
+
     def get_interface_config(self) -> Dict:
         """Get interface-specific configuration"""
         return self.ui_settings["interface_config"]
-    
+
     def customize_mode(self, mode: UIMode, customizations: Dict) -> Dict:
         """Customize mode-specific settings"""
         if mode not in self.mode_configs:
             return {"error": "Invalid mode"}
-        
+
         # Update mode configuration
         if "features" in customizations:
             self.mode_configs[mode]["features"].update(customizations["features"])
-        
+
         if "ui_elements" in customizations:
             self.mode_configs[mode]["ui_elements"].update(customizations["ui_elements"])
-        
+
         if "theme" in customizations:
             self.mode_configs[mode]["theme"] = customizations["theme"]
-        
+
         if "layout" in customizations:
             self.mode_configs[mode]["layout"] = customizations["layout"]
-        
+
         # Update current settings if this is the active mode
         if mode == self.current_mode:
             self.ui_settings["mode_config"] = self.mode_configs[mode]
             self.ui_settings["last_updated"] = datetime.now().isoformat()
-        
+
         return {
             "message": f"Customized {mode.value} mode",
             "updated_config": self.mode_configs[mode]
         }
-    
+
     def get_mode_comparison(self) -> Dict:
         """Get comparison between companion and dev modes"""
         comparison = {
@@ -250,9 +250,9 @@ class UIModeManager:
                 "best_for": ["development", "testing", "professional use"]
             }
         }
-        
+
         return comparison
-    
+
     def get_interface_recommendations(self) -> Dict:
         """Get interface recommendations based on current mode"""
         recommendations = {
@@ -267,9 +267,9 @@ class UIModeManager:
                 InterfaceType.DESKTOP: "Best for development with full keyboard shortcuts"
             }
         }
-        
+
         return recommendations.get(self.current_mode, {})
-    
+
     def export_ui_config(self) -> Dict:
         """Export current UI configuration"""
         return {
@@ -278,24 +278,24 @@ class UIModeManager:
             "mode_configs": self.mode_configs,
             "interface_configs": self.interface_configs
         }
-    
+
     def import_ui_config(self, config: Dict) -> Dict:
         """Import UI configuration"""
         if "ui_settings" in config:
             self.ui_settings = config["ui_settings"]
             self.current_mode = UIMode(self.ui_settings["current_mode"])
             self.current_interface = InterfaceType(self.ui_settings["current_interface"])
-        
+
         if "mode_configs" in config:
             self.mode_configs.update(config["mode_configs"])
-        
+
         if "interface_configs" in config:
             self.interface_configs.update(config["interface_configs"])
-        
+
         return {
             "message": "UI configuration imported successfully",
             "current_config": self.get_current_ui_config()
         }
 
 # Global UI mode manager instance
-ui_mode_manager = UIModeManager() 
+ui_mode_manager = UIModeManager()

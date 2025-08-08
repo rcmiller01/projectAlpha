@@ -126,11 +126,11 @@ const Projects = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <Card sx={{ 
-                height: '100%', 
-                display: 'flex', 
+              <Card sx={{
+                height: '100%',
+                display: 'flex',
                 flexDirection: 'column',
-                '&:hover': { 
+                '&:hover': {
                   boxShadow: 4,
                   transform: 'translateY(-2px)',
                   transition: 'all 0.2s ease-in-out'
@@ -158,7 +158,7 @@ const Projects = () => {
                   {/* Tags */}
                   <Box sx={{ mb: 2 }}>
                     {project.tags?.map((tag) => (
-                      <Chip 
+                      <Chip
                         key={tag}
                         label={tag}
                         size="small"
@@ -178,9 +178,9 @@ const Projects = () => {
                         {project.progress}%
                       </Typography>
                     </Box>
-                    <LinearProgress 
-                      variant="determinate" 
-                      value={project.progress} 
+                    <LinearProgress
+                      variant="determinate"
+                      value={project.progress}
                       sx={{ height: 6, borderRadius: 3 }}
                     />
                   </Box>
@@ -200,18 +200,18 @@ const Projects = () => {
 
                   {/* Status and Priority */}
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                    <Chip 
+                    <Chip
                       label={project.status}
                       size="small"
                       color={getStatusColor(project.status)}
                     />
-                    <Chip 
+                    <Chip
                       label={`${project.priority} priority`}
                       size="small"
                       color={getPriorityColor(project.priority)}
                       variant="outlined"
                     />
-                    <Chip 
+                    <Chip
                       label={project.type}
                       size="small"
                       variant="outlined"
@@ -222,9 +222,9 @@ const Projects = () => {
                 {/* Actions */}
                 <Box sx={{ p: 2, pt: 0 }}>
                   <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Button 
-                      variant="outlined" 
-                      size="small" 
+                    <Button
+                      variant="outlined"
+                      size="small"
                       fullWidth
                       onClick={() => {
                         // TODO: Navigate to project detail view
@@ -233,7 +233,7 @@ const Projects = () => {
                     >
                       Open
                     </Button>
-                    <IconButton 
+                    <IconButton
                       size="small"
                       onClick={() => {
                         // TODO: Archive project

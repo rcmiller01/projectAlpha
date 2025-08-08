@@ -18,7 +18,7 @@ from .security import (
 
 __all__ = [
     'mask_token',
-    'is_admin', 
+    'is_admin',
     'require_scope',
     'require_layer_access',
     'validate_json_schema',

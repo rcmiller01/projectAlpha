@@ -31,7 +31,7 @@ class ConsistentCharacterGenerator:
         # Character consistency settings
         self.character_seeds = {}  # persona_id -> CharacterSeed
         self.character_profiles = {}  # persona_id -> character_profile
-        
+
         # Base character templates for different personas
         self.persona_templates = {
             "mia": {
@@ -130,7 +130,7 @@ class ConsistentCharacterGenerator:
                 "specializations": ["coding", "debugging", "technical_analysis"]
             }
         }
-        
+
         # Character generation models
         self.generation_models = {
             "face": {
@@ -140,7 +140,7 @@ class ConsistentCharacterGenerator:
             },
             "body": {
                 "model": "stable-diffusion-xl-body",
-                "lora": "consistent_body_v1", 
+                "lora": "consistent_body_v1",
                 "strength": 0.7
             },
             "full": {
@@ -149,19 +149,19 @@ class ConsistentCharacterGenerator:
                 "strength": 0.9
             }
         }
-    
+
     def initialize_character(self, persona_id: str) -> Dict:
         """Initialize a new character with consistent seeds"""
         if persona_id not in self.persona_templates:
             return {"error": "Unknown persona"}
-        
+
         # Generate consistent seeds
         base_seed = self._generate_base_seed(persona_id)
         aspect_seeds = {}
-        
+
         for aspect in CharacterAspect:
             aspect_seeds[aspect] = self._generate_aspect_seed(persona_id, aspect)
-        
+
         # Create character seed
         character_seed = CharacterSeed(
             persona_id=persona_id,
@@ -169,9 +169,9 @@ class ConsistentCharacterGenerator:
             aspect_seeds=aspect_seeds,
             last_updated=datetime.now()
         )
-        
+
         self.character_seeds[persona_id] = character_seed
-        
+
         # Create character profile
         template = self.persona_templates[persona_id]
         character_profile = {
@@ -182,9 +182,9 @@ class ConsistentCharacterGenerator:
             "customizations": {},
             "generation_history": []
         }
-        
+
         self.character_profiles[persona_id] = character_profile
-        
+
         return {
             "message": f"Character initialized for {persona_id}",
             "character_profile": character_profile,
@@ -193,37 +193,37 @@ class ConsistentCharacterGenerator:
                 "aspect_seeds": {k.value: v for k, v in aspect_seeds.items()}
             }
         }
-    
+
     def _generate_base_seed(self, persona_id: str) -> int:
         """Generate consistent base seed for persona"""
         hash_input = f"{persona_id}_base_character"
         hash_result = hashlib.md5(hash_input.encode()).hexdigest()
         return int(hash_result[:8], 16)
-    
+
     def _generate_aspect_seed(self, persona_id: str, aspect: CharacterAspect) -> int:
         """Generate consistent seed for specific aspect"""
         hash_input = f"{persona_id}_{aspect.value}_aspect"
         hash_result = hashlib.md5(hash_input.encode()).hexdigest()
         return int(hash_result[:8], 16)
-    
-    def generate_character_image(self, persona_id: str, aspect: CharacterAspect = CharacterAspect.FULL, 
+
+    def generate_character_image(self, persona_id: str, aspect: CharacterAspect = CharacterAspect.FULL,
                                mood: str = "neutral", pose: str = "standing") -> Dict:
         """Generate consistent character image"""
         if persona_id not in self.character_seeds:
             return {"error": "Character not initialized"}
-        
+
         character_seed = self.character_seeds[persona_id]
         character_profile = self.character_profiles[persona_id]
-        
+
         # Build consistent prompt
         prompt = self._build_character_prompt(character_profile, aspect, mood, pose)
-        
+
         # Get appropriate seed
         if aspect == CharacterAspect.FULL:
             seed = character_seed.base_seed
         else:
             seed = character_seed.aspect_seeds[aspect]
-        
+
         # Generate image parameters
         generation_params = {
             "prompt": prompt,
@@ -235,7 +235,7 @@ class ConsistentCharacterGenerator:
             "guidance_scale": 7.5,
             "resolution": "1024x1024"
         }
-        
+
         # Mock generation result
         result = {
             "success": True,
@@ -253,18 +253,18 @@ class ConsistentCharacterGenerator:
                 }
             }
         }
-        
+
         # Record generation
         self._record_generation(persona_id, result)
-        
+
         return result
-    
+
     def _build_character_prompt(self, profile: Dict, aspect: CharacterAspect, mood: str, pose: str) -> str:
         """Build consistent character prompt"""
         base_appearance = profile["base_appearance"]
         style_prefs = profile["style_preferences"]
         personality = profile["personality_traits"]
-        
+
         # Base character description
         prompt_parts = [
             f"beautiful woman, {base_appearance['age_range']}",
@@ -273,7 +273,7 @@ class ConsistentCharacterGenerator:
             f"{base_appearance['skin_tone']} skin",
             f"{base_appearance['height']} height, {base_appearance['build']} build"
         ]
-        
+
         # Add aspect-specific details
         if aspect == CharacterAspect.FACE:
             prompt_parts.extend([
@@ -295,62 +295,62 @@ class ConsistentCharacterGenerator:
                 f"{style_prefs['clothing_style']} clothing",
                 f"{personality['mood_indicator']}"
             ])
-        
+
         # Add mood and style
         prompt_parts.extend([
             f"{mood} mood",
             f"{personality['pose_style']}",
             "high quality, detailed, beautiful"
         ])
-        
+
         return ", ".join(prompt_parts)
-    
+
     def update_character_appearance(self, persona_id: str, updates: Dict) -> Dict:
         """Allow persona to update their appearance"""
         if persona_id not in self.character_profiles:
             return {"error": "Character not found"}
-        
+
         profile = self.character_profiles[persona_id]
-        
+
         # Update base appearance
         if "base_appearance" in updates:
             profile["base_appearance"].update(updates["base_appearance"])
-        
+
         # Update style preferences
         if "style_preferences" in updates:
             profile["style_preferences"].update(updates["style_preferences"])
-        
+
         # Update personality traits
         if "personality_traits" in updates:
             profile["personality_traits"].update(updates["personality_traits"])
-        
+
         # Add customizations
         if "customizations" in updates:
             profile["customizations"].update(updates["customizations"])
-        
+
         # Update timestamp
         if persona_id in self.character_seeds:
             self.character_seeds[persona_id].last_updated = datetime.now()
-        
+
         return {
             "message": f"Character appearance updated for {persona_id}",
             "updated_profile": profile
         }
-    
+
     def generate_character_video(self, persona_id: str, action: str, duration: int = 3) -> Dict:
         """Generate consistent character video"""
         if persona_id not in self.character_seeds:
             return {"error": "Character not initialized"}
-        
+
         character_profile = self.character_profiles[persona_id]
-        
+
         # Build video prompt
         video_prompt = self._build_character_prompt(character_profile, CharacterAspect.FULL, "neutral", "standing")
         video_prompt += f", {action}, smooth motion, consistent character"
-        
+
         # Get base seed for consistency
         seed = self.character_seeds[persona_id].base_seed
-        
+
         generation_params = {
             "prompt": video_prompt,
             "model": "stable-video-diffusion",
@@ -361,7 +361,7 @@ class ConsistentCharacterGenerator:
             "duration": duration,
             "resolution": "1024x1024"
         }
-        
+
         result = {
             "success": True,
             "persona_id": persona_id,
@@ -376,11 +376,11 @@ class ConsistentCharacterGenerator:
                 }
             }
         }
-        
+
         self._record_generation(persona_id, result)
-        
+
         return result
-    
+
     def _record_generation(self, persona_id: str, result: Dict):
         """Record character generation"""
         if persona_id in self.character_profiles:
@@ -390,33 +390,33 @@ class ConsistentCharacterGenerator:
                 "mood": result.get("mood", "neutral"),
                 "action": result.get("action", "none")
             })
-            
+
             # Keep only last 50 generations
             if len(self.character_profiles[persona_id]["generation_history"]) > 50:
                 self.character_profiles[persona_id]["generation_history"] = \
                     self.character_profiles[persona_id]["generation_history"][-50:]
-    
+
     def get_character_profile(self, persona_id: str) -> Dict:
         """Get character profile"""
         if persona_id not in self.character_profiles:
             return {"error": "Character not found"}
-        
+
         return {
             "message": f"Character profile for {persona_id}",
             "profile": self.character_profiles[persona_id]
         }
-    
+
     def get_character_generation_history(self, persona_id: str, limit: int = 10) -> Dict:
         """Get character generation history"""
         if persona_id not in self.character_profiles:
             return {"error": "Character not found"}
-        
+
         history = self.character_profiles[persona_id]["generation_history"][-limit:]
-        
+
         return {
             "message": f"Generation history for {persona_id}",
             "history": history
         }
 
 # Global character generator instance
-consistent_character_generator = ConsistentCharacterGenerator() 
+consistent_character_generator = ConsistentCharacterGenerator()

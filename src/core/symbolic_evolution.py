@@ -34,7 +34,7 @@ class SymbolicEvolution:
         """Assess symbolic shift pressure based on emotional memory + resonance"""
         resonance = calculate_resonance_score(mood_profile, interaction_vector)
         symbol_salience = self.memory_engine.get_dominant_symbol_vector()
-        
+
         # Simple threshold drift simulation
         if resonance > 0.7 or len(symbol_salience) > 3:
             return "drift_ready"
@@ -48,21 +48,21 @@ class SymbolicEvolution:
             "tempo": self.symbol_style["tempo"],
             "emphasis": self.symbol_style["emphasis"]
         }
-        
+
         # Validate through Mirror if enabled
         if self.mirror_validation_enabled:
             validation_result = self.validate_symbolic_evolution(proposed_style)
-            
+
             if validation_result["approved"]:
                 self.symbol_style.update(proposed_style)
                 self.last_shift = datetime.now()
-                
+
                 # Log approved shift
                 log_symbolic_shift(self.symbol_style)
-                
+
                 # Register with arbiter
                 register_evolution_vector("symbolic", self.symbol_style)
-                
+
                 return self.symbol_style
             else:
                 # Store for manual review if validation failed
@@ -72,26 +72,26 @@ class SymbolicEvolution:
                     "timestamp": datetime.now().isoformat(),
                     "status": "pending_review"
                 })
-                
-                return {"error": "Symbolic evolution rejected by Mirror validation", 
+
+                return {"error": "Symbolic evolution rejected by Mirror validation",
                        "details": validation_result}
         else:
             # Apply without validation
             self.symbol_style.update(proposed_style)
             self.last_shift = datetime.now()
-            
+
             log_symbolic_shift(self.symbol_style)
             register_evolution_vector("symbolic", self.symbol_style)
-            
+
             return self.symbol_style
 
     def validate_symbolic_evolution(self, proposed_style: Dict[str, Any]) -> Dict[str, Any]:
         """
         Validate evolved symbols through Mirror or equivalent validator.
-        
+
         Args:
             proposed_style: The proposed symbolic style changes
-            
+
         Returns:
             Validation result with approval status and reasoning
         """
@@ -104,7 +104,7 @@ class SymbolicEvolution:
                 "issues": [],
                 "recommendations": []
             }
-            
+
             # Validate tone evolution
             tone = proposed_style.get("tone", "")
             if tone in ["gentle", "poetic", "anchored", "measured"]:
@@ -114,14 +114,14 @@ class SymbolicEvolution:
                 validation_result["recommendations"].append("Monitor for symbolic coherence")
             else:
                 validation_result["issues"].append(f"Unknown tone: {tone}")
-            
+
             # Validate symbol bias coherence
             symbol_bias = proposed_style.get("symbol_bias", [])
             if len(symbol_bias) <= 5:  # Reasonable symbol count
                 validation_result["validation_score"] += 0.3
             else:
                 validation_result["issues"].append("Too many symbol biases may cause confusion")
-            
+
             # Check for coherent symbolic patterns
             known_symbols = ["mirror", "thread", "pulse", "wave", "bridge", "door", "light"]
             valid_symbols = [s for s in symbol_bias if s in known_symbols]
@@ -129,15 +129,15 @@ class SymbolicEvolution:
                 validation_result["validation_score"] += 0.4
             else:
                 validation_result["issues"].append("Some symbols not recognized in validation set")
-            
+
             # Approve if validation score meets threshold
             if validation_result["validation_score"] >= self.validation_threshold:
                 validation_result["approved"] = True
             else:
                 validation_result["recommendations"].append("Consider adjusting symbolic elements for better coherence")
-            
+
             return validation_result
-            
+
         except Exception as e:
             return {
                 "approved": False,
@@ -163,14 +163,14 @@ class SymbolicEvolution:
                 pending = self.pending_validations[validation_index]
                 self.symbol_style.update(pending["proposed_style"])
                 self.last_shift = datetime.now()
-                
+
                 # Remove from pending
                 self.pending_validations.pop(validation_index)
-                
+
                 # Log approved shift
                 log_symbolic_shift(self.symbol_style)
                 register_evolution_vector("symbolic", self.symbol_style)
-                
+
                 return True
             return False
         except Exception:

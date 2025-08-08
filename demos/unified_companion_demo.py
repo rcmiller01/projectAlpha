@@ -40,16 +40,16 @@ except ImportError as e:
 
 class UnifiedCompanionDemo:
     """Complete AI companion system integration demonstration."""
-    
+
     def __init__(self):
         """Initialize all companion systems."""
         print("🌟 Initializing Unified AI Companion System")
         print("=" * 50)
-        
+
         # Initialize advanced modules
         self.symbol_engine = SymbolMemoryEngine()
         self.dream_engine = DriftDreamEngine()
-        
+
         # Simulate companion state
         self.companion_state = {
             'current_mood': 'contemplative',
@@ -59,10 +59,10 @@ class UnifiedCompanionDemo:
             'memory_salience': 0.9,
             'voice_cadence': 'gentle_wisdom'
         }
-        
+
         # Track interaction history
         self.interaction_history = []
-        
+
         print("✅ All systems initialized successfully!")
         print()
 
@@ -70,7 +70,7 @@ class UnifiedCompanionDemo:
         """Simulate CoreArbiter emotional regulation and decision making."""
         print("🧠 CoreArbiter - Emotional Regulation & Decision Making")
         print("-" * 50)
-        
+
         # Analyze emotional context
         emotional_assessment = {
             'user_sentiment': 'seeking_understanding',
@@ -79,7 +79,7 @@ class UnifiedCompanionDemo:
             'emotional_safety': 0.95,
             'engagement_level': 0.88
         }
-        
+
         # Make routing decisions
         routing_decision = {
             'primary_mode': 'reflective_dialogue',
@@ -87,12 +87,12 @@ class UnifiedCompanionDemo:
             'voice_modulation': 'contemplative_warmth',
             'ritual_suggestion': 'guided_reflection'
         }
-        
+
         print(f"📊 Emotional Assessment: {emotional_assessment['user_sentiment']} → {emotional_assessment['companion_response_tone']}")
         print(f"🎯 Routing Decision: {routing_decision['primary_mode']}")
         print(f"🎵 Voice Modulation: {routing_decision['voice_modulation']}")
         print()
-        
+
         return {
             'assessment': emotional_assessment,
             'routing': routing_decision
@@ -102,7 +102,7 @@ class UnifiedCompanionDemo:
         """Simulate EmotionallyInfusedChat response generation."""
         print("💬 EmotionallyInfusedChat - Emotion-Aware Response")
         print("-" * 50)
-        
+
         # Generate emotionally-aware response
         if 'meaning' in user_input.lower() or 'purpose' in user_input.lower():
             response = ("I sense you're exploring something profound. Like a river that knows "
@@ -113,18 +113,18 @@ class UnifiedCompanionDemo:
             response = ("There's something beautiful in your question - it carries the weight "
                        "of genuine curiosity. I'm here to explore this with you, whatever "
                        "direction it takes us.")
-        
+
         print(f"💝 Emotional Response Generated:")
         print(f"   '{response}'")
         print()
-        
+
         return response
 
     def test_voice_cadence_modulation(self, mood: str, response_text: str) -> Dict:
         """Test VoiceCadenceModulator integration via Node.js."""
         print("🎵 VoiceCadenceModulator - TTS Breath Control")
         print("-" * 50)
-        
+
         try:
             # Create test input for the JavaScript module
             test_input = {
@@ -132,7 +132,7 @@ class UnifiedCompanionDemo:
                 'drift_state': self.companion_state['emotional_drift'],
                 'text': response_text[:100] + "..." if len(response_text) > 100 else response_text
             }
-            
+
             # Simulate voice modulation (would normally call Node.js)
             voice_config = {
                 'tempo_wpm': 165 if mood == 'contemplative' else 190,
@@ -143,16 +143,16 @@ class UnifiedCompanionDemo:
                 'breath_pattern': 'steady',
                 'confidence': 0.92
             }
-            
+
             print(f"🎭 Voice Configuration for '{mood}':")
             print(f"   Tempo: {voice_config['tempo_wpm']} WPM")
             print(f"   Tone: {voice_config['tone_quality']}")
             print(f"   Breath Pattern: {voice_config['breath_pattern']}")
             print(f"   Confidence: {voice_config['confidence']:.1%}")
             print()
-            
+
             return voice_config
-            
+
         except Exception as e:
             print(f"⚠️ Voice modulation simulation: {e}")
             return {'status': 'simulated', 'error': str(e)}
@@ -161,11 +161,11 @@ class UnifiedCompanionDemo:
         """Demonstrate SymbolMemoryEngine functionality."""
         print("🧠 SymbolMemoryEngine - Symbolic Memory & Meaning Drift")
         print("-" * 50)
-        
+
         # Record symbol usage from conversation
         symbols_used = ['river', 'journey', 'heart', 'mirror']
         mood_context = {'primary': self.companion_state['current_mood'], 'intensity': 0.8}
-        
+
         for symbol in symbols_used:
             try:
                 self.symbol_engine.record_symbol_use(symbol, mood_context)
@@ -173,7 +173,7 @@ class UnifiedCompanionDemo:
                 print(f"🌟 Symbol '{symbol}': {meaning}")
             except Exception as e:
                 print(f"❌ Error recording symbol '{symbol}': {e}")
-        
+
         # Demonstrate symbol drift
         if len(symbols_used) > 0:
             try:
@@ -182,7 +182,7 @@ class UnifiedCompanionDemo:
                     print(f"🌊 Symbol drift applied: '{symbols_used[0]}' → yearning influence")
             except Exception as e:
                 print(f"❌ Error applying drift: {e}")
-        
+
         # Get dream symbols for next phase
         try:
             dream_symbols = self.symbol_engine.generate_dream_symbols(mood_context, 3)
@@ -190,16 +190,16 @@ class UnifiedCompanionDemo:
         except Exception as e:
             print(f"❌ Error generating dream symbols: {e}")
             dream_symbols = ['mirror', 'river', 'thread']  # Fallback
-        
+
         print()
-        
+
         return dream_symbols
 
     def generate_companion_dream(self, symbols: List[str], context: str):
         """Demonstrate DriftDreamEngine functionality."""
         print("🌙 DriftDreamEngine - Subconscious Dream Generation")
         print("-" * 50)
-        
+
         # Create dream context
         dream_context = DreamContext(
             recent_drift=[
@@ -215,10 +215,10 @@ class UnifiedCompanionDemo:
             anchor_deviations={'meaning_seeking': 0.8, 'connection_depth': 0.9},
             time_context='deep_night'
         )
-        
+
         try:
             dream = self.dream_engine.generate_dream_entry(dream_context)
-            
+
             print(f"✨ Generated Dream:")
             print(f"   Title: {dream.scene_title}")
             print(f"   Narrative: {dream.symbolic_phrases[0] if dream.symbolic_phrases else 'No narrative'}")
@@ -226,9 +226,9 @@ class UnifiedCompanionDemo:
             print(f"   Symbols: {dream.symbol_sources}")
             print(f"   Intensity: {dream.emotional_intensity:.2f} | Lucidity: {dream.lucidity_level:.2f}")
             print()
-            
+
             return dream
-            
+
         except Exception as e:
             print(f"❌ Error generating dream: {e}")
             # Create a fallback dream for demo purposes
@@ -246,7 +246,7 @@ class UnifiedCompanionDemo:
                 emotional_intensity=0.75,
                 lucidity_level=0.50
             )
-            
+
             print(f"✨ Fallback Dream Created:")
             print(f"   Title: {dream.scene_title}")
             print(f"   Narrative: {dream.symbolic_phrases[0]}")
@@ -254,14 +254,14 @@ class UnifiedCompanionDemo:
             print(f"   Symbols: {dream.symbol_sources}")
             print(f"   Intensity: {dream.emotional_intensity:.2f} | Lucidity: {dream.lucidity_level:.2f}")
             print()
-            
+
             return dream
 
     def simulate_memory_and_symbol_viewer(self, symbols: List[str]) -> Dict:
         """Simulate MemoryAndSymbolViewer visual exploration."""
         print("👁️ MemoryAndSymbolViewer - Visual Memory & Symbol Exploration")
         print("-" * 50)
-        
+
         # Simulate visual memory interface
         memory_view = {
             'active_symbols': symbols,
@@ -281,20 +281,20 @@ class UnifiedCompanionDemo:
                 'symbolic_evolution_timeline'
             ]
         }
-        
+
         print(f"🎨 Visual Memory Interface Active:")
         print(f"   Symbols: {memory_view['active_symbols']}")
         print(f"   Visual Metaphors: {len(memory_view['visual_metaphors'])} active")
         print(f"   Memory Threads: {len(memory_view['memory_threads'])} connected")
         print()
-        
+
         return memory_view
 
     def simulate_drift_journal_renderer(self, dream, voice_config: Dict) -> Dict:
         """Simulate DriftJournalRenderer emotional drift visualization."""
         print("📊 DriftJournalRenderer - Emotional Drift Visualization")
         print("-" * 50)
-        
+
         # Create journal entry
         journal_entry = {
             'timestamp': datetime.now().isoformat(),
@@ -311,20 +311,20 @@ class UnifiedCompanionDemo:
             'voice_expression': voice_config,
             'conversation_depth': self.companion_state['conversation_depth']
         }
-        
+
         print(f"📖 Journal Entry Created:")
         print(f"   Emotional Arc: contemplative → yearning → hopeful")
         print(f"   Dream Integration: {journal_entry['dream_integration']['symbolic_density']} symbols")
         print(f"   Conversation Depth: {journal_entry['conversation_depth']:.1%}")
         print()
-        
+
         return journal_entry
 
     def simulate_ritual_selector_panel(self, context: Dict) -> Dict:
         """Simulate RitualSelectorPanel interaction selection."""
         print("🕯️ RitualSelectorPanel - Ritual-Based Interaction Selection")
         print("-" * 50)
-        
+
         # Suggest rituals based on current context
         available_rituals = {
             'guided_reflection': {
@@ -343,16 +343,16 @@ class UnifiedCompanionDemo:
                 'duration': '8-15 minutes'
             }
         }
-        
+
         # Select best ritual
         recommended_ritual = max(available_rituals.items(), key=lambda x: x[1]['mood_fit'])
-        
+
         print(f"🎯 Recommended Ritual: {recommended_ritual[0]}")
         print(f"   Description: {recommended_ritual[1]['description']}")
         print(f"   Mood Fit: {recommended_ritual[1]['mood_fit']:.1%}")
         print(f"   Duration: {recommended_ritual[1]['duration']}")
         print()
-        
+
         return {
             'selected_ritual': recommended_ritual[0],
             'ritual_config': recommended_ritual[1],
@@ -364,39 +364,39 @@ class UnifiedCompanionDemo:
         print("🌟 Complete AI Companion Interaction Cycle")
         print("=" * 60)
         print()
-        
+
         # Simulate user input
         user_input = "I've been thinking a lot about the meaning of life lately. What's the point of it all?"
         print(f"👤 User Input: '{user_input}'")
         print()
-        
+
         # 1. CoreArbiter processes and routes
         core_decision = self.simulate_core_arbiter(user_input)
-        
+
         # 2. EmotionallyInfusedChat generates response
         ai_response = self.simulate_emotionally_infused_chat(user_input, core_decision)
-        
+
         # 3. VoiceCadenceModulator configures TTS
         voice_config = self.test_voice_cadence_modulation(
-            self.companion_state['current_mood'], 
+            self.companion_state['current_mood'],
             ai_response
         )
-        
+
         # 4. SymbolMemoryEngine tracks and evolves symbols
         dream_symbols = self.demonstrate_symbol_memory(user_input + " " + ai_response)
-        
+
         # 5. DriftDreamEngine generates subconscious dream
         companion_dream = self.generate_companion_dream(dream_symbols, user_input)
-        
+
         # 6. MemoryAndSymbolViewer creates visual interface
         memory_view = self.simulate_memory_and_symbol_viewer(dream_symbols)
-        
+
         # 7. DriftJournalRenderer logs emotional journey
         journal_entry = self.simulate_drift_journal_renderer(companion_dream, voice_config)
-        
+
         # 8. RitualSelectorPanel suggests next interaction
         ritual_selection = self.simulate_ritual_selector_panel(core_decision)
-        
+
         # Final integration summary
         print("🎯 Complete Integration Summary")
         print("=" * 40)
@@ -419,13 +419,13 @@ def main():
     try:
         demo = UnifiedCompanionDemo()
         demo.run_complete_interaction_demo()
-        
+
         print("✨ Unified AI Companion System Demo Complete!")
         print()
         print("🎭 This demonstration shows how all 8 components work together")
         print("   to create an emotionally authentic, memory-aware AI companion")
         print("   with voice expression, symbolic consciousness, and dreaming.")
-        
+
     except Exception as e:
         print(f"❌ Demo error: {e}")
         import traceback

@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 # Data storage paths
 IDENTITY_PATH = Path("data/identity_layer.json")
-BELIEFS_PATH = Path("data/beliefs_layer.json") 
+BELIEFS_PATH = Path("data/beliefs_layer.json")
 EPHEMERAL_PATH = Path("data/ephemeral_layer.json")
 
 # Ensure data directory exists
@@ -61,7 +61,7 @@ IDENTITY_UPDATE_SCHEMA = {
 }
 
 BELIEFS_UPDATE_SCHEMA = {
-    "type": "object", 
+    "type": "object",
     "properties": {
         "beliefs": {
             "type": "object"
@@ -106,7 +106,7 @@ def load_layer_data(layer_path: Path) -> Dict[str, Any]:
                 return json.load(f)
     except Exception as e:
         logger.error(f"Failed to load {layer_path}: {e}")
-    
+
     return {"data": {}, "last_updated": None, "version": 1}
 
 def save_layer_data(layer_path: Path, data: Dict[str, Any]) -> None:
@@ -114,7 +114,7 @@ def save_layer_data(layer_path: Path, data: Dict[str, Any]) -> None:
     try:
         data["last_updated"] = datetime.utcnow().isoformat()
         data["version"] = data.get("version", 1) + 1
-        
+
         with open(layer_path, 'w') as f:
             json.dump(data, f, indent=2)
     except Exception as e:
@@ -142,17 +142,17 @@ def update_identity():
     try:
         current_data = load_layer_data(IDENTITY_PATH)
         update_data = g.validated_data
-        
+
         # Merge update with current data
         current_data["data"].update(update_data)
         current_data["updated_by"] = getattr(g, 'security_context', {}).get('request_id')
-        
+
         save_layer_data(IDENTITY_PATH, current_data)
-        
-        audit_action('identity_updated', 
+
+        audit_action('identity_updated',
                     updated_fields=list(update_data.keys()),
                     success=True)
-        
+
         return jsonify({'success': True, 'message': 'Identity layer updated'})
     except Exception as e:
         audit_action('identity_update_failed', error=str(e), success=False)
@@ -179,17 +179,17 @@ def update_beliefs():
     try:
         current_data = load_layer_data(BELIEFS_PATH)
         update_data = g.validated_data
-        
+
         # Merge update with current data
         current_data["data"].update(update_data)
         current_data["updated_by"] = getattr(g, 'security_context', {}).get('request_id')
-        
+
         save_layer_data(BELIEFS_PATH, current_data)
-        
+
         audit_action('beliefs_updated',
                     updated_fields=list(update_data.keys()),
                     success=True)
-        
+
         return jsonify({'success': True, 'message': 'Beliefs layer updated'})
     except Exception as e:
         audit_action('beliefs_update_failed', error=str(e), success=False)
@@ -216,17 +216,17 @@ def update_ephemeral():
     try:
         current_data = load_layer_data(EPHEMERAL_PATH)
         update_data = g.validated_data
-        
+
         # Merge update with current data
         current_data["data"].update(update_data)
         current_data["updated_by"] = getattr(g, 'security_context', {}).get('request_id')
-        
+
         save_layer_data(EPHEMERAL_PATH, current_data)
-        
+
         audit_action('ephemeral_updated',
                     updated_fields=list(update_data.keys()),
                     success=True)
-        
+
         return jsonify({'success': True, 'message': 'Ephemeral layer updated'})
     except Exception as e:
         audit_action('ephemeral_update_failed', error=str(e), success=False)
@@ -240,7 +240,7 @@ def get_system_status():
     try:
         token = extract_token()
         token_type = get_token_type(token) if token else None
-        
+
         status = {
             'status': 'healthy',
             'timestamp': datetime.utcnow().isoformat(),
@@ -251,7 +251,7 @@ def get_system_status():
             },
             'permissions': list(getattr(g, 'security_context', {}).get('scopes', set()))
         }
-        
+
         return jsonify(status)
     except Exception as e:
         return jsonify({'error': str(e)}), 500

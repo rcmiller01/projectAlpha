@@ -33,7 +33,7 @@ const Sidebar = ({ onClose }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   const { threads, getFilteredThreads } = useThreadStore();
   const { projects, getFilteredProjects } = useProjectStore();
 
@@ -87,9 +87,9 @@ const Sidebar = ({ onClose }) => {
   };
 
   return (
-    <Box sx={{ 
-      height: '100vh', 
-      display: 'flex', 
+    <Box sx={{
+      height: '100vh',
+      display: 'flex',
       flexDirection: 'column',
       borderRight: 1,
       borderColor: 'divider',
@@ -105,7 +105,7 @@ const Sidebar = ({ onClose }) => {
             <Close />
           </IconButton>
         </Box>
-        
+
         {/* Search */}
         <TextField
           fullWidth
@@ -143,7 +143,7 @@ const Sidebar = ({ onClose }) => {
                   }
                 }}
               >
-                <ListItemIcon sx={{ 
+                <ListItemIcon sx={{
                   minWidth: 36,
                   color: isActive(item.path) ? 'inherit' : 'text.secondary'
                 }}>
@@ -165,7 +165,7 @@ const Sidebar = ({ onClose }) => {
             <Typography variant="subtitle2" color="text.secondary">
               Recent Threads
             </Typography>
-            <IconButton 
+            <IconButton
               size="small"
               onClick={() => {
                 navigate('/chat');
@@ -201,17 +201,17 @@ const Sidebar = ({ onClose }) => {
                     }}
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', mb: 0.5 }}>
-                      <Avatar sx={{ 
-                        width: 20, 
-                        height: 20, 
+                      <Avatar sx={{
+                        width: 20,
+                        height: 20,
                         mr: 1,
                         bgcolor: `${getAgentColor(thread.agentType)}.main`
                       }}>
                         <SmartToy sx={{ fontSize: 12 }} />
                       </Avatar>
-                      <Typography 
-                        variant="body2" 
-                        sx={{ 
+                      <Typography
+                        variant="body2"
+                        sx={{
                           flexGrow: 1,
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
@@ -222,7 +222,7 @@ const Sidebar = ({ onClose }) => {
                       </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                      <Chip 
+                      <Chip
                         label={thread.agentType}
                         size="small"
                         color={getAgentColor(thread.agentType)}
@@ -248,7 +248,7 @@ const Sidebar = ({ onClose }) => {
             <Typography variant="subtitle2" color="text.secondary">
               Active Projects
             </Typography>
-            <IconButton 
+            <IconButton
               size="small"
               onClick={() => {
                 navigate('/projects');
@@ -285,9 +285,9 @@ const Sidebar = ({ onClose }) => {
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', mb: 0.5 }}>
                       <Folder sx={{ fontSize: 16, mr: 1, color: 'primary.main' }} />
-                      <Typography 
-                        variant="body2" 
-                        sx={{ 
+                      <Typography
+                        variant="body2"
+                        sx={{
                           flexGrow: 1,
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',

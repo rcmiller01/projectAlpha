@@ -63,7 +63,7 @@ class VRIntegration:
         self.interaction_history = []
         self.scene_definitions = self._load_scene_definitions()
         self.interaction_patterns = self._load_interaction_patterns()
-        
+
         # VR device support
         self.device_support = {
             "webvr": False,
@@ -72,9 +72,9 @@ class VRIntegration:
             "vive": False,
             "desktop_vr": False
         }
-        
+
         self._detect_vr_devices()
-    
+
     def _detect_vr_devices(self):
         """Detect available VR devices and capabilities"""
         try:
@@ -83,21 +83,21 @@ class VRIntegration:
                 from js import navigator
                 if hasattr(navigator, 'xr'):
                     self.device_support["webxr"] = True
-                
+
                 # Check for WebVR support (legacy)
                 if hasattr(navigator, 'getVRDisplays'):
                     self.device_support["webvr"] = True
             else:
                 # Non-browser environment - check for VR runtime APIs
                 self.device_support.update(self._detect_system_vr())
-                
+
         except Exception as e:
             print(f"[VR] VR device detection failed: {e}")
             # Continue with fallback support
-        
+
         # Simulate VR support for development
         self.device_support["desktop_vr"] = True
-    
+
     def _has_navigator_api(self) -> bool:
         """Check if navigator API is available (browser environment)"""
         try:
@@ -105,15 +105,15 @@ class VRIntegration:
             return hasattr(js, 'navigator')
         except ImportError:
             return False
-    
+
     def _detect_system_vr(self) -> Dict[str, bool]:
         """Detect VR devices using system APIs when navigator unavailable"""
         vr_support = {}
-        
+
         try:
             import platform
             system = platform.system().lower()
-            
+
             # Check for VR runtime on different platforms
             if system == 'windows':
                 vr_support.update(self._check_windows_vr())
@@ -121,60 +121,60 @@ class VRIntegration:
                 vr_support.update(self._check_linux_vr())
             elif system == 'darwin':
                 vr_support.update(self._check_macos_vr())
-                
+
         except Exception as e:
             print(f"[VR] System VR detection failed: {e}")
-        
+
         return vr_support
-    
+
     def _check_windows_vr(self) -> Dict[str, bool]:
         """Check for VR support on Windows"""
         support = {}
-        
+
         try:
             # Check for SteamVR
             import os
             steam_vr_path = os.path.expandvars(r"%PROGRAMFILES(x86)%\Steam\steamapps\common\SteamVR")
             support["steamvr"] = os.path.exists(steam_vr_path)
-            
+
             # Check for Oculus runtime
             oculus_path = os.path.expandvars(r"%PROGRAMFILES%\Oculus")
             support["oculus"] = os.path.exists(oculus_path)
-            
+
         except Exception:
             pass
-        
+
         return support
-    
+
     def _check_linux_vr(self) -> Dict[str, bool]:
         """Check for VR support on Linux"""
         support = {}
-        
+
         try:
             import subprocess
             import os
-            
+
             # Check for SteamVR on Linux
             steam_vr_linux = os.path.expanduser("~/.steam/steam/steamapps/common/SteamVR")
             support["steamvr"] = os.path.exists(steam_vr_linux)
-            
+
             # Check for OpenXR runtime
             try:
                 result = subprocess.run(['which', 'openxr'], capture_output=True, text=True)
                 support["openxr"] = result.returncode == 0
             except:
                 pass
-                
+
         except Exception:
             pass
-        
+
         return support
-    
+
     def _check_macos_vr(self) -> Dict[str, bool]:
         """Check for VR support on macOS"""
         # Limited VR support on macOS
         return {"desktop_vr": False}
-    
+
     def _load_scene_definitions(self) -> Dict[VRSceneType, VRScene]:
         """Load VR scene definitions"""
         return {
@@ -198,7 +198,7 @@ class VRIntegration:
                 interactive_elements=["touch_roses", "sit_bench", "walk_path", "gaze_fountain"],
                 romantic_intensity=0.8
             ),
-            
+
             VRSceneType.COZY_HOME: VRScene(
                 scene_type=VRSceneType.COZY_HOME,
                 name="Cozy Home",
@@ -219,7 +219,7 @@ class VRIntegration:
                 interactive_elements=["sit_sofa", "cook_together", "dance", "cuddle"],
                 romantic_intensity=0.9
             ),
-            
+
             VRSceneType.BEACH_SUNSET: VRScene(
                 scene_type=VRSceneType.BEACH_SUNSET,
                 name="Beach Sunset",
@@ -240,7 +240,7 @@ class VRIntegration:
                 interactive_elements=["walk_beach", "sit_blanket", "touch_water", "watch_sunset"],
                 romantic_intensity=0.7
             ),
-            
+
             VRSceneType.INTIMATE_BEDROOM: VRScene(
                 scene_type=VRSceneType.INTIMATE_BEDROOM,
                 name="Intimate Bedroom",
@@ -262,7 +262,7 @@ class VRIntegration:
                 romantic_intensity=1.0
             )
         }
-    
+
     def _load_interaction_patterns(self) -> Dict[VRInteractionType, Dict]:
         """Load VR interaction patterns"""
         return {
@@ -297,139 +297,139 @@ class VRIntegration:
                 "audio_feedback": "hand_holding_sound"
             }
         }
-    
+
     def start_vr_session(self, scene_type: str = "romantic_garden") -> bool:
         """Start a VR session with specified scene"""
         try:
             scene_enum = VRSceneType(scene_type)
             self.current_scene = self.scene_definitions[scene_enum]
             self.is_vr_active = True
-            
+
             # Initialize VR environment
             self._initialize_vr_environment()
-            
+
             # Start VR monitoring
             threading.Thread(target=self._vr_monitoring_loop, daemon=True).start()
-            
+
             print(f"[VR] Started session in {self.current_scene.name}")
             return True
-            
+
         except Exception as e:
             print(f"[VR] Error starting session: {e}")
             return False
-    
+
     def _initialize_vr_environment(self):
         """Initialize VR environment and scene"""
         if not self.current_scene:
             return
-        
+
         # Set up scene lighting
         self._apply_scene_lighting()
-        
+
         # Load audio ambience
         self._load_audio_ambience()
-        
+
         # Position avatars
         self._position_avatars()
-        
+
         # Initialize interactive elements
         self._setup_interactive_elements()
-    
+
     def _apply_scene_lighting(self):
         """Apply scene lighting settings"""
         lighting = self.current_scene.lighting
         print(f"[VR] Applied {lighting['primary']} lighting (intensity: {lighting['intensity']})")
-    
+
     def _load_audio_ambience(self):
         """Load and play scene audio ambience"""
         ambience = self.current_scene.audio_ambience
         print(f"[VR] Loaded audio ambience: {ambience}")
-    
+
     def _position_avatars(self):
         """Position avatars in the scene"""
         # Position user avatar
         self.user_position = (0.0, 0.0, 0.0)
-        
+
         # Position AI companion avatar
         self.avatar_position = (1.0, 0.0, 0.0)  # Slightly to the right
-        
+
         print(f"[VR] Positioned avatars - User: {self.user_position}, Avatar: {self.avatar_position}")
-    
+
     def _setup_interactive_elements(self):
         """Set up interactive elements in the scene"""
         elements = self.current_scene.interactive_elements
         print(f"[VR] Set up interactive elements: {elements}")
-    
+
     def _vr_monitoring_loop(self):
         """Main VR monitoring loop"""
         while self.is_vr_active:
             try:
                 # Monitor user position and interactions
                 self._monitor_user_interactions()
-                
+
                 # Update avatar responses
                 self._update_avatar_responses()
-                
+
                 # Check for scene transitions
                 self._check_scene_transitions()
-                
+
                 time.sleep(0.1)  # 10 FPS monitoring
-                
+
             except Exception as e:
                 print(f"[VR] Monitoring error: {e}")
                 time.sleep(1.0)
-    
+
     def _monitor_user_interactions(self):
         """Monitor user interactions in VR"""
         # Simulate user interaction detection
         # In real implementation, this would read from VR controllers/sensors
-        
+
         # Check for proximity to avatar
         distance = self._calculate_distance(self.user_position, self.avatar_position)
-        
+
         if distance < 1.0:  # Close proximity
             self._trigger_proximity_response(distance)
-    
+
     def _calculate_distance(self, pos1: Tuple[float, float, float], pos2: Tuple[float, float, float]) -> float:
         """Calculate distance between two 3D positions"""
         return math.sqrt(sum((a - b) ** 2 for a, b in zip(pos1, pos2)))
-    
+
     def _trigger_proximity_response(self, distance: float):
         """Trigger response based on proximity to avatar"""
         from modules.input.haptic_system import get_haptic_system
         from modules.emotion.mood_engine import update_mood
-        
+
         # Update mood based on proximity
         proximity_intensity = max(0.0, 1.0 - distance)
         update_mood("vr:proximity", intensity=proximity_intensity)
-        
+
         # Trigger haptic feedback
         haptic_system = get_haptic_system()
         if proximity_intensity > 0.7:
             haptic_system.trigger_romantic_haptic("embrace", intensity="gentle")
         elif proximity_intensity > 0.4:
             haptic_system.trigger_romantic_haptic("touch", intensity="subtle")
-    
+
     def _update_avatar_responses(self):
         """Update avatar responses based on user interactions"""
         # Simulate avatar movement and expressions
         # In real implementation, this would update 3D avatar model
-        
+
         pass
-    
+
     def _check_scene_transitions(self):
         """Check for scene transition triggers"""
         # Check if user wants to change scenes
         # This could be triggered by voice commands, gestures, or UI interactions
-        
+
         pass
-    
+
     def trigger_vr_interaction(self, interaction_type: str, intensity: float = 0.5):
         """Trigger a VR interaction"""
         try:
             interaction_enum = VRInteractionType(interaction_type)
             pattern = self.interaction_patterns[interaction_enum]
-            
+
             interaction = VRInteraction(
                 interaction_type=interaction_enum,
                 intensity=intensity,
@@ -438,10 +438,10 @@ class VRIntegration:
                 target="avatar",
                 emotional_context="romantic"
             )
-            
+
             # Execute interaction
             self._execute_vr_interaction(interaction)
-            
+
             # Store interaction history
             self.interaction_history.append({
                 "type": interaction_type,
@@ -449,35 +449,35 @@ class VRIntegration:
                 "timestamp": datetime.now().isoformat(),
                 "scene": self.current_scene.name if self.current_scene else None
             })
-            
+
             print(f"[VR] Triggered {interaction_type} interaction")
             return True
-            
+
         except Exception as e:
             print(f"[VR] Error triggering interaction: {e}")
             return False
-    
+
     def _execute_vr_interaction(self, interaction: VRInteraction):
         """Execute a VR interaction"""
         from modules.input.haptic_system import get_haptic_system
         from modules.emotion.mood_engine import update_mood
-        
+
         # Update mood based on interaction
         update_mood(f"vr:{interaction.interaction_type.value}", intensity=interaction.intensity)
-        
+
         # Trigger haptic feedback
         haptic_system = get_haptic_system()
         haptic_system.trigger_romantic_haptic(
             interaction.interaction_type.value,
             intensity="moderate" if interaction.intensity > 0.7 else "gentle"
         )
-        
+
         # Update avatar animation
         self._update_avatar_animation(interaction)
-        
+
         # Play interaction audio
         self._play_interaction_audio(interaction)
-    
+
     def _update_avatar_animation(self, interaction: VRInteraction):
         """Update avatar animation based on interaction"""
         # In real implementation, this would trigger 3D avatar animations
@@ -488,43 +488,43 @@ class VRIntegration:
             VRInteractionType.DANCE: "dance_animation",
             VRInteractionType.HOLD_HANDS: "hand_holding_animation"
         }
-        
+
         animation = animation_map.get(interaction.interaction_type, "idle_animation")
         print(f"[VR] Triggered avatar animation: {animation}")
-    
+
     def _play_interaction_audio(self, interaction: VRInteraction):
         """Play audio feedback for interaction"""
         pattern = self.interaction_patterns[interaction.interaction_type]
         audio = pattern["audio_feedback"]
         print(f"[VR] Playing interaction audio: {audio}")
-    
+
     def change_vr_scene(self, scene_type: str) -> bool:
         """Change to a different VR scene"""
         if not self.is_vr_active:
             return False
-        
+
         # Fade out current scene
         self._fade_out_scene()
-        
+
         # Start new scene
         success = self.start_vr_session(scene_type)
-        
+
         if success:
             print(f"[VR] Changed to scene: {scene_type}")
-        
+
         return success
-    
+
     def _fade_out_scene(self):
         """Fade out current scene"""
         print("[VR] Fading out current scene")
         time.sleep(1.0)  # Simulate fade transition
-    
+
     def stop_vr_session(self):
         """Stop current VR session"""
         self.is_vr_active = False
         self.current_scene = None
         print("[VR] Stopped VR session")
-    
+
     def get_vr_status(self) -> Dict:
         """Get current VR system status"""
         return {
@@ -559,4 +559,4 @@ def trigger_vr_interaction(interaction_type: str, intensity: float = 0.5) -> boo
 
 def change_vr_scene(scene_type: str) -> bool:
     """Change VR scene"""
-    return vr_integration.change_vr_scene(scene_type) 
+    return vr_integration.change_vr_scene(scene_type)

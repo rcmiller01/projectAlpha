@@ -113,7 +113,7 @@ module.exports = {
           transition: 'background 2s ease-in-out',
         },
       };
-      
+
       addUtilities(emotionalUtilities);
     },
   ],

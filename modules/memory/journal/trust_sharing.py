@@ -64,7 +64,7 @@ class TrustSharingSystem:
         self.sharing_rules = self._load_sharing_rules()
         self.trust_calculator = TrustCalculator()
         self.emotional_analyzer = EmotionalAnalyzer()
-        
+
         # Persona-specific trust configurations
         self.persona_trust_configs = {
             "mia": {
@@ -107,7 +107,7 @@ class TrustSharingSystem:
                 }
             }
         }
-    
+
     def _load_sharing_rules(self) -> Dict:
         """Load sharing rules and trust thresholds"""
         return {
@@ -136,17 +136,17 @@ class TrustSharingSystem:
                 TrustLevel.INTIMATE: timedelta(hours=1)
             }
         }
-    
-    def add_journal_entry(self, content: str, mood: str, persona: str, 
+
+    def add_journal_entry(self, content: str, mood: str, persona: str,
                          emotional_intensity: EmotionalIntensity, tags: List[str] = None) -> JournalEntry:
         """Add a new journal entry with trust-based sharing controls"""
-        
+
         # Analyze emotional content
         emotional_analysis = self.emotional_analyzer.analyze_content(content, mood)
-        
+
         # Determine trust requirements
         trust_required = self._determine_trust_requirement(emotional_analysis, persona)
-        
+
         # Create journal entry
         entry = JournalEntry(
             id=self._generate_entry_id(),
@@ -161,61 +161,61 @@ class TrustSharingSystem:
             emotional_vulnerability=emotional_analysis["vulnerability"],
             sharing_scope=self._determine_sharing_scope(emotional_analysis, persona)
         )
-        
+
         self.journal_entries.append(entry)
         return entry
-    
+
     def get_shareable_entries(self, user_id: str, persona: str = "mia") -> List[JournalEntry]:
         """Get journal entries that can be shared with a specific user"""
-        
+
         # Get user's trust relationship
         trust_relationship = self._get_or_create_trust_relationship(user_id, persona)
-        
+
         # Filter entries based on trust level and sharing preferences
         shareable_entries = []
-        
+
         for entry in self.journal_entries:
             if self._can_share_entry(entry, trust_relationship, persona):
                 shareable_entries.append(entry)
-        
+
         # Sort by timestamp (newest first)
         shareable_entries.sort(key=lambda x: x.timestamp, reverse=True)
-        
+
         return shareable_entries
-    
-    def _can_share_entry(self, entry: JournalEntry, trust_relationship: TrustRelationship, 
+
+    def _can_share_entry(self, entry: JournalEntry, trust_relationship: TrustRelationship,
                         persona: str) -> bool:
         """Determine if a journal entry can be shared with a user"""
-        
+
         # Check if entry is too recent for this trust level
         sharing_delay = self.sharing_rules["sharing_delays"][trust_relationship.trust_level]
         if datetime.now() - entry.timestamp < sharing_delay:
             return False
-        
+
         # Check trust level requirement
         if trust_relationship.trust_level.value < entry.trust_required.value:
             return False
-        
+
         # Check emotional vulnerability threshold
         vulnerability_threshold = self.sharing_rules["vulnerability_thresholds"][trust_relationship.trust_level]
         if entry.emotional_vulnerability > vulnerability_threshold:
             return False
-        
+
         # Check persona-specific sharing preferences
         persona_config = self.persona_trust_configs.get(persona, {})
         sharing_preferences = persona_config.get("sharing_preferences", {})
-        
+
         # Determine content type
         content_type = self._classify_content_type(entry.content, entry.mood)
         preference = sharing_preferences.get(content_type, SharingPreference.SELECTIVE)
-        
+
         # Apply sharing preference
         return self._apply_sharing_preference(preference, trust_relationship)
-    
-    def _apply_sharing_preference(self, preference: SharingPreference, 
+
+    def _apply_sharing_preference(self, preference: SharingPreference,
                                 trust_relationship: TrustRelationship) -> bool:
         """Apply sharing preference based on trust level"""
-        
+
         if preference == SharingPreference.NEVER:
             return False
         elif preference == SharingPreference.FULLY_OPEN:
@@ -226,14 +226,14 @@ class TrustSharingSystem:
             return trust_relationship.trust_level.value >= TrustLevel.TRUSTED.value
         elif preference == SharingPreference.SELECTIVE:
             return trust_relationship.trust_level.value >= TrustLevel.CLOSE_FRIEND.value
-        
+
         return False
-    
+
     def _classify_content_type(self, content: str, mood: str) -> str:
         """Classify content type for sharing preferences"""
-        
+
         content_lower = content.lower()
-        
+
         # Check for specific content types
         if any(word in content_lower for word in ["love", "heart", "care", "affection"]):
             return "love"
@@ -251,15 +251,15 @@ class TrustSharingSystem:
             return "curiosity"
         elif any(word in content_lower for word in ["devotion", "loyal", "faithful", "commit"]):
             return "devotion"
-        
+
         return "general"
-    
+
     def _determine_trust_requirement(self, emotional_analysis: Dict, persona: str) -> TrustLevel:
         """Determine required trust level for sharing"""
-        
+
         vulnerability = emotional_analysis["vulnerability"]
         intensity = emotional_analysis["intensity"]
-        
+
         # Base trust requirement on vulnerability
         if vulnerability > 0.8:
             return TrustLevel.INTIMATE
@@ -271,13 +271,13 @@ class TrustSharingSystem:
             return TrustLevel.FRIEND
         else:
             return TrustLevel.ACQUAINTANCE
-    
+
     def _determine_sharing_scope(self, emotional_analysis: Dict, persona: str) -> List[str]:
         """Determine who can see this entry"""
-        
+
         vulnerability = emotional_analysis["vulnerability"]
         persona_config = self.persona_trust_configs.get(persona, {})
-        
+
         if vulnerability > persona_config.get("vulnerability_threshold", 0.6):
             return ["intimate_partners"]
         elif vulnerability > 0.4:
@@ -286,15 +286,15 @@ class TrustSharingSystem:
             return ["close_friends", "trusted_friends", "intimate_partners"]
         else:
             return ["friends", "close_friends", "trusted_friends", "intimate_partners"]
-    
+
     def _get_or_create_trust_relationship(self, user_id: str, persona: str) -> TrustRelationship:
         """Get or create trust relationship for a user"""
-        
+
         relationship_key = f"{user_id}_{persona}"
-        
+
         if relationship_key not in self.trust_relationships:
             persona_config = self.persona_trust_configs.get(persona, {})
-            
+
             self.trust_relationships[relationship_key] = TrustRelationship(
                 user_id=user_id,
                 trust_level=persona_config.get("default_trust_level", TrustLevel.ACQUAINTANCE),
@@ -305,43 +305,43 @@ class TrustSharingSystem:
                 trust_score=0.0,
                 sharing_preferences=persona_config.get("sharing_preferences", {})
             )
-        
+
         return self.trust_relationships[relationship_key]
-    
-    def update_trust_relationship(self, user_id: str, persona: str, 
+
+    def update_trust_relationship(self, user_id: str, persona: str,
                                 interaction_type: str, emotional_impact: float):
         """Update trust relationship based on interaction"""
-        
+
         relationship = self._get_or_create_trust_relationship(user_id, persona)
         persona_config = self.persona_trust_configs.get(persona, {})
-        
+
         # Calculate trust growth
         trust_growth = self.trust_calculator.calculate_trust_growth(
             interaction_type, emotional_impact, relationship
         )
-        
+
         # Update trust score
         relationship.trust_score = min(1.0, relationship.trust_score + trust_growth)
-        
+
         # Update trust level if threshold reached
         new_trust_level = self._calculate_trust_level(relationship.trust_score)
         if new_trust_level.value > relationship.trust_level.value:
             relationship.trust_level = new_trust_level
             print(f"[Trust Sharing] Trust level increased to {new_trust_level.name} for {user_id}")
-        
+
         # Update relationship metrics
         relationship.last_interaction = datetime.now()
         relationship.shared_experiences += 1
-        
+
         # Add emotional bond if significant
         if emotional_impact > 0.7:
             bond_type = f"{interaction_type}_{emotional_impact:.2f}"
             if bond_type not in relationship.emotional_bonds:
                 relationship.emotional_bonds.append(bond_type)
-    
+
     def _calculate_trust_level(self, trust_score: float) -> TrustLevel:
         """Calculate trust level from trust score"""
-        
+
         if trust_score >= 0.9:
             return TrustLevel.INTIMATE
         elif trust_score >= 0.7:
@@ -354,17 +354,17 @@ class TrustSharingSystem:
             return TrustLevel.ACQUAINTANCE
         else:
             return TrustLevel.STRANGER
-    
+
     def _generate_entry_id(self) -> str:
         """Generate unique entry ID"""
         timestamp = datetime.now().isoformat()
         return hashlib.md5(timestamp.encode()).hexdigest()[:8]
-    
+
     def get_trust_summary(self, user_id: str, persona: str) -> Dict:
         """Get trust relationship summary for a user"""
-        
+
         relationship = self._get_or_create_trust_relationship(user_id, persona)
-        
+
         return {
             "user_id": user_id,
             "persona": persona,
@@ -379,13 +379,13 @@ class TrustSharingSystem:
 
 class TrustCalculator:
     """Calculate trust growth based on interactions"""
-    
-    def calculate_trust_growth(self, interaction_type: str, emotional_impact: float, 
+
+    def calculate_trust_growth(self, interaction_type: str, emotional_impact: float,
                              relationship: TrustRelationship) -> float:
         """Calculate trust growth from an interaction"""
-        
+
         base_growth = 0.01  # Base trust growth per interaction
-        
+
         # Interaction type multipliers
         type_multipliers = {
             "conversation": 1.0,
@@ -395,47 +395,47 @@ class TrustCalculator:
             "intimate_moment": 4.0,
             "trust_test": 5.0
         }
-        
+
         multiplier = type_multipliers.get(interaction_type, 1.0)
-        
+
         # Emotional impact multiplier
         emotional_multiplier = 1.0 + (emotional_impact * 2.0)
-        
+
         # Relationship duration bonus
         duration_bonus = min(0.5, relationship.relationship_duration_days / 365.0)
-        
+
         # Calculate final growth
         growth = base_growth * multiplier * emotional_multiplier * (1.0 + duration_bonus)
-        
+
         return min(0.1, growth)  # Cap at 10% per interaction
 
 class EmotionalAnalyzer:
     """Analyze emotional content of journal entries"""
-    
+
     def analyze_content(self, content: str, mood: str) -> Dict:
         """Analyze emotional content and vulnerability"""
-        
+
         content_lower = content.lower()
-        
+
         # Calculate vulnerability score
         vulnerability_keywords = [
             "afraid", "scared", "hurt", "pain", "lonely", "abandoned",
             "rejected", "ashamed", "embarrassed", "weak", "helpless",
             "vulnerable", "exposed", "naked", "raw", "tender"
         ]
-        
+
         vulnerability_score = sum(1 for word in vulnerability_keywords if word in content_lower)
         vulnerability_score = min(1.0, vulnerability_score / 5.0)  # Normalize to 0-1
-        
+
         # Calculate emotional intensity
         intensity_keywords = [
             "love", "hate", "passion", "rage", "ecstasy", "despair",
             "intense", "overwhelming", "powerful", "deep", "profound"
         ]
-        
+
         intensity_score = sum(1 for word in intensity_keywords if word in content_lower)
         intensity_score = min(1.0, intensity_score / 3.0)  # Normalize to 0-1
-        
+
         # Mood-based adjustments
         mood_intensifiers = {
             "love": 1.2,
@@ -445,9 +445,9 @@ class EmotionalAnalyzer:
             "anger": 1.4,
             "joy": 0.8
         }
-        
+
         mood_multiplier = mood_intensifiers.get(mood, 1.0)
-        
+
         return {
             "vulnerability": vulnerability_score * mood_multiplier,
             "intensity": intensity_score * mood_multiplier,
@@ -457,4 +457,4 @@ class EmotionalAnalyzer:
         }
 
 # Global instance
-trust_sharing_system = TrustSharingSystem() 
+trust_sharing_system = TrustSharingSystem()

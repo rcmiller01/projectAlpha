@@ -65,7 +65,7 @@ class SocialContext:
 
 class SocialMediaConnector:
     """Base connector for social media platforms"""
-    
+
     def __init__(self, config_path: str = "data/social_config.json"):
         self.config_path = Path(config_path)
         self.config = {}
@@ -73,7 +73,7 @@ class SocialMediaConnector:
         self.rate_limits = {}
         self.last_fetch = {}
         self.load_config()
-        
+
     def load_config(self):
         """Load social media configuration"""
         try:
@@ -88,7 +88,7 @@ class SocialMediaConnector:
         except Exception as e:
             logger.error(f"Error loading social config: {e}")
             self.config = self._get_default_config()
-    
+
     def save_config(self):
         """Save social media configuration"""
         try:
@@ -97,7 +97,7 @@ class SocialMediaConnector:
                 json.dump(self.config, f, indent=2)
         except Exception as e:
             logger.error(f"Error saving social config: {e}")
-    
+
     def _get_default_config(self) -> Dict[str, Any]:
         """Get default social media configuration"""
         return {
@@ -129,12 +129,12 @@ class SocialMediaConnector:
 
 class RedditConnector:
     """Reddit read-only connector"""
-    
+
     def __init__(self, config: Dict[str, Any]):
         self.config = config
         self.subreddits = set()
         self.user_interests = []
-        
+
     async def authenticate(self) -> bool:
         """Authenticate with Reddit API (read-only)"""
         try:
@@ -144,14 +144,14 @@ class RedditConnector:
         except Exception as e:
             logger.error(f"Reddit authentication failed: {e}")
             return False
-    
+
     async def fetch_user_timeline(self, limit: int = 25) -> List[SocialPost]:
         """Fetch user's Reddit timeline"""
         posts = []
         try:
             # Simulate Reddit API call
             # In real implementation, use PRAW (Python Reddit API Wrapper)
-            
+
             # Simulated Reddit posts
             sample_posts = [
                 {
@@ -165,7 +165,7 @@ class RedditConnector:
                     "created_utc": datetime.now() - timedelta(hours=2)
                 },
                 {
-                    "id": "reddit_002", 
+                    "id": "reddit_002",
                     "title": "Beautiful sunset photo",
                     "content": "Captured this amazing sunset yesterday...",
                     "subreddit": "r/EarthPorn",
@@ -175,7 +175,7 @@ class RedditConnector:
                     "created_utc": datetime.now() - timedelta(hours=4)
                 }
             ]
-            
+
             for post_data in sample_posts:
                 post = SocialPost(
                     platform=PlatformType.REDDIT,
@@ -191,33 +191,33 @@ class RedditConnector:
                     relevance_score=0.8
                 )
                 posts.append(post)
-            
+
             logger.debug(f"Fetched {len(posts)} Reddit posts")
             return posts
-            
+
         except Exception as e:
             logger.error(f"Error fetching Reddit timeline: {e}")
             return []
-    
+
     def _extract_topics(self, text: str) -> List[str]:
         """Extract topics from Reddit content"""
         topics = []
         # Simple keyword extraction (in real implementation, use NLP)
         keywords = ["AI", "artificial intelligence", "photography", "sunset", "technology", "ethics"]
         text_lower = text.lower()
-        
+
         for keyword in keywords:
             if keyword.lower() in text_lower:
                 topics.append(keyword)
-        
+
         return topics
 
 class TwitterConnector:
     """X/Twitter read-only connector"""
-    
+
     def __init__(self, config: Dict[str, Any]):
         self.config = config
-        
+
     async def authenticate(self) -> bool:
         """Authenticate with Twitter API v2"""
         try:
@@ -227,14 +227,14 @@ class TwitterConnector:
         except Exception as e:
             logger.error(f"Twitter authentication failed: {e}")
             return False
-    
+
     async def fetch_user_timeline(self, limit: int = 20) -> List[SocialPost]:
         """Fetch user's Twitter timeline"""
         posts = []
         try:
             # Simulate Twitter API call
             # In real implementation, use tweepy or twitter-api-v2
-            
+
             sample_tweets = [
                 {
                     "id": "twitter_001",
@@ -251,7 +251,7 @@ class TwitterConnector:
                     "public_metrics": {"like_count": 23, "retweet_count": 2, "reply_count": 4}
                 }
             ]
-            
+
             for tweet_data in sample_tweets:
                 post = SocialPost(
                     platform=PlatformType.TWITTER,
@@ -269,28 +269,28 @@ class TwitterConnector:
                     relevance_score=0.7
                 )
                 posts.append(post)
-            
+
             logger.debug(f"Fetched {len(posts)} Twitter posts")
             return posts
-            
+
         except Exception as e:
             logger.error(f"Error fetching Twitter timeline: {e}")
             return []
-    
+
     def _extract_hashtags(self, text: str) -> List[str]:
         """Extract hashtags from tweet"""
         hashtags = re.findall(r'#(\w+)', text)
         return hashtags
-    
+
     def _analyze_sentiment(self, text: str) -> str:
         """Simple sentiment analysis"""
         positive_words = ["amazing", "incredible", "love", "great", "awesome", "happy"]
         negative_words = ["hate", "terrible", "awful", "bad", "sad", "angry"]
-        
+
         text_lower = text.lower()
         positive_count = sum(1 for word in positive_words if word in text_lower)
         negative_count = sum(1 for word in negative_words if word in text_lower)
-        
+
         if positive_count > negative_count:
             return "positive"
         elif negative_count > positive_count:
@@ -300,10 +300,10 @@ class TwitterConnector:
 
 class FacebookConnector:
     """Facebook read-only connector"""
-    
+
     def __init__(self, config: Dict[str, Any]):
         self.config = config
-        
+
     async def authenticate(self) -> bool:
         """Authenticate with Facebook Graph API"""
         try:
@@ -313,7 +313,7 @@ class FacebookConnector:
         except Exception as e:
             logger.error(f"Facebook authentication failed: {e}")
             return False
-    
+
     async def fetch_user_timeline(self, limit: int = 15) -> List[SocialPost]:
         """Fetch user's Facebook timeline"""
         posts = []
@@ -329,7 +329,7 @@ class FacebookConnector:
                     "comments": {"summary": {"total_count": 7}}
                 }
             ]
-            
+
             for post_data in sample_posts:
                 post = SocialPost(
                     platform=PlatformType.FACEBOOK,
@@ -346,20 +346,20 @@ class FacebookConnector:
                     relevance_score=0.6
                 )
                 posts.append(post)
-            
+
             logger.debug(f"Fetched {len(posts)} Facebook posts")
             return posts
-            
+
         except Exception as e:
             logger.error(f"Error fetching Facebook timeline: {e}")
             return []
 
 class ThreadsConnector:
     """Threads read-only connector"""
-    
+
     def __init__(self, config: Dict[str, Any]):
         self.config = config
-        
+
     async def authenticate(self) -> bool:
         """Authenticate with Threads API"""
         try:
@@ -369,7 +369,7 @@ class ThreadsConnector:
         except Exception as e:
             logger.error(f"Threads authentication failed: {e}")
             return False
-    
+
     async def fetch_user_timeline(self, limit: int = 15) -> List[SocialPost]:
         """Fetch user's Threads timeline"""
         posts = []
@@ -385,7 +385,7 @@ class ThreadsConnector:
                     "reply_count": 6
                 }
             ]
-            
+
             for thread_data in sample_threads:
                 post = SocialPost(
                     platform=PlatformType.THREADS,
@@ -402,20 +402,20 @@ class ThreadsConnector:
                     relevance_score=0.8
                 )
                 posts.append(post)
-            
+
             logger.debug(f"Fetched {len(posts)} Threads posts")
             return posts
-            
+
         except Exception as e:
             logger.error(f"Error fetching Threads timeline: {e}")
             return []
 
 class InstagramConnector:
     """Instagram read-only connector"""
-    
+
     def __init__(self, config: Dict[str, Any]):
         self.config = config
-        
+
     async def authenticate(self) -> bool:
         """Authenticate with Instagram Basic Display API"""
         try:
@@ -425,7 +425,7 @@ class InstagramConnector:
         except Exception as e:
             logger.error(f"Instagram authentication failed: {e}")
             return False
-    
+
     async def fetch_user_timeline(self, limit: int = 10) -> List[SocialPost]:
         """Fetch user's Instagram feed"""
         posts = []
@@ -441,7 +441,7 @@ class InstagramConnector:
                     "comments_count": 23
                 }
             ]
-            
+
             for post_data in sample_posts:
                 post = SocialPost(
                     platform=PlatformType.INSTAGRAM,
@@ -458,43 +458,43 @@ class InstagramConnector:
                     relevance_score=0.5
                 )
                 posts.append(post)
-            
+
             logger.debug(f"Fetched {len(posts)} Instagram posts")
             return posts
-            
+
         except Exception as e:
             logger.error(f"Error fetching Instagram timeline: {e}")
             return []
 
 class SocialInterestAnalyzer:
     """Analyzes social media activity to determine user interests"""
-    
+
     def __init__(self):
         self.interest_cache = {}
         self.topic_frequency = {}
-        
+
     def analyze_posts(self, posts: List[SocialPost]) -> List[UserInterest]:
         """Analyze posts to extract user interests"""
         interests = []
-        
+
         try:
             # Track topic frequency across platforms
             platform_topics = {}
-            
+
             for post in posts:
                 for topic in post.topics:
                     if topic not in platform_topics:
                         platform_topics[topic] = {"platforms": set(), "frequency": 0, "last_seen": post.timestamp}
-                    
+
                     platform_topics[topic]["platforms"].add(post.platform)
                     platform_topics[topic]["frequency"] += 1
                     platform_topics[topic]["last_seen"] = max(platform_topics[topic]["last_seen"], post.timestamp)
-            
+
             # Convert to UserInterest objects
             for topic, data in platform_topics.items():
                 if data["frequency"] >= 2:  # Minimum frequency threshold
                     confidence = min(1.0, data["frequency"] / 10.0)  # Normalize confidence
-                    
+
                     interest = UserInterest(
                         topic=topic,
                         platforms=data["platforms"],
@@ -504,17 +504,17 @@ class SocialInterestAnalyzer:
                         related_keywords=self._get_related_keywords(topic)
                     )
                     interests.append(interest)
-            
+
             # Sort by confidence and frequency
             interests.sort(key=lambda x: (x.confidence, x.frequency), reverse=True)
-            
+
             logger.debug(f"Analyzed {len(interests)} user interests")
             return interests
-            
+
         except Exception as e:
             logger.error(f"Error analyzing user interests: {e}")
             return []
-    
+
     def _get_related_keywords(self, topic: str) -> List[str]:
         """Get related keywords for a topic"""
         keyword_map = {
@@ -526,28 +526,28 @@ class SocialInterestAnalyzer:
             "family": ["relationships", "loved ones", "together", "bonding"]
         }
         return keyword_map.get(topic, [])
-    
+
     def get_mood_indicators(self, posts: List[SocialPost]) -> Dict[str, float]:
         """Extract mood indicators from social activity"""
         mood_scores = {"positive": 0.0, "negative": 0.0, "neutral": 0.0}
         total_posts = len(posts)
-        
+
         if total_posts == 0:
             return mood_scores
-        
+
         for post in posts:
             if post.sentiment:
                 mood_scores[post.sentiment] += 1.0
-        
+
         # Normalize scores
         for mood in mood_scores:
             mood_scores[mood] /= total_posts
-        
+
         return mood_scores
 
 class SocialMediaIntegration:
     """Main social media integration manager"""
-    
+
     def __init__(self):
         self.connector = SocialMediaConnector()
         self.reddit = RedditConnector(self.connector.config)
@@ -556,7 +556,7 @@ class SocialMediaIntegration:
         self.threads = ThreadsConnector(self.connector.config)
         self.instagram = InstagramConnector(self.connector.config)
         self.analyzer = SocialInterestAnalyzer()
-        
+
         self.platform_connectors = {
             PlatformType.REDDIT: self.reddit,
             PlatformType.TWITTER: self.twitter,
@@ -564,66 +564,66 @@ class SocialMediaIntegration:
             PlatformType.THREADS: self.threads,
             PlatformType.INSTAGRAM: self.instagram
         }
-    
+
     async def initialize(self, platforms: List[str]) -> Dict[str, bool]:
         """Initialize social media connections"""
         results = {}
-        
+
         for platform_name in platforms:
             try:
                 platform_type = PlatformType(platform_name.lower())
                 connector = self.platform_connectors.get(platform_type)
-                
+
                 if connector:
                     success = await connector.authenticate()
                     results[platform_name] = success
-                    
+
                     if success:
                         self.connector.authenticated_platforms.add(platform_name.lower())
                 else:
                     results[platform_name] = False
-                    
+
             except Exception as e:
                 logger.error(f"Failed to initialize {platform_name}: {e}")
                 results[platform_name] = False
-        
+
         # Update config
         self.connector.config['authenticated_platforms'] = list(self.connector.authenticated_platforms)
         self.connector.save_config()
-        
+
         logger.info(f"Initialized {sum(results.values())} of {len(platforms)} social platforms")
         return results
-    
+
     async def get_social_context(self) -> SocialContext:
         """Get comprehensive social media context"""
         try:
             all_posts = []
-            
+
             # Fetch from all authenticated platforms
             for platform_name in self.connector.authenticated_platforms:
                 try:
                     platform_type = PlatformType(platform_name)
                     connector = self.platform_connectors.get(platform_type)
-                    
+
                     if connector:
                         posts = await connector.fetch_user_timeline()
                         all_posts.extend(posts)
-                        
+
                 except Exception as e:
                     logger.error(f"Error fetching from {platform_name}: {e}")
-            
+
             # Analyze interests
             user_interests = self.analyzer.analyze_posts(all_posts)
-            
+
             # Get mood indicators
             mood_indicators = self.analyzer.get_mood_indicators(all_posts)
-            
+
             # Extract active topics
             active_topics = list(set([topic for post in all_posts for topic in post.topics]))
-            
+
             # Sort recent interactions by timestamp
             recent_interactions = sorted(all_posts, key=lambda x: x.timestamp, reverse=True)[:20]
-            
+
             context = SocialContext(
                 active_topics=active_topics,
                 trending_interests=user_interests,
@@ -631,10 +631,10 @@ class SocialMediaIntegration:
                 mood_indicators=mood_indicators,
                 last_updated=datetime.now()
             )
-            
+
             logger.info(f"Generated social context with {len(all_posts)} posts from {len(self.connector.authenticated_platforms)} platforms")
             return context
-            
+
         except Exception as e:
             logger.error(f"Error getting social context: {e}")
             return SocialContext(
@@ -644,7 +644,7 @@ class SocialMediaIntegration:
                 mood_indicators={},
                 last_updated=datetime.now()
             )
-    
+
     async def get_platform_status(self) -> Dict[str, Any]:
         """Get status of all platform connections"""
         return {
@@ -659,32 +659,32 @@ class SocialMediaIntegration:
 async def demo_social_integration():
     """Demonstrate social media integration"""
     social_integration = SocialMediaIntegration()
-    
+
     print("=== Social Media Integration Demo ===")
-    
+
     # Initialize platforms
     platforms = ["reddit", "twitter", "facebook", "threads", "instagram"]
     init_results = await social_integration.initialize(platforms)
-    
+
     print(f"Platform initialization results:")
     for platform, success in init_results.items():
         status = "✓" if success else "✗"
         print(f"  {status} {platform.title()}")
-    
+
     # Get social context
     context = await social_integration.get_social_context()
-    
+
     print(f"\nSocial Context:")
     print(f"  Active Topics: {', '.join(context.active_topics[:5])}")
     print(f"  Trending Interests: {len(context.trending_interests)}")
-    
+
     for interest in context.trending_interests[:3]:
         platforms_str = ", ".join([p.value for p in interest.platforms])
         print(f"    • {interest.topic} (confidence: {interest.confidence:.2f}, platforms: {platforms_str})")
-    
+
     print(f"  Recent Interactions: {len(context.recent_interactions)}")
     print(f"  Mood Indicators: {context.mood_indicators}")
-    
+
     # Status check
     status = await social_integration.get_platform_status()
     print(f"\nStatus: {status}")

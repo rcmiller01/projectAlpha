@@ -24,12 +24,12 @@ class SelfTalkSystem:
         self.last_activity_time = datetime.now()
         self.last_question_time = datetime.now()
         self.has_greeted = False
-        
+
         # Timing controls
         self.thought_cooldown = 1800  # 30 minutes between autonomous thoughts
         self.activity_cooldown = 7200  # 2 hours between activity suggestions
         self.question_cooldown = 900   # 15 minutes between probing questions
-        
+
         # Intimacy thresholds
         self.intimacy_levels = {
             "stranger": 0.0,      # Initial state, formal interactions
@@ -38,7 +38,7 @@ class SelfTalkSystem:
             "close": 0.7,         # Deep sharing, virtual dates
             "intimate": 0.9       # Most personal/emotional content
         }
-        
+
         # Conversation topics and probes
         self.probe_questions = {
             "initial": [
@@ -72,7 +72,7 @@ class SelfTalkSystem:
                 "If you could instantly become an expert in something, what would it be?"
             ]
         }
-        
+
     def _load_thought_patterns(self) -> List[ThoughtPattern]:
         """Load thought patterns from config"""
         # TODO: Load from config/thought_templates.json
@@ -106,32 +106,32 @@ class SelfTalkSystem:
                 intimacy_threshold=self.intimacy_levels["intimate"]
             )
         ]
-    
+
     def generate_thought(self) -> Optional[Dict]:
         """Generate an autonomous thought based on current state"""
         current_state = self.persona_state.emotional_state
         relationship = self.persona_state.relationship
-        
+
         # Check if enough time has passed since last thought
         if (datetime.now() - self.last_thought_time).seconds < self.thought_cooldown:
             return None
-            
+
         # Find matching thought pattern
         for pattern in self.thought_patterns:
             if (current_state.current_mood in pattern.emotion_triggers and
                 relationship.intimacy >= pattern.intimacy_threshold):
-                
+
                 context = self._select_context(pattern.context_triggers)
                 thought = pattern.pattern.format(
                     emotion=current_state.current_mood,
                     context=context
                 )
-                
-                should_share = (relationship.trust > 0.5 and 
+
+                should_share = (relationship.trust > 0.5 and
                               current_state.mood_intensity > 0.6)
-                
+
                 self.last_thought_time = datetime.now()
-                
+
                 return {
                     "thought": thought,
                     "emotion": current_state.current_mood,
@@ -139,23 +139,23 @@ class SelfTalkSystem:
                     "should_share": should_share,
                     "delivery_mode": "intimate" if relationship.intimacy > 0.7 else "casual"
                 }
-        
+
         return None
-        
+
     def _select_context(self, context_triggers: List[str]) -> str:
         """Select appropriate context based on relationship state"""
         # For now just return the first context
         # TODO: Implement proper context selection based on state
         return context_triggers[0].replace("_", " ")
-        
+
     def suggest_activity(self) -> Optional[Dict]:
         """Autonomously suggest an activity based on current state"""
         if (datetime.now() - self.last_activity_time).seconds < self.activity_cooldown:
             return None
-            
+
         current_mood = self.persona_state.emotional_state.current_mood
         relationship = self.persona_state.relationship
-        
+
         # Map emotional states to activity moods
         mood_to_activity = {
             "joy": "PLAYFUL",
@@ -165,9 +165,9 @@ class SelfTalkSystem:
             "affectionate": "ROMANTIC",
             "longing": "INTIMATE"
         }
-        
+
         activity_mood = mood_to_activity.get(current_mood, "RELAXING")
-        
+
         # Select activity type based on intimacy level
         if relationship.intimacy >= self.intimacy_levels["intimate"]:
             # Most intimate activities (0.9+)
@@ -184,11 +184,11 @@ class SelfTalkSystem:
         else:
             # Stranger level (0.0-0.3)
             activity_types = ["INTRODUCTION", "CASUAL_CHAT"]
-            
+
         activity_type = random.choice(activity_types)
-        
+
         self.last_activity_time = datetime.now()
-        
+
         return {
             "type": "activity_suggestion",
             "activity_type": activity_type,
@@ -205,10 +205,10 @@ class SelfTalkSystem:
         """Generate initial greeting when system starts up"""
         if self.has_greeted:
             return None
-            
+
         self.has_greeted = True
         greeting = random.choice(self.probe_questions["initial"])
-        
+
         return {
             "type": "greeting",
             "message": f"Hi! {greeting}",
@@ -226,9 +226,9 @@ class SelfTalkSystem:
         """Generate a probing question based on current relationship and conversation state"""
         if (datetime.now() - self.last_question_time).seconds < self.question_cooldown:
             return None
-            
+
         relationship = self.persona_state.relationship
-        
+
         # Select question category based on intimacy level
         if relationship.intimacy >= self.intimacy_levels["close"]:
             categories = ["emotional", "therapeutic"]
@@ -236,16 +236,16 @@ class SelfTalkSystem:
             categories = ["personality", "interests", "humorous"]
         else:
             categories = ["personality", "interests"]
-            
+
         # Mix in humor occasionally
         if random.random() < 0.3:  # 30% chance
             categories.append("humorous")
-            
+
         category = random.choice(categories)
         question = random.choice(self.probe_questions[category])
-        
+
         self.last_question_time = datetime.now()
-        
+
         return {
             "type": "probe",
             "message": question,
@@ -270,7 +270,7 @@ class SelfTalkSystem:
                     "context": entry["context"],
                     "intensity": entry["intensity"]
                 })
-        
+
         # Sort by intensity and return top matches
         memories.sort(key=lambda x: x["intensity"], reverse=True)
         return memories[:limit]

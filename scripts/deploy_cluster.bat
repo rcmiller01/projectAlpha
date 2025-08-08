@@ -359,4 +359,4 @@ echo 3. Set up SSL certificates if needed
 echo 4. Configure backup strategies for MongoDB
 echo 5. Monitor cluster health and performance
 echo.
-goto :eof 
+goto :eof

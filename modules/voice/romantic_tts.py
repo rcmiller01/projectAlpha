@@ -39,7 +39,7 @@ class RomanticTTS:
             warmth=0.9,  # High warmth
             intimacy=0.8  # High intimacy
         )
-        
+
         # Emotional voice mappings
         self.emotion_voice_mappings = {
             VoiceEmotion.LOVING: VoiceSettings(1.15, 0.85, 0.85, 0.3, 0.95, 0.9),
@@ -53,7 +53,7 @@ class RomanticTTS:
             VoiceEmotion.CALM: VoiceSettings(1.0, 0.85, 0.75, 0.1, 0.85, 0.8),
             VoiceEmotion.EXCITED: VoiceSettings(1.3, 1.3, 0.95, 0.2, 0.9, 0.7)
         }
-        
+
         # Intimate phrases and their emotional context
         self.intimate_phrases = {
             "greeting": [
@@ -81,7 +81,7 @@ class RomanticTTS:
                 ("I can't resist you", VoiceEmotion.PASSIONATE)
             ]
         }
-        
+
         # Voice synthesis parameters (for integration with TTS engines)
         self.synthesis_params = {
             "engine": "tacotron2",  # or "fastpitch", "coqui"
@@ -89,17 +89,17 @@ class RomanticTTS:
             "sample_rate": 22050,
             "quality": "high"
         }
-    
+
     def get_voice_settings(self, emotion: VoiceEmotion) -> VoiceSettings:
         """Get voice settings for a specific emotion"""
         if emotion in self.emotion_voice_mappings:
             return self.emotion_voice_mappings[emotion]
         return self.base_voice
-    
+
     def analyze_text_emotion(self, text: str) -> VoiceEmotion:
         """Analyze text to determine appropriate voice emotion"""
         text_lower = text.lower()
-        
+
         # Keyword-based emotion detection
         if any(word in text_lower for word in ["love", "adore", "cherish"]):
             return VoiceEmotion.LOVING
@@ -119,18 +119,18 @@ class RomanticTTS:
             return VoiceEmotion.EXCITED
         else:
             return VoiceEmotion.AFFECTIONATE
-    
+
     def generate_speech_parameters(self, text: str, emotion: Optional[VoiceEmotion] = None) -> Dict:
         """Generate speech parameters for TTS synthesis"""
         if emotion is None:
             emotion = self.analyze_text_emotion(text)
-        
+
         voice_settings = self.get_voice_settings(emotion)
-        
+
         # Add some natural variation
         pitch_variation = random.uniform(-0.05, 0.05)
         speed_variation = random.uniform(-0.05, 0.05)
-        
+
         return {
             "text": text,
             "emotion": emotion.value,
@@ -143,7 +143,7 @@ class RomanticTTS:
             "synthesis_params": self.synthesis_params,
             "prosody": self._generate_prosody(emotion, text)
         }
-    
+
     def _generate_prosody(self, emotion: VoiceEmotion, text: str) -> Dict:
         """Generate prosody (intonation, rhythm, stress) for the text"""
         prosody_patterns = {
@@ -178,15 +178,15 @@ class RomanticTTS:
                 "rhythm": "steady"
             }
         }
-        
+
         return prosody_patterns.get(emotion, prosody_patterns[VoiceEmotion.AFFECTIONATE])
-    
+
     def get_intimate_phrase(self, category: str) -> Tuple[str, VoiceEmotion]:
         """Get a random intimate phrase for a category"""
         if category in self.intimate_phrases:
             return random.choice(self.intimate_phrases[category])
         return ("I love you", VoiceEmotion.LOVING)
-    
+
     def create_voice_profile(self, user_preferences: Dict) -> Dict:
         """Create personalized voice profile based on user preferences"""
         profile = {
@@ -196,15 +196,15 @@ class RomanticTTS:
             "personality_traits": ["empathetic", "romantic", "gentle"],
             "speaking_style": "intimate_conversational"
         }
-        
+
         # Adjust based on user preferences
         if "voice_pitch" in user_preferences:
             profile["base_pitch"] = user_preferences["voice_pitch"]
         if "speaking_speed" in user_preferences:
             profile["base_speed"] = user_preferences["speaking_speed"]
-        
+
         return profile
-    
+
     def generate_whisper_settings(self) -> Dict:
         """Generate settings for intimate whisper mode"""
         return {
@@ -219,4 +219,4 @@ class RomanticTTS:
         }
 
 # Global TTS instance
-romantic_tts = RomanticTTS() 
+romantic_tts = RomanticTTS()

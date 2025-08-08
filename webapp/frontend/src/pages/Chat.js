@@ -29,12 +29,12 @@ const Chat = () => {
   const [message, setMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
-  
+
   const { currentThread, addMessage } = useThreadStore();
   const { currentAgent } = useAgentStore();
-  const { 
-    generateVoiceParams, 
-    isInitialized: voiceInitialized 
+  const {
+    generateVoiceParams,
+    isInitialized: voiceInitialized
   } = useVoiceCadence();
   const { voiceSettings, toggleVoiceEnabled } = useVoiceSettings();
 
@@ -160,12 +160,12 @@ const Chat = () => {
               </Typography>
             </Box>
           </Box>
-          
+
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {voiceSettings.enabled && (
-              <Chip 
-                label="Voice Active" 
-                color="primary" 
+              <Chip
+                label="Voice Active"
+                color="primary"
                 size="small"
                 icon={<VolumeUp />}
               />
@@ -203,14 +203,14 @@ const Chat = () => {
                     gap: 1
                   }}
                 >
-                  <Avatar sx={{ 
+                  <Avatar sx={{
                     bgcolor: msg.sender === 'user' ? 'secondary.main' : 'primary.main',
                     width: 32,
                     height: 32
                   }}>
                     {msg.sender === 'user' ? <Person /> : <SmartToy />}
                   </Avatar>
-                  
+
                   <Box>
                     <Paper
                       sx={{
@@ -225,7 +225,7 @@ const Chat = () => {
                       <Typography variant="body1">
                         {msg.content}
                       </Typography>
-                      
+
                       {/* Voice parameters display (for demo) */}
                       {msg.sender === 'agent' && msg.voiceParams && voiceSettings.enabled && (
                         <Box sx={{ mt: 1, pt: 1, borderTop: 1, borderColor: 'divider' }}>
@@ -235,9 +235,9 @@ const Chat = () => {
                         </Box>
                       )}
                     </Paper>
-                    
-                    <Typography variant="caption" color="text.secondary" sx={{ 
-                      display: 'block', 
+
+                    <Typography variant="caption" color="text.secondary" sx={{
+                      display: 'block',
                       mt: 0.5,
                       textAlign: msg.sender === 'user' ? 'right' : 'left'
                     }}>
@@ -282,7 +282,7 @@ const Chat = () => {
             Voice modulation system is initializing...
           </Alert>
         )}
-        
+
         <Box sx={{ display: 'flex', gap: 1 }}>
           <TextField
             fullWidth

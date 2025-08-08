@@ -43,7 +43,7 @@ if settings and settings.SAFE_MODE_FORCE:
     logger.warning("⚠️  SAFE MODE FORCE is enabled - system operating in restricted mode")
 
 app = FastAPI(
-    title="ProjectAlpha Backend", 
+    title="ProjectAlpha Backend",
     version="1.0.0",
     debug=settings.DEBUG if settings else False
 )
@@ -61,7 +61,7 @@ app.add_middleware(
 async def startup_event():
     """Application startup event."""
     logger.info("🔧 ProjectAlpha Backend startup complete")
-    
+
     if settings:
         # Log feature status
         features_status = {
@@ -118,7 +118,7 @@ async def get_config_summary():
             "error": "Configuration not fully loaded",
             "message": "Set required environment variables (MONGO_ROOT_USERNAME, MONGO_ROOT_PASSWORD, etc.)"
         }
-    
+
     return {
         "server": {
             "role": settings.SERVER_ROLE,
@@ -145,11 +145,11 @@ async def get_config_summary():
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     port = settings.PORT if settings else 8000
     debug = settings.DEBUG if settings else False
     log_level = settings.LOG_LEVEL.lower() if settings else "info"
-    
+
     logger.info(f"🌐 Starting server on port {port}")
     uvicorn.run(
         "app:app",

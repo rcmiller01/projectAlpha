@@ -35,18 +35,18 @@ class ChartData:
     data: Dict[str, Any]
     metadata: Dict[str, Any]
     timestamp: datetime
-    
+
 
 class VisualizationEngine:
     """
     Visualization engine for companion system analytics and user insights
     """
-    
+
     def __init__(self, user_id: str, config: Dict[str, Any]):
         self.user_id = user_id
         self.config = config
         self.logger = logging.getLogger(f"{__name__}.{user_id}")
-        
+
         # Visualization state
         self.active_charts = {}
         self.chart_history = []
@@ -55,9 +55,9 @@ class VisualizationEngine:
             "emotional": ["#ff6b6b", "#4ecdc4", "#45b7d1", "#96ceb4", "#feca57"],
             "therapeutic": ["#a8e6cf", "#dcedc1", "#ffd3a5", "#ffd1dc", "#c7cedb"]
         }
-        
+
         self.logger.info(f"📊 Visualization engine initialized for user {user_id}")
-    
+
     async def create_emotional_timeline_chart(self, emotional_data: List[Dict[str, Any]]) -> ChartData:
         """
         Create a timeline chart showing emotional state evolution
@@ -66,16 +66,16 @@ class VisualizationEngine:
             # Process emotional data for visualization
             timestamps = []
             emotions = {}
-            
+
             for entry in emotional_data:
                 timestamps.append(entry.get("timestamp", datetime.now().isoformat()))
                 emotional_state = entry.get("emotional_state", {})
-                
+
                 for emotion, intensity in emotional_state.items():
                     if emotion not in emotions:
                         emotions[emotion] = []
                     emotions[emotion].append(intensity)
-            
+
             # Prepare chart data
             chart_data = {
                 "type": "line",
@@ -103,7 +103,7 @@ class VisualizationEngine:
                     }
                 }
             }
-            
+
             # Add datasets for each emotion
             color_scheme = self.color_schemes.get("emotional", self.color_schemes["default"])
             for i, (emotion, values) in enumerate(emotions.items()):
@@ -115,7 +115,7 @@ class VisualizationEngine:
                     "backgroundColor": color + "20",  # Add transparency
                     "tension": 0.3
                 })
-            
+
             chart = ChartData(
                 chart_id=f"emotional_timeline_{int(datetime.now().timestamp())}",
                 chart_type="emotional_timeline",
@@ -128,16 +128,16 @@ class VisualizationEngine:
                 },
                 timestamp=datetime.now()
             )
-            
+
             self.active_charts[chart.chart_id] = chart
             self.logger.info(f"📈 Created emotional timeline chart: {chart.chart_id}")
-            
+
             return chart
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error creating emotional timeline chart: {e}")
             return self._create_error_chart("emotional_timeline", str(e))
-    
+
     async def create_interaction_analysis_chart(self, interaction_data: List[Dict[str, Any]]) -> ChartData:
         """
         Create charts analyzing interaction patterns and types
@@ -147,16 +147,16 @@ class VisualizationEngine:
             interaction_types = {}
             satisfaction_scores = []
             hourly_distribution = {str(i): 0 for i in range(24)}
-            
+
             for interaction in interaction_data:
                 # Count interaction types
                 int_type = interaction.get("interaction_type", "general")
                 interaction_types[int_type] = interaction_types.get(int_type, 0) + 1
-                
+
                 # Collect satisfaction scores
                 satisfaction = interaction.get("satisfaction_score", 0.5)
                 satisfaction_scores.append(satisfaction)
-                
+
                 # Analyze time distribution
                 timestamp = interaction.get("timestamp", datetime.now().isoformat())
                 try:
@@ -164,7 +164,7 @@ class VisualizationEngine:
                     hourly_distribution[str(hour)] += 1
                 except:
                     pass
-            
+
             # Create combined dashboard chart
             chart_data = {
                 "type": "dashboard",
@@ -236,7 +236,7 @@ class VisualizationEngine:
                     }
                 }
             }
-            
+
             chart = ChartData(
                 chart_id=f"interaction_analysis_{int(datetime.now().timestamp())}",
                 chart_type="interaction_analysis",
@@ -250,16 +250,16 @@ class VisualizationEngine:
                 },
                 timestamp=datetime.now()
             )
-            
+
             self.active_charts[chart.chart_id] = chart
             self.logger.info(f"📊 Created interaction analysis chart: {chart.chart_id}")
-            
+
             return chart
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error creating interaction analysis chart: {e}")
             return self._create_error_chart("interaction_analysis", str(e))
-    
+
     async def create_crisis_monitoring_chart(self, crisis_data: List[Dict[str, Any]]) -> ChartData:
         """
         Create visualization for crisis monitoring and safety metrics
@@ -269,11 +269,11 @@ class VisualizationEngine:
             crisis_levels = []
             timestamps = []
             intervention_counts = {"immediate": 0, "follow_up": 0, "resources_provided": 0}
-            
+
             for entry in crisis_data:
                 timestamps.append(entry.get("timestamp", datetime.now().isoformat()))
                 crisis_levels.append(entry.get("crisis_level", 0))
-                
+
                 # Count intervention types
                 if entry.get("immediate_intervention"):
                     intervention_counts["immediate"] += 1
@@ -281,7 +281,7 @@ class VisualizationEngine:
                     intervention_counts["follow_up"] += 1
                 if entry.get("resources_provided"):
                     intervention_counts["resources_provided"] += 1
-            
+
             chart_data = {
                 "type": "crisis_dashboard",
                 "charts": {
@@ -341,7 +341,7 @@ class VisualizationEngine:
                     }
                 }
             }
-            
+
             chart = ChartData(
                 chart_id=f"crisis_monitoring_{int(datetime.now().timestamp())}",
                 chart_type="crisis_monitoring",
@@ -355,16 +355,16 @@ class VisualizationEngine:
                 },
                 timestamp=datetime.now()
             )
-            
+
             self.active_charts[chart.chart_id] = chart
             self.logger.info(f"🚨 Created crisis monitoring chart: {chart.chart_id}")
-            
+
             return chart
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error creating crisis monitoring chart: {e}")
             return self._create_error_chart("crisis_monitoring", str(e))
-    
+
     def _create_error_chart(self, chart_type: str, error_message: str) -> ChartData:
         """Create an error chart when visualization fails"""
         return ChartData(
@@ -375,7 +375,7 @@ class VisualizationEngine:
             metadata={"error": True, "error_message": error_message},
             timestamp=datetime.now()
         )
-    
+
     async def export_chart(self, chart_id: str, format: str = "json") -> Optional[str]:
         """
         Export chart data in specified format
@@ -383,9 +383,9 @@ class VisualizationEngine:
         if chart_id not in self.active_charts:
             self.logger.warning(f"⚠️ Chart not found: {chart_id}")
             return None
-        
+
         chart = self.active_charts[chart_id]
-        
+
         try:
             if format == "json":
                 return json.dumps({
@@ -396,7 +396,7 @@ class VisualizationEngine:
                     "metadata": chart.metadata,
                     "timestamp": chart.timestamp.isoformat()
                 }, indent=2)
-            
+
             elif format == "svg":
                 # Generate SVG representation (simplified)
                 svg_content = f"""
@@ -408,15 +408,15 @@ class VisualizationEngine:
                 </svg>
                 """
                 return svg_content.strip()
-            
+
             else:
                 self.logger.warning(f"⚠️ Unsupported export format: {format}")
                 return None
-                
+
         except Exception as e:
             self.logger.error(f"❌ Error exporting chart {chart_id}: {e}")
             return None
-    
+
     async def get_visualization_summary(self) -> Dict[str, Any]:
         """Get summary of visualization engine status"""
         return {
@@ -426,20 +426,20 @@ class VisualizationEngine:
             "available_color_schemes": list(self.color_schemes.keys()),
             "supported_export_formats": ["json", "svg"]
         }
-    
+
     async def cleanup_old_charts(self, max_age_hours: int = 24) -> int:
         """Clean up old charts to manage memory"""
         cutoff_time = datetime.now() - timedelta(hours=max_age_hours)
         charts_to_remove = []
-        
+
         for chart_id, chart in self.active_charts.items():
             if chart.timestamp < cutoff_time:
                 charts_to_remove.append(chart_id)
                 self.chart_history.append(chart)
-        
+
         for chart_id in charts_to_remove:
             del self.active_charts[chart_id]
-        
+
         self.logger.info(f"🧹 Cleaned up {len(charts_to_remove)} old charts")
         return len(charts_to_remove)
 

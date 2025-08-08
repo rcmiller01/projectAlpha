@@ -50,71 +50,71 @@ setup(
         # Core web framework
         'fastapi>=0.104.0',
         'uvicorn[standard]>=0.24.0',
-        
+
         # HTTP clients and async support
         'httpx>=0.25.0',
         'aiohttp>=3.9.0',
         'aiofiles>=23.2.0',
-        
+
         # Data validation and serialization
         'pydantic>=2.4.0',
         'pydantic-settings>=2.0.0',
-        
+
         # Ollama integration
         'ollama>=0.1.7',
-        
+
         # MCP (Model Context Protocol) integration
         'mcp>=0.1.0',  # Adjust version as needed
         'websockets>=11.0.0',  # For MCP WebSocket support
-        
+
         # Database and storage
         'sqlalchemy>=2.0.0',
         'alembic>=1.12.0',
         'aiosqlite>=0.19.0',  # Async SQLite support
-        
+
         # AI and ML libraries
         'numpy>=1.24.0',
         'pandas>=2.0.0',
         'scikit-learn>=1.3.0',
         'transformers>=4.30.0',
         'torch>=2.0.0',
-        
+
         # Natural language processing
         'nltk>=3.8.0',
         'spacy>=3.6.0',
-        
+
         # Configuration management
         'python-dotenv>=1.0.0',
         'pyyaml>=6.0.0',
         'toml>=0.10.0',
-        
+
         # Logging and monitoring
         'structlog>=23.2.0',
         'rich>=13.0.0',
-        
+
         # File watching for hot-reload
         'watchdog>=3.0.0',
-        
+
         # Date and time handling
         'python-dateutil>=2.8.0',
         'pytz>=2023.3',
-        
+
         # Concurrency and async utilities
         'asyncio-throttle>=1.0.0',
         'tenacity>=8.2.0',  # For retry logic
-        
+
         # Testing (dev dependencies)
         'pytest>=7.4.0',
         'pytest-asyncio>=0.21.0',
         'pytest-cov>=4.1.0',
         'httpx[testing]>=0.25.0',
-        
+
         # Development tools
         'black>=23.0.0',
         'isort>=5.12.0',
         'flake8>=6.0.0',
         'mypy>=1.5.0',
-        
+
         # Security
         'cryptography>=41.0.0',
         'python-jose>=3.3.0',

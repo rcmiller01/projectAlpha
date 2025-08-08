@@ -41,7 +41,7 @@ class UserProfile:
     display_name: Optional[str] = None
     preferences: Dict[str, Any] = field(default_factory=dict)
     adaptive_profile: Dict[str, Any] = field(default_factory=dict)
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "user_id": self.user_id,
@@ -51,7 +51,7 @@ class UserProfile:
             "preferences": self.preferences,
             "adaptive_profile": self.adaptive_profile
         }
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'UserProfile':
         return cls(
@@ -79,7 +79,7 @@ class InteractionRecord:
     creative_context: Dict[str, Any]
     guidance_used: Dict[str, Any]
     response_metrics: Dict[str, Any]
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "interaction_id": self.interaction_id,
@@ -96,7 +96,7 @@ class InteractionRecord:
             "guidance_used": self.guidance_used,
             "response_metrics": self.response_metrics
         }
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'InteractionRecord':
         return cls(
@@ -126,7 +126,7 @@ class SessionRecord:
     primary_focuses: List[str] = field(default_factory=list)
     emotional_trajectory: List[Dict[str, Any]] = field(default_factory=list)
     session_summary: Dict[str, Any] = field(default_factory=dict)
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "session_id": self.session_id,
@@ -138,7 +138,7 @@ class SessionRecord:
             "emotional_trajectory": self.emotional_trajectory,
             "session_summary": self.session_summary
         }
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'SessionRecord':
         return cls(
@@ -165,7 +165,7 @@ class PsychologicalState:
     support_needs: List[str]
     risk_factors: Dict[str, float]
     growth_indicators: Dict[str, float]
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "user_id": self.user_id,
@@ -179,7 +179,7 @@ class PsychologicalState:
             "risk_factors": self.risk_factors,
             "growth_indicators": self.growth_indicators
         }
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'PsychologicalState':
         return cls(
@@ -211,7 +211,7 @@ class MemoryFragment:
     tone: Optional[str] = None
     sentiment: float = 0.0
     time_of_day: Optional[str] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "memory_id": self.memory_id,
@@ -228,7 +228,7 @@ class MemoryFragment:
             "sentiment": self.sentiment,
             "time_of_day": self.time_of_day
         }
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'MemoryFragment':
         return cls(
@@ -278,43 +278,43 @@ class EmotionalRiskEntry:
 
 class DatabaseInterface(Protocol):
     """Protocol defining the database interface for the unified companion system"""
-    
+
     async def initialize(self) -> None:
         """Initialize the database connection"""
         ...
-    
+
     async def create_user_profile(self, user_profile: UserProfile) -> bool:
         """Create a new user profile"""
         ...
-    
+
     async def get_user_profile(self, user_id: str) -> Optional[UserProfile]:
         """Get user profile by user_id"""
         ...
-    
+
     async def update_user_profile(self, user_id: str, updates: Dict[str, Any]) -> bool:
         """Update user profile"""
         ...
-    
+
     async def save_interaction(self, interaction: InteractionRecord) -> bool:
         """Save an interaction record"""
         ...
-    
+
     async def get_recent_interactions(self, user_id: str, limit: int = 20) -> List[InteractionRecord]:
         """Get recent interactions for a user"""
         ...
-    
+
     async def save_psychological_state(self, state: PsychologicalState) -> bool:
         """Save psychological state snapshot"""
         ...
-    
+
     async def get_latest_psychological_state(self, user_id: str) -> Optional[PsychologicalState]:
         """Get latest psychological state for user"""
         ...
-    
+
     async def save_memory_fragment(self, memory: MemoryFragment) -> bool:
         """Save a memory fragment"""
         ...
-    
+
     async def get_relevant_memories(self, user_id: str, memory_type: Optional[str] = None,
                                   tags: Optional[List[str]] = None, limit: int = 10) -> List[MemoryFragment]:
         """Get relevant memory fragments for context"""
@@ -332,7 +332,7 @@ class InMemoryDatabase:
     """
     In-memory database implementation for development and testing
     """
-    
+
     def __init__(self):
         self.users: Dict[str, UserProfile] = {}
         self.interactions: List[InteractionRecord] = []
@@ -341,11 +341,11 @@ class InMemoryDatabase:
         self.memory_fragments: List[MemoryFragment] = []
         self.emotional_risk_registry: List[EmotionalRiskEntry] = []
         self.logger = logging.getLogger(__name__)
-    
+
     async def initialize(self) -> None:
         """Initialize the in-memory database"""
         self.logger.info("In-memory database initialized")
-    
+
     async def create_user_profile(self, user_profile: UserProfile) -> bool:
         """Create a new user profile"""
         try:
@@ -356,28 +356,28 @@ class InMemoryDatabase:
         except Exception as e:
             self.logger.error(f"Error creating user profile: {e}")
             return False
-    
+
     async def get_user_profile(self, user_id: str) -> Optional[UserProfile]:
         """Get user profile by user_id"""
         return self.users.get(user_id)
-    
+
     async def update_user_profile(self, user_id: str, updates: Dict[str, Any]) -> bool:
         """Update user profile"""
         try:
             if user_id not in self.users:
                 return False
-            
+
             user = self.users[user_id]
             for key, value in updates.items():
                 if hasattr(user, key):
                     setattr(user, key, value)
-            
+
             user.last_active = datetime.now()
             return True
         except Exception as e:
             self.logger.error(f"Error updating user profile: {e}")
             return False
-    
+
     async def save_interaction(self, interaction: InteractionRecord) -> bool:
         """Save an interaction record"""
         try:
@@ -386,7 +386,7 @@ class InMemoryDatabase:
         except Exception as e:
             self.logger.error(f"Error saving interaction: {e}")
             return False
-    
+
     async def get_recent_interactions(self, user_id: str, limit: int = 20) -> List[InteractionRecord]:
         """Get recent interactions for a user"""
         try:
@@ -396,7 +396,7 @@ class InMemoryDatabase:
         except Exception as e:
             self.logger.error(f"Error getting recent interactions: {e}")
             return []
-    
+
     async def get_session_interactions(self, session_id: str) -> List[InteractionRecord]:
         """Get all interactions for a specific session"""
         try:
@@ -406,7 +406,7 @@ class InMemoryDatabase:
         except Exception as e:
             self.logger.error(f"Error getting session interactions: {e}")
             return []
-    
+
     async def create_session(self, session: SessionRecord) -> bool:
         """Create a new session record"""
         try:
@@ -415,27 +415,27 @@ class InMemoryDatabase:
         except Exception as e:
             self.logger.error(f"Error creating session: {e}")
             return False
-    
+
     async def update_session(self, session_id: str, updates: Dict[str, Any]) -> bool:
         """Update session record"""
         try:
             if session_id not in self.sessions:
                 return False
-            
+
             session = self.sessions[session_id]
             for key, value in updates.items():
                 if hasattr(session, key):
                     setattr(session, key, value)
-            
+
             return True
         except Exception as e:
             self.logger.error(f"Error updating session: {e}")
             return False
-    
+
     async def get_session(self, session_id: str) -> Optional[SessionRecord]:
         """Get session record by session_id"""
         return self.sessions.get(session_id)
-    
+
     async def save_psychological_state(self, state: PsychologicalState) -> bool:
         """Save psychological state snapshot"""
         try:
@@ -444,7 +444,7 @@ class InMemoryDatabase:
         except Exception as e:
             self.logger.error(f"Error saving psychological state: {e}")
             return False
-    
+
     async def get_latest_psychological_state(self, user_id: str) -> Optional[PsychologicalState]:
         """Get latest psychological state for user"""
         try:
@@ -455,19 +455,19 @@ class InMemoryDatabase:
         except Exception as e:
             self.logger.error(f"Error getting psychological state: {e}")
             return None
-    
+
     async def get_psychological_trend(self, user_id: str, days: int = 30) -> List[PsychologicalState]:
         """Get psychological state trend over time"""
         try:
             start_date = datetime.now() - timedelta(days=days)
-            user_states = [s for s in self.psychological_states 
+            user_states = [s for s in self.psychological_states
                           if s.user_id == user_id and s.timestamp >= start_date]
             user_states.sort(key=lambda x: x.timestamp)
             return user_states
         except Exception as e:
             self.logger.error(f"Error getting psychological trend: {e}")
             return []
-    
+
     async def save_memory_fragment(self, memory: MemoryFragment) -> bool:
         """Save a memory fragment"""
         try:
@@ -476,26 +476,26 @@ class InMemoryDatabase:
         except Exception as e:
             self.logger.error(f"Error saving memory fragment: {e}")
             return False
-    
-    async def get_relevant_memories(self, user_id: str, memory_type: Optional[str] = None, 
+
+    async def get_relevant_memories(self, user_id: str, memory_type: Optional[str] = None,
                                   tags: Optional[List[str]] = None, limit: int = 10) -> List[MemoryFragment]:
         """Get relevant memory fragments for context"""
         try:
             user_memories = [m for m in self.memory_fragments if m.user_id == user_id]
-            
+
             if memory_type:
                 user_memories = [m for m in user_memories if m.memory_type == memory_type]
-            
+
             if tags:
                 user_memories = [m for m in user_memories if any(tag in m.tags for tag in tags)]
-            
+
             # Sort by importance score
             user_memories.sort(key=lambda x: x.importance_score, reverse=True)
             return user_memories[:limit]
         except Exception as e:
             self.logger.error(f"Error getting relevant memories: {e}")
             return []
-    
+
     async def update_memory_access(self, memory_id: str) -> bool:
         """Update memory access tracking"""
         try:
@@ -527,27 +527,27 @@ class InMemoryDatabase:
         except Exception as e:
             self.logger.error(f"Error getting emotional risk history: {e}")
             return []
-    
+
     async def get_user_analytics(self, user_id: str, days: int = 30) -> Dict[str, Any]:
         """Get user interaction analytics"""
         try:
             start_date = datetime.now() - timedelta(days=days)
-            
+
             # Get interactions in timeframe
-            user_interactions = [i for i in self.interactions 
+            user_interactions = [i for i in self.interactions
                                if i.user_id == user_id and i.timestamp >= start_date]
-            
+
             # Count by interaction type
             interaction_stats = {}
             for interaction in user_interactions:
                 interaction_type = interaction.interaction_type.value
                 interaction_stats[interaction_type] = interaction_stats.get(interaction_type, 0) + 1
-            
+
             # Get emotional trend
-            user_states = [s for s in self.psychological_states 
+            user_states = [s for s in self.psychological_states
                           if s.user_id == user_id and s.timestamp >= start_date]
             user_states.sort(key=lambda x: x.timestamp)
-            
+
             emotional_trend = [
                 {
                     "timestamp": state.timestamp.isoformat(),
@@ -555,7 +555,7 @@ class InMemoryDatabase:
                 }
                 for state in user_states
             ]
-            
+
             return {
                 "user_id": user_id,
                 "analysis_period_days": days,
@@ -564,11 +564,11 @@ class InMemoryDatabase:
                 "total_interactions": len(user_interactions),
                 "generated_at": datetime.now().isoformat()
             }
-            
+
         except Exception as e:
             self.logger.error(f"Error getting user analytics: {e}")
             return {}
-    
+
     async def close(self):
         """Close database connection (no-op for in-memory)"""
         self.logger.info("In-memory database closed")
@@ -580,7 +580,7 @@ def create_database_interface(connection_string: Optional[str] = None, database_
     Supports local JSON persistence when `database_type` is ``jsonfile``.
     """
     import os
-    
+
     # Auto-detect database type based on environment and parameters
     if database_type == "auto":
         if connection_string or os.getenv('MONGO_CONNECTION_STRING'):
@@ -589,11 +589,11 @@ def create_database_interface(connection_string: Optional[str] = None, database_
         else:
             database_type = "inmemory"
             logging.info("No connection string found, defaulting to in-memory database")
-    
+
     # Use environment variable if no connection string provided
     if not connection_string:
         connection_string = os.getenv('MONGO_CONNECTION_STRING')
-    
+
     if database_type == "inmemory":
         logging.info("Using in-memory database")
         return InMemoryDatabase()
@@ -617,7 +617,7 @@ def create_database_interface(connection_string: Optional[str] = None, database_
     elif database_type == "mongodb":
         if not connection_string:
             raise ValueError("MongoDB connection string required but not provided")
-            
+
         try:
             from .mongodb_database import MongoDatabase
             logging.info(f"Initializing MongoDB with connection: {connection_string[:20] if len(connection_string) > 20 else connection_string}...")

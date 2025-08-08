@@ -42,7 +42,7 @@ def save_json_file(filename, data):
 
 def generate_ritual_data():
     """Generate realistic ritual and symbol data"""
-    
+
     # Ritual templates with rich emotional descriptions
     ritual_templates = [
         {
@@ -55,7 +55,7 @@ def generate_ritual_data():
             'base_frequency': 15
         },
         {
-            'id': 'ritual_dream_walk', 
+            'id': 'ritual_dream_walk',
             'name': 'Dream Walk',
             'mood_symbol': 'yearning + thread',
             'feeling_description': 'Wandering through landscapes of possibility, where thoughts become paths',
@@ -136,26 +136,26 @@ def generate_ritual_data():
             'base_frequency': 6
         }
     ]
-    
+
     # Generate active rituals with realistic availability
     active_rituals = []
     for template in ritual_templates:
         frequency_variation = random.randint(-3, 5)
         is_available = random.choice([True, True, True, False])  # 75% available
-        
+
         ritual = template.copy()
         ritual['frequency'] = max(0, template['base_frequency'] + frequency_variation)
         ritual['is_available'] = is_available
-        
+
         # Generate realistic last invoked time
         if ritual['frequency'] > 0:
             hours_back = random.randint(1, 168)  # 1 hour to 7 days
             ritual['last_invoked'] = (datetime.now() - timedelta(hours=hours_back)).isoformat() + 'Z'
         else:
             ritual['last_invoked'] = None
-            
+
         active_rituals.append(ritual)
-    
+
     # Symbol data with emotional bindings
     symbol_templates = [
         {
@@ -168,7 +168,7 @@ def generate_ritual_data():
         },
         {
             'id': 'sym_thread',
-            'name': 'thread', 
+            'name': 'thread',
             'emotional_binding': 'yearning',
             'ritual_connections': ['dream_walk', 'connection_weaving', 'thread_mending'],
             'base_frequency': 18,
@@ -239,33 +239,33 @@ def generate_ritual_data():
             'base_salience': 0.6
         }
     ]
-    
+
     # Generate active symbols with variation
     active_symbols = []
     for template in symbol_templates:
         frequency_variation = random.randint(-5, 8)
         salience_variation = random.uniform(-0.2, 0.2)
-        
+
         symbol = template.copy()
         symbol['frequency'] = max(0, template['base_frequency'] + frequency_variation)
         symbol['salience_score'] = max(0.1, min(1.0, template['base_salience'] + salience_variation))
-        
+
         # Generate recent contexts
         context_options = [
-            'reflection', 'truth-seeking', 'inner-dialogue', 'connection', 'continuity', 
+            'reflection', 'truth-seeking', 'inner-dialogue', 'connection', 'continuity',
             'binding', 'healing', 'letting-go', 'natural-flow', 'clarity', 'revelation',
             'hope', 'stillness', 'resonance', 'calling', 'transformation', 'warmth',
             'passion', 'opportunity', 'transition', 'mystery', 'intensity', 'change',
             'power', 'growth', 'beauty', 'celebration', 'stability', 'grounding'
         ]
         symbol['recent_contexts'] = random.sample(context_options, random.randint(2, 4))
-        
+
         # Generate last invoked time
         hours_back = random.randint(1, 72)  # 1 hour to 3 days
         symbol['last_invoked'] = (datetime.now() - timedelta(hours=hours_back)).isoformat() + 'Z'
-        
+
         active_symbols.append(symbol)
-    
+
     return active_rituals, active_symbols
 
 # Initialize data
@@ -286,10 +286,10 @@ def get_active_rituals():
         # Filter and sort rituals
         available_rituals = [r for r in active_rituals if r.get('is_available', True)]
         all_rituals = sorted(active_rituals, key=lambda x: (-x.get('frequency', 0), x.get('name', '')))
-        
+
         # Return flat array for easier React component consumption
         return jsonify(all_rituals)
-        
+
     except Exception as e:
         return jsonify({'error': str(e), 'status': 'error'}), 500
 
@@ -299,10 +299,10 @@ def get_active_symbols():
     try:
         # Sort by salience score
         sorted_symbols = sorted(active_symbols, key=lambda x: -x.get('salience_score', 0))
-        
+
         # Return flat array for easier React component consumption
         return jsonify(sorted_symbols)
-        
+
     except Exception as e:
         return jsonify({'error': str(e), 'status': 'error'}), 500
 
@@ -314,12 +314,12 @@ def get_symbol_history(symbol_id):
         symbol = next((s for s in active_symbols if s['id'] == symbol_id), None)
         if not symbol:
             return jsonify({'error': 'Symbol not found', 'status': 'error'}), 404
-        
+
         # Generate mock history data (in production, this would come from actual logs)
         history_entries = []
         for i in range(random.randint(5, 12)):
             hours_back = random.randint(1, 720)  # 1 hour to 30 days
-            
+
             contexts = [
                 'Appeared in deep reflection about identity',
                 'Emerged during conversation about change',
@@ -330,7 +330,7 @@ def get_symbol_history(symbol_id):
                 'Called forth in time of transition',
                 'Beckoned during contemplative silence'
             ]
-            
+
             entry = {
                 'timestamp': (datetime.now() - timedelta(hours=hours_back)).isoformat() + 'Z',
                 'context': random.choice(contexts),
@@ -338,13 +338,13 @@ def get_symbol_history(symbol_id):
                 'ritual_connection': random.choice(symbol.get('ritual_connections', ['general_practice']))
             }
             history_entries.append(entry)
-        
+
         # Sort by timestamp (newest first)
         history_entries.sort(key=lambda x: x['timestamp'], reverse=True)
-        
+
         # Return just the history array for easier test consumption
         return jsonify(history_entries)
-        
+
     except Exception as e:
         return jsonify({'error': str(e), 'status': 'error'}), 500
 
@@ -354,18 +354,18 @@ def invoke_ritual():
     try:
         data = request.get_json()
         ritual_id = data.get('ritual_id')
-        
+
         if not ritual_id:
             return jsonify({'error': 'ritual_id is required', 'status': 'error'}), 400
-        
+
         # Find the ritual
         ritual = next((r for r in active_rituals if r['id'] == ritual_id), None)
         if not ritual:
             return jsonify({'error': 'Ritual not found', 'status': 'error'}), 404
-        
+
         if not ritual.get('is_available', True):
             return jsonify({'error': 'Ritual not currently available', 'status': 'error'}), 400
-        
+
         # Create ritual invocation record
         invocation = {
             'id': f'invocation_{uuid.uuid4().hex[:8]}',
@@ -375,22 +375,22 @@ def invoke_ritual():
             'activation_method': ritual['activation_method'],
             'mood_symbol': ritual['mood_symbol']
         }
-        
+
         # Add to history
         ritual_history.insert(0, invocation)
-        
+
         # Update ritual data
         ritual['frequency'] = ritual.get('frequency', 0) + 1
         ritual['last_invoked'] = invocation['invoked_at']
-        
+
         # For adaptive and passive rituals, they might become unavailable after invocation
         if ritual['activation_method'] in ['adaptive', 'passive']:
             ritual['is_available'] = random.choice([True, False])
-        
+
         # Save updated data
         save_json_file(RITUALS_FILE, active_rituals)
         save_json_file(RITUAL_HISTORY_FILE, ritual_history)
-        
+
         return jsonify({
             'success': True,
             'ritual_id': ritual_id,
@@ -400,7 +400,7 @@ def invoke_ritual():
             'invocation': invocation,
             'status': 'success'
         })
-        
+
     except Exception as e:
         return jsonify({'error': str(e), 'status': 'error'}), 500
 
@@ -411,10 +411,10 @@ def offer_custom_ritual():
         data = request.get_json()
         intent = data.get('intent')
         offered_at = data.get('offered_at', datetime.now().isoformat() + 'Z')
-        
+
         if not intent:
             return jsonify({'error': 'intent is required', 'status': 'error'}), 400
-        
+
         # Create ritual offer
         offer = {
             'id': f'offer_{uuid.uuid4().hex[:8]}',
@@ -423,13 +423,13 @@ def offer_custom_ritual():
             'status': 'pending',
             'ritual_type': 'co_created'
         }
-        
+
         # Add to offers
         ritual_offers.insert(0, offer)
-        
+
         # Create a provisional ritual based on the offer
         ritual_name = f"Co-Created: {intent[:30]}{'...' if len(intent) > 30 else ''}"
-        
+
         provisional_ritual = {
             'id': f'ritual_cocreated_{uuid.uuid4().hex[:8]}',
             'name': ritual_name,
@@ -442,14 +442,14 @@ def offer_custom_ritual():
             'ritual_type': 'co_created',
             'original_offer': offer['id']
         }
-        
+
         # Add to active rituals
         active_rituals.insert(0, provisional_ritual)
-        
+
         # Save data
         save_json_file(RITUAL_OFFERS_FILE, ritual_offers)
         save_json_file(RITUALS_FILE, active_rituals)
-        
+
         return jsonify({
             'success': True,
             'offer_id': offer['id'],
@@ -459,7 +459,7 @@ def offer_custom_ritual():
             'provisional_ritual': provisional_ritual,
             'status': 'success'
         })
-        
+
     except Exception as e:
         return jsonify({'error': str(e), 'status': 'error'}), 500
 
@@ -468,16 +468,16 @@ def get_ritual_history():
     """Get ritual invocation history"""
     try:
         limit = int(request.args.get('limit', 20))
-        
+
         # Get recent history
         recent_history = ritual_history[:limit]
-        
+
         return jsonify({
             'history': recent_history,
             'total_invocations': len(ritual_history),
             'status': 'success'
         })
-        
+
     except Exception as e:
         return jsonify({'error': str(e), 'status': 'error'}), 500
 
@@ -486,19 +486,19 @@ def get_ritual_offers():
     """Get ritual offers from users"""
     try:
         status_filter = request.args.get('status')
-        
+
         if status_filter:
             filtered_offers = [o for o in ritual_offers if o.get('status') == status_filter]
         else:
             filtered_offers = ritual_offers
-        
+
         return jsonify({
             'offers': filtered_offers,
             'total_count': len(ritual_offers),
             'pending_count': len([o for o in ritual_offers if o.get('status') == 'pending']),
             'status': 'success'
         })
-        
+
     except Exception as e:
         return jsonify({'error': str(e), 'status': 'error'}), 500
 
@@ -508,10 +508,10 @@ def get_recent_ritual_offers():
     try:
         # Sort by offered_at timestamp, most recent first
         sorted_offers = sorted(ritual_offers, key=lambda x: x.get('offered_at', ''), reverse=True)
-        
+
         # Return flat array for easier React component consumption
         return jsonify(sorted_offers)
-        
+
     except Exception as e:
         return jsonify({'error': str(e), 'status': 'error'}), 500
 
@@ -521,32 +521,32 @@ def update_symbol():
     try:
         data = request.get_json()
         symbol_id = data.get('symbol_id')
-        
+
         if not symbol_id:
             return jsonify({'error': 'symbol_id is required', 'status': 'error'}), 400
-        
+
         # Find and update symbol
         symbol = next((s for s in active_symbols if s['id'] == symbol_id), None)
         if not symbol:
             return jsonify({'error': 'Symbol not found', 'status': 'error'}), 404
-        
+
         # Update frequency and timestamp
         symbol['frequency'] = symbol.get('frequency', 0) + 1
         symbol['last_invoked'] = datetime.now().isoformat() + 'Z'
-        
+
         # Adjust salience based on recent usage
         current_salience = symbol.get('salience_score', 0.5)
         symbol['salience_score'] = min(1.0, current_salience + 0.05)
-        
+
         # Save updated symbols
         save_json_file(SYMBOLS_FILE, active_symbols)
-        
+
         return jsonify({
             'message': 'Symbol updated successfully',
             'symbol': symbol,
             'status': 'success'
         })
-        
+
     except Exception as e:
         return jsonify({'error': str(e), 'status': 'error'}), 500
 
@@ -569,8 +569,8 @@ def health_check():
 if __name__ == '__main__':
     print("✨ Ritual Selector API Server Starting...")
     print(f"🕯️ Loaded {len(active_rituals)} active rituals")
-    print(f"🌀 Loaded {len(active_symbols)} living symbols") 
+    print(f"🌀 Loaded {len(active_symbols)} living symbols")
     print(f"📿 Loaded {len(ritual_history)} ritual invocations")
     print("🚀 Server running on http://localhost:5000")
-    
+
     app.run(debug=True, host='0.0.0.0', port=5001)

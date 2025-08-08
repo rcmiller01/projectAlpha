@@ -1,0 +1,4 @@
+# file: C:\Users\rober\OneDrive\Documents\GitHub\projectAlpha\backend\common\__init__.py
+# hypothesis_version: 6.137.1
+
+['audit_action', 'can_access_layer', 'extract_token', 'get_token_type', 'is_admin', 'log_audit_entry', 'mask_token', 'require_layer_access', 'require_scope', 'validate_json_schema']

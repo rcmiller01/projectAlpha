@@ -16,11 +16,11 @@ import uuid
 
 class MemorySymbolDemo:
     """Demo class for memory and symbolic tracking"""
-    
+
     def __init__(self):
         self.data_dir = Path("data")
         self.data_dir.mkdir(exist_ok=True)
-        
+
         # Emotional states and their characteristics
         self.moods = {
             "contemplative": {"weight": 0.3, "symbols": ["mirror", "river", "compass"]},
@@ -32,7 +32,7 @@ class MemorySymbolDemo:
             "restless": {"weight": 0.03, "symbols": ["storm", "door", "flame"]},
             "joy": {"weight": 0.02, "symbols": ["garden", "bridge", "compass"]}
         }
-        
+
         # Memory phrase templates by mood
         self.memory_templates = {
             "contemplative": [
@@ -84,7 +84,7 @@ class MemorySymbolDemo:
                 "Warmth cascaded through me like summer rain."
             ]
         }
-        
+
         # Context templates
         self.contexts = [
             "Deep conversation about loss and healing",
@@ -98,7 +98,7 @@ class MemorySymbolDemo:
             "Moments of comfortable silence",
             "Playful wordplay and humor"
         ]
-        
+
         # Tag combinations
         self.tag_sets = {
             "contemplative": [["anchor", "reflection", "bonded"], ["depth", "contemplation"], ["mirror", "inner"]],
@@ -115,28 +115,28 @@ class MemorySymbolDemo:
         """Generate a realistic emotional memory trace"""
         trace = []
         current_time = datetime.now()
-        
+
         for i in range(num_entries):
             # Choose mood based on weights
             mood = self.weighted_choice(self.moods)
-            
+
             # Generate timestamp (going backwards in time)
             timestamp = current_time - timedelta(
                 hours=random.uniform(i * 0.5, (i + 1) * 2),
                 minutes=random.randint(0, 59)
             )
-            
+
             # Select memory phrase and context
             memory_phrase = random.choice(self.memory_templates[mood])
             context = random.choice(self.contexts)
-            
+
             # Generate tags
             tags = random.choice(self.tag_sets[mood])
-            
+
             # Generate symbolic connections
             mood_symbols = self.moods[mood]["symbols"]
             symbolic_connections = random.sample(mood_symbols, random.randint(1, 3))
-            
+
             entry = {
                 "id": str(uuid.uuid4()),
                 "timestamp": timestamp.isoformat(),
@@ -148,9 +148,9 @@ class MemorySymbolDemo:
                 "context": context,
                 "symbolic_connections": symbolic_connections
             }
-            
+
             trace.append(entry)
-        
+
         # Sort by timestamp (most recent first)
         trace.sort(key=lambda x: x["timestamp"], reverse=True)
         return trace
@@ -158,7 +158,7 @@ class MemorySymbolDemo:
     def generate_symbolic_map(self) -> List[Dict[str, Any]]:
         """Generate a symbolic map with frequencies and connections"""
         symbols = []
-        
+
         symbol_definitions = {
             "mirror": {
                 "connections": ["reflection", "self-awareness", "truth", "clarity"],
@@ -211,23 +211,23 @@ class MemorySymbolDemo:
                 "base_frequency": 9
             }
         }
-        
+
         for name, data in symbol_definitions.items():
             # Vary frequency slightly
             frequency = data["base_frequency"] + random.randint(-3, 5)
             frequency = max(1, frequency)  # Ensure positive
-            
+
             # Choose affective color based on recent usage
             affective_colors = list(self.moods.keys())
             weights = [self.moods[mood]["weight"] for mood in affective_colors]
             affective_color = self.weighted_choice_from_lists(affective_colors, weights)
-            
+
             # Generate last invoked time
             last_invoked = datetime.now() - timedelta(
                 hours=random.uniform(0.5, 12),
                 minutes=random.randint(0, 59)
             )
-            
+
             symbol = {
                 "id": f"sym_{name}",
                 "name": name,
@@ -238,9 +238,9 @@ class MemorySymbolDemo:
                 "ritual_weight": random.uniform(0.3, 1.0),
                 "dream_associations": data["dream_associations"]
             }
-            
+
             symbols.append(symbol)
-        
+
         # Sort by frequency (most frequent first)
         symbols.sort(key=lambda x: x["frequency"], reverse=True)
         return symbols
@@ -248,7 +248,7 @@ class MemorySymbolDemo:
     def generate_anchor_state(self) -> Dict[str, Any]:
         """Generate anchor/identity state with realistic drift"""
         vectors = {}
-        
+
         # Core emotional vectors
         vector_definitions = {
             "empathy": 0.8,
@@ -260,12 +260,12 @@ class MemorySymbolDemo:
             "playfulness": 0.6,
             "introspection": 0.8
         }
-        
+
         for name, baseline in vector_definitions.items():
             # Add some drift from baseline
             drift = random.uniform(-0.1, 0.1)
             current_value = max(0.0, min(1.0, baseline + drift))
-            
+
             vectors[name] = {
                 "value": current_value,
                 "baseline": baseline,
@@ -278,13 +278,13 @@ class MemorySymbolDemo:
                     for h in range(1, 6)  # Last 5 hours of drift
                 ]
             }
-        
+
         # Calculate tether score
         total_alignment = sum(
-            1.0 - abs(v["value"] - v["baseline"]) 
+            1.0 - abs(v["value"] - v["baseline"])
             for v in vectors.values()
         ) / len(vectors)
-        
+
         # Determine stability
         if total_alignment > 0.9:
             stability = "excellent"
@@ -294,7 +294,7 @@ class MemorySymbolDemo:
             stability = "concerning"
         else:
             stability = "critical"
-        
+
         return {
             "vectors": vectors,
             "tether_score": total_alignment,
@@ -332,7 +332,7 @@ class MemorySymbolDemo:
     def save_demo_data(self):
         """Generate and save all demo data"""
         print("🌟 Generating MemoryAndSymbolViewer demo data...")
-        
+
         # Generate emotional trace
         print("📜 Creating emotional memory trace...")
         trace = self.generate_emotional_trace(25)
@@ -340,12 +340,12 @@ class MemorySymbolDemo:
             "trace": trace,
             "last_updated": datetime.now().isoformat()
         }
-        
+
         trace_file = self.data_dir / "emotional_memory_trace.json"
         with open(trace_file, 'w') as f:
             json.dump(trace_data, f, indent=2)
         print(f"   ✓ Saved {len(trace)} memory entries to {trace_file}")
-        
+
         # Generate symbolic map
         print("🔮 Creating symbolic map...")
         symbols = self.generate_symbolic_map()
@@ -353,28 +353,28 @@ class MemorySymbolDemo:
             "symbols": symbols,
             "last_updated": datetime.now().isoformat()
         }
-        
+
         symbol_file = self.data_dir / "symbolic_map.json"
         with open(symbol_file, 'w') as f:
             json.dump(symbol_data, f, indent=2)
         print(f"   ✓ Saved {len(symbols)} symbols to {symbol_file}")
-        
+
         # Generate anchor state
         print("⚓ Creating anchor state...")
         anchor_state = self.generate_anchor_state()
-        
+
         anchor_file = self.data_dir / "anchor_state.json"
         with open(anchor_file, 'w') as f:
             json.dump(anchor_state, f, indent=2)
         print(f"   ✓ Saved anchor state with {len(anchor_state['vectors'])} vectors to {anchor_file}")
-        
+
         print("\n🎯 Demo data generation complete!")
         return trace_data, symbol_data, anchor_state
 
     def print_summary(self, trace_data: Dict, symbol_data: Dict, anchor_state: Dict):
         """Print a summary of generated data"""
         print("\n📊 === MemoryAndSymbolViewer Demo Summary ===")
-        
+
         # Memory trace summary
         print(f"\n📜 Emotional Memory Trace:")
         print(f"   • Total entries: {len(trace_data['trace'])}")
@@ -382,27 +382,27 @@ class MemorySymbolDemo:
         for entry in trace_data['trace']:
             mood = entry['dominant_mood']
             mood_counts[mood] = mood_counts.get(mood, 0) + 1
-        
+
         for mood, count in sorted(mood_counts.items(), key=lambda x: x[1], reverse=True):
             print(f"   • {mood.capitalize()}: {count} entries")
-        
+
         # Symbolic map summary
         print(f"\n🔮 Symbolic Map:")
         print(f"   • Total symbols: {len(symbol_data['symbols'])}")
         for symbol in symbol_data['symbols'][:5]:  # Top 5
             print(f"   • {symbol['name'].capitalize()}: {symbol['frequency']} invocations ({symbol['affective_color']})")
-        
+
         # Anchor state summary
         print(f"\n⚓ Anchor State:")
         print(f"   • Identity Tether Score: {anchor_state['tether_score']:.1%}")
         print(f"   • Identity Stability: {anchor_state['identity_stability']}")
         print("   • Core Vectors:")
-        
+
         for name, data in list(anchor_state['vectors'].items())[:4]:  # Top 4
             deviation = abs(data['value'] - data['baseline'])
             status = "✓" if deviation < 0.1 else "⚠" if deviation < 0.2 else "⚠️"
             print(f"     {status} {name.capitalize()}: {data['value']:.2f} (baseline: {data['baseline']:.2f})")
-        
+
         print(f"\n🌐 Ready for React Component Integration!")
         print(f"   • Start Memory Symbol API: python memory_symbol_api.py")
         print(f"   • API will run on: http://localhost:5001")
@@ -411,13 +411,13 @@ class MemorySymbolDemo:
 async def run_demo():
     """Run the complete demo"""
     demo = MemorySymbolDemo()
-    
+
     # Generate all demo data
     trace_data, symbol_data, anchor_state = demo.save_demo_data()
-    
+
     # Print summary
     demo.print_summary(trace_data, symbol_data, anchor_state)
-    
+
     print(f"\n🚀 Next Steps:")
     print(f"1. Start the Memory Symbol API server:")
     print(f"   python memory_symbol_api.py")

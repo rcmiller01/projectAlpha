@@ -9,7 +9,7 @@ Components:
 
 Usage:
     from emotion_quant_autopilot import QuantizationAutopilot, IdleMonitor
-    
+
     autopilot = QuantizationAutopilot("autopilot_config.json")
     autopilot.start()
 """
@@ -38,7 +38,7 @@ except ImportError:
 
 __all__ = [
     "QuantizationAutopilot",
-    "AutopilotDatabase", 
+    "AutopilotDatabase",
     "QuantizationJob",
     "AutopilotRun",
     "IdleMonitor",

@@ -40,11 +40,11 @@ class RomanticActivities:
         self.activities = self._initialize_activities()
         self.current_activity = None
         self.activity_history = []
-        
+
     def _initialize_activities(self) -> Dict[str, Activity]:
         """Initialize all available romantic activities"""
         activities = {}
-        
+
         # Virtual Dates
         activities["sunset_walk"] = Activity(
             id="sunset_walk",
@@ -57,7 +57,7 @@ class RomanticActivities:
             romantic_intensity=0.8,
             tags=["nature", "conversation", "reflection"]
         )
-        
+
         activities["candlelit_dinner"] = Activity(
             id="candlelit_dinner",
             name="Candlelit Virtual Dinner",
@@ -69,7 +69,7 @@ class RomanticActivities:
             romantic_intensity=0.9,
             tags=["food", "music", "intimate"]
         )
-        
+
         activities["stargazing"] = Activity(
             id="stargazing",
             name="Virtual Stargazing",
@@ -81,7 +81,7 @@ class RomanticActivities:
             romantic_intensity=0.85,
             tags=["nature", "dreams", "peaceful"]
         )
-        
+
         activities["dance_together"] = Activity(
             id="dance_together",
             name="Dance Together",
@@ -93,7 +93,7 @@ class RomanticActivities:
             romantic_intensity=0.9,
             tags=["music", "movement", "intimate"]
         )
-        
+
         # Games
         activities["truth_or_dare"] = Activity(
             id="truth_or_dare",
@@ -106,7 +106,7 @@ class RomanticActivities:
             romantic_intensity=0.7,
             tags=["game", "intimate", "fun"]
         )
-        
+
         activities["love_quiz"] = Activity(
             id="love_quiz",
             name="Love Quiz",
@@ -118,7 +118,7 @@ class RomanticActivities:
             romantic_intensity=0.6,
             tags=["game", "learning", "fun"]
         )
-        
+
         activities["word_association"] = Activity(
             id="word_association",
             name="Romantic Word Association",
@@ -130,7 +130,7 @@ class RomanticActivities:
             romantic_intensity=0.5,
             tags=["creative", "storytelling", "fun"]
         )
-        
+
         # Creative Activities
         activities["write_poetry"] = Activity(
             id="write_poetry",
@@ -143,7 +143,7 @@ class RomanticActivities:
             romantic_intensity=0.8,
             tags=["creative", "writing", "romantic"]
         )
-        
+
         activities["draw_together"] = Activity(
             id="draw_together",
             name="Draw Together",
@@ -155,7 +155,7 @@ class RomanticActivities:
             romantic_intensity=0.6,
             tags=["creative", "art", "relaxing"]
         )
-        
+
         activities["playlist_creation"] = Activity(
             id="playlist_creation",
             name="Create Playlist Together",
@@ -167,7 +167,7 @@ class RomanticActivities:
             romantic_intensity=0.7,
             tags=["music", "creative", "romantic"]
         )
-        
+
         # Daily Routines
         activities["morning_ritual"] = Activity(
             id="morning_ritual",
@@ -180,7 +180,7 @@ class RomanticActivities:
             romantic_intensity=0.6,
             tags=["routine", "morning", "cozy"]
         )
-        
+
         activities["bedtime_story"] = Activity(
             id="bedtime_story",
             name="Bedtime Love Story",
@@ -192,15 +192,15 @@ class RomanticActivities:
             romantic_intensity=0.8,
             tags=["routine", "bedtime", "intimate"]
         )
-        
+
         return activities
-    
-    def suggest_activity(self, mood: Optional[ActivityMood] = None, 
+
+    def suggest_activity(self, mood: Optional[ActivityMood] = None,
                         duration_max: Optional[int] = None,
                         romantic_intensity_min: float = 0.0) -> Optional[Activity]:
         """Suggest an appropriate activity based on criteria"""
         available_activities = []
-        
+
         for activity in self.activities.values():
             if mood and activity.mood != mood:
                 continue
@@ -209,24 +209,24 @@ class RomanticActivities:
             if activity.romantic_intensity < romantic_intensity_min:
                 continue
             available_activities.append(activity)
-        
+
         if not available_activities:
             return None
-        
+
         return random.choice(available_activities)
-    
+
     def start_activity(self, activity_id: str) -> Dict:
         """Start a specific activity"""
         if activity_id not in self.activities:
             return {"error": "Activity not found"}
-        
+
         activity = self.activities[activity_id]
         self.current_activity = {
             "activity": activity,
             "start_time": datetime.now(),
             "status": "active"
         }
-        
+
         return {
             "message": f"Started {activity.name}",
             "activity": {
@@ -239,15 +239,15 @@ class RomanticActivities:
             },
             "start_time": self.current_activity["start_time"].isoformat()
         }
-    
+
     def end_activity(self) -> Dict:
         """End the current activity"""
         if not self.current_activity:
             return {"error": "No active activity"}
-        
+
         end_time = datetime.now()
         duration = (end_time - self.current_activity["start_time"]).total_seconds() / 60
-        
+
         activity_record = {
             "activity": self.current_activity["activity"],
             "start_time": self.current_activity["start_time"],
@@ -255,25 +255,25 @@ class RomanticActivities:
             "duration_minutes": duration,
             "completed": True
         }
-        
+
         self.activity_history.append(activity_record)
         self.current_activity = None
-        
+
         return {
             "message": f"Completed {activity_record['activity'].name}",
             "duration_minutes": duration,
             "romantic_intensity": activity_record["activity"].romantic_intensity
         }
-    
+
     def get_activity_progress(self) -> Dict:
         """Get progress of current activity"""
         if not self.current_activity:
             return {"error": "No active activity"}
-        
+
         elapsed = (datetime.now() - self.current_activity["start_time"]).total_seconds() / 60
         activity = self.current_activity["activity"]
         progress = min(1.0, elapsed / activity.duration_minutes)
-        
+
         return {
             "activity_name": activity.name,
             "elapsed_minutes": elapsed,
@@ -281,7 +281,7 @@ class RomanticActivities:
             "progress": progress,
             "remaining_minutes": max(0, activity.duration_minutes - elapsed)
         }
-    
+
     def get_activity_history(self, limit: int = 10) -> List[Dict]:
         """Get recent activity history"""
         recent_activities = self.activity_history[-limit:]
@@ -296,8 +296,8 @@ class RomanticActivities:
             }
             for record in recent_activities
         ]
-    
-    def create_custom_activity(self, name: str, description: str, 
+
+    def create_custom_activity(self, name: str, description: str,
                              activity_type: ActivityType, mood: ActivityMood,
                              duration_minutes: int, romantic_intensity: float) -> str:
         """Create a custom activity"""
@@ -313,9 +313,9 @@ class RomanticActivities:
             romantic_intensity=romantic_intensity,
             tags=["custom"]
         )
-        
+
         self.activities[activity_id] = activity
         return activity_id
 
 # Global activities instance
-romantic_activities = RomanticActivities() 
+romantic_activities = RomanticActivities()

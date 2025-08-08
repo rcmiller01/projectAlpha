@@ -163,7 +163,7 @@ ProjectSchema.statics.findByType = function(type, userId = 'default') {
 // Static method to search projects
 ProjectSchema.statics.searchProjects = function(query, userId = 'default') {
   const searchRegex = new RegExp(query, 'i');
-  
+
   return this.find({
     userId,
     status: { $ne: 'archived' },

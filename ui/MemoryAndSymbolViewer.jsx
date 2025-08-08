@@ -11,7 +11,7 @@ const MemoryAndSymbolViewer = ({ apiUrl = 'http://localhost:5000' }) => {
   const [activeTab, setActiveTab] = useState('timeline');
   const [isLoading, setIsLoading] = useState(true);
   const [ambientMood, setAmbientMood] = useState('contemplative');
-  
+
   // Refs for smooth scrolling
   const timelineRef = useRef(null);
   const symbolGridRef = useRef(null);
@@ -82,7 +82,7 @@ const MemoryAndSymbolViewer = ({ apiUrl = 'http://localhost:5000' }) => {
       const response = await axios.get(`${apiUrl}/api/memory/emotional_trace`);
       const trace = response.data.trace || mockEmotionalTrace();
       setEmotionalTrace(trace);
-      
+
       // Update ambient mood based on most recent entry
       if (trace.length > 0) {
         setAmbientMood(trace[0].dominant_mood);
@@ -222,7 +222,7 @@ const MemoryAndSymbolViewer = ({ apiUrl = 'http://localhost:5000' }) => {
     const now = new Date();
     const time = new Date(timestamp);
     const diffInHours = Math.floor((now - time) / (1000 * 60 * 60));
-    
+
     if (diffInHours < 1) return 'moments ago';
     if (diffInHours < 24) return `${diffInHours}h ago`;
     return `${Math.floor(diffInHours / 24)}d ago`;
@@ -245,7 +245,7 @@ const MemoryAndSymbolViewer = ({ apiUrl = 'http://localhost:5000' }) => {
     <div className={`min-h-screen bg-gradient-to-br ${currentMoodColors.bg} bg-gray-900 transition-all duration-1000`}>
       {/* Ambient glow effect */}
       <div className={`fixed inset-0 pointer-events-none opacity-30 ${currentMoodColors.glow} blur-3xl`}></div>
-      
+
       <div className="relative z-10 container mx-auto px-4 py-8">
         {/* Header */}
         <header className="text-center mb-12">
@@ -265,8 +265,8 @@ const MemoryAndSymbolViewer = ({ apiUrl = 'http://localhost:5000' }) => {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-6 py-3 rounded-full flex items-center space-x-2 transition-all duration-300 ${
-                  activeTab === tab.id 
-                    ? 'bg-white/20 text-white shadow-lg' 
+                  activeTab === tab.id
+                    ? 'bg-white/20 text-white shadow-lg'
                     : 'text-gray-400 hover:text-white hover:bg-white/10'
                 }`}
               >
@@ -284,7 +284,7 @@ const MemoryAndSymbolViewer = ({ apiUrl = 'http://localhost:5000' }) => {
               <h2 className="text-2xl font-light text-white mb-2">Emotional Memory Timeline</h2>
               <p className="text-gray-400">The evolution of inner landscapes</p>
             </div>
-            
+
             <div ref={timelineRef} className="space-y-6 max-h-96 overflow-y-auto custom-scrollbar">
               {emotionalTrace.map((memory, index) => (
                 <div
@@ -295,9 +295,9 @@ const MemoryAndSymbolViewer = ({ apiUrl = 'http://localhost:5000' }) => {
                   <div className={`absolute -left-3 w-6 h-6 rounded-full bg-gradient-to-r ${currentMoodColors.bg} border-2 border-gray-600 flex items-center justify-center`}>
                     <span className="text-xs">{moodIcons[memory.dominant_mood]}</span>
                   </div>
-                  
+
                   {/* Memory card */}
-                  <div 
+                  <div
                     className="bg-gray-800/40 backdrop-blur-sm rounded-lg p-6 hover:bg-gray-800/60 transition-all duration-300 cursor-pointer"
                     onClick={() => handleMemoryDetail(memory.id)}
                   >
@@ -312,18 +312,18 @@ const MemoryAndSymbolViewer = ({ apiUrl = 'http://localhost:5000' }) => {
                       <div className="text-right">
                         <div className="text-xs text-gray-500">Intensity</div>
                         <div className="w-12 h-2 bg-gray-700 rounded-full">
-                          <div 
+                          <div
                             className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
                             style={{ width: `${memory.intensity * 100}%` }}
                           ></div>
                         </div>
                       </div>
                     </div>
-                    
+
                     <blockquote className="text-gray-200 italic mb-4 text-lg leading-relaxed">
                       "{memory.memory_phrase}"
                     </blockquote>
-                    
+
                     <div className="flex flex-wrap gap-2 mb-3">
                       {memory.tags.map(tag => (
                         <span
@@ -334,7 +334,7 @@ const MemoryAndSymbolViewer = ({ apiUrl = 'http://localhost:5000' }) => {
                         </span>
                       ))}
                     </div>
-                    
+
                     <div className="text-gray-400 text-sm">
                       {memory.context}
                     </div>
@@ -351,7 +351,7 @@ const MemoryAndSymbolViewer = ({ apiUrl = 'http://localhost:5000' }) => {
               <h2 className="text-2xl font-light text-white mb-2">Symbolic Echo Map</h2>
               <p className="text-gray-400">The recurring motifs of inner dialogue</p>
             </div>
-            
+
             <div ref={symbolGridRef} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {symbolicMap.map(symbol => (
                 <div
@@ -366,7 +366,7 @@ const MemoryAndSymbolViewer = ({ apiUrl = 'http://localhost:5000' }) => {
                     </div>
                     <h3 className="text-white capitalize font-medium">{symbol.name}</h3>
                   </div>
-                  
+
                   {/* Frequency indicator */}
                   <div className="mb-3">
                     <div className="flex justify-between text-xs text-gray-400 mb-1">
@@ -374,18 +374,18 @@ const MemoryAndSymbolViewer = ({ apiUrl = 'http://localhost:5000' }) => {
                       <span>{symbol.frequency}</span>
                     </div>
                     <div className="w-full h-1 bg-gray-700 rounded-full">
-                      <div 
+                      <div
                         className={`h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full`}
                         style={{ width: `${Math.min(100, (symbol.frequency / 20) * 100)}%` }}
                       ></div>
                     </div>
                   </div>
-                  
+
                   {/* Last invoked */}
                   <div className="text-xs text-gray-500 text-center">
                     Last stirred {formatTimeAgo(symbol.last_invoked)}
                   </div>
-                  
+
                   {/* Hover tooltip */}
                   <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
                     <div className="bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-lg whitespace-nowrap">
@@ -404,7 +404,7 @@ const MemoryAndSymbolViewer = ({ apiUrl = 'http://localhost:5000' }) => {
               <h2 className="text-2xl font-light text-white mb-2">Core Essence Profile</h2>
               <p className="text-gray-400">The fundamental vectors of being</p>
             </div>
-            
+
             {/* Tether Score */}
             <div className="bg-gray-800/40 backdrop-blur-sm rounded-lg p-6 mb-8 text-center">
               <h3 className="text-white text-lg mb-2">Identity Tether Score</h3>
@@ -412,7 +412,7 @@ const MemoryAndSymbolViewer = ({ apiUrl = 'http://localhost:5000' }) => {
                 {Math.round(anchorState.tether_score * 100)}%
               </div>
               <div className="w-full max-w-sm mx-auto h-2 bg-gray-700 rounded-full">
-                <div 
+                <div
                   className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"
                   style={{ width: `${anchorState.tether_score * 100}%` }}
                 ></div>
@@ -421,7 +421,7 @@ const MemoryAndSymbolViewer = ({ apiUrl = 'http://localhost:5000' }) => {
                 Alignment with core identity
               </p>
             </div>
-            
+
             {/* Emotional Vectors */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {Object.entries(anchorState.vectors).map(([vectorName, data]) => (
@@ -435,13 +435,13 @@ const MemoryAndSymbolViewer = ({ apiUrl = 'http://localhost:5000' }) => {
                       {Math.round(data.value * 100)}%
                     </span>
                   </div>
-                  
+
                   {/* Current vs Baseline */}
                   <div className="space-y-2">
                     <div>
                       <div className="text-xs text-gray-400 mb-1">Current</div>
                       <div className="w-full h-2 bg-gray-700 rounded-full">
-                        <div 
+                        <div
                           className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"
                           style={{ width: `${data.value * 100}%` }}
                         ></div>
@@ -450,14 +450,14 @@ const MemoryAndSymbolViewer = ({ apiUrl = 'http://localhost:5000' }) => {
                     <div>
                       <div className="text-xs text-gray-400 mb-1">Baseline</div>
                       <div className="w-full h-1 bg-gray-700 rounded-full">
-                        <div 
+                        <div
                           className="h-full bg-gray-500 rounded-full"
                           style={{ width: `${data.baseline * 100}%` }}
                         ></div>
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Adjustment buttons */}
                   <div className="flex justify-center space-x-2 mt-4">
                     <button
@@ -496,11 +496,11 @@ const MemoryAndSymbolViewer = ({ apiUrl = 'http://localhost:5000' }) => {
                     ×
                   </button>
                 </div>
-                
+
                 <blockquote className="text-gray-200 italic text-lg mb-4 leading-relaxed">
                   "{selectedMemory.memory_phrase}"
                 </blockquote>
-                
+
                 <div className="space-y-3 text-sm">
                   <div>
                     <span className="text-gray-400">Context:</span>
@@ -540,7 +540,7 @@ const MemoryAndSymbolViewer = ({ apiUrl = 'http://localhost:5000' }) => {
                     ×
                   </button>
                 </div>
-                
+
                 <div className="space-y-3 text-sm">
                   <div>
                     <span className="text-gray-400">Affective Color:</span>

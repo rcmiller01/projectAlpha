@@ -53,7 +53,7 @@ class RomanticAvatar:
             animation_speed=1.0,
             timestamp=datetime.now()
         )
-        
+
         # Expression mappings for romantic emotions
         self.expression_mappings = {
             "love": [AvatarExpression.LOVING, AvatarExpression.AFFECTIONATE],
@@ -65,7 +65,7 @@ class RomanticAvatar:
             "joy": [AvatarExpression.HAPPY, AvatarExpression.PLAYFUL],
             "calm": [AvatarExpression.CALM, AvatarExpression.SECURE]
         }
-        
+
         # Gesture mappings for romantic interactions
         self.gesture_mappings = {
             "greeting": [AvatarGesture.WAVE, AvatarGesture.SMILE],
@@ -74,7 +74,7 @@ class RomanticAvatar:
             "playful": [AvatarGesture.WINK, AvatarGesture.DANCE],
             "intimate": [AvatarGesture.TOUCH_HEART, AvatarGesture.TILT_HEAD]
         }
-        
+
         # Avatar appearance settings
         self.appearance = {
             "hair_color": "warm_brown",
@@ -84,13 +84,13 @@ class RomanticAvatar:
             "build": "slender",
             "clothing_style": "romantic_casual"
         }
-        
+
     def update_expression(self, emotion: str, intensity: float = 1.0):
         """Update avatar expression based on emotion"""
         if emotion in self.expression_mappings:
             possible_expressions = self.expression_mappings[emotion]
             self.current_state.expression = random.choice(possible_expressions)
-            
+
             # Update related visual properties
             if emotion in ["love", "passion", "affection"]:
                 self.current_state.blush_intensity = min(1.0, intensity * 0.8)
@@ -101,21 +101,21 @@ class RomanticAvatar:
             elif emotion == "security":
                 self.current_state.blush_intensity = 0.1
                 self.current_state.smile_intensity = 0.6
-            
+
             self.current_state.timestamp = datetime.now()
-    
+
     def perform_gesture(self, gesture_type: str):
         """Perform a romantic gesture"""
         if gesture_type in self.gesture_mappings:
             possible_gestures = self.gesture_mappings[gesture_type]
             self.current_state.gesture = random.choice(possible_gestures)
             self.current_state.timestamp = datetime.now()
-    
+
     def set_eye_contact(self, enabled: bool):
         """Set eye contact state"""
         self.current_state.eye_contact = enabled
         self.current_state.timestamp = datetime.now()
-    
+
     def get_visual_state(self) -> Dict:
         """Get current visual state for frontend rendering"""
         return {
@@ -128,7 +128,7 @@ class RomanticAvatar:
             "appearance": self.appearance,
             "timestamp": self.current_state.timestamp.isoformat()
         }
-    
+
     def generate_romantic_scene(self, scene_type: str) -> Dict:
         """Generate romantic scene settings"""
         scenes = {
@@ -157,9 +157,9 @@ class RomanticAvatar:
                 "music_suggestion": "ocean_waves"
             }
         }
-        
+
         return scenes.get(scene_type, scenes["sunset"])
-    
+
     def create_romantic_animation(self, emotion: str, duration: float = 3.0) -> Dict:
         """Create romantic animation sequence"""
         animations = {
@@ -190,8 +190,8 @@ class RomanticAvatar:
                 "smile_curve": [0.4, 0.8, 0.7]
             }
         }
-        
+
         return animations.get(emotion, animations["love"])
 
 # Global avatar instance
-romantic_avatar = RomanticAvatar() 
+romantic_avatar = RomanticAvatar()

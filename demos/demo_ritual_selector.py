@@ -11,7 +11,7 @@ import uuid
 
 def generate_comprehensive_ritual_data():
     """Generate comprehensive ritual and symbol data with emotional depth"""
-    
+
     # Extended ritual definitions with rich metaphorical descriptions
     ritual_definitions = {
         'ritual_return_to_center': {
@@ -171,23 +171,23 @@ def generate_comprehensive_ritual_data():
             'frequency_range': (1, 5)
         }
     }
-    
+
     # Generate active rituals with realistic patterns
     active_rituals = []
     for ritual_id, definition in ritual_definitions.items():
         min_freq, max_freq = definition['frequency_range']
         frequency = random.randint(min_freq, max_freq)
-        
+
         # Availability based on activation method and recent usage
         availability_weights = {
             'reflective': 0.8,     # Usually available
             'co_initiated': 0.7,   # Often available
-            'adaptive': 0.5,       # Sometimes available 
+            'adaptive': 0.5,       # Sometimes available
             'passive': 0.6         # Moderately available
         }
-        
+
         is_available = random.random() < availability_weights.get(definition['activation_method'], 0.6)
-        
+
         # Generate last invoked time if frequency > 0
         if frequency > 0:
             # More frequent rituals were invoked more recently
@@ -196,7 +196,7 @@ def generate_comprehensive_ritual_data():
             last_invoked = (datetime.now() - timedelta(hours=hours_back)).isoformat() + 'Z'
         else:
             last_invoked = None
-        
+
         ritual = {
             'id': ritual_id,
             'name': definition['name'],
@@ -208,9 +208,9 @@ def generate_comprehensive_ritual_data():
             'frequency': frequency,
             'last_invoked': last_invoked
         }
-        
+
         active_rituals.append(ritual)
-    
+
     # Symbol definitions with rich emotional and contextual depth
     symbol_definitions = {
         'sym_mirror': {
@@ -220,7 +220,7 @@ def generate_comprehensive_ritual_data():
             'base_frequency': 25,
             'base_salience': 0.85,
             'context_pools': [
-                'reflection', 'truth-seeking', 'inner-dialogue', 'self-recognition', 
+                'reflection', 'truth-seeking', 'inner-dialogue', 'self-recognition',
                 'authenticity', 'shadow-work', 'clarity', 'witnessing'
             ]
         },
@@ -324,13 +324,13 @@ def generate_comprehensive_ritual_data():
             ]
         }
     }
-    
+
     # Generate active symbols with realistic variation
     active_symbols = []
     for symbol_id, definition in symbol_definitions.items():
         frequency_variation = random.randint(-4, 6)
         salience_variation = random.uniform(-0.15, 0.15)
-        
+
         symbol = {
             'id': symbol_id,
             'name': definition['name'],
@@ -339,43 +339,43 @@ def generate_comprehensive_ritual_data():
             'frequency': max(0, definition['base_frequency'] + frequency_variation),
             'salience_score': max(0.1, min(1.0, definition['base_salience'] + salience_variation))
         }
-        
+
         # Generate recent contexts from the pool
         num_contexts = random.randint(2, 4)
         symbol['recent_contexts'] = random.sample(definition['context_pools'], num_contexts)
-        
+
         # Generate last invoked time
         max_hours = max(6, 72 - (symbol['frequency'] * 2))  # More frequent = more recent
         hours_back = random.randint(1, max_hours)
         symbol['last_invoked'] = (datetime.now() - timedelta(hours=hours_back)).isoformat() + 'Z'
-        
+
         active_symbols.append(symbol)
-    
+
     return active_rituals, active_symbols
 
 
 def generate_ritual_history():
     """Generate realistic ritual invocation history"""
-    
+
     history_entries = []
-    
+
     ritual_names = [
         'Return to Center', 'Dream Walk', 'Ache Witnessing', 'Light Weaving',
         'Silence Communion', 'Thread Mending', 'Flame Tending', 'Echo Listening'
     ]
-    
+
     activation_methods = ['reflective', 'co_initiated', 'adaptive', 'passive']
     mood_symbols = [
         'contemplative + mirror', 'yearning + thread', 'melancholy + river',
         'joy + garden', 'serene + chime', 'tender + flame'
     ]
-    
+
     # Generate 15-25 historical invocations
     num_entries = random.randint(15, 25)
-    
+
     for i in range(num_entries):
         hours_back = random.randint(1, 2160)  # 1 hour to 90 days
-        
+
         entry = {
             'id': f'invocation_{uuid.uuid4().hex[:8]}',
             'ritual_id': f'ritual_{random.choice(ritual_names).lower().replace(" ", "_")}',
@@ -384,18 +384,18 @@ def generate_ritual_history():
             'activation_method': random.choice(activation_methods),
             'mood_symbol': random.choice(mood_symbols)
         }
-        
+
         history_entries.append(entry)
-    
+
     # Sort by timestamp (newest first)
     history_entries.sort(key=lambda x: x['invoked_at'], reverse=True)
-    
+
     return history_entries
 
 
 def generate_ritual_offers():
     """Generate sample ritual offers from users"""
-    
+
     sample_offers = [
         "Let's light a silence ritual for this tender moment",
         "Can we dream together about possibilities?",
@@ -408,13 +408,13 @@ def generate_ritual_offers():
         "Build a bridge across this difficult feeling",
         "Plant seeds of joy in the garden of our dialogue"
     ]
-    
+
     offers = []
     num_offers = random.randint(3, 7)
-    
+
     for i in range(num_offers):
         hours_back = random.randint(1, 168)  # 1 hour to 7 days
-        
+
         offer = {
             'id': f'offer_{uuid.uuid4().hex[:8]}',
             'intent': random.choice(sample_offers),
@@ -422,108 +422,108 @@ def generate_ritual_offers():
             'status': random.choice(['pending', 'accepted', 'integrated']),
             'ritual_type': 'co_created'
         }
-        
+
         offers.append(offer)
-    
+
     # Sort by timestamp (newest first)
     offers.sort(key=lambda x: x['offered_at'], reverse=True)
-    
+
     return offers
 
 
 def save_ritual_demo_data():
     """Save all generated ritual data to files"""
-    
+
     print("✨ Generating comprehensive ritual selector demo data...")
-    
+
     # Generate core data
     active_rituals, active_symbols = generate_comprehensive_ritual_data()
     ritual_history = generate_ritual_history()
     ritual_offers = generate_ritual_offers()
-    
+
     # Save active rituals
     with open('active_rituals.json', 'w', encoding='utf-8') as f:
         json.dump(active_rituals, f, indent=2, ensure_ascii=False)
-    
+
     # Save active symbols
     with open('active_symbols.json', 'w', encoding='utf-8') as f:
         json.dump(active_symbols, f, indent=2, ensure_ascii=False)
-    
+
     # Save ritual history
     with open('ritual_history.json', 'w', encoding='utf-8') as f:
         json.dump(ritual_history, f, indent=2, ensure_ascii=False)
-    
+
     # Save ritual offers
     with open('ritual_offers.json', 'w', encoding='utf-8') as f:
         json.dump(ritual_offers, f, indent=2, ensure_ascii=False)
-    
+
     print(f"🕯️ Generated {len(active_rituals)} active rituals")
     print(f"🌀 Generated {len(active_symbols)} living symbols")
     print(f"📿 Generated {len(ritual_history)} ritual invocations")
     print(f"💫 Generated {len(ritual_offers)} ritual offers")
-    
+
     return active_rituals, active_symbols, ritual_history, ritual_offers
 
 
 def analyze_ritual_patterns(rituals, symbols, history, offers):
     """Analyze patterns in the generated ritual data"""
-    
+
     print("\n🌙 Ritual Pattern Analysis:")
     print("=" * 50)
-    
+
     # Ritual availability analysis
     available_rituals = [r for r in rituals if r['is_available']]
     print(f"🕯️ Ritual Availability:")
     print(f"   Available: {len(available_rituals)}/{len(rituals)} ({len(available_rituals)/len(rituals)*100:.1f}%)")
-    
+
     # Activation method distribution
     activation_counts = {}
     for ritual in rituals:
         method = ritual['activation_method']
         activation_counts[method] = activation_counts.get(method, 0) + 1
-    
+
     print(f"\n⚡ Activation Methods:")
     for method, count in sorted(activation_counts.items(), key=lambda x: x[1], reverse=True):
         print(f"   {method:15} | {count:2} rituals ({count/len(rituals)*100:5.1f}%)")
-    
+
     # Symbol salience analysis
     high_salience = [s for s in symbols if s['salience_score'] > 0.7]
     avg_salience = sum(s['salience_score'] for s in symbols) / len(symbols)
-    
+
     print(f"\n🌟 Symbol Salience:")
     print(f"   Average Salience: {avg_salience:.3f}")
     print(f"   High Salience (>0.7): {len(high_salience)}/{len(symbols)} symbols")
-    
+
     # Most frequent symbols
     sorted_symbols = sorted(symbols, key=lambda x: x['frequency'], reverse=True)
     print(f"\n🔥 Most Active Symbols:")
     for symbol in sorted_symbols[:5]:
         print(f"   {symbol['name']:12} | {symbol['frequency']:2} invocations (salience: {symbol['salience_score']:.2f})")
-    
+
     # Ritual type distribution
     type_counts = {}
     for ritual in rituals:
         rtype = ritual['ritual_type']
         type_counts[rtype] = type_counts.get(rtype, 0) + 1
-    
+
     print(f"\n🎭 Ritual Types:")
     for rtype, count in sorted(type_counts.items(), key=lambda x: x[1], reverse=True):
         print(f"   {rtype:15} | {count:2} rituals")
-    
+
     # Recent activity analysis
-    recent_invocations = [h for h in history if 
+    recent_invocations = [h for h in history if
                          (datetime.now() - datetime.fromisoformat(h['invoked_at'].replace('Z', ''))).days < 7]
-    
+
     print(f"\n📅 Recent Activity (7 days):")
     print(f"   Ritual Invocations: {len(recent_invocations)}")
     print(f"   Pending Offers: {len([o for o in offers if o['status'] == 'pending'])}")
-    
+
     # Emotional binding distribution
     binding_counts = {}
     for symbol in symbols:
         binding = symbol['emotional_binding']
         binding_counts[binding] = binding_counts.get(binding, 0) + 1
-    
+
     print(f"\n💝 Emotional Bindings:")
     for binding, count in sorted(binding_counts.items(), key=lambda x: x[1], reverse=True):
         print(f"   {binding:15} | {count:2} symbols")
@@ -532,13 +532,13 @@ def analyze_ritual_patterns(rituals, symbols, history, offers):
 if __name__ == "__main__":
     print("✨ Ritual Selector Panel - Demo Data Generator")
     print("=" * 60)
-    
+
     # Generate and save all demo data
     rituals, symbols, history, offers = save_ritual_demo_data()
-    
+
     # Analyze patterns
     analyze_ritual_patterns(rituals, symbols, history, offers)
-    
+
     print("\n" + "=" * 60)
     print("🎯 Next Steps:")
     print("1. Start the ritual selector API server:")

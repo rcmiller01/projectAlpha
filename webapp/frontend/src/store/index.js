@@ -8,7 +8,7 @@ export const useAppStore = create(
     sidebarOpen: true,
     currentView: 'chat',
     darkMode: true,
-    
+
     // Connection status
     connectionStatus: {
       api: 'connected',
@@ -53,7 +53,7 @@ export const useThreadStore = create(
     error: null,
     searchQuery: '',
     filter: 'all', // all, active, archived
-    
+
     // Actions
     setThreads: (threads) => set({ threads }),
     setCurrentThread: (thread) => set({ currentThread: thread }),
@@ -61,25 +61,25 @@ export const useThreadStore = create(
     setError: (error) => set({ error }),
     setSearchQuery: (query) => set({ searchQuery: query }),
     setFilter: (filter) => set({ filter }),
-    
+
     addThread: (thread) => set(state => ({
       threads: [thread, ...state.threads]
     })),
-    
+
     updateThread: (threadId, updates) => set(state => ({
-      threads: state.threads.map(thread => 
+      threads: state.threads.map(thread =>
         thread.id === threadId ? { ...thread, ...updates } : thread
       ),
-      currentThread: state.currentThread?.id === threadId 
+      currentThread: state.currentThread?.id === threadId
         ? { ...state.currentThread, ...updates }
         : state.currentThread
     })),
-    
+
     removeThread: (threadId) => set(state => ({
       threads: state.threads.filter(thread => thread.id !== threadId),
       currentThread: state.currentThread?.id === threadId ? null : state.currentThread
     })),
-    
+
     addMessage: (threadId, message) => set(state => {
       const updatedThreads = state.threads.map(thread => {
         if (thread.id === threadId) {
@@ -93,7 +93,7 @@ export const useThreadStore = create(
         }
         return thread;
       });
-      
+
       const updatedCurrentThread = state.currentThread?.id === threadId
         ? {
             ...state.currentThread,
@@ -103,35 +103,35 @@ export const useThreadStore = create(
             updatedAt: new Date().toISOString()
           }
         : state.currentThread;
-      
+
       return {
         threads: updatedThreads,
         currentThread: updatedCurrentThread
       };
     }),
-    
+
     // Filtered threads getter
     getFilteredThreads: () => {
       const { threads, searchQuery, filter } = get();
       let filtered = threads;
-      
+
       // Apply status filter
       if (filter === 'archived') {
         filtered = filtered.filter(thread => thread.isArchived);
       } else if (filter === 'active') {
         filtered = filtered.filter(thread => !thread.isArchived);
       }
-      
+
       // Apply search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
-        filtered = filtered.filter(thread => 
+        filtered = filtered.filter(thread =>
           thread.title.toLowerCase().includes(query) ||
           thread.lastMessage?.toLowerCase().includes(query) ||
           thread.tags?.some(tag => tag.toLowerCase().includes(query))
         );
       }
-      
+
       return filtered.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
     }
   }))
@@ -146,7 +146,7 @@ export const useProjectStore = create(
     error: null,
     stats: null,
     filter: 'active', // active, completed, all
-    
+
     // Actions
     setProjects: (projects) => set({ projects }),
     setCurrentProject: (project) => set({ currentProject: project }),
@@ -154,46 +154,46 @@ export const useProjectStore = create(
     setError: (error) => set({ error }),
     setStats: (stats) => set({ stats }),
     setFilter: (filter) => set({ filter }),
-    
+
     addProject: (project) => set(state => ({
       projects: [project, ...state.projects]
     })),
-    
+
     updateProject: (projectId, updates) => set(state => ({
-      projects: state.projects.map(project => 
+      projects: state.projects.map(project =>
         project.id === projectId ? { ...project, ...updates } : project
       ),
-      currentProject: state.currentProject?.id === projectId 
+      currentProject: state.currentProject?.id === projectId
         ? { ...state.currentProject, ...updates }
         : state.currentProject
     })),
-    
+
     removeProject: (projectId) => set(state => ({
       projects: state.projects.filter(project => project.id !== projectId),
       currentProject: state.currentProject?.id === projectId ? null : state.currentProject
     })),
-    
+
     // Filtered projects getter
     getFilteredProjects: () => {
       const { projects, filter } = get();
       let filtered = projects;
-      
+
       if (filter === 'active') {
         filtered = filtered.filter(project => project.status === 'active');
       } else if (filter === 'completed') {
         filtered = filtered.filter(project => project.status === 'completed');
       }
-      
+
       return filtered.sort((a, b) => {
         // Sort by priority first, then by update time
         const priorityOrder = { urgent: 3, high: 2, medium: 1, low: 0 };
         const aPriority = priorityOrder[a.priority] || 0;
         const bPriority = priorityOrder[b.priority] || 0;
-        
+
         if (aPriority !== bPriority) {
           return bPriority - aPriority;
         }
-        
+
         return new Date(b.updatedAt) - new Date(a.updatedAt);
       });
     }
@@ -209,24 +209,24 @@ export const useAgentStore = create(
     activeRequests: new Map(),
     loading: false,
     error: null,
-    
+
     // Actions
     setAgents: (agents) => set({ agents }),
     setCurrentAgent: (agent) => set({ currentAgent: agent }),
     setAgentStatuses: (statuses) => set({ agentStatuses: statuses }),
     setLoading: (loading) => set({ loading }),
     setError: (error) => set({ error }),
-    
+
     updateAgentStatus: (agentType, status) => set(state => ({
       agentStatuses: { ...state.agentStatuses, [agentType]: status }
     })),
-    
+
     addActiveRequest: (requestId, request) => set(state => {
       const newRequests = new Map(state.activeRequests);
       newRequests.set(requestId, request);
       return { activeRequests: newRequests };
     }),
-    
+
     updateActiveRequest: (requestId, updates) => set(state => {
       const newRequests = new Map(state.activeRequests);
       const existing = newRequests.get(requestId);
@@ -235,19 +235,19 @@ export const useAgentStore = create(
       }
       return { activeRequests: newRequests };
     }),
-    
+
     removeActiveRequest: (requestId) => set(state => {
       const newRequests = new Map(state.activeRequests);
       newRequests.delete(requestId);
       return { activeRequests: newRequests };
     }),
-    
+
     // Get agent by type
     getAgent: (agentType) => {
       const { agents } = get();
       return agents.find(agent => agent.type === agentType);
     },
-    
+
     // Get active requests as array
     getActiveRequests: () => {
       const { activeRequests } = get();

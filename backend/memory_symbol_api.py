@@ -162,22 +162,22 @@ def rate_limit(f):
     def decorated_function(*args, **kwargs):
         source_ip = request.remote_addr
         current_time = time.time()
-        
+
         # Clean old requests outside the window
         while request_counts[source_ip] and request_counts[source_ip][0] < current_time - RATE_LIMIT_WINDOW:
             request_counts[source_ip].popleft()
-        
+
         # Check if rate limit exceeded
         if len(request_counts[source_ip]) >= RATE_LIMIT_REQUESTS:
             logger.warning(f"Rate limit exceeded for {source_ip}")
             return jsonify({'error': 'Rate limit exceeded. Too many requests.'}), 429
-        
+
         # Add current request
         request_counts[source_ip].append(current_time)
-        
+
         # Log the request
         logger.info(f"Request from {source_ip} to {request.endpoint} at {datetime.now().isoformat()}")
-        
+
         return f(*args, **kwargs)
     return decorated_function
 
@@ -185,27 +185,27 @@ def validate_symbol_input(symbol_data):
     """Validate symbol/emotion input data"""
     if not isinstance(symbol_data, dict):
         return False, "Symbol data must be a dictionary"
-    
+
     required_fields = ['name']
     for field in required_fields:
         if field not in symbol_data:
             return False, f"Missing required field: {field}"
-    
+
     # Validate name
     name = symbol_data.get('name', '')
     if not isinstance(name, str) or len(name.strip()) == 0:
         return False, "Symbol name must be a non-empty string"
-    
+
     # Sanitize name - only alphanumeric, spaces, hyphens, underscores
     if not re.match(r'^[a-zA-Z0-9\s\-_]+$', name):
         return False, "Symbol name contains invalid characters"
-    
+
     # Validate optional fields
     if 'affective_color' in symbol_data:
         valid_colors = ['tender', 'contemplative', 'vibrant', 'serene', 'passionate', 'mystical']
         if symbol_data['affective_color'] not in valid_colors:
             return False, f"Invalid affective color. Must be one of: {valid_colors}"
-    
+
     if 'frequency' in symbol_data:
         try:
             freq = int(symbol_data['frequency'])
@@ -213,24 +213,24 @@ def validate_symbol_input(symbol_data):
                 return False, "Frequency must be between 0 and 1000"
         except (ValueError, TypeError):
             return False, "Frequency must be a valid integer"
-    
+
     return True, "Valid"
 
 def validate_emotion_input(emotion_data):
     """Validate emotion input data"""
     if not isinstance(emotion_data, dict):
         return False, "Emotion data must be a dictionary"
-    
+
     required_fields = ['dominant_mood']
     for field in required_fields:
         if field not in emotion_data:
             return False, f"Missing required field: {field}"
-    
+
     # Validate mood
     mood = emotion_data.get('dominant_mood', '')
     if not isinstance(mood, str) or len(mood.strip()) == 0:
         return False, "Dominant mood must be a non-empty string"
-    
+
     # Validate intensity if provided
     if 'intensity' in emotion_data:
         try:
@@ -239,18 +239,18 @@ def validate_emotion_input(emotion_data):
                 return False, "Intensity must be between 0 and 1"
         except (ValueError, TypeError):
             return False, "Intensity must be a valid number"
-    
+
     return True, "Valid"
 
 class MemorySymbolAPI:
     """API for memory and symbolic tracking"""
-    
+
     def __init__(self):
         self.initialize_data_files()
-    
+
     def initialize_data_files(self):
         """Initialize data files with default content if they don't exist"""
-        
+
         # Initialize emotional memory trace
         if not MEMORY_TRACE_PATH.exists():
             default_trace = {
@@ -304,7 +304,7 @@ class MemorySymbolAPI:
             }
             with open(MEMORY_TRACE_PATH, 'w') as f:
                 json.dump(default_trace, f, indent=2)
-        
+
         # Initialize symbolic map
         if not SYMBOLIC_MAP_PATH.exists():
             default_symbols = {
@@ -374,7 +374,7 @@ class MemorySymbolAPI:
             }
             with open(SYMBOLIC_MAP_PATH, 'w') as f:
                 json.dump(default_symbols, f, indent=2)
-        
+
         # Initialize anchor state
         if not ANCHOR_STATE_PATH.exists():
             default_anchor = {
@@ -427,10 +427,10 @@ def get_emotional_trace():
         # Filter by layer based on permissions
         token = extract_token()
         token_type = get_token_type(token) if token else None
-        
+
         data = memory_api.load_json_file(MEMORY_TRACE_PATH)
         trace = data.get('trace', [])
-        
+
         # Filter trace by accessible layers
         filtered_trace = []
         for entry in trace:
@@ -439,11 +439,11 @@ def get_emotional_trace():
                 (entry_layer == 'beliefs' and token_type in ['admin', 'system']) or
                 (entry_layer == 'identity' and token_type == 'admin')):
                 filtered_trace.append(entry)
-        
+
         # Sort by timestamp (most recent first)
         trace = data.get('trace', [])
         trace.sort(key=lambda x: x['timestamp'], reverse=True)
-        
+
         return jsonify({
             'trace': trace,
             'total_entries': len(trace),
@@ -460,23 +460,23 @@ def add_memory_entry():
     try:
         entry_data = g.validated_data
         layer = entry_data.get('layer', 'ephemeral')
-        
+
         # Additional layer access check for identity/beliefs
         token = extract_token()
         token_type = get_token_type(token) if token else None
-        
+
         if layer == 'identity' and token_type != 'admin':
             audit_action('layer_access_denied', layer='identity', reason='admin_required')
             return jsonify({'error': 'Admin access required for identity layer'}), 403
-        
+
         if layer == 'beliefs' and token_type not in ['admin', 'system']:
             audit_action('layer_access_denied', layer='beliefs', reason='admin_or_system_required')
             return jsonify({'error': 'Admin or system access required for beliefs layer'}), 403
-        
+
         # Load current trace
         data = memory_api.load_json_file(MEMORY_TRACE_PATH)
         trace = data.get('trace', [])
-        
+
         # Create new entry
         new_entry = {
             'id': str(uuid.uuid4()),
@@ -489,27 +489,27 @@ def add_memory_entry():
             'created_by': token_type,
             'request_id': getattr(g, 'security_context', {}).get('request_id')
         }
-        
+
         # Add to trace
         trace.insert(0, new_entry)
-        
+
         # Keep only last 100 entries per layer
         layer_entries = [e for e in trace if e.get('layer') == layer]
         if len(layer_entries) > 100:
             # Remove oldest entries for this layer
             trace = [e for e in trace if e.get('layer') != layer or e in layer_entries[:100]]
-        
+
         # Update and save
         data['trace'] = trace
         data['last_updated'] = datetime.now().isoformat()
         memory_api.save_json_file(MEMORY_TRACE_PATH, data)
-        
+
         # Audit log the action
-        audit_action('memory_entry_created', 
-                    layer=layer, 
+        audit_action('memory_entry_created',
+                    layer=layer,
                     entry_id=new_entry['id'],
                     success=True)
-        
+
         return jsonify({'success': True, 'entry': new_entry})
     except Exception as e:
         audit_action('memory_entry_creation_failed', error=str(e), success=False)
@@ -525,11 +525,11 @@ def get_symbolic_map():
 
     try:
         data = memory_api.load_json_file(SYMBOLIC_MAP_PATH)
-        
+
         # Sort by frequency (most frequent first)
         symbols = data.get('symbols', [])
         symbols.sort(key=lambda x: x['frequency'], reverse=True)
-        
+
         return jsonify({
             'symbols': symbols,
             'total_symbols': len(symbols),
@@ -546,25 +546,25 @@ def invoke_symbol():
     try:
         symbol_data = g.validated_data
         layer = symbol_data.get('layer', 'ephemeral')
-        
+
         # Additional layer access check
         token = extract_token()
         token_type = get_token_type(token) if token else None
-        
+
         if layer == 'identity' and token_type != 'admin':
             audit_action('layer_access_denied', layer='identity', reason='admin_required')
             return jsonify({'error': 'Admin access required for identity layer symbols'}), 403
-        
+
         if layer == 'beliefs' and token_type not in ['admin', 'system']:
             audit_action('layer_access_denied', layer='beliefs', reason='admin_or_system_required')
             return jsonify({'error': 'Admin or system access required for beliefs layer symbols'}), 403
-        
+
         symbol_name = symbol_data.get('name')
-        
+
         # Load current map
         data = memory_api.load_json_file(SYMBOLIC_MAP_PATH)
         symbols = data.get('symbols', [])
-        
+
         # Find and update symbol
         symbol_found = False
         for symbol in symbols:
@@ -576,13 +576,13 @@ def invoke_symbol():
                 if 'strength' in symbol_data:
                     symbol['strength'] = symbol_data['strength']
                 symbol_found = True
-                audit_action('symbol_invoked', 
+                audit_action('symbol_invoked',
                            symbol_name=symbol_name,
                            layer=layer,
                            frequency=symbol['frequency'],
                            success=True)
                 break
-        
+
         # If symbol doesn't exist, create it
         if not symbol_found:
             new_symbol = {
@@ -600,17 +600,17 @@ def invoke_symbol():
                 'request_id': getattr(g, 'security_context', {}).get('request_id')
             }
             symbols.append(new_symbol)
-            
-            audit_action('symbol_created', 
+
+            audit_action('symbol_created',
                         symbol_name=symbol_name,
                         layer=layer,
                         success=True)
-        
+
         # Update and save
         data['symbols'] = symbols
         data['last_updated'] = datetime.now().isoformat()
         memory_api.save_json_file(SYMBOLIC_MAP_PATH, data)
-        
+
         return jsonify({'success': True, 'symbol_name': symbol_name, 'layer': layer})
     except Exception as e:
         audit_action('symbol_invoke_failed', error=str(e), success=False)
@@ -640,24 +640,24 @@ def adjust_anchor_baseline():
 
     try:
         adjustment_data = request.json
-        
+
         # Validate input data exists
         if not adjustment_data:
             return jsonify({'error': 'Request must contain JSON data'}), 400
-        
+
         # Validate required fields
         required_fields = ['vector', 'value']
         for field in required_fields:
             if field not in adjustment_data:
                 return jsonify({'error': f'Missing required field: {field}'}), 400
-        
+
         vector_name = adjustment_data.get('vector')
         new_value = adjustment_data.get('value')
-        
+
         # Validate vector name
         if not isinstance(vector_name, str) or len(vector_name.strip()) == 0:
             return jsonify({'error': 'Vector name must be a non-empty string'}), 400
-        
+
         # Validate value
         try:
             new_value = float(new_value)
@@ -665,23 +665,23 @@ def adjust_anchor_baseline():
                 return jsonify({'error': 'Value must be between 0 and 1'}), 400
         except (ValueError, TypeError):
             return jsonify({'error': 'Value must be a valid number'}), 400
-        
+
         # Load current state
         data = memory_api.load_json_file(ANCHOR_STATE_PATH)
-        
+
         if vector_name not in data.get('vectors', {}):
             return jsonify({'error': f'Vector {vector_name} not found'}), 404
-        
+
         # Record old value for drift tracking
         old_baseline = data['vectors'][vector_name]['baseline']
-        
+
         # Update baseline
         data['vectors'][vector_name]['baseline'] = max(0.0, min(1.0, new_value))
-        
+
         # Record adjustment in drift history
         if 'drift_history' not in data:
             data['drift_history'] = []
-        
+
         data['drift_history'].append({
             'timestamp': datetime.now().isoformat(),
             'vector': vector_name,
@@ -689,19 +689,19 @@ def adjust_anchor_baseline():
             'new_baseline': data['vectors'][vector_name]['baseline'],
             'adjustment_type': 'manual'
         })
-        
+
         # Keep only last 50 drift entries
         if len(data['drift_history']) > 50:
             data['drift_history'] = data['drift_history'][-50:]
-        
+
         # Recalculate tether score
         vectors = data['vectors']
         total_alignment = sum(
-            1.0 - abs(v['value'] - v['baseline']) 
+            1.0 - abs(v['value'] - v['baseline'])
             for v in vectors.values()
         ) / len(vectors)
         data['tether_score'] = total_alignment
-        
+
         # Update identity stability
         if data['tether_score'] > 0.9:
             data['identity_stability'] = 'excellent'
@@ -711,12 +711,12 @@ def adjust_anchor_baseline():
             data['identity_stability'] = 'concerning'
         else:
             data['identity_stability'] = 'critical'
-        
+
         data['last_calibration'] = datetime.now().isoformat()
-        
+
         # Save updated state
         memory_api.save_json_file(ANCHOR_STATE_PATH, data)
-        
+
         return jsonify({
             'success': True,
             'vector': vector_name,
@@ -736,38 +736,38 @@ def simulate_drift():
 
     try:
         data = memory_api.load_json_file(ANCHOR_STATE_PATH)
-        
+
         # Simulate small random drifts in current values
         for vector_name, vector_data in data['vectors'].items():
             drift_amount = random.uniform(-0.05, 0.05)
             new_value = max(0.0, min(1.0, vector_data['value'] + drift_amount))
             vector_data['value'] = new_value
-            
+
             # Record drift in recent_drift array
             if 'recent_drift' not in vector_data:
                 vector_data['recent_drift'] = []
-            
+
             vector_data['recent_drift'].append({
                 'timestamp': datetime.now().isoformat(),
                 'drift_amount': drift_amount,
                 'new_value': new_value
             })
-            
+
             # Keep only last 20 drift records
             if len(vector_data['recent_drift']) > 20:
                 vector_data['recent_drift'] = vector_data['recent_drift'][-20:]
-        
+
         # Recalculate tether score
         vectors = data['vectors']
         total_alignment = sum(
-            1.0 - abs(v['value'] - v['baseline']) 
+            1.0 - abs(v['value'] - v['baseline'])
             for v in vectors.values()
         ) / len(vectors)
         data['tether_score'] = total_alignment
-        
+
         # Save updated state
         memory_api.save_json_file(ANCHOR_STATE_PATH, data)
-        
+
         return jsonify({
             'success': True,
             'tether_score': data['tether_score'],
@@ -838,5 +838,5 @@ if __name__ == '__main__':
     print("   • POST /api/anchor/simulate_drift - Simulate natural drift")
     print("   • GET  /api/health - Health check")
     print("🚀 Server running on http://localhost:5001")
-    
+
     app.run(debug=True, host='0.0.0.0', port=5001)

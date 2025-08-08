@@ -23,7 +23,7 @@
   },
   "quantization_methods": [
     "q8_0",
-    "q6_K", 
+    "q6_K",
     "q5_K_M",
     "q4_K_M",
     "q4_0",

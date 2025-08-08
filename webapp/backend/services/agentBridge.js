@@ -4,7 +4,7 @@ const EventEmitter = require('events');
 
 /**
  * AgentBridge - Bridge between Node.js backend and Python SLiM agents
- * 
+ *
  * This service manages communication with the ProjectAlpha Python backend,
  * specifically the HRM router and SLiM agent system.
  */
@@ -15,11 +15,11 @@ class AgentBridge extends EventEmitter {
     this.isConnected = false;
     this.pendingRequests = new Map();
     this.requestCounter = 0;
-    
+
     // Path to the ProjectAlpha Python backend
     this.projectRoot = path.resolve(__dirname, '../../../');
     this.pythonScript = path.join(this.projectRoot, 'webapp/backend/services/agent_bridge.py');
-    
+
     this.initializePythonBridge();
   }
 
@@ -31,7 +31,7 @@ class AgentBridge extends EventEmitter {
       console.log('🐍 Starting Python Agent Bridge...');
       console.log(`📁 Project root: ${this.projectRoot}`);
       console.log(`🔧 Python script: ${this.pythonScript}`);
-      
+
       this.pythonProcess = spawn('python', [this.pythonScript], {
         cwd: this.projectRoot,
         stdio: ['pipe', 'pipe', 'pipe']
@@ -49,7 +49,7 @@ class AgentBridge extends EventEmitter {
         console.log(`🐍 Python process exited with code ${code}`);
         this.isConnected = false;
         this.emit('disconnected');
-        
+
         // Auto-restart after 5 seconds
         setTimeout(() => {
           console.log('🔄 Restarting Python Agent Bridge...');
@@ -81,7 +81,7 @@ class AgentBridge extends EventEmitter {
   handlePythonOutput(data) {
     try {
       const lines = data.trim().split('\n');
-      
+
       for (const line of lines) {
         if (line.startsWith('{')) {
           const message = JSON.parse(line);
@@ -157,9 +157,9 @@ class AgentBridge extends EventEmitter {
   async invokeAgent(agentType, prompt, options = {}) {
     return new Promise((resolve, reject) => {
       const requestId = `req_${++this.requestCounter}_${Date.now()}`;
-      
+
       this.pendingRequests.set(requestId, { resolve, reject });
-      
+
       // Set timeout for request
       setTimeout(() => {
         if (this.pendingRequests.has(requestId)) {
@@ -187,9 +187,9 @@ class AgentBridge extends EventEmitter {
   async getAgents() {
     return new Promise((resolve, reject) => {
       const requestId = `agents_${++this.requestCounter}_${Date.now()}`;
-      
+
       this.pendingRequests.set(requestId, { resolve, reject });
-      
+
       setTimeout(() => {
         if (this.pendingRequests.has(requestId)) {
           this.pendingRequests.delete(requestId);

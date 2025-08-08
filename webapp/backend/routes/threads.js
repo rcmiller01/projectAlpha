@@ -4,7 +4,7 @@ const Thread = require('../models/Thread');
 
 /**
  * Threads API Routes
- * 
+ *
  * Manages conversation threads for the ProjectAlpha web UI
  */
 
@@ -12,7 +12,7 @@ const Thread = require('../models/Thread');
 router.get('/', async (req, res) => {
   try {
     const { userId = 'default' } = req.query;
-    
+
     const threads = await Thread.find({ userId })
       .sort({ updatedAt: -1 })
       .select('id title lastMessage messageCount createdAt updatedAt tags isArchived');
@@ -80,7 +80,7 @@ router.get('/:threadId', async (req, res) => {
     const { threadId } = req.params;
     const { includeMessages = true } = req.query;
 
-    const selectFields = includeMessages 
+    const selectFields = includeMessages
       ? '' // Include all fields
       : '-messages'; // Exclude messages
 
@@ -175,7 +175,7 @@ router.post('/:threadId/messages', async (req, res) => {
       {
         $push: { messages: message },
         $inc: { messageCount: 1 },
-        $set: { 
+        $set: {
           lastMessage: content.substring(0, 100),
           updatedAt: new Date()
         }

@@ -15,10 +15,10 @@ fdef run_emotional_test(candidate: QuantizationCandidate, prompt: str) -> float:
 
     import random
     score = round(random.uniform(0.5, 0.95), 3)
-    
+
     # Log the reflection for long-term analysis
     write_reflection_log(candidate, prompt, fake_response, score)
-    
+
     print(f"Score: {score}")
     return scorefuture emotional improvement systems.
 """
@@ -50,10 +50,10 @@ class QuantizationCandidate:
 
 def load_anchor_weights(config_path: str = 'config/anchor_settings.json') -> Dict[str, float]:
     """Load real Anchor tuning values from JSON configuration file.
-    
+
     Args:
         config_path: Path to the anchor settings JSON file
-        
+
     Returns:
         Dictionary of anchor weights for evaluation
     """
@@ -125,23 +125,23 @@ class EmotionLoopManager:
     def evaluate_candidate(self, candidate: QuantizationCandidate) -> float:
         """Compute emotional resonance score for a candidate using dynamic anchor weights."""
         logger.debug("Evaluating emotional resonance for %s", candidate.name)
-        
+
         # Reload weights to get latest configuration
         self.anchor_weights = load_anchor_weights(self.config_path)
-        
+
         # TODO: Implement actual emotional scoring based on anchor weights
         # For now, use weighted combination based on anchor settings
         base_score = 0.5
-        
+
         # Apply anchor weight adjustments (placeholder logic)
         persona_factor = self.anchor_weights.get('persona_continuity', 0.4) * 1.2
         expression_factor = self.anchor_weights.get('expression_accuracy', 0.3) * 0.8
         depth_factor = self.anchor_weights.get('response_depth', 0.2) * 1.1
         memory_factor = self.anchor_weights.get('memory_alignment', 0.1) * 0.9
-        
+
         score = base_score * (persona_factor + expression_factor + depth_factor + memory_factor)
         score = min(1.0, max(0.0, score))  # Clamp to [0, 1]
-        
+
         candidate.emotional_resonance_score = score
         logger.debug(f"Emotional resonance score for {candidate.name}: {score:.3f} (weights: {self.anchor_weights})")
         return score
@@ -156,21 +156,21 @@ class EmotionLoopManager:
     def select_best_candidate(self, candidates: List[QuantizationCandidate]) -> Optional[QuantizationCandidate]:
         """Return the candidate with the highest weighted overall score using dynamic anchor weights."""
         logger.debug("Selecting best candidate among %d options", len(candidates))
-        
+
         # Reload weights for selection
         self.anchor_weights = load_anchor_weights(self.config_path)
-        
+
         for cand in candidates:
             self.evaluate_candidate(cand)
             self.verify_with_anchor(cand)
-            
+
         if not candidates:
             return None
-            
+
         # Use dynamic weights for final scoring
         emotion_weight = self.anchor_weights.get('expression_accuracy', 0.3) + self.anchor_weights.get('response_depth', 0.2)
         anchor_weight = self.anchor_weights.get('persona_continuity', 0.4) + self.anchor_weights.get('memory_alignment', 0.1)
-        
+
         # Normalize weights
         total_weight = emotion_weight + anchor_weight
         if total_weight > 0:
@@ -178,10 +178,10 @@ class EmotionLoopManager:
             anchor_weight /= total_weight
         else:
             emotion_weight, anchor_weight = 0.6, 0.4
-            
+
         best = max(candidates, key=lambda c: (c.emotional_resonance_score * emotion_weight) + (c.anchor_alignment_score * anchor_weight))
-        
-        logger.info("Selected best candidate: %s (emotion_weight=%.2f, anchor_weight=%.2f)", 
+
+        logger.info("Selected best candidate: %s (emotion_weight=%.2f, anchor_weight=%.2f)",
                    best.name, emotion_weight, anchor_weight)
         self.history.append(best)
         return best
@@ -289,7 +289,7 @@ if __name__ == "__main__":
     if best:
         manager.record_feedback(best)
         print(f"Best candidate: {best.name} | resonance={best.emotional_resonance_score:.2f} | alignment={best.anchor_alignment_score:.2f}")
-        
+
         # Save results after feedback
         manager.save_loop_results(best, mock_candidates)
 
@@ -305,6 +305,6 @@ if __name__ == "__main__":
         for prompt in test_prompts:
             for c in mock_candidates:
                 _ = run_emotional_test(c, prompt)
-                
+
     else:
         print("No candidates evaluated")

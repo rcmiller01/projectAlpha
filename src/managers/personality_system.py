@@ -2,7 +2,7 @@
 """
 Personality System for Dolphin AI Orchestrator
 
-Defines user-selectable personas/modes that affect routing behavior 
+Defines user-selectable personas/modes that affect routing behavior
 and prompt formatting across the AI ecosystem.
 """
 
@@ -18,14 +18,14 @@ class PersonalitySystem:
     """
     Manages AI personas and their routing/prompt behaviors
     """
-    
+
     def __init__(self, config_dir: str = "config"):
         self.config_dir = Path(config_dir)
         self.config_dir.mkdir(exist_ok=True)
         self.personas_file = self.config_dir / "personas.json"
         self.current_persona = "companion"  # Default
         self.personas = self._load_personas()
-    
+
     def _load_personas(self) -> Dict[str, Any]:
         """Load persona definitions from JSON file"""
         default_personas = {
@@ -125,7 +125,7 @@ class PersonalitySystem:
                 "emotional_responsiveness": "minimal"
             }
         }
-        
+
         if self.personas_file.exists():
             try:
                 with open(self.personas_file, 'r') as f:
@@ -142,7 +142,7 @@ class PersonalitySystem:
             # Save default personas
             self._save_personas(default_personas)
             return default_personas
-    
+
     def _save_personas(self, personas: Dict[str, Any]):
         """Save personas to JSON file"""
         try:
@@ -151,15 +151,15 @@ class PersonalitySystem:
             logger.info("Personas saved successfully")
         except Exception as e:
             logger.error(f"Error saving personas: {e}")
-    
+
     def get_personas(self) -> Dict[str, Any]:
         """Get all available personas"""
         return self.personas
-    
+
     def get_current_persona(self) -> Dict[str, Any]:
         """Get current active persona"""
         return self.personas.get(self.current_persona, self.personas["companion"])
-    
+
     def set_persona(self, persona_id: str) -> bool:
         """Set active persona"""
         if persona_id in self.personas:
@@ -169,12 +169,12 @@ class PersonalitySystem:
         else:
             logger.error(f"Unknown persona: {persona_id}")
             return False
-    
+
     def format_prompt_with_persona(self, message: str, context: Optional[Dict] = None) -> str:
         """Format a message according to current persona style"""
         persona = self.get_current_persona()
         prompt_style = persona.get("prompt_style", {})
-        
+
         formatted_prompt = f"""
 You are an AI assistant with the following persona:
 
@@ -192,16 +192,16 @@ Context: {json.dumps(context or {}, indent=2)}
 Respond in character with the specified tone and style.
 """
         return formatted_prompt.strip()
-    
+
     def adjust_routing_for_persona(self, base_route: Dict[str, Any]) -> Dict[str, Any]:
         """Adjust routing decision based on current persona preferences"""
         persona = self.get_current_persona()
         routing_prefs = persona.get("routing_preferences", {})
-        
+
         # Adjust confidence based on persona preferences
         handler = base_route.get("handler", "DOLPHIN")
         confidence = base_route.get("confidence", 0.5)
-        
+
         if handler == "DOLPHIN":
             confidence *= routing_prefs.get("dolphin_bias", 1.0)
         elif handler == "OPENROUTER":
@@ -213,22 +213,22 @@ Respond in character with the specified tone and style.
             if confidence < routing_prefs.get("n8n_threshold", 0.5):
                 base_route["handler"] = "DOLPHIN"
                 base_route["reasoning"] += f" (Adjusted for {persona['name']} persona)"
-        
+
         base_route["confidence"] = min(confidence, 1.0)
         base_route["persona_applied"] = persona["name"]
-        
+
         return base_route
-    
+
     def get_memory_focus_areas(self) -> List[str]:
         """Get memory focus areas for current persona"""
         persona = self.get_current_persona()
         return persona.get("memory_focus", ["general"])
-    
+
     def get_emotional_responsiveness(self) -> str:
         """Get emotional responsiveness level for current persona"""
         persona = self.get_current_persona()
         return persona.get("emotional_responsiveness", "medium")
-    
+
     def create_custom_persona(self, persona_id: str, persona_data: Dict[str, Any]) -> bool:
         """Create or update a custom persona"""
         try:
@@ -237,7 +237,7 @@ Respond in character with the specified tone and style.
             for field in required_fields:
                 if field not in persona_data:
                     raise ValueError(f"Missing required field: {field}")
-            
+
             # Set defaults for optional fields
             if "routing_preferences" not in persona_data:
                 persona_data["routing_preferences"] = {
@@ -245,7 +245,7 @@ Respond in character with the specified tone and style.
                     "openrouter_threshold": 0.5,
                     "n8n_threshold": 0.5
                 }
-            
+
             if "prompt_style" not in persona_data:
                 persona_data["prompt_style"] = {
                     "tone": "helpful",
@@ -253,12 +253,12 @@ Respond in character with the specified tone and style.
                     "conversation_style": "Be helpful and informative",
                     "prefix": ""
                 }
-            
+
             self.personas[persona_id] = persona_data
             self._save_personas(self.personas)
             logger.info(f"Custom persona created: {persona_id}")
             return True
-            
+
         except Exception as e:
             logger.error(f"Error creating custom persona: {e}")
             return False

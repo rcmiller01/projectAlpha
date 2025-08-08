@@ -106,4 +106,4 @@ echo "   - Prometheus: http://localhost:9090"
 
 # Show logs
 echo "📋 Recent logs:"
-docker-compose logs --tail=20 
+docker-compose logs --tail=20

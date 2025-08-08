@@ -40,7 +40,7 @@ MAX_REQUEST_SIZE = 10000  # characters
 BRIDGE_RATE_LIMIT = 100  # requests per hour per IP
 MAX_CONCURRENT_REQUESTS = 20
 VALID_ORIGINS = {
-    "http://192.168.50.234:3000", "http://192.168.50.234:5173", 
+    "http://192.168.50.234:3000", "http://192.168.50.234:5173",
     "http://localhost:3000", "http://localhost:5173"
 }
 
@@ -66,17 +66,17 @@ except ImportError as e:
 def check_rate_limit(client_ip: str) -> bool:
     """Check if client IP has exceeded rate limit"""
     current_time = time.time()
-    
+
     # Clean old requests
-    while (request_counts[client_ip] and 
+    while (request_counts[client_ip] and
            request_counts[client_ip][0] < current_time - 3600):  # 1 hour window
         request_counts[client_ip].popleft()
-    
+
     # Check limit
     if len(request_counts[client_ip]) >= BRIDGE_RATE_LIMIT:
         logger.warning(f"Rate limit exceeded for IP: {client_ip}")
         return False
-    
+
     # Add current request
     request_counts[client_ip].append(current_time)
     return True
@@ -90,10 +90,10 @@ def validate_input_text(text: str, max_length: int = MAX_REQUEST_SIZE) -> tuple[
     try:
         if not text or not isinstance(text, str):
             return False, "Input must be a non-empty string"
-        
+
         if len(text) > max_length:
             return False, f"Input exceeds maximum length of {max_length}"
-        
+
         # Check for potential injection patterns
         dangerous_patterns = [
             r'<script[^>]*>.*?</script>',  # XSS
@@ -101,13 +101,13 @@ def validate_input_text(text: str, max_length: int = MAX_REQUEST_SIZE) -> tuple[
             r'on\w+\s*=',                # Event handlers
             r'expression\s*\(',          # CSS expressions
         ]
-        
+
         for pattern in dangerous_patterns:
             if re.search(pattern, text, re.IGNORECASE):
                 return False, f"Input contains potentially dangerous content"
-        
+
         return True, "Valid"
-    
+
     except Exception as e:
         logger.error(f"Error validating input text: {str(e)}")
         return False, f"Validation error: {str(e)}"
@@ -116,14 +116,14 @@ def sanitize_text_input(text: str) -> str:
     """Sanitize text input for safety"""
     if not isinstance(text, str):
         return ""
-    
+
     # Remove potentially dangerous characters
     text = re.sub(r'[<>"\']', '', text)
-    
+
     # Limit length
     if len(text) > MAX_REQUEST_SIZE:
         text = text[:MAX_REQUEST_SIZE] + "..."
-    
+
     return text.strip()
 
 def log_bridge_activity(activity_type: str, client_ip: str, details: Dict[str, Any], status: str = "success"):
@@ -136,39 +136,39 @@ def log_bridge_activity(activity_type: str, client_ip: str, details: Dict[str, A
             'details': details,
             'status': status
         }
-        
+
         logger.info(f"Bridge activity logged: {activity_type} from {client_ip} ({status})")
-        
+
         if status != "success":
             logger.warning(f"Bridge activity issue: {activity_type} from {client_ip} failed with {status}")
-        
+
     except Exception as e:
         logger.error(f"Error logging bridge activity: {str(e)}")
 
 async def validate_request(request: Request) -> bool:
     """Validate incoming request"""
     client_ip = request.client.host
-    
+
     # Check rate limit
     if not check_rate_limit(client_ip):
         raise HTTPException(status_code=429, detail="Rate limit exceeded")
-    
+
     # Check concurrent requests
     if len(active_requests) >= MAX_CONCURRENT_REQUESTS:
         logger.warning(f"Concurrent request limit reached: {len(active_requests)}")
         raise HTTPException(status_code=503, detail="Server too busy")
-    
+
     # Validate origin if present
     origin = request.headers.get("origin")
     if origin and not validate_origin(origin):
         logger.warning(f"Invalid origin: {origin} from {client_ip}")
         raise HTTPException(status_code=403, detail="Invalid origin")
-    
+
     return True
 
 class SecureBaseModel(BaseModel):
     """Base model with input validation"""
-    
+
     @validator('*', pre=True)
     def sanitize_string_fields(cls, v):
         if isinstance(v, str):
@@ -199,7 +199,7 @@ async def init_preference_db():
     try:
         # Ensure data directory exists
         os.makedirs(os.path.dirname(PREFERENCE_DB_PATH), exist_ok=True)
-        
+
         async with aiosqlite.connect(PREFERENCE_DB_PATH) as db:
             await db.execute(
                 """
@@ -279,7 +279,7 @@ async def chat_endpoint(request: ChatRequest):
     """
     if not house_of_minds:
         raise HTTPException(status_code=503, detail="House of Minds system not available")
-    
+
     try:
         # Build context for House of Minds
         context = {
@@ -288,13 +288,13 @@ async def chat_endpoint(request: ChatRequest):
             "use_cloud": request.useCloud,
             **request.context
         }
-        
+
         # Process through House of Minds
         result = await house_of_minds.process_request(request.prompt, context)
-        
+
         if result['status'] == 'success':
             response = result['response']
-            
+
             # Format response for Core1 frontend
             return ChatResponse(
                 choices=[{
@@ -313,10 +313,10 @@ async def chat_endpoint(request: ChatRequest):
             )
         else:
             raise HTTPException(
-                status_code=500, 
+                status_code=500,
                 detail=f"Processing failed: {result.get('error', 'Unknown error')}"
             )
-            
+
     except Exception as e:
         logger.error(f"Chat endpoint error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -327,7 +327,7 @@ async def get_cloud_models():
     try:
         if not house_of_minds:
             return []
-            
+
         # Get cloud models from model router
         cloud_models = [
             ModelInfo(
@@ -366,9 +366,9 @@ async def get_cloud_models():
                 available=True
             )
         ]
-        
+
         return cloud_models
-        
+
     except Exception as e:
         logger.error(f"Error fetching cloud models: {e}")
         return []
@@ -379,7 +379,7 @@ async def get_local_models():
     try:
         if not house_of_minds:
             return []
-            
+
         # Get local models from model router
         local_models = [
             ModelInfo(
@@ -411,9 +411,9 @@ async def get_local_models():
                 available=True
             )
         ]
-        
+
         return local_models
-        
+
     except Exception as e:
         logger.error(f"Error fetching local models: {e}")
         return []
@@ -423,18 +423,18 @@ async def get_status():
     """Get system status and health information."""
     try:
         status = "running" if house_of_minds else "error"
-        
+
         available_models = {
             "cloud": ["gpt-4", "claude-3-opus", "claude-3-sonnet"],
             "local": ["dolphin-mixtral", "kimik2", "llama2", "codellama"]
         }
-        
+
         active_handlers = []
         if house_of_minds:
             # Get active handlers from model router
             status_info = await house_of_minds.model_router.get_system_status()
             active_handlers = status_info.get('active_handlers', [])
-        
+
         return StatusResponse(
             status=status,
             timestamp=datetime.now().isoformat(),
@@ -442,7 +442,7 @@ async def get_status():
             available_models=available_models,
             active_handlers=active_handlers
         )
-        
+
     except Exception as e:
         logger.error(f"Status endpoint error: {e}")
         return StatusResponse(
@@ -459,7 +459,7 @@ async def get_memories(user_id: str = "default_user", limit: int = 50):
     try:
         if not house_of_minds:
             raise HTTPException(status_code=503, detail="House of Minds system not available")
-            
+
         # Get memories from Dolphin interface (which has True Recall integration)
         dolphin = house_of_minds.model_router.dolphin
         if hasattr(dolphin, 'search_memories'):
@@ -467,7 +467,7 @@ async def get_memories(user_id: str = "default_user", limit: int = 50):
             return {"memories": memories}
         else:
             return {"memories": [], "message": "Memory system not available"}
-            
+
     except Exception as e:
         logger.error(f"Memory endpoint error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -482,7 +482,7 @@ async def search_memories(
     try:
         if not house_of_minds:
             raise HTTPException(status_code=503, detail="House of Minds system not available")
-            
+
         # Search memories using Dolphin interface
         dolphin = house_of_minds.model_router.dolphin
         if hasattr(dolphin, 'search_memories'):
@@ -490,7 +490,7 @@ async def search_memories(
             return {"memories": memories, "query": query}
         else:
             return {"memories": [], "query": query, "message": "Memory search not available"}
-            
+
     except Exception as e:
         logger.error(f"Memory search error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -511,7 +511,7 @@ async def get_daily_reflection(user_id: str = "default_user"):
     try:
         if not house_of_minds:
             raise HTTPException(status_code=503, detail="House of Minds system not available")
-            
+
         # Get daily reflection from Dolphin interface
         dolphin = house_of_minds.model_router.dolphin
         if hasattr(dolphin, 'get_daily_reflection'):
@@ -519,7 +519,7 @@ async def get_daily_reflection(user_id: str = "default_user"):
             return {"reflection": reflection}
         else:
             return {"reflection": None, "message": "Reflection system not available"}
-            
+
     except Exception as e:
         logger.error(f"Reflection endpoint error: {e}")
         raise HTTPException(status_code=500, detail=str(e))

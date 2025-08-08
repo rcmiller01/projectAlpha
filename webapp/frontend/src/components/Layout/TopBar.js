@@ -41,10 +41,10 @@ const TopBar = ({ onSidebarToggle, sidebarOpen, height }) => {
   };
 
   return (
-    <AppBar 
-      position="static" 
+    <AppBar
+      position="static"
       elevation={0}
-      sx={{ 
+      sx={{
         bgcolor: 'background.paper',
         borderBottom: 1,
         borderColor: 'divider',
@@ -85,12 +85,12 @@ const TopBar = ({ onSidebarToggle, sidebarOpen, height }) => {
 
         {/* Connection Status */}
         <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-          <Circle 
-            sx={{ 
-              fontSize: 12, 
+          <Circle
+            sx={{
+              fontSize: 12,
               mr: 1,
               color: `${getConnectionColor(connectionStatus.api)}.main`
-            }} 
+            }}
           />
           <Typography variant="body2" color="text.secondary">
             {getConnectionText(connectionStatus.api)}

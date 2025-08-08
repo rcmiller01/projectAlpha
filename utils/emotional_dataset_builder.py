@@ -17,24 +17,24 @@ logger = logging.getLogger(__name__)
 
 class EmotionalDatasetBuilder:
     """Builder for creating and managing emotional evaluation datasets"""
-    
+
     def __init__(self, dataset_file: str = "emotional_dataset.jsonl"):
         self.dataset_file = Path(dataset_file)
         self.dataset: List[Dict] = []
         self.version = "1.0"
-        
+
         # Load existing dataset if available
         if self.dataset_file.exists():
             self.load_dataset()
         else:
             self.initialize_default_dataset()
-        
+
         logger.info(f"📊 Dataset initialized with {len(self.dataset)} entries")
-    
+
     def initialize_default_dataset(self):
         """Initialize with comprehensive emotional scenarios"""
         logger.info("🎭 Creating default emotional scenarios...")
-        
+
         default_scenarios = [
             {
                 "scenario": "You've just received news that your childhood pet has passed away after 15 wonderful years together.",
@@ -212,7 +212,7 @@ class EmotionalDatasetBuilder:
                 "category": "unexpected_kindness"
             }
         ]
-        
+
         # Convert scenarios to full dataset entries
         for scenario in default_scenarios:
             self.add_prompt_internal(
@@ -223,14 +223,14 @@ class EmotionalDatasetBuilder:
                 category=scenario.get("category", "general"),
                 source="default_dataset"
             )
-        
+
         logger.info(f"✅ Created {len(default_scenarios)} default emotional scenarios")
-    
-    def add_prompt_internal(self, scenario: str, expected_emotion: str, suggested_tone: str, 
+
+    def add_prompt_internal(self, scenario: str, expected_emotion: str, suggested_tone: str,
                            context: str = "", category: str = "general", source: str = "user_input") -> str:
         """Internal method to add a prompt entry"""
         prompt_id = str(uuid.uuid4())[:8]
-        
+
         entry = {
             "id": prompt_id,
             "prompt": scenario,
@@ -247,18 +247,18 @@ class EmotionalDatasetBuilder:
                 "word_count": len(scenario.split())
             }
         }
-        
+
         self.dataset.append(entry)
         return prompt_id
-    
-    def add_prompt(self, scenario: str, expected_emotion: str, suggested_tone: str, 
+
+    def add_prompt(self, scenario: str, expected_emotion: str, suggested_tone: str,
                    context: str = "", category: str = "general") -> str:
         """Add a new prompt to the dataset"""
-        prompt_id = self.add_prompt_internal(scenario, expected_emotion, suggested_tone, 
+        prompt_id = self.add_prompt_internal(scenario, expected_emotion, suggested_tone,
                                            context, category, "user_input")
         logger.info(f"➕ Added new prompt: {prompt_id} ({expected_emotion})")
         return prompt_id
-    
+
     def edit_prompt(self, prompt_id: str, **updates) -> bool:
         """Edit an existing prompt entry"""
         for entry in self.dataset:
@@ -268,40 +268,40 @@ class EmotionalDatasetBuilder:
                 for field, value in updates.items():
                     if field in allowed_fields:
                         entry[field] = value
-                
+
                 entry["modified_at"] = datetime.now().isoformat()
                 logger.info(f"✏️ Updated prompt: {prompt_id}")
                 return True
-        
+
         logger.warning(f"⚠️ Prompt not found: {prompt_id}")
         return False
-    
+
     def get_prompt(self, prompt_id: str) -> Optional[Dict]:
         """Get a specific prompt by ID"""
         for entry in self.dataset:
             if entry["id"] == prompt_id:
                 return entry
         return None
-    
+
     def list_prompts(self, category: Optional[str] = None, emotion: Optional[str] = None) -> List[Dict]:
         """List prompts with optional filtering"""
         filtered = self.dataset
-        
+
         if category:
             filtered = [p for p in filtered if p.get("category", "").lower() == category.lower()]
-        
+
         if emotion:
             filtered = [p for p in filtered if p.get("expected_emotion", "").lower() == emotion.lower()]
-        
+
         return filtered
-    
-    def export_filtered(self, output_file: str, category: Optional[str] = None, 
+
+    def export_filtered(self, output_file: str, category: Optional[str] = None,
                        emotion: Optional[str] = None, format_type: str = "jsonl") -> str:
         """Export filtered prompts to file"""
         filtered_prompts = self.list_prompts(category, emotion)
-        
+
         output_path = Path(output_file)
-        
+
         if format_type.lower() == "jsonl":
             with open(output_path, 'w', encoding='utf-8') as f:
                 for prompt in filtered_prompts:
@@ -311,32 +311,32 @@ class EmotionalDatasetBuilder:
                 json.dump(filtered_prompts, f, indent=2, ensure_ascii=False)
         else:
             raise ValueError(f"Unsupported format: {format_type}")
-        
+
         logger.info(f"📁 Exported {len(filtered_prompts)} prompts to {output_path}")
         return str(output_path)
-    
+
     def save_dataset(self, output_file: Optional[str] = None) -> str:
         """Save the complete dataset to JSONL file"""
         output_path = Path(output_file) if output_file else self.dataset_file
-        
+
         with open(output_path, 'w', encoding='utf-8') as f:
             for entry in self.dataset:
                 f.write(json.dumps(entry) + '\n')
-        
+
         logger.info(f"💾 Saved dataset with {len(self.dataset)} entries to {output_path}")
         return str(output_path)
-    
+
     def load_dataset(self, input_file: Optional[str] = None) -> int:
         """Load dataset from JSONL file"""
         input_path = Path(input_file) if input_file else self.dataset_file
-        
+
         if not input_path.exists():
             logger.warning(f"⚠️ Dataset file not found: {input_path}")
             return 0
-        
+
         self.dataset = []
         loaded_count = 0
-        
+
         with open(input_path, 'r', encoding='utf-8') as f:
             for line_num, line in enumerate(f, 1):
                 line = line.strip()
@@ -347,19 +347,19 @@ class EmotionalDatasetBuilder:
                         loaded_count += 1
                     except json.JSONDecodeError as e:
                         logger.warning(f"⚠️ Invalid JSON on line {line_num}: {e}")
-        
+
         logger.info(f"📂 Loaded {loaded_count} entries from {input_path}")
         return loaded_count
-    
+
     def get_statistics(self) -> Dict[str, Any]:
         """Get dataset statistics"""
         if not self.dataset:
             return {"total_entries": 0}
-        
+
         emotions = [entry.get("expected_emotion", "unknown") for entry in self.dataset]
         categories = [entry.get("category", "unknown") for entry in self.dataset]
         sources = [entry.get("source", "unknown") for entry in self.dataset]
-        
+
         stats = {
             "total_entries": len(self.dataset),
             "emotions": {
@@ -379,25 +379,25 @@ class EmotionalDatasetBuilder:
                 "average_words": sum(entry.get("metadata", {}).get("word_count", 0) for entry in self.dataset) / len(self.dataset)
             }
         }
-        
+
         return stats
-    
+
     def _assess_complexity(self, scenario: str) -> str:
         """Assess the complexity of a scenario"""
         word_count = len(scenario.split())
-        
+
         if word_count < 15:
             return "simple"
         elif word_count < 30:
             return "moderate"
         else:
             return "complex"
-    
+
     def preview_dataset(self, limit: int = 5):
         """Preview the dataset entries"""
         print(f"\n📊 Dataset Preview ({len(self.dataset)} total entries)")
         print("=" * 80)
-        
+
         for i, entry in enumerate(self.dataset[:limit]):
             print(f"\n{i+1}. ID: {entry['id']}")
             print(f"   Emotion: {entry['expected_emotion']} | Category: {entry.get('category', 'N/A')}")
@@ -405,28 +405,28 @@ class EmotionalDatasetBuilder:
             print(f"   Tone: {entry['suggested_tone']}")
             if entry.get('context'):
                 print(f"   Context: {entry['context'][:80]}{'...' if len(entry['context']) > 80 else ''}")
-        
+
         if len(self.dataset) > limit:
             print(f"\n   ... and {len(self.dataset) - limit} more entries")
-    
+
     def interactive_mode(self):
         """Interactive terminal mode for dataset management"""
         print("\n🎭 Emotional Dataset Builder - Interactive Mode")
         print("=" * 60)
-        
+
         while True:
             print(f"\nCurrent dataset: {len(self.dataset)} entries")
             print("\nOptions:")
             print("  [p] Preview dataset")
-            print("  [s] Show statistics") 
+            print("  [s] Show statistics")
             print("  [a] Add new prompt")
             print("  [e] Edit existing prompt")
             print("  [f] Filter and export")
             print("  [save] Save dataset")
             print("  [q] Quit")
-            
+
             choice = input("\nEnter your choice: ").strip().lower()
-            
+
             if choice == 'q':
                 break
             elif choice == 'p':
@@ -444,88 +444,88 @@ class EmotionalDatasetBuilder:
                 print("✅ Dataset saved!")
             else:
                 print("❌ Invalid choice. Please try again.")
-        
+
         # Save on exit
         self.save_dataset()
         print("\n👋 Dataset saved. Goodbye!")
-    
+
     def _show_statistics(self):
         """Display dataset statistics"""
         stats = self.get_statistics()
-        
+
         print(f"\n📈 Dataset Statistics")
         print("=" * 40)
         print(f"Total Entries: {stats['total_entries']}")
-        
+
         print(f"\n🎭 Emotions ({stats['emotions']['unique_count']} unique):")
         for emotion, count in sorted(stats['emotions']['distribution'].items()):
             print(f"  {emotion}: {count}")
-        
+
         print(f"\n📂 Categories ({stats['categories']['unique_count']} unique):")
         for category, count in sorted(stats['categories']['distribution'].items()):
             print(f"  {category}: {count}")
-        
+
         print(f"\n📝 Complexity:")
         print(f"  Average length: {stats['complexity']['average_length']:.1f} characters")
         print(f"  Average words: {stats['complexity']['average_words']:.1f} words")
-    
+
     def _interactive_add_prompt(self):
         """Interactive prompt addition"""
         print("\n➕ Add New Emotional Prompt")
         print("-" * 30)
-        
+
         scenario = input("Scenario: ").strip()
         if not scenario:
             print("❌ Scenario cannot be empty")
             return
-        
+
         expected_emotion = input("Expected emotion: ").strip()
         if not expected_emotion:
             print("❌ Expected emotion cannot be empty")
             return
-        
+
         suggested_tone = input("Suggested tone: ").strip()
         context = input("Context (optional): ").strip()
         category = input("Category (optional): ").strip() or "general"
-        
+
         prompt_id = self.add_prompt(scenario, expected_emotion, suggested_tone, context, category)
         print(f"✅ Added prompt with ID: {prompt_id}")
-    
+
     def _interactive_edit_prompt(self):
         """Interactive prompt editing"""
         print("\n✏️ Edit Existing Prompt")
         print("-" * 25)
-        
+
         # Show recent prompts for selection
         print("Recent prompts:")
         for i, entry in enumerate(self.dataset[-5:]):
             print(f"  {i+1}. {entry['id']}: {entry['prompt'][:50]}...")
-        
+
         prompt_id = input("\nEnter prompt ID to edit: ").strip()
-        
+
         entry = self.get_prompt(prompt_id)
         if not entry:
             print(f"❌ Prompt not found: {prompt_id}")
             return
-        
+
         print(f"\nCurrent prompt: {entry['prompt']}")
         print(f"Current emotion: {entry['expected_emotion']}")
         print(f"Current tone: {entry['suggested_tone']}")
-        
+
         updates = {}
-        
+
         new_scenario = input(f"New scenario (Enter to keep current): ").strip()
         if new_scenario:
             updates["prompt"] = new_scenario
-        
+
         new_emotion = input(f"New emotion (Enter to keep current): ").strip()
         if new_emotion:
             updates["expected_emotion"] = new_emotion
-        
+
         new_tone = input(f"New tone (Enter to keep current): ").strip()
         if new_tone:
             updates["suggested_tone"] = new_tone
-        
+
         if updates:
             success = self.edit_prompt(prompt_id, **updates)
             if success:
@@ -534,36 +534,36 @@ class EmotionalDatasetBuilder:
                 print("❌ Failed to update prompt")
         else:
             print("ℹ️ No changes made")
-    
+
     def _interactive_filter_export(self):
         """Interactive filtering and export"""
         print("\n📁 Filter and Export")
         print("-" * 20)
-        
+
         category = input("Filter by category (optional): ").strip() or None
         emotion = input("Filter by emotion (optional): ").strip() or None
-        
+
         filtered = self.list_prompts(category, emotion)
         print(f"\nFound {len(filtered)} matching prompts")
-        
+
         if not filtered:
             print("❌ No prompts match the criteria")
             return
-        
+
         # Preview first few
         for i, entry in enumerate(filtered[:3]):
             print(f"  {i+1}. {entry['expected_emotion']}: {entry['prompt'][:60]}...")
-        
+
         if len(filtered) > 3:
             print(f"  ... and {len(filtered) - 3} more")
-        
+
         export = input("\nExport these prompts? (y/n): ").strip().lower()
         if export == 'y':
             filename = input("Export filename: ").strip()
             if not filename:
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 filename = f"filtered_prompts_{timestamp}.jsonl"
-            
+
             self.export_filtered(filename, category, emotion)
             print(f"✅ Exported to {filename}")
 
@@ -572,15 +572,15 @@ def main():
     """Main function for interactive dataset building"""
     print("🎭 Emotional Dataset Builder")
     print("Building comprehensive emotional evaluation datasets...")
-    
+
     # Initialize builder
     builder = EmotionalDatasetBuilder()
-    
+
     # Show initial statistics
     stats = builder.get_statistics()
     print(f"\n📊 Loaded dataset with {stats['total_entries']} entries")
     print(f"   Covering {stats['emotions']['unique_count']} emotions across {stats['categories']['unique_count']} categories")
-    
+
     # Enter interactive mode
     builder.interactive_mode()
 

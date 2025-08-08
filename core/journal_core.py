@@ -14,4 +14,4 @@ def create_private_bloom(persona: str, text: str):
     journal = _get_journal(persona)
     journal.auto_bloom("bloom", text)
     last_entry = journal.entries[-1] if journal.entries else {}
-    return {"timestamp": last_entry.get("timestamp"), "entry": text} 
+    return {"timestamp": last_entry.get("timestamp"), "entry": text}

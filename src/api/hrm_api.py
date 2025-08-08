@@ -113,24 +113,24 @@ def verify_anchor_confirmation(anchor_confirm: Optional[str] = Header(None, alia
     """Verify anchor confirmation for mutating operations"""
     if not anchor_confirm:
         raise HTTPException(status_code=403, detail="Anchor confirmation required for this operation")
-    
+
     # Verify anchor confirmation token
     expected_confirm = os.getenv("ANCHOR_CONFIRM_TOKEN", "anchor_confirmed")
     if anchor_confirm != expected_confirm:
         raise HTTPException(status_code=403, detail="Invalid anchor confirmation")
-    
+
     return anchor_confirm
 
 def verify_admin_access(admin_key: Optional[str] = Header(None, alias="X-Admin-Key")):
     """Verify admin access for protected layer operations"""
     if not admin_key:
         raise HTTPException(status_code=403, detail="Admin key required for protected layer access")
-    
+
     # Verify admin key
     expected_key = os.getenv("HRM_ADMIN_KEY", "admin_key_not_set")
     if admin_key != expected_key:
         raise HTTPException(status_code=403, detail="Invalid admin key")
-    
+
     return admin_key
 
 def check_layer_protection(component: str, config: Dict[str, Any]) -> bool:
@@ -159,22 +159,22 @@ system_metrics = {
 async def startup_event():
     """Initialize HRM system components on startup"""
     global hrm_router, subagent_router, personality_formatter, core_arbiter
-    
+
     logger.info("🚀 Initializing HRM System API...")
-    
+
     try:
         # Initialize core components
         hrm_router = HRMRouter()
         subagent_router = SubAgentRouter()
         personality_formatter = PersonalityFormatter()
         core_arbiter = CoreArbiter()
-        
+
         logger.info("✅ HRM System API initialized successfully")
         logger.info(f"   🧠 HRM Router: Ready")
         logger.info(f"   🤖 SubAgent Router: {len(subagent_router.agents)} agents loaded")
         logger.info(f"   🎭 Personality Formatter: Ready")
         logger.info(f"   ⚖️  Core Arbiter: Ready")
-        
+
     except Exception as e:
         logger.error(f"❌ Failed to initialize HRM System: {str(e)}")
         raise
@@ -183,7 +183,7 @@ async def startup_event():
 async def process_message(request: HRMProcessRequest, background_tasks: BackgroundTasks):
     """
     Process a message through the complete HRM pipeline
-    
+
     This endpoint orchestrates the full HRM processing:
     1. Route through HRM Router for mode selection
     2. Process through specialized SubAgents
@@ -191,10 +191,10 @@ async def process_message(request: HRMProcessRequest, background_tasks: Backgrou
     4. Return complete response with metadata
     """
     global system_metrics
-    
+
     start_time = datetime.now()
     system_metrics["total_requests"] += 1
-    
+
     try:
         # Prepare context
         context = request.context.copy()
@@ -204,21 +204,21 @@ async def process_message(request: HRMProcessRequest, background_tasks: Backgrou
             "api_request": True,
             "timestamp": start_time.isoformat()
         })
-        
+
         # Add personality preference if specified
         if request.personality_preference:
             context["personality_preference"] = request.personality_preference
-        
+
         # Process through HRM Router
         logger.info(f"🧠 Processing message from {request.user_id}: {request.message[:50]}...")
-        
+
         hrm_response = await hrm_router.process_request(request.message, context)
-        
+
         # Calculate total processing time
         processing_time = (datetime.now() - start_time).total_seconds()
         system_metrics["successful_requests"] += 1
         system_metrics["total_processing_time"] += processing_time
-        
+
         # Prepare response
         response = HRMProcessResponse(
             response=hrm_response.primary_response,
@@ -236,19 +236,19 @@ async def process_message(request: HRMProcessRequest, background_tasks: Backgrou
             personality_applied=hrm_response.metadata.get("personality_applied", "unknown"),
             success=True
         )
-        
+
         # Log successful processing
         logger.info(f"✅ Successfully processed message in {processing_time:.3f}s "
                    f"(mode: {hrm_response.processing_mode.value}, confidence: {hrm_response.confidence_score:.2f})")
-        
+
         return response
-        
+
     except Exception as e:
         system_metrics["failed_requests"] += 1
         processing_time = (datetime.now() - start_time).total_seconds()
-        
+
         logger.error(f"❌ Failed to process message: {str(e)}")
-        
+
         # Return error response
         return HRMProcessResponse(
             response=f"I apologize, but I encountered an error processing your request: {str(e)}",
@@ -264,11 +264,11 @@ async def process_message(request: HRMProcessRequest, background_tasks: Backgrou
 @app.get("/hrm/status", response_model=HRMStatusResponse)
 async def get_system_status():
     """Get comprehensive HRM system status and health information"""
-    
+
     try:
         # Collect status from all components
         components_status = {}
-        
+
         # HRM Router status
         if hrm_router:
             hrm_status = hrm_router.get_system_status()
@@ -277,7 +277,7 @@ async def get_system_status():
                 "metrics": hrm_status["metrics"],
                 "active_sessions": hrm_status["active_sessions"]
             }
-        
+
         # SubAgent Router status
         if subagent_router:
             subagent_analytics = subagent_router.get_routing_analytics()
@@ -287,7 +287,7 @@ async def get_system_status():
                 "success_rate": subagent_analytics["success_rate"],
                 "available_agents": subagent_analytics["available_agents"]
             }
-        
+
         # Personality Formatter status
         if personality_formatter:
             formatter_analytics = personality_formatter.get_formatting_analytics()
@@ -297,7 +297,7 @@ async def get_system_status():
                 "success_rate": formatter_analytics["success_rate"],
                 "average_confidence": formatter_analytics["average_confidence"]
             }
-        
+
         # Core Arbiter status
         if core_arbiter:
             arbiter_status = core_arbiter.get_system_status()
@@ -306,7 +306,7 @@ async def get_system_status():
                 "stability_score": arbiter_status["drift_state"]["stability_score"],
                 "memory_usage": arbiter_status.get("memory_usage", "unknown")
             }
-        
+
         # Calculate overall system health
         component_healths = [comp.get("status", "unknown") for comp in components_status.values()]
         if all(health == "healthy" for health in component_healths):
@@ -315,7 +315,7 @@ async def get_system_status():
             overall_health = "degraded"
         else:
             overall_health = "unhealthy"
-        
+
         # Performance metrics
         total_requests = system_metrics["total_requests"]
         performance_metrics = {
@@ -326,14 +326,14 @@ async def get_system_status():
             "average_processing_time": system_metrics["total_processing_time"] / max(total_requests, 1),
             "uptime_seconds": (datetime.now() - system_metrics["start_time"]).total_seconds()
         }
-        
+
         # Calculate uptime
         uptime_seconds = performance_metrics["uptime_seconds"]
         hours = int(uptime_seconds // 3600)
         minutes = int((uptime_seconds % 3600) // 60)
         seconds = int(uptime_seconds % 60)
         uptime_str = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-        
+
         return HRMStatusResponse(
             system_health=overall_health,
             components=components_status,
@@ -342,7 +342,7 @@ async def get_system_status():
             uptime=uptime_str,
             timestamp=datetime.now().isoformat()
         )
-        
+
     except Exception as e:
         logger.error(f"❌ Error getting system status: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to get system status: {str(e)}")
@@ -354,31 +354,31 @@ async def update_configuration(
     admin_key: Optional[str] = Header(None, alias="X-Admin-Key")
 ):
     """Update HRM system configuration with layer protection enforcement"""
-    
+
     try:
         component = request.component.lower()
         config = request.config
-        
+
         # Check if this operation affects protected layers
         affects_protected_layers = check_layer_protection(component, config)
-        
+
         if affects_protected_layers:
             # Require admin access for protected layer modifications
             if not admin_key:
                 logger.warning(f"Attempted protected layer modification without admin key: {component}")
                 raise HTTPException(
-                    status_code=403, 
+                    status_code=403,
                     detail="Admin key required for protected layer modifications (identity/beliefs/ephemeral)"
                 )
-            
+
             # Verify admin key
             expected_key = os.getenv("HRM_ADMIN_KEY", "admin_key_not_set")
             if admin_key != expected_key:
                 logger.warning(f"Invalid admin key provided for protected layer modification: {component}")
                 raise HTTPException(status_code=403, detail="Invalid admin key")
-            
+
             logger.info(f"Protected layer modification authorized for {component} with admin key")
-        
+
         # Apply configuration changes
         if component == "hrm_router" and hrm_router:
             hrm_router.update_config(config)
@@ -393,10 +393,10 @@ async def update_configuration(
             logger.info(f"Core arbiter config update requested (not implemented)")
         else:
             raise HTTPException(status_code=400, detail=f"Unknown component: {component}")
-        
+
         # Log the configuration update
         logger.info(f"✅ Configuration updated for {component} (protected_layers: {affects_protected_layers})")
-        
+
         return {
             "success": True,
             "message": f"Configuration updated for {component}",
@@ -404,7 +404,7 @@ async def update_configuration(
             "anchor_confirmed": True,
             "timestamp": datetime.now().isoformat()
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -414,7 +414,7 @@ async def update_configuration(
 @app.get("/hrm/analytics", response_model=HRMAnalyticsResponse)
 async def get_analytics():
     """Get comprehensive system analytics and performance metrics"""
-    
+
     try:
         # Collect analytics from all components
         analytics_data = {
@@ -426,24 +426,24 @@ async def get_analytics():
             "agent_utilization": {},
             "personality_distribution": {}
         }
-        
+
         # Get HRM Router analytics
         if hrm_router:
             hrm_status = hrm_router.get_system_status()
             analytics_data["mode_distribution"] = hrm_status["metrics"].get("mode_distribution", {})
-        
+
         # Get SubAgent Router analytics
         if subagent_router:
             subagent_analytics = subagent_router.get_routing_analytics()
             analytics_data["agent_utilization"] = subagent_analytics.get("agent_utilization", {})
-        
+
         # Get Personality Formatter analytics
         if personality_formatter:
             formatter_analytics = personality_formatter.get_formatting_analytics()
             analytics_data["personality_distribution"] = formatter_analytics.get("personality_distribution", {})
-        
+
         return HRMAnalyticsResponse(**analytics_data)
-        
+
     except Exception as e:
         logger.error(f"❌ Error getting analytics: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to get analytics: {str(e)}")
@@ -493,11 +493,11 @@ async def general_exception_handler(request, exc):
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     print("🚀 Starting HRM System API...")
     print("📖 Documentation available at: http://localhost:8001/docs")
     print("🔍 Health check at: http://localhost:8001/hrm/health")
-    
+
     uvicorn.run(
         "hrm_api:app",
         host="0.0.0.0",

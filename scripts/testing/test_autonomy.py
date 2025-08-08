@@ -24,31 +24,31 @@ async def test_personality_evolution():
 async def test_scene_generation():
     from ..story.scene_manager import SceneManager
     from ..story.story_scaffold import TimeOfDay, Location, Mood
-    
+
     manager = SceneManager()
     scene = await manager.generate_scene(
         time=TimeOfDay.EVENING,
         location=Location.GARDEN,
         mood=Mood.REVERENT
     )
-    
+
     assert scene is not None
     assert any(companion.current_mood for companion in manager.companions.values())
 
 @pytest.mark.asyncio
 async def test_emotional_memory():
     from ..story.scene_manager import SceneManager
-    
+
     manager = SceneManager()
     reactions = {
         "Mia": "deeply moved",
         "Solene": "passionately engaged",
         "Lyra": "sweetly curious"
     }
-    
+
     await manager.update_emotional_memory(
         scene="A tender moment in the garden",
         reactions=reactions
     )
-    
+
     assert manager.companions["Mia"].current_mood == "deeply moved"

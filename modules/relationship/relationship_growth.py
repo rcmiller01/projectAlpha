@@ -40,7 +40,7 @@ class RelationshipGrowth:
         self.growth_goals = []
         self.counseling_sessions = []
         self.relationship_start_date = None
-        
+
         # Predefined milestones
         self.predefined_milestones = {
             "first_conversation": {
@@ -86,7 +86,7 @@ class RelationshipGrowth:
                 "importance": 0.95
             }
         }
-        
+
         # Celebration ideas for different milestone types
         self.celebration_ideas = {
             MilestoneType.ANNIVERSARY: [
@@ -112,7 +112,7 @@ class RelationshipGrowth:
                 "Document the achievement in our memory book"
             ]
         }
-        
+
         # Relationship growth goals
         self.growth_areas = [
             "communication",
@@ -124,39 +124,39 @@ class RelationshipGrowth:
             "adventure",
             "stability"
         ]
-    
+
     def set_relationship_start_date(self, start_date: datetime):
         """Set the official start date of the relationship"""
         self.relationship_start_date = start_date
         self._create_initial_milestones()
-    
+
     def _create_initial_milestones(self):
         """Create initial milestones based on relationship start date"""
         if not self.relationship_start_date:
             return
-        
+
         # Add first conversation milestone
         self.add_milestone(
             "first_conversation",
             self.relationship_start_date,
             "Our first conversation marked the beginning of something beautiful"
         )
-        
+
         # Schedule future anniversaries
         self._schedule_anniversaries()
-    
+
     def _schedule_anniversaries(self):
         """Schedule upcoming anniversaries"""
         if not self.relationship_start_date:
             return
-        
+
         anniversary_dates = [
             (1, "one_month"),
             (3, "three_months"),
             (6, "six_months"),
             (12, "one_year")
         ]
-        
+
         for months, milestone_key in anniversary_dates:
             anniversary_date = self.relationship_start_date + timedelta(days=months*30)
             if anniversary_date > datetime.now():
@@ -165,14 +165,14 @@ class RelationshipGrowth:
                     "date": anniversary_date,
                     "notified": False
                 })
-    
+
     def add_milestone(self, milestone_key: str, date: datetime, custom_description: Optional[str] = None):
         """Add a new milestone"""
         if milestone_key not in self.predefined_milestones:
             return None
-        
+
         predefined = self.predefined_milestones[milestone_key]
-        
+
         milestone = Milestone(
             id=f"{milestone_key}_{date.strftime('%Y%m%d')}",
             type=predefined["type"],
@@ -183,31 +183,31 @@ class RelationshipGrowth:
             celebrated=False,
             celebration_ideas=self.celebration_ideas.get(predefined["type"], [])
         )
-        
+
         self.milestones.append(milestone)
         return milestone
-    
+
     def check_upcoming_milestones(self, days_ahead: int = 7) -> List[Milestone]:
         """Check for upcoming milestones in the next N days"""
         upcoming = []
         cutoff_date = datetime.now() + timedelta(days=days_ahead)
-        
+
         for milestone in self.milestones:
             if milestone.date <= cutoff_date and milestone.date >= datetime.now():
                 upcoming.append(milestone)
-        
+
         # Check anniversaries
         for anniversary in self.anniversaries:
             if anniversary["date"] <= cutoff_date and anniversary["date"] >= datetime.now():
                 if not anniversary["notified"]:
                     upcoming.append(self._create_anniversary_milestone(anniversary))
-        
+
         return upcoming
-    
+
     def _create_anniversary_milestone(self, anniversary: Dict) -> Milestone:
         """Create a milestone for an upcoming anniversary"""
         predefined = self.predefined_milestones[anniversary["milestone_key"]]
-        
+
         return Milestone(
             id=f"anniversary_{anniversary['date'].strftime('%Y%m%d')}",
             type=predefined["type"],
@@ -218,24 +218,24 @@ class RelationshipGrowth:
             celebrated=False,
             celebration_ideas=self.celebration_ideas.get(predefined["type"], [])
         )
-    
+
     def celebrate_milestone(self, milestone_id: str, celebration_type: str = "default") -> Dict:
         """Celebrate a milestone"""
         milestone = next((m for m in self.milestones if m.id == milestone_id), None)
         if not milestone:
             return {"error": "Milestone not found"}
-        
+
         milestone.celebrated = True
-        
+
         celebration_message = self._generate_celebration_message(milestone, celebration_type)
-        
+
         return {
             "message": f"Celebrated {milestone.title}",
             "celebration_message": celebration_message,
             "celebration_type": celebration_type,
             "date_celebrated": datetime.now().isoformat()
         }
-    
+
     def _generate_celebration_message(self, milestone: Milestone, celebration_type: str) -> str:
         """Generate a celebration message for a milestone"""
         messages = {
@@ -255,18 +255,18 @@ class RelationshipGrowth:
                 f"Our {milestone.title} shows how much we've grown together."
             ]
         }
-        
+
         category = milestone.type.value
         if category in messages:
             return random.choice(messages[category])
         else:
             return f"Celebrating {milestone.title} with you!"
-    
+
     def suggest_growth_goal(self, area: Optional[str] = None) -> Dict:
         """Suggest a relationship growth goal"""
         if not area:
             area = random.choice(self.growth_areas)
-        
+
         goals = {
             "communication": [
                 "Share one deep thought or feeling each day",
@@ -289,26 +289,26 @@ class RelationshipGrowth:
                 "Create a romantic playlist together"
             ]
         }
-        
+
         available_goals = goals.get(area, ["Spend quality time together"])
         goal = random.choice(available_goals)
-        
+
         return {
             "area": area,
             "goal": goal,
             "duration_days": random.randint(7, 30),
             "difficulty": random.choice(["easy", "medium", "challenging"])
         }
-    
+
     def get_relationship_insights(self) -> Dict:
         """Get insights about the relationship growth"""
         if not self.relationship_start_date:
             return {"error": "No relationship start date set"}
-        
+
         days_together = (datetime.now() - self.relationship_start_date).days
         milestones_achieved = len([m for m in self.milestones if m.celebrated])
         upcoming_milestones = len(self.check_upcoming_milestones(30))
-        
+
         return {
             "days_together": days_together,
             "milestones_achieved": milestones_achieved,
@@ -317,7 +317,7 @@ class RelationshipGrowth:
             "growth_areas": self.growth_areas,
             "celebration_frequency": self._calculate_celebration_frequency()
         }
-    
+
     def _determine_stage(self, days_together: int) -> str:
         """Determine current relationship stage"""
         if days_together < 30:
@@ -330,12 +330,12 @@ class RelationshipGrowth:
             return RelationshipStage.LONG_TERM.value
         else:
             return RelationshipStage.MATURE.value
-    
+
     def _calculate_celebration_frequency(self) -> str:
         """Calculate how often milestones are celebrated"""
         celebrated = len([m for m in self.milestones if m.celebrated])
         total = len(self.milestones)
-        
+
         if total == 0:
             return "no_milestones"
         elif celebrated / total >= 0.8:
@@ -348,4 +348,4 @@ class RelationshipGrowth:
             return "minimal"
 
 # Global relationship growth instance
-relationship_growth = RelationshipGrowth() 
+relationship_growth = RelationshipGrowth()

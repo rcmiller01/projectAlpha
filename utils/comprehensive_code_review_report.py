@@ -17,12 +17,12 @@ def test_module_imports():
     """Test importing key modules"""
     modules = {
         'core_arbiter.py': 'CoreArbiter',
-        'emotion_loop_core.py': 'EmotionLoopManager', 
+        'emotion_loop_core.py': 'EmotionLoopManager',
         'dolphin_backend.py': 'app',
         'autopilot_bootloader.py': 'AutopilotBootloader',
         'api_bridge.py': 'app'
     }
-    
+
     results = {}
     for file_path, expected_class in modules.items():
         try:
@@ -32,7 +32,7 @@ def test_module_imports():
                 )
                 mod = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(mod)
-                
+
                 # Check if expected class/object exists
                 if hasattr(mod, expected_class):
                     results[file_path] = {
@@ -41,7 +41,7 @@ def test_module_imports():
                     }
                 else:
                     results[file_path] = {
-                        'status': 'WARNING', 
+                        'status': 'WARNING',
                         'message': f'Module imported but {expected_class} not found'
                     }
             else:
@@ -54,7 +54,7 @@ def test_module_imports():
                 'status': 'ERROR',
                 'message': str(e)[:100]
             }
-    
+
     return results
 
 def check_dependencies():
@@ -63,7 +63,7 @@ def check_dependencies():
         'fastapi', 'uvicorn', 'requests', 'pydantic', 'torch',
         'numpy', 'pandas', 'scikit-learn', 'flask', 'flask-cors'
     ]
-    
+
     results = {}
     for package in required_packages:
         try:
@@ -71,7 +71,7 @@ def check_dependencies():
             results[package] = {'status': 'INSTALLED', 'message': 'Available'}
         except ImportError:
             results[package] = {'status': 'MISSING', 'message': 'Not installed'}
-    
+
     return results
 
 def analyze_file_structure():
@@ -80,11 +80,11 @@ def analyze_file_structure():
         'README.md', 'requirements.txt', 'package.json',
         'core_arbiter.py', 'emotion_loop_core.py', 'dolphin_backend.py'
     ]
-    
+
     important_dirs = [
         'modules/', 'backend/', 'data/', 'config/', 'scripts/'
     ]
-    
+
     file_results = {}
     for file in important_files:
         if os.path.exists(file):
@@ -97,14 +97,14 @@ def analyze_file_structure():
         else:
             file_results[file] = {
                 'status': 'MISSING',
-                'size': '0 bytes', 
+                'size': '0 bytes',
                 'message': 'Not found'
             }
-    
+
     dir_results = {}
     for directory in important_dirs:
         if os.path.exists(directory):
-            file_count = len([f for f in os.listdir(directory) 
+            file_count = len([f for f in os.listdir(directory)
                             if os.path.isfile(os.path.join(directory, f))])
             dir_results[directory] = {
                 'status': 'EXISTS',
@@ -117,7 +117,7 @@ def analyze_file_structure():
                 'files': 0,
                 'message': 'Directory not found'
             }
-    
+
     return file_results, dir_results
 
 def check_configuration_files():
@@ -128,7 +128,7 @@ def check_configuration_files():
         'drift_config.json',
         'emotional_prompts.json'
     ]
-    
+
     results = {}
     for config_file in config_files:
         try:
@@ -158,7 +158,7 @@ def check_configuration_files():
                 'keys': 0,
                 'message': str(e)[:50]
             }
-    
+
     return results
 
 def generate_report():
@@ -179,11 +179,11 @@ def generate_report():
     import_results = test_module_imports()
     success_count = sum(1 for r in import_results.values() if r['status'] == 'SUCCESS')
     total_count = len(import_results)
-    
+
     for module, result in import_results.items():
         status_icon = "✅" if result['status'] == 'SUCCESS' else "⚠️" if result['status'] == 'WARNING' else "❌"
         print(f"{status_icon} {module:<25} | {result['message']}")
-    
+
     print(f"\n📊 Import Success Rate: {success_count}/{total_count} ({success_count/total_count*100:.1f}%)")
 
     # Check dependencies
@@ -192,30 +192,30 @@ def generate_report():
     dep_results = check_dependencies()
     installed_count = sum(1 for r in dep_results.values() if r['status'] == 'INSTALLED')
     total_deps = len(dep_results)
-    
+
     for package, result in dep_results.items():
         status_icon = "✅" if result['status'] == 'INSTALLED' else "❌"
         print(f"{status_icon} {package:<20} | {result['message']}")
-    
+
     print(f"\n📊 Dependencies: {installed_count}/{total_deps} ({installed_count/total_deps*100:.1f}%)")
 
     # File structure analysis
     print(f"\n📁 FILE STRUCTURE ANALYSIS")
     print("-" * 40)
     file_results, dir_results = analyze_file_structure()
-    
+
     print("📄 Important Files:")
     file_exist_count = sum(1 for r in file_results.values() if r['status'] == 'EXISTS')
     for file, result in file_results.items():
         status_icon = "✅" if result['status'] == 'EXISTS' else "❌"
         print(f"  {status_icon} {file:<25} | {result['size']:<15} | {result['message']}")
-    
+
     print(f"\n📂 Important Directories:")
     dir_exist_count = sum(1 for r in dir_results.values() if r['status'] == 'EXISTS')
     for directory, result in dir_results.items():
         status_icon = "✅" if result['status'] == 'EXISTS' else "❌"
         print(f"  {status_icon} {directory:<25} | {result['files']:<5} files | {result['message']}")
-    
+
     print(f"\n📊 File Structure: Files {file_exist_count}/{len(file_results)}, Dirs {dir_exist_count}/{len(dir_results)}")
 
     # Configuration analysis
@@ -223,31 +223,31 @@ def generate_report():
     print("-" * 40)
     config_results = check_configuration_files()
     valid_configs = sum(1 for r in config_results.values() if r['status'] == 'VALID')
-    
+
     for config, result in config_results.items():
         status_icon = "✅" if result['status'] == 'VALID' else "⚠️" if result['status'] == 'MISSING' else "❌"
         keys_info = f"({result['keys']} keys)" if result['keys'] else ""
         print(f"  {status_icon} {config:<30} | {result['message']} {keys_info}")
-    
+
     print(f"\n📊 Configuration: {valid_configs}/{len(config_results)} ({valid_configs/len(config_results)*100:.1f}%)")
 
     # Overall assessment
     print(f"\n{'='*80}")
     print("🎯 OVERALL SYSTEM ASSESSMENT")
     print("="*80)
-    
+
     overall_health = (
         (success_count / total_count * 0.3) +
-        (installed_count / total_deps * 0.3) + 
+        (installed_count / total_deps * 0.3) +
         (file_exist_count / len(file_results) * 0.2) +
         (dir_exist_count / len(dir_results) * 0.1) +
         (valid_configs / len(config_results) * 0.1)
     ) * 100
-    
+
     health_status = "🟢 EXCELLENT" if overall_health >= 90 else "🟡 GOOD" if overall_health >= 75 else "🟠 FAIR" if overall_health >= 60 else "🔴 NEEDS WORK"
-    
+
     print(f"Overall Health Score: {overall_health:.1f}% - {health_status}")
-    
+
     print(f"\n🎉 RECOMMENDATIONS:")
     if success_count < total_count:
         print("   • Fix module import issues for better system stability")
@@ -258,7 +258,7 @@ def generate_report():
     if overall_health >= 75:
         print("   • System is in good condition and ready for use")
         print("   • Consider running integration tests for final verification")
-    
+
     print(f"\n{'='*80}")
     print("Report generated successfully! 🎊")
     print("="*80)

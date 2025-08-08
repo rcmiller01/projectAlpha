@@ -55,10 +55,10 @@ class ToolResponse:
 class ToolRequestRouter:
     """
     Thread-safe tool request router for autonomous AI agent systems.
-    
+
     This class provides a modular system for registering and routing tool requests
     where AI agents can dynamically discover and execute tools based on string intents.
-    
+
     Features:
     - Thread-safe tool registration and execution
     - Automatic request/response logging
@@ -66,11 +66,11 @@ class ToolRequestRouter:
     - Tool discovery and introspection
     - Stateless design for scalability
     """
-    
+
     def __init__(self, log_file: Optional[str] = None, enable_logging: bool = True):
         """
         Initialize the tool request router.
-        
+
         Args:
             log_file: Path to log file for tool requests. If None, uses default location.
             enable_logging: Whether to enable request/response logging
@@ -81,38 +81,38 @@ class ToolRequestRouter:
         self.log_file = log_file or "logs/tool_requests.jsonl"
         self.enable_logging = enable_logging
         self._ensure_log_directory()
-        
+
         logger.info("ToolRequestRouter initialized")
-    
+
     def _ensure_log_directory(self):
         """Ensure the log directory exists"""
         if self.enable_logging:
             Path(self.log_file).parent.mkdir(parents=True, exist_ok=True)
-    
+
     def _log_request(self, request: ToolRequest, response: ToolResponse):
         """Log tool request and response to file"""
         if not self.enable_logging:
             return
-        
+
         try:
             log_entry = {
                 'request': asdict(request),
                 'response': asdict(response),
                 'logged_at': datetime.now().isoformat()
             }
-            
+
             with open(self.log_file, 'a', encoding='utf-8') as f:
                 f.write(json.dumps(log_entry) + '\n')
-                
+
         except Exception as e:
             logger.error(f"Error logging tool request: {e}")
-    
+
     def _extract_tool_metadata(self, handler: Callable) -> Dict[str, Any]:
         """Extract metadata from tool function"""
         try:
             sig = inspect.signature(handler)
             doc = inspect.getdoc(handler) or "No description available"
-            
+
             parameters = {}
             for param_name, param in sig.parameters.items():
                 param_info = {
@@ -121,7 +121,7 @@ class ToolRequestRouter:
                     'default': str(param.default) if param.default != inspect.Parameter.empty else None
                 }
                 parameters[param_name] = param_info
-            
+
             return {
                 'description': doc,
                 'parameters': parameters,
@@ -138,49 +138,49 @@ class ToolRequestRouter:
                 'module': 'unknown',
                 'registered_at': datetime.now().isoformat()
             }
-    
-    def register_tool(self, name: str, handler: Callable, 
+
+    def register_tool(self, name: str, handler: Callable,
                      description: Optional[str] = None) -> bool:
         """
         Register a tool function with the router.
-        
+
         Args:
             name: Unique name for the tool
             handler: Callable function that implements the tool
             description: Optional description override
-            
+
         Returns:
             bool: Success status
         """
         if not callable(handler):
             logger.error(f"Handler for tool '{name}' is not callable")
             return False
-        
+
         with self._lock:
             try:
                 # Extract metadata
                 metadata = self._extract_tool_metadata(handler)
                 if description:
                     metadata['description'] = description
-                
+
                 # Register tool
                 self._tools[name] = handler
                 self._tool_metadata[name] = metadata
-                
+
                 logger.info(f"Tool '{name}' registered successfully")
                 return True
-                
+
             except Exception as e:
                 logger.error(f"Error registering tool '{name}': {e}")
                 return False
-    
+
     def unregister_tool(self, name: str) -> bool:
         """
         Unregister a tool from the router.
-        
+
         Args:
             name: Name of the tool to unregister
-            
+
         Returns:
             bool: Success status
         """
@@ -193,24 +193,24 @@ class ToolRequestRouter:
             else:
                 logger.warning(f"Tool '{name}' not found for unregistration")
                 return False
-    
+
     def route_request(self, intent: str, parameters: Optional[Dict[str, Any]] = None,
                      source: str = "unknown") -> ToolResponse:
         """
         Route a tool request based on intent string.
-        
+
         Args:
             intent: String identifying the tool to execute
             parameters: Dictionary of parameters to pass to the tool
             source: Source identifier for the request
-            
+
         Returns:
             ToolResponse: Structured response with result or error
         """
         request_id = str(uuid.uuid4())
         trace_id = str(uuid.uuid4())
         start_time = datetime.now()
-        
+
         # Create request object
         request = ToolRequest(
             request_id=request_id,
@@ -220,7 +220,7 @@ class ToolRequestRouter:
             timestamp=start_time.isoformat(),
             source=source
         )
-        
+
         # Default response for errors
         def create_error_response(error_msg: str) -> ToolResponse:
             return ToolResponse(
@@ -233,7 +233,7 @@ class ToolRequestRouter:
                 timestamp=datetime.now().isoformat(),
                 trace_id=trace_id
             )
-        
+
         # Check if tool exists
         with self._lock:
             if intent not in self._tools:
@@ -242,13 +242,13 @@ class ToolRequestRouter:
                 response = create_error_response(error_msg)
                 self._log_request(request, response)
                 return response
-            
+
             tool_handler = self._tools[intent]
-        
+
         # Execute tool
         try:
             logger.info(f"Executing tool '{intent}' with request_id: {request_id}")
-            
+
             # Add trace_id to parameters if tool supports it
             exec_params = parameters.copy() if parameters else {}
             sig = inspect.signature(tool_handler)
@@ -256,13 +256,13 @@ class ToolRequestRouter:
                 exec_params['trace_id'] = trace_id
             if 'request_id' in sig.parameters:
                 exec_params['request_id'] = request_id
-            
+
             # Execute the tool
             result = tool_handler(**exec_params)
-            
+
             # Calculate execution time
             execution_time = (datetime.now() - start_time).total_seconds() * 1000
-            
+
             # Create success response
             response = ToolResponse(
                 request_id=request_id,
@@ -274,14 +274,14 @@ class ToolRequestRouter:
                 timestamp=datetime.now().isoformat(),
                 trace_id=trace_id
             )
-            
+
             logger.info(f"Tool '{intent}' executed successfully in {execution_time:.2f}ms")
-            
+
         except Exception as e:
             execution_time = (datetime.now() - start_time).total_seconds() * 1000
             error_msg = f"Error executing tool '{intent}': {str(e)}"
             logger.error(error_msg)
-            
+
             response = ToolResponse(
                 request_id=request_id,
                 tool_name=intent,
@@ -292,39 +292,39 @@ class ToolRequestRouter:
                 timestamp=datetime.now().isoformat(),
                 trace_id=trace_id
             )
-        
+
         # Log the request/response
         self._log_request(request, response)
         return response
-    
+
     def list_tools(self) -> Dict[str, Dict[str, Any]]:
         """
         Get list of all registered tools with their metadata.
-        
+
         Returns:
             Dict mapping tool names to their metadata
         """
         with self._lock:
             return self._tool_metadata.copy()
-    
+
     def get_tool_info(self, name: str) -> Optional[Dict[str, Any]]:
         """
         Get detailed information about a specific tool.
-        
+
         Args:
             name: Tool name
-            
+
         Returns:
             Tool metadata dict or None if not found
         """
         with self._lock:
             return self._tool_metadata.get(name)
-    
+
     def tool_exists(self, name: str) -> bool:
         """Check if a tool is registered"""
         with self._lock:
             return name in self._tools
-    
+
     def get_stats(self) -> Dict[str, Any]:
         """Get router statistics"""
         with self._lock:
@@ -365,11 +365,11 @@ def requires_params(*param_names: str):
 def example_web_search_tool(query: str, max_results: int = 5, **kwargs) -> dict:
     """
     Example web search tool implementation.
-    
+
     Args:
         query: Search query string
         max_results: Maximum number of results to return
-        
+
     Returns:
         dict: Search results with metadata
     """
@@ -390,10 +390,10 @@ def example_web_search_tool(query: str, max_results: int = 5, **kwargs) -> dict:
 def example_calculator_tool(expression: str, **kwargs) -> dict:
     """
     Example calculator tool implementation.
-    
+
     Args:
         expression: Mathematical expression to evaluate
-        
+
     Returns:
         dict: Calculation result with metadata
     """
@@ -420,11 +420,11 @@ def example_calculator_tool(expression: str, **kwargs) -> dict:
 def example_memory_query_tool(concept: str, depth: int = 2, **kwargs) -> dict:
     """
     Example memory query tool that interfaces with GraphRAG.
-    
+
     Args:
         concept: Concept to query
         depth: Query depth
-        
+
     Returns:
         dict: Memory query results
     """
@@ -442,41 +442,41 @@ def example_memory_query_tool(concept: str, depth: int = 2, **kwargs) -> dict:
 
 def example_usage():
     """Example usage of the Tool Request Router"""
-    
+
     # Initialize router
     router = ToolRequestRouter("logs/example_tool_requests.jsonl")
-    
+
     # Register example tools
     print("Registering example tools...")
     router.register_tool("search_web", example_web_search_tool)
     router.register_tool("calculate", example_calculator_tool)
     router.register_tool("memory_query", example_memory_query_tool)
-    
+
     # List available tools
     print(f"\nAvailable tools: {list(router.list_tools().keys())}")
-    
+
     # Example tool requests
     print("\nExecuting example tool requests:")
-    
+
     # Web search
-    response1 = router.route_request("search_web", 
+    response1 = router.route_request("search_web",
                                    {"query": "AI memory systems", "max_results": 3})
     print(f"Web search: {response1.success}, Result: {response1.result}")
-    
+
     # Calculator
-    response2 = router.route_request("calculate", 
+    response2 = router.route_request("calculate",
                                    {"expression": "2 + 2 * 3"})
     print(f"Calculator: {response2.success}, Result: {response2.result}")
-    
+
     # Memory query
-    response3 = router.route_request("memory_query", 
+    response3 = router.route_request("memory_query",
                                    {"concept": "user_preferences", "depth": 2})
     print(f"Memory query: {response3.success}, Result: {response3.result}")
-    
+
     # Error case
     response4 = router.route_request("nonexistent_tool", {})
     print(f"Error case: {response4.success}, Error: {response4.error_message}")
-    
+
     # Show router stats
     print(f"\nRouter stats: {router.get_stats()}")
 

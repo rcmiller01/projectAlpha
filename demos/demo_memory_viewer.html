@@ -9,7 +9,7 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- TailwindCSS Configuration -->
     <script>
         tailwind.config = {
@@ -44,7 +44,7 @@
             }
         }
     </script>
-    
+
     <style>
         /* Custom scrollbar styles */
         .custom-scrollbar::-webkit-scrollbar {
@@ -61,12 +61,12 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: rgba(156, 163, 175, 0.7);
         }
-        
+
         /* Ambient effects */
         .ambient-glow {
             animation: glow 4s ease-in-out infinite alternate;
         }
-        
+
         body {
             margin: 0;
             padding: 0;
@@ -91,7 +91,7 @@
             const [isLoading, setIsLoading] = useState(true);
             const [ambientMood, setAmbientMood] = useState('contemplative');
             const [connectionStatus, setConnectionStatus] = useState('disconnected');
-            
+
             // Refs for smooth scrolling
             const timelineRef = useRef(null);
             const symbolGridRef = useRef(null);
@@ -166,7 +166,7 @@
                     const response = await axios.get(`${apiUrl}/api/memory/emotional_trace`);
                     const trace = response.data.trace || [];
                     setEmotionalTrace(trace);
-                    
+
                     // Update ambient mood based on most recent entry
                     if (trace.length > 0) {
                         setAmbientMood(trace[0].dominant_mood);
@@ -298,7 +298,7 @@
                 const now = new Date();
                 const time = new Date(timestamp);
                 const diffInHours = Math.floor((now - time) / (1000 * 60 * 60));
-                
+
                 if (diffInHours < 1) return 'moments ago';
                 if (diffInHours < 24) return `${diffInHours}h ago`;
                 return `${Math.floor(diffInHours / 24)}d ago`;
@@ -338,7 +338,7 @@
                     key: 'glow',
                     className: `fixed inset-0 pointer-events-none opacity-30 ${currentMoodColors.glow} blur-3xl`
                 }),
-                
+
                 // Main content
                 React.createElement('div', {
                     key: 'content',
@@ -386,15 +386,15 @@
                         key: tab.id,
                         onClick: () => setActiveTab(tab.id),
                         className: `px-6 py-3 rounded-full flex items-center space-x-2 transition-all duration-300 ${
-                            activeTab === tab.id 
-                                ? 'bg-white/20 text-white shadow-lg' 
+                            activeTab === tab.id
+                                ? 'bg-white/20 text-white shadow-lg'
                                 : 'text-gray-400 hover:text-white hover:bg-white/10'
                         }`
                     }, [
                         React.createElement('span', { key: 'icon' }, tab.icon),
-                        React.createElement('span', { 
+                        React.createElement('span', {
                             key: 'label',
-                            className: "hidden sm:inline" 
+                            className: "hidden sm:inline"
                         }, tab.label)
                     ])))),
 
@@ -411,7 +411,7 @@
                         React.createElement('h2', {
                             key: 'title',
                             className: "text-2xl text-white mb-2"
-                        }, activeTab === 'timeline' ? 'Emotional Memory Timeline' : 
+                        }, activeTab === 'timeline' ? 'Emotional Memory Timeline' :
                            activeTab === 'symbols' ? 'Symbolic Echo Map' : 'Core Essence Profile'),
                         React.createElement('p', {
                             key: 'desc'

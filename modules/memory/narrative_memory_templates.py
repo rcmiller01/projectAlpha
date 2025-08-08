@@ -19,7 +19,7 @@ class NarrativeMemoryTemplateManager:
             "intimate": [
                 "I remember how you felt about {event} and the {symbol}.",
                 "Your voice softened when talking about {symbol} during {event}.",
-                "The way you described {event} around the {symbol} stayed with me." 
+                "The way you described {event} around the {symbol} stayed with me."
             ]
         }
 

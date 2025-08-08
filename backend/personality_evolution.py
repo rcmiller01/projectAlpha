@@ -56,7 +56,7 @@ class PersonalityTrait:
     last_modified: str
     modification_count: int = 0
     evolution_history: List[Dict[str, Any]] = None
-    
+
     def __post_init__(self):
         if self.evolution_history is None:
             self.evolution_history = []
@@ -83,16 +83,16 @@ def validate_personality_session(session_token: str) -> bool:
     """Validate personality session token"""
     if not session_token or len(session_token) != PERSONALITY_SESSION_LENGTH:
         return False
-    
+
     if session_token not in personality_sessions:
         return False
-    
+
     # Check if session has expired
     session_data = personality_sessions[session_token]
     if datetime.now() > session_data['expires_at']:
         del personality_sessions[session_token]
         return False
-    
+
     # Update last access time
     session_data['last_access'] = datetime.now()
     return True
@@ -100,17 +100,17 @@ def validate_personality_session(session_token: str) -> bool:
 def check_personality_rate_limit(session_token: str) -> bool:
     """Check if personality operation rate limit is exceeded"""
     current_time = time.time()
-    
+
     # Clean old requests
-    while (personality_requests[session_token] and 
+    while (personality_requests[session_token] and
            personality_requests[session_token][0] < current_time - 3600):  # 1 hour window
         personality_requests[session_token].popleft()
-    
+
     # Check limit
     if len(personality_requests[session_token]) >= PERSONALITY_RATE_LIMIT:
         logger.warning(f"Personality rate limit exceeded for session: {session_token[:8]}...")
         return False
-    
+
     # Add current request
     personality_requests[session_token].append(current_time)
     return True
@@ -121,23 +121,23 @@ def validate_personality_trait(name: str, value: float) -> Tuple[bool, str]:
         # Validate name
         if not isinstance(name, str):
             return False, "Trait name must be a string"
-        
+
         if len(name) > MAX_TRAIT_NAME_LENGTH:
             return False, f"Trait name too long (max {MAX_TRAIT_NAME_LENGTH} characters)"
-        
+
         # Check for dangerous characters
         if re.search(r'[<>"\']', name):
             return False, "Trait name contains invalid characters"
-        
+
         # Validate value
         if not isinstance(value, (int, float)):
             return False, "Trait value must be a number"
-        
+
         if not (MIN_TRAIT_VALUE <= value <= MAX_TRAIT_VALUE):
             return False, f"Trait value must be between {MIN_TRAIT_VALUE} and {MAX_TRAIT_VALUE}"
-        
+
         return True, "Valid"
-    
+
     except Exception as e:
         logger.error(f"Error validating personality trait: {str(e)}")
         return False, f"Validation error: {str(e)}"
@@ -162,21 +162,21 @@ def log_personality_activity(activity_type: str, session_token: str, details: Di
             'status': status,
             'thread_id': threading.get_ident()
         }
-        
+
         personality_access_history.append(log_entry)
-        
+
         logger.info(f"Personality access logged: {activity_type} ({status})")
-        
+
         if status != "success":
             logger.warning(f"Personality access issue: {activity_type} failed with {status}")
-        
+
     except Exception as e:
         logger.error(f"Error logging personality access: {str(e)}")
 
 class PersonalityEvolution:
     """
     Secure personality evolution system for AI agents.
-    
+
     Features:
     - Trait-based personality modeling with validation
     - Evolution tracking and history
@@ -192,17 +192,17 @@ class PersonalityEvolution:
         self.profile_id = profile_id or f"profile_{hashlib.md5(f'{self.session_token}{time.time()}'.encode()).hexdigest()[:16]}"
         self.creation_time = datetime.now()
         self.evolution_count = 0
-        
+
         # Initialize default personality traits
         self.traits: Dict[str, PersonalityTrait] = {}
         self._initialize_default_traits()
-        
+
         log_personality_activity("initialization", self.session_token, {
             "profile_id": self.profile_id,
             "creation_time": self.creation_time.isoformat(),
             "default_traits_count": len(self.traits)
         })
-        
+
         logger.info(f"PersonalityEvolution initialized with security features: {self.profile_id}")
 
     def create_session(self) -> str:
@@ -220,11 +220,11 @@ class PersonalityEvolution:
     def validate_session(self, session_token: Optional[str] = None) -> bool:
         """Validate session for personality operations"""
         token_to_validate = session_token or self.session_token
-        
+
         if not token_to_validate:
             logger.warning("No session token provided for personality validation")
             return False
-        
+
         return validate_personality_session(token_to_validate)
 
     def _initialize_default_traits(self):
@@ -241,9 +241,9 @@ class PersonalityEvolution:
             "assertiveness": 50.0,
             "adaptability": 50.0
         }
-        
+
         current_time = datetime.now().isoformat()
-        
+
         for name, value in default_traits.items():
             self.traits[name] = PersonalityTrait(
                 name=name,
@@ -256,45 +256,45 @@ class PersonalityEvolution:
     def evolve_trait(self, trait_name: str, delta: float, session_token: Optional[str] = None) -> bool:
         """
         Evolve a personality trait with security validation.
-        
+
         Args:
             trait_name: Name of the trait to evolve
             delta: Change amount (positive or negative)
             session_token: Session token for authentication
-            
+
         Returns:
             Success status
         """
         try:
             # Validate session
             if not self.validate_session(session_token):
-                log_personality_activity("evolve_trait", session_token or self.session_token, 
+                log_personality_activity("evolve_trait", session_token or self.session_token,
                                         {"trait": trait_name, "status": "session_invalid"}, "failed")
                 return False
-            
+
             current_token = session_token or self.session_token
-            
+
             # Check rate limit
             if not check_personality_rate_limit(current_token):
-                log_personality_activity("evolve_trait", current_token, 
+                log_personality_activity("evolve_trait", current_token,
                                         {"trait": trait_name, "status": "rate_limited"}, "failed")
                 return False
-            
+
             # Sanitize trait name
             clean_trait_name = sanitize_trait_name(trait_name)
             if not clean_trait_name:
                 logger.error("Invalid trait name after sanitization")
                 return False
-            
+
             # Validate delta
             if not isinstance(delta, (int, float)):
                 logger.error("Delta must be a number")
                 return False
-            
+
             if abs(delta) > 50.0:  # Limit large changes
                 delta = 50.0 if delta > 0 else -50.0
                 logger.warning(f"Delta clamped to {delta} for safety")
-            
+
             with personality_lock:
                 # Get or create trait
                 if clean_trait_name not in self.traits:
@@ -305,24 +305,24 @@ class PersonalityEvolution:
                         modification_count=0,
                         evolution_history=[]
                     )
-                
+
                 trait = self.traits[clean_trait_name]
                 old_value = trait.value
                 new_value = max(MIN_TRAIT_VALUE, min(MAX_TRAIT_VALUE, old_value + delta))
-                
+
                 # Validate new value
                 is_valid, validation_message = validate_personality_trait(clean_trait_name, new_value)
                 if not is_valid:
                     logger.error(f"Invalid trait evolution: {validation_message}")
-                    log_personality_activity("evolve_trait", current_token, 
+                    log_personality_activity("evolve_trait", current_token,
                                             {"trait": clean_trait_name, "error": validation_message}, "validation_failed")
                     return False
-                
+
                 # Update trait
                 trait.value = new_value
                 trait.last_modified = datetime.now().isoformat()
                 trait.modification_count += 1
-                
+
                 # Add to evolution history
                 evolution_entry = {
                     "timestamp": trait.last_modified,
@@ -332,17 +332,17 @@ class PersonalityEvolution:
                     "session_token": current_token[:8] + "..."
                 }
                 trait.evolution_history.append(evolution_entry)
-                
+
                 # Limit history size
                 if len(trait.evolution_history) > MAX_EVOLUTION_HISTORY:
                     trait.evolution_history = trait.evolution_history[-MAX_EVOLUTION_HISTORY:]
-                
+
                 self.evolution_count += 1
-                
+
                 # Update session tracking
                 if current_token in personality_sessions:
                     personality_sessions[current_token]['personality_operations'] += 1
-            
+
             log_personality_activity("evolve_trait", current_token, {
                 "trait": clean_trait_name,
                 "old_value": old_value,
@@ -350,48 +350,48 @@ class PersonalityEvolution:
                 "delta": delta,
                 "evolution_count": self.evolution_count
             })
-            
+
             logger.info(f"Trait evolved: {clean_trait_name} {old_value:.2f} -> {new_value:.2f} (Δ{delta:+.2f})")
             return True
-            
+
         except Exception as e:
             logger.error(f"Error evolving trait: {str(e)}")
-            log_personality_activity("evolve_trait", session_token or self.session_token, 
+            log_personality_activity("evolve_trait", session_token or self.session_token,
                                     {"trait": trait_name, "error": str(e)}, "error")
             return False
 
     def get_trait(self, trait_name: str, session_token: Optional[str] = None) -> Optional[float]:
         """
         Get trait value with security validation.
-        
+
         Args:
             trait_name: Name of the trait
             session_token: Session token for authentication
-            
+
         Returns:
             Trait value or None if not found/unauthorized
         """
         try:
             # Validate session
             if not self.validate_session(session_token):
-                log_personality_activity("get_trait", session_token or self.session_token, 
+                log_personality_activity("get_trait", session_token or self.session_token,
                                         {"trait": trait_name, "status": "session_invalid"}, "failed")
                 return None
-            
+
             clean_trait_name = sanitize_trait_name(trait_name)
-            
+
             if clean_trait_name in self.traits:
                 value = self.traits[clean_trait_name].value
-                
+
                 log_personality_activity("get_trait", session_token or self.session_token, {
                     "trait": clean_trait_name,
                     "value": value
                 })
-                
+
                 return value
-            
+
             return None
-            
+
         except Exception as e:
             logger.error(f"Error getting trait: {str(e)}")
             return None
@@ -399,22 +399,22 @@ class PersonalityEvolution:
     def get_personality_profile(self, session_token: Optional[str] = None) -> Optional[PersonalityProfile]:
         """
         Get complete personality profile with security validation.
-        
+
         Args:
             session_token: Session token for authentication
-            
+
         Returns:
             PersonalityProfile or None if unauthorized
         """
         try:
             # Validate session
             if not self.validate_session(session_token):
-                log_personality_activity("get_profile", session_token or self.session_token, 
+                log_personality_activity("get_profile", session_token or self.session_token,
                                         {"status": "session_invalid"}, "failed")
                 return None
-            
+
             current_token = session_token or self.session_token
-            
+
             profile = PersonalityProfile(
                 profile_id=self.profile_id,
                 traits=self.traits.copy(),
@@ -428,56 +428,56 @@ class PersonalityEvolution:
                     "total_evolutions": self.evolution_count
                 }
             )
-            
+
             log_personality_activity("get_profile", current_token, {
                 "profile_id": self.profile_id,
                 "traits_count": len(self.traits),
                 "evolution_count": self.evolution_count
             })
-            
+
             return profile
-            
+
         except Exception as e:
             logger.error(f"Error getting personality profile: {str(e)}")
-            log_personality_activity("get_profile", session_token or self.session_token, 
+            log_personality_activity("get_profile", session_token or self.session_token,
                                     {"error": str(e)}, "error")
             return None
 
     def reset_trait(self, trait_name: str, session_token: Optional[str] = None) -> bool:
         """
         Reset a trait to default value with security validation.
-        
+
         Args:
             trait_name: Name of the trait to reset
             session_token: Session token for authentication
-            
+
         Returns:
             Success status
         """
         try:
             # Validate session
             if not self.validate_session(session_token):
-                log_personality_activity("reset_trait", session_token or self.session_token, 
+                log_personality_activity("reset_trait", session_token or self.session_token,
                                         {"trait": trait_name, "status": "session_invalid"}, "failed")
                 return False
-            
+
             current_token = session_token or self.session_token
-            
+
             # Check rate limit
             if not check_personality_rate_limit(current_token):
-                log_personality_activity("reset_trait", current_token, 
+                log_personality_activity("reset_trait", current_token,
                                         {"trait": trait_name, "status": "rate_limited"}, "failed")
                 return False
-            
+
             clean_trait_name = sanitize_trait_name(trait_name)
-            
+
             if clean_trait_name in self.traits:
                 with personality_lock:
                     old_value = self.traits[clean_trait_name].value
                     self.traits[clean_trait_name].value = 50.0  # Reset to neutral
                     self.traits[clean_trait_name].last_modified = datetime.now().isoformat()
                     self.traits[clean_trait_name].modification_count += 1
-                    
+
                     # Add reset to history
                     reset_entry = {
                         "timestamp": self.traits[clean_trait_name].last_modified,
@@ -487,23 +487,23 @@ class PersonalityEvolution:
                         "session_token": current_token[:8] + "..."
                     }
                     self.traits[clean_trait_name].evolution_history.append(reset_entry)
-                    
+
                     self.evolution_count += 1
-                
+
                 log_personality_activity("reset_trait", current_token, {
                     "trait": clean_trait_name,
                     "old_value": old_value,
                     "new_value": 50.0
                 })
-                
+
                 logger.info(f"Trait reset: {clean_trait_name} {old_value:.2f} -> 50.0")
                 return True
-            
+
             return False
-            
+
         except Exception as e:
             logger.error(f"Error resetting trait: {str(e)}")
-            log_personality_activity("reset_trait", session_token or self.session_token, 
+            log_personality_activity("reset_trait", session_token or self.session_token,
                                     {"trait": trait_name, "error": str(e)}, "error")
             return False
 

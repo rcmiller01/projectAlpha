@@ -64,10 +64,10 @@ const Dashboard = () => {
       <Card sx={{ height: '100%' }}>
         <CardContent>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <Box sx={{ 
-              p: 1, 
-              borderRadius: 1, 
-              bgcolor: `${color}.main`, 
+            <Box sx={{
+              p: 1,
+              borderRadius: 1,
+              bgcolor: `${color}.main`,
               color: `${color}.contrastText`,
               mr: 2
             }}>
@@ -160,20 +160,20 @@ const Dashboard = () => {
                   <Typography variant="h6" component="h2">
                     Recent Conversations
                   </Typography>
-                  <Button 
-                    size="small" 
+                  <Button
+                    size="small"
                     onClick={() => navigate('/chat')}
                   >
                     View All
                   </Button>
                 </Box>
-                
+
                 {recentThreads.map((thread, index) => (
-                  <Box 
+                  <Box
                     key={thread.id}
-                    sx={{ 
-                      display: 'flex', 
-                      justifyContent: 'space-between', 
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
                       alignItems: 'center',
                       py: 1,
                       borderBottom: index < recentThreads.length - 1 ? 1 : 0,
@@ -189,9 +189,9 @@ const Dashboard = () => {
                         {thread.updatedAt.toLocaleDateString()}
                       </Typography>
                     </Box>
-                    <Chip 
-                      label={thread.agentType} 
-                      size="small" 
+                    <Chip
+                      label={thread.agentType}
+                      size="small"
                       color="primary"
                       variant="outlined"
                     />
@@ -215,18 +215,18 @@ const Dashboard = () => {
                   <Typography variant="h6" component="h2">
                     Active Projects
                   </Typography>
-                  <Button 
+                  <Button
                     size="small"
                     onClick={() => navigate('/projects')}
                   >
                     View All
                   </Button>
                 </Box>
-                
+
                 {activeProjects.map((project, index) => (
-                  <Box 
+                  <Box
                     key={project.id}
-                    sx={{ 
+                    sx={{
                       py: 2,
                       borderBottom: index < activeProjects.length - 1 ? 1 : 0,
                       borderColor: 'divider'
@@ -234,17 +234,17 @@ const Dashboard = () => {
                   >
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                       <Typography variant="body1">{project.name}</Typography>
-                      <Chip 
-                        label={project.type} 
-                        size="small" 
+                      <Chip
+                        label={project.type}
+                        size="small"
                         color="secondary"
                         variant="outlined"
                       />
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <LinearProgress 
-                        variant="determinate" 
-                        value={project.progress} 
+                      <LinearProgress
+                        variant="determinate"
+                        value={project.progress}
                         sx={{ flexGrow: 1, height: 6, borderRadius: 3 }}
                       />
                       <Typography variant="caption" color="text.secondary">
@@ -270,21 +270,21 @@ const Dashboard = () => {
                 <Typography variant="h6" component="h2" sx={{ mb: 2 }}>
                   Agent Status
                 </Typography>
-                
+
                 <Grid container spacing={2}>
                   {agentStatusList.map((agent) => (
                     <Grid item xs={12} sm={6} md={3} key={agent.type}>
-                      <Box sx={{ 
-                        p: 2, 
-                        border: 1, 
-                        borderColor: 'divider', 
+                      <Box sx={{
+                        p: 2,
+                        border: 1,
+                        borderColor: 'divider',
                         borderRadius: 1,
                         textAlign: 'center'
                       }}>
                         <SmartToy sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
                         <Typography variant="subtitle1">{agent.name}</Typography>
-                        <Chip 
-                          label={agent.status} 
+                        <Chip
+                          label={agent.status}
                           size="small"
                           color={agent.status === 'active' ? 'success' : 'default'}
                         />

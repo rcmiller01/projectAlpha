@@ -17,7 +17,7 @@ class CreativeModelDiscovery:
     Discovers and manages AI models for creative projects
     Replaces hardcoded model support with dynamic discovery
     """
-    
+
     def __init__(self):
         self.model_registry = {}
         self.installed_models = set()
@@ -30,15 +30,15 @@ class CreativeModelDiscovery:
             "code": ["codex", "codewhisperer", "copilot", "starcoder"]
         }
         self.model_database = {}
-        
+
     async def initialize(self):
         """Initialize the model discovery system"""
         await self._load_model_database()
         await self._scan_installed_models()
-    
+
     async def _load_model_database(self):
         """Load database of available models and their capabilities"""
-        
+
         # This would typically load from a configuration file or API
         # For now, we'll define a comprehensive model database
         self.model_database = {
@@ -55,7 +55,7 @@ class CreativeModelDiscovery:
             },
             "audiocraft": {
                 "name": "AudioCraft",
-                "category": "music", 
+                "category": "music",
                 "description": "Meta's AudioCraft for music and audio generation",
                 "size": "3.2GB",
                 "install_command": "pip install audiocraft",
@@ -63,7 +63,7 @@ class CreativeModelDiscovery:
                 "supported_formats": ["wav", "mp3", "flac"],
                 "requirements": ["torch", "torchaudio", "xformers"]
             },
-            
+
             # Art Generation Models
             "stable-diffusion-xl": {
                 "name": "Stable Diffusion XL",
@@ -79,13 +79,13 @@ class CreativeModelDiscovery:
                 "name": "ControlNet",
                 "category": "art",
                 "description": "Precise control over image generation",
-                "size": "2.5GB", 
+                "size": "2.5GB",
                 "install_command": "pip install controlnet-aux",
                 "capabilities": ["pose_control", "edge_detection", "depth_control"],
                 "supported_formats": ["png", "jpg"],
                 "requirements": ["torch", "transformers", "controlnet-aux"]
             },
-            
+
             # Writing Models
             "gpt-neo": {
                 "name": "GPT-Neo",
@@ -97,8 +97,8 @@ class CreativeModelDiscovery:
                 "supported_formats": ["txt", "md"],
                 "requirements": ["transformers", "torch"]
             },
-            
-            # Video Generation Models  
+
+            # Video Generation Models
             "animatediff": {
                 "name": "AnimateDiff",
                 "category": "video",
@@ -109,7 +109,7 @@ class CreativeModelDiscovery:
                 "supported_formats": ["mp4", "gif"],
                 "requirements": ["torch", "diffusers", "opencv-python"]
             },
-            
+
             # Voice Synthesis Models
             "bark": {
                 "name": "Bark",
@@ -121,7 +121,7 @@ class CreativeModelDiscovery:
                 "supported_formats": ["wav", "mp3"],
                 "requirements": ["torch", "torchaudio", "scipy"]
             },
-            
+
             # Code Generation Models
             "starcoder": {
                 "name": "StarCoder",
@@ -134,10 +134,10 @@ class CreativeModelDiscovery:
                 "requirements": ["transformers", "torch"]
             }
         }
-    
+
     async def _scan_installed_models(self):
         """Scan for already installed models"""
-        
+
         # Check which models are already available
         for model_id, model_info in self.model_database.items():
             try:
@@ -145,28 +145,28 @@ class CreativeModelDiscovery:
                 requirements = model_info.get("requirements", [])
                 for req in requirements:
                     __import__(req)
-                
+
                 # If all requirements are met, consider it installed
                 self.installed_models.add(model_id)
                 logger.info(f"✓ Found installed model: {model_info['name']}")
-                
+
             except ImportError:
                 logger.debug(f"Model {model_id} not installed")
-    
+
     async def find_models_for_project(self, project_type: str, requirements: Dict[str, Any] = {}) -> List[Dict[str, Any]]:
         """Find suitable models for a specific project type"""
-        
+
         suitable_models = []
-        
+
         # Get models for the project category
         category_models = [
             model_id for model_id, model_info in self.model_database.items()
             if model_info["category"] == project_type
         ]
-        
+
         for model_id in category_models:
             model_info = self.model_database[model_id]
-            
+
             model_status = {
                 "id": model_id,
                 "name": model_info["name"],
@@ -175,20 +175,20 @@ class CreativeModelDiscovery:
                 "size": model_info["size"],
                 "status": "installed" if model_id in self.installed_models else "installable"
             }
-            
+
             suitable_models.append(model_status)
-        
+
         # Sort by installation status (installed first)
         suitable_models.sort(key=lambda x: x["status"] == "installed", reverse=True)
-        
+
         return suitable_models
-    
+
     async def find_models_for_message(self, message: str) -> List[Dict[str, Any]]:
         """Analyze message and suggest relevant models"""
-        
+
         message_lower = message.lower()
         relevant_models = []
-        
+
         # Keywords to model mapping
         keyword_mappings = {
             "music": ["music", "song", "melody", "compose", "beat", "rhythm"],
@@ -198,26 +198,26 @@ class CreativeModelDiscovery:
             "voice": ["voice", "speak", "speech", "audio", "sound"],
             "code": ["code", "program", "script", "function", "algorithm"]
         }
-        
+
         # Find matching categories
         for category, keywords in keyword_mappings.items():
             if any(keyword in message_lower for keyword in keywords):
                 models = await self.find_models_for_project(category)
                 relevant_models.extend(models[:2])  # Top 2 models per category
-        
+
         return relevant_models
-    
+
     async def install_model(self, model_id: str) -> Dict[str, Any]:
         """Install a specific model"""
-        
+
         if model_id not in self.model_database:
             raise ValueError(f"Unknown model: {model_id}")
-        
+
         model_info = self.model_database[model_id]
-        
+
         try:
             logger.info(f"Installing {model_info['name']}...")
-            
+
             # Execute installation command
             install_cmd = model_info["install_command"]
             process = await asyncio.create_subprocess_shell(
@@ -225,13 +225,13 @@ class CreativeModelDiscovery:
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE
             )
-            
+
             stdout, stderr = await process.communicate()
-            
+
             if process.returncode == 0:
                 self.installed_models.add(model_id)
                 logger.info(f"✓ Successfully installed {model_info['name']}")
-                
+
                 return {
                     "status": "success",
                     "model_id": model_id,
@@ -240,26 +240,26 @@ class CreativeModelDiscovery:
             else:
                 error_msg = stderr.decode() if stderr else "Installation failed"
                 logger.error(f"Failed to install {model_info['name']}: {error_msg}")
-                
+
                 return {
                     "status": "error",
                     "model_id": model_id,
                     "error": error_msg
                 }
-                
+
         except Exception as e:
             logger.error(f"Error installing {model_id}: {e}")
             return {
-                "status": "error", 
+                "status": "error",
                 "model_id": model_id,
                 "error": str(e)
             }
-    
+
     async def get_all_available_models(self) -> List[Dict[str, Any]]:
         """Get comprehensive list of all available models"""
-        
+
         all_models = []
-        
+
         for model_id, model_info in self.model_database.items():
             model_data = {
                 "id": model_id,
@@ -271,40 +271,40 @@ class CreativeModelDiscovery:
                 "status": "installed" if model_id in self.installed_models else "available"
             }
             all_models.append(model_data)
-        
+
         return all_models
-    
+
     async def get_model_categories(self) -> Dict[str, List[str]]:
         """Get model categories and their descriptions"""
-        
+
         category_descriptions = {
             "music": "Generate music, melodies, and audio content",
-            "art": "Create images, artwork, and visual designs", 
+            "art": "Create images, artwork, and visual designs",
             "writing": "Generate stories, poems, and written content",
             "video": "Create animations and video content",
             "voice": "Synthesize speech and voice content",
             "code": "Generate and assist with programming code"
         }
-        
+
         return category_descriptions
-    
+
     async def analyze_for_opportunities(self, message: str, response_data: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Analyze conversation for creative opportunities"""
-        
+
         opportunities = []
-        
+
         # Check if user expressed interest in creating something
         creative_expressions = [
             "i want to make", "let's create", "can you help me build",
             "i'd like to try", "how about we", "let's work on"
         ]
-        
+
         message_lower = message.lower()
-        
+
         if any(expr in message_lower for expr in creative_expressions):
             # Find relevant models
             relevant_models = await self.find_models_for_message(message)
-            
+
             if relevant_models:
                 opportunities.append({
                     "type": "creative_collaboration",
@@ -312,14 +312,14 @@ class CreativeModelDiscovery:
                     "models": relevant_models[:3],  # Top 3 suggestions
                     "action": "start_project"
                 })
-        
+
         return opportunities
-    
+
     async def get_project_next_steps(self, project: Dict[str, Any]) -> List[str]:
         """Get suggested next steps for a creative project"""
-        
+
         project_type = project["type"]
-        
+
         next_steps = {
             "music": [
                 "Tell me what style or mood you're going for",
@@ -352,7 +352,7 @@ class CreativeModelDiscovery:
                 "Any specific requirements or constraints?"
             ]
         }
-        
+
         return next_steps.get(project_type, [
             "Tell me more about what you'd like to create",
             "What's your vision for this project?",

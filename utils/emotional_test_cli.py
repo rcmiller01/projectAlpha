@@ -18,9 +18,9 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 try:
     from emotion_loop_core import (
-        EmotionLoopManager, 
-        QuantizationCandidate, 
-        run_emotional_test, 
+        EmotionLoopManager,
+        QuantizationCandidate,
+        run_emotional_test,
         run_emotional_test_suite
     )
 except ImportError as e:
@@ -32,10 +32,10 @@ def create_test_candidates(names: Optional[List[str]] = None) -> List[Quantizati
     """Create test candidates for emotional evaluation."""
     if names is None:
         names = ["model_q8", "model_q6", "model_q5", "model_q4", "model_q3"]
-    
+
     candidates = []
     base_sizes = {"q8": 15.2, "q6": 12.5, "q5": 10.2, "q4": 8.8, "q3": 6.5}
-    
+
     for name in names:
         # Extract quantization level
         q_level = None
@@ -43,14 +43,14 @@ def create_test_candidates(names: Optional[List[str]] = None) -> List[Quantizati
             if q in name.lower():
                 q_level = q
                 break
-        
+
         size = base_sizes.get(q_level, 10.0)
         candidates.append(QuantizationCandidate(
             name=name,
             size_gb=size,
             file_path=f"models/{name}.bin"
         ))
-    
+
     return candidates
 
 def load_custom_prompts(file_path: str) -> List[str]:
@@ -86,30 +86,30 @@ def run_comparative_analysis(results: dict) -> None:
     """Run comparative analysis of emotional test results."""
     print(f"\n📊 Comparative Emotional Analysis")
     print("=" * 60)
-    
+
     # Find best and worst performers
     candidates = list(results.keys())
     if not candidates:
         print("No results to analyze")
         return
-    
+
     averages = {name: data.get('average', 0.0) for name, data in results.items()}
     best_performer = max(averages, key=averages.get)
     worst_performer = min(averages, key=averages.get)
-    
+
     print(f"🏆 Best emotional performer: {best_performer} (avg: {averages[best_performer]:.3f})")
     print(f"⚠️  Needs improvement: {worst_performer} (avg: {averages[worst_performer]:.3f})")
-    
+
     # Calculate score distribution
     all_scores = []
     for data in results.values():
         all_scores.extend([v for k, v in data.items() if k != 'average'])
-    
+
     if all_scores:
         avg_score = sum(all_scores) / len(all_scores)
         min_score = min(all_scores)
         max_score = max(all_scores)
-        
+
         print(f"\n📈 Score Distribution:")
         print(f"   Average: {avg_score:.3f}")
         print(f"   Range: {min_score:.3f} - {max_score:.3f}")
@@ -124,16 +124,16 @@ def main():
     parser.add_argument('--verbose', '-v', action='store_true', help='Enable verbose logging')
     parser.add_argument('--anchor-config', help='Path to anchor settings config file')
     parser.add_argument('--analysis-only', help='Run analysis on existing results file')
-    
+
     args = parser.parse_args()
-    
+
     # Configure logging
     log_level = logging.DEBUG if args.verbose else logging.INFO
     logging.basicConfig(level=log_level, format='%(levelname)s: %(message)s')
-    
+
     print("🎭 Emotional Test CLI - Quantized Model Evaluation")
     print("=" * 60)
-    
+
     # Analysis-only mode
     if args.analysis_only:
         try:
@@ -144,11 +144,11 @@ def main():
         except Exception as e:
             print(f"❌ Failed to load results file: {e}")
             return
-    
+
     # Create candidates
     candidates = create_test_candidates(args.candidates)
     print(f"📋 Testing {len(candidates)} candidates: {[c.name for c in candidates]}")
-    
+
     # Load custom prompts if specified
     custom_prompts = None
     if args.prompts_file:
@@ -160,12 +160,12 @@ def main():
     elif args.single_prompt:
         custom_prompts = [args.single_prompt]
         print(f"📝 Testing single prompt: {args.single_prompt}")
-    
+
     # Initialize emotion loop manager
     config_path = args.anchor_config or 'config/anchor_settings.json'
     manager = EmotionLoopManager(config_path=config_path)
     print(f"🧭 Using anchor weights: {manager.anchor_weights}")
-    
+
     # Run emotional test suite
     if args.single_prompt:
         print(f"\n🎯 Single Prompt Test")
@@ -176,10 +176,10 @@ def main():
             results[candidate.name] = {"single_prompt": score, "average": score}
     else:
         results = run_emotional_test_suite(candidates, custom_prompts)
-    
+
     # Run comparative analysis
     run_comparative_analysis(results)
-    
+
     # Save results
     full_results = {
         "metadata": {
@@ -191,9 +191,9 @@ def main():
         },
         "results": results
     }
-    
+
     save_test_results(full_results, args.output)
-    
+
     print(f"\n🎯 Emotional testing complete!")
     print(f"   Results saved to: {args.output}")
     print(f"   Run with --analysis-only {args.output} to re-analyze")

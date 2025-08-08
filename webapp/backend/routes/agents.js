@@ -3,7 +3,7 @@ const router = express.Router();
 
 /**
  * Agents API Routes
- * 
+ *
  * Provides REST endpoints for interacting with ProjectAlpha SLiM agents
  */
 
@@ -31,7 +31,7 @@ router.get('/:agentType', async (req, res) => {
   try {
     const { agentType } = req.params;
     const agents = await req.agentBridge.getAgents();
-    
+
     if (agents.success && agents.agents[agentType]) {
       res.json({
         success: true,
@@ -120,7 +120,7 @@ router.post('/batch', async (req, res) => {
     req.logger.info(`Processing batch request with ${requests.length} agent invocations`);
 
     const results = [];
-    
+
     // Process requests sequentially to avoid overwhelming the system
     for (let i = 0; i < requests.length; i++) {
       const request = requests[i];
@@ -153,7 +153,7 @@ router.post('/batch', async (req, res) => {
     }
 
     const successCount = results.filter(r => r.success).length;
-    
+
     res.json({
       success: true,
       total_requests: requests.length,

@@ -6,7 +6,7 @@ from .metaphor_agent import MetaphorAgent
 
 __all__ = [
     'SLiMAgent',
-    'AgentResponse', 
+    'AgentResponse',
     'DeductionAgent',
     'MetaphorAgent'
 ]

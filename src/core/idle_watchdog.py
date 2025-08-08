@@ -35,20 +35,20 @@ class IdleWatchdog:
         self.idle_threshold = timedelta(minutes=idle_minutes)
         self.last_active_time = datetime.now()
         self.running = False
-        
+
         # Emotion loop pause management
         self.emotion_loop_paused = False
         self.emotion_loop_pause_time: Optional[datetime] = None
         self.emotion_loop_instance: Optional[Any] = None
         self.pause_emotion_on_idle = True  # Configuration flag
-        
+
         logger.info(f"IdleWatchdog initialized with {idle_minutes}min threshold and emotion loop pause enabled")
 
     def mark_active(self) -> None:
         """Record a user activity event and resume emotion loop if paused."""
         self.last_active_time = datetime.now()
         logger.debug("User activity recorded")
-        
+
         # Resume emotion loop if it was paused due to idle
         if self.emotion_loop_paused:
             asyncio.create_task(self._resume_emotion_loop())
@@ -61,16 +61,16 @@ class IdleWatchdog:
     async def _pause_emotion_loop(self) -> bool:
         """
         Pause the emotion loop during idle periods to conserve resources.
-        
+
         Returns:
             True if successfully paused, False otherwise
         """
         if not self.pause_emotion_on_idle:
             return False
-        
+
         if self.emotion_loop_paused:
             return True  # Already paused
-        
+
         try:
             # Try to pause the emotion loop instance if available
             if self.emotion_loop_instance and hasattr(self.emotion_loop_instance, 'pause'):
@@ -79,7 +79,7 @@ class IdleWatchdog:
                 self.emotion_loop_pause_time = datetime.now()
                 logger.info("Emotion loop paused due to idle state")
                 return True
-            
+
             # Alternative: Try to import and pause emotion loop directly
             try:
                 from core.emotion_loop_core import pause_emotion_loop
@@ -91,14 +91,14 @@ class IdleWatchdog:
                     return True
             except ImportError:
                 logger.debug("Direct emotion loop pause not available")
-            
+
             # Fallback: Use environment variable or global flag
             os.environ['EMOTION_LOOP_PAUSED'] = 'true'
             self.emotion_loop_paused = True
             self.emotion_loop_pause_time = datetime.now()
             logger.info("Emotion loop paused via environment flag")
             return True
-            
+
         except Exception as e:
             logger.error(f"Error pausing emotion loop: {e}")
             return False
@@ -106,19 +106,19 @@ class IdleWatchdog:
     async def _resume_emotion_loop(self) -> bool:
         """
         Resume the emotion loop when activity is detected.
-        
+
         Returns:
             True if successfully resumed, False otherwise
         """
         if not self.emotion_loop_paused:
             return True  # Already running
-        
+
         try:
             # Calculate pause duration for logging
             pause_duration = None
             if self.emotion_loop_pause_time:
                 pause_duration = datetime.now() - self.emotion_loop_pause_time
-            
+
             # Try to resume the emotion loop instance if available
             if self.emotion_loop_instance and hasattr(self.emotion_loop_instance, 'resume'):
                 await self.emotion_loop_instance.resume()
@@ -126,7 +126,7 @@ class IdleWatchdog:
                 self.emotion_loop_pause_time = None
                 logger.info(f"Emotion loop resumed after {pause_duration} pause")
                 return True
-            
+
             # Alternative: Try to resume emotion loop directly
             try:
                 from core.emotion_loop_core import resume_emotion_loop
@@ -138,16 +138,16 @@ class IdleWatchdog:
                     return True
             except ImportError:
                 logger.debug("Direct emotion loop resume not available")
-            
+
             # Fallback: Clear environment variable
             if 'EMOTION_LOOP_PAUSED' in os.environ:
                 del os.environ['EMOTION_LOOP_PAUSED']
-            
+
             self.emotion_loop_paused = False
             self.emotion_loop_pause_time = None
             logger.info(f"Emotion loop resumed via environment flag after {pause_duration}")
             return True
-            
+
         except Exception as e:
             logger.error(f"Error resuming emotion loop: {e}")
             return False
@@ -161,11 +161,11 @@ class IdleWatchdog:
             "pause_duration_seconds": None,
             "has_emotion_loop_instance": self.emotion_loop_instance is not None
         }
-        
+
         if self.emotion_loop_paused and self.emotion_loop_pause_time:
             duration = datetime.now() - self.emotion_loop_pause_time
             status["pause_duration_seconds"] = duration.total_seconds()
-        
+
         return status
 
     async def start(self) -> None:
@@ -206,11 +206,11 @@ class IdleWatchdog:
 
             logger.info("Idle threshold exceeded; initiating self-training")
             await trigger_self_training()
-    
+
     def get_status(self) -> dict:
         """Get comprehensive idle watchdog status including emotion loop state."""
         idle_duration = datetime.now() - self.last_active_time
-        
+
         status = {
             "running": self.running,
             "idle_threshold_minutes": self.idle_threshold.total_seconds() / 60,
@@ -219,11 +219,11 @@ class IdleWatchdog:
             "last_active_time": self.last_active_time.isoformat(),
             "check_interval_seconds": CHECK_INTERVAL_SECONDS
         }
-        
+
         # Add emotion loop status
         emotion_status = self.get_emotion_loop_status()
         status.update(emotion_status)
-        
+
         return status
 
 

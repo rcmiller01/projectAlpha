@@ -41,4 +41,4 @@ db.config.insertOne({
     }
 });
 
-print("✅ EmotionalAI database initialized successfully"); 
+print("✅ EmotionalAI database initialized successfully");

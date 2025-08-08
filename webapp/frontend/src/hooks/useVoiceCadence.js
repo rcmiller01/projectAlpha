@@ -77,7 +77,7 @@ export const useVoiceCadence = () => {
       };
 
       const voiceProfile = agentVoiceMap[agentType] || agentVoiceMap.general;
-      
+
       // Generate modulation parameters
       const params = modulatorRef.current.modulateForContext({
         ...voiceProfile,

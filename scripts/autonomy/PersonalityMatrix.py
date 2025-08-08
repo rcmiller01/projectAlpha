@@ -11,15 +11,15 @@ class PersonalityMatrix:
         }
         self.opinion_network: Dict[str, Any] = {}
         self.value_system: Dict[str, float] = {}
-        
+
     def update_traits_from_experience(self, experiences: Dict):
         # TODO: Implement trait updates
         pass
-        
+
     def develop_new_opinions(self):
         # TODO: Implement opinion development
         pass
-        
+
     def strengthen_or_weaken_values(self):
         # TODO: Implement value system evolution
         pass

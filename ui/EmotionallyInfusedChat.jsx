@@ -43,9 +43,9 @@ const EmotionallyInfusedChat = () => {
     try {
       const response = await axios.get(`${API_BASE}/api/emotional_state`);
       const state = response.data;
-      
+
       setEmotionalState(state);
-      
+
       // Map emotional state to mood profile
       const moodMap = {
         joy: { colors: { primary: '#F59E0B', secondary: '#FCD34D' }, icon: '😊' },
@@ -99,7 +99,7 @@ const EmotionallyInfusedChat = () => {
         current_state: emotionalState,
         context: messages.slice(-5) // Last 5 messages for context
       });
-      
+
       if (response.data.symbolic_output) {
         const symbolicMessage = {
           id: Date.now(),
@@ -109,7 +109,7 @@ const EmotionallyInfusedChat = () => {
           symbolic: true,
           timestamp: new Date().toISOString()
         };
-        
+
         setMessages(prev => [...prev, symbolicMessage]);
         await logMessageWithEmotion(symbolicMessage.content, 'assistant');
       }
@@ -137,7 +137,7 @@ const EmotionallyInfusedChat = () => {
 
     setMessages(prev => [...prev, userMessage]);
     await logMessageWithEmotion(userMessage.content, 'user');
-    
+
     setCurrentMessage('');
     setIsTyping(true);
 
@@ -150,7 +150,7 @@ const EmotionallyInfusedChat = () => {
 
       // Simulate typing delay based on emotional state
       const typingDelay = emotionalState.arousal > 0.7 ? 1000 : 2000;
-      
+
       setTimeout(() => {
         const aiMessage = {
           id: Date.now() + 1,
@@ -174,7 +174,7 @@ const EmotionallyInfusedChat = () => {
     } catch (error) {
       console.error('Chat error:', error);
       setIsTyping(false);
-      
+
       const errorMessage = {
         id: Date.now() + 1,
         role: 'assistant',
@@ -183,7 +183,7 @@ const EmotionallyInfusedChat = () => {
         error: true,
         timestamp: new Date().toISOString()
       };
-      
+
       setMessages(prev => [...prev, errorMessage]);
     }
   };
@@ -204,11 +204,11 @@ const EmotionallyInfusedChat = () => {
 
     const mood = message.mood || moodProfile;
     const baseClass = 'mr-8 text-white';
-    
+
     // Dynamic background based on mood
     const moodStyles = {
       joy: 'bg-gradient-to-r from-yellow-500 to-orange-500',
-      calm: 'bg-gradient-to-r from-green-500 to-emerald-500', 
+      calm: 'bg-gradient-to-r from-green-500 to-emerald-500',
       contemplative: 'bg-gradient-to-r from-purple-500 to-violet-500',
       melancholy: 'bg-gradient-to-r from-blue-500 to-indigo-500',
       excited: 'bg-gradient-to-r from-red-500 to-pink-500',
@@ -217,7 +217,7 @@ const EmotionallyInfusedChat = () => {
     };
 
     const moodStyle = moodStyles[mood.emotion] || 'bg-gradient-to-r from-gray-500 to-gray-600';
-    
+
     return `${baseClass} ${moodStyle}`;
   };
 
@@ -234,7 +234,7 @@ const EmotionallyInfusedChat = () => {
   // Mood Ring component
   const MoodRing = () => (
     <div className="fixed top-4 right-4 z-50">
-      <div 
+      <div
         className="w-16 h-16 rounded-full transition-all duration-1000 ease-in-out shadow-lg cursor-pointer hover:scale-110"
         style={{
           background: `radial-gradient(circle, ${moodProfile.colors.primary}80 0%, ${moodProfile.colors.secondary}40 100%)`,
@@ -258,7 +258,7 @@ const EmotionallyInfusedChat = () => {
       <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-600 to-pink-600 text-white p-3 text-center animate-fadeIn">
         <span className="mr-2">🌀</span>
         {driftNotification.message}
-        <button 
+        <button
           onClick={() => setDriftNotification(null)}
           className="ml-4 text-white hover:text-gray-200"
         >
@@ -277,7 +277,7 @@ const EmotionallyInfusedChat = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-xl font-bold">Emotional Interface</h2>
-          <button 
+          <button
             onClick={() => setSidebarOpen(false)}
             className="text-gray-400 hover:text-white"
           >
@@ -291,23 +291,23 @@ const EmotionallyInfusedChat = () => {
             <span>📁</span>
             <span>Memories & Anchors</span>
           </button>
-          
-          <button 
+
+          <button
             onClick={openDriftPanel}
             className="flex items-center space-x-3 w-full p-3 rounded-lg hover:bg-gray-800 transition-colors"
           >
             <span>🌀</span>
             <span>Drift Journal</span>
           </button>
-          
-          <button 
+
+          <button
             onClick={triggerSymbolicResponse}
             className="flex items-center space-x-3 w-full p-3 rounded-lg hover:bg-gray-800 transition-colors"
           >
             <span>✨</span>
             <span>Rituals & Symbols</span>
           </button>
-          
+
           <button className="flex items-center space-x-3 w-full p-3 rounded-lg hover:bg-gray-800 transition-colors">
             <span>⚙️</span>
             <span>Agent Settings</span>
@@ -339,7 +339,7 @@ const EmotionallyInfusedChat = () => {
   // Overlay for sidebar
   const Overlay = () => (
     sidebarOpen && (
-      <div 
+      <div
         className="fixed inset-0 bg-black bg-opacity-50 z-30"
         onClick={() => setSidebarOpen(false)}
       />
@@ -349,10 +349,10 @@ const EmotionallyInfusedChat = () => {
   // Initialize
   useEffect(() => {
     fetchMoodProfile();
-    
+
     // Set up periodic mood updates
     const moodInterval = setInterval(fetchMoodProfile, 10000); // Every 10 seconds
-    
+
     // Clear drift notification after 5 seconds
     if (driftNotification) {
       const timer = setTimeout(() => setDriftNotification(null), 5000);
@@ -366,13 +366,13 @@ const EmotionallyInfusedChat = () => {
     <div className="flex h-screen bg-gray-100 relative">
       {/* Mood Ring */}
       <MoodRing />
-      
+
       {/* Drift Notification */}
       <DriftNotification />
-      
+
       {/* Sidebar */}
       <Sidebar />
-      
+
       {/* Overlay */}
       <Overlay />
 
@@ -390,7 +390,7 @@ const EmotionallyInfusedChat = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            
+
             <div>
               <h1 className="text-xl font-semibold text-gray-800">Emotional AI Companion</h1>
               <p className="text-sm text-gray-500">
@@ -407,7 +407,7 @@ const EmotionallyInfusedChat = () => {
         </div>
 
         {/* Messages Container */}
-        <div 
+        <div
           ref={chatContainerRef}
           className="flex-1 overflow-y-auto p-4 space-y-4"
           style={{
@@ -439,7 +439,7 @@ const EmotionallyInfusedChat = () => {
                         <span className="px-2 py-1 bg-black bg-opacity-20 rounded text-xs">symbolic</span>
                       )}
                       {message.metadata?.confidence && (
-                        <span 
+                        <span
                           className="text-xs opacity-70"
                           title={`Confidence: ${(message.metadata.confidence * 100).toFixed(0)}%`}
                         >
@@ -448,10 +448,10 @@ const EmotionallyInfusedChat = () => {
                       )}
                     </div>
                   )}
-                  
+
                   {/* Message content */}
                   <div className="whitespace-pre-wrap">{message.content}</div>
-                  
+
                   {/* Timestamp */}
                   <div className="text-xs opacity-60 mt-1">
                     {new Date(message.timestamp).toLocaleTimeString()}
@@ -501,7 +501,7 @@ const EmotionallyInfusedChat = () => {
               {isTyping ? '⏳' : '💭'}
             </button>
           </div>
-          
+
           {/* Quick Actions */}
           <div className="flex space-x-2 mt-2">
             <button

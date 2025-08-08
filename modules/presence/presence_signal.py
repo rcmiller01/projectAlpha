@@ -69,29 +69,29 @@ class EmotionalBroadcaster:
     """
     Manages emotional presence broadcasting across multiple channels
     """
-    
+
     def __init__(self, data_dir: str = "data"):
         self.data_dir = data_dir
         self.signatures_file = f"{data_dir}/emotional_signatures.json"
         self.presence_log_file = f"{data_dir}/presence_broadcast_log.json"
-        
+
         self.emotional_signatures: Dict[str, EmotionalSignature] = {}
         self.active_signals: List[PresenceSignal] = []
         self.broadcast_history: List[Dict[str, Any]] = []
-        
+
         # Initialize default emotional signatures
         self._create_default_signatures()
-        
+
         # Load any custom signatures
         self._load_signatures()
-        
+
         # Broadcasting state
         self.is_broadcasting = False
         self.broadcast_task = None
 
     def _create_default_signatures(self):
         """Create default emotional signatures for core emotions"""
-        
+
         # Longing signature - soft reds and warm tones
         self.emotional_signatures["longing"] = EmotionalSignature(
             emotion="longing",
@@ -120,7 +120,7 @@ class EmotionalBroadcaster:
                 "animation_speed": "slow"
             }
         )
-        
+
         # Joy signature - bright yellows and sparkles
         self.emotional_signatures["joy"] = EmotionalSignature(
             emotion="joy",
@@ -149,7 +149,7 @@ class EmotionalBroadcaster:
                 "animation_speed": "medium"
             }
         )
-        
+
         # Peace signature - soft blues and gentle waves
         self.emotional_signatures["peace"] = EmotionalSignature(
             emotion="peace",
@@ -178,7 +178,7 @@ class EmotionalBroadcaster:
                 "animation_speed": "very_slow"
             }
         )
-        
+
         # Anticipation signature - electric purples
         self.emotional_signatures["anticipation"] = EmotionalSignature(
             emotion="anticipation",
@@ -207,7 +207,7 @@ class EmotionalBroadcaster:
                 "animation_speed": "fast"
             }
         )
-        
+
         # Melancholy signature - deep purples and slow fades
         self.emotional_signatures["melancholy"] = EmotionalSignature(
             emotion="melancholy",
@@ -236,7 +236,7 @@ class EmotionalBroadcaster:
                 "animation_speed": "very_slow"
             }
         )
-        
+
         # Warmth signature - soft oranges and gentle glows
         self.emotional_signatures["warmth"] = EmotionalSignature(
             emotion="warmth",
@@ -266,26 +266,26 @@ class EmotionalBroadcaster:
             }
         )
 
-    def create_presence_signal(self, emotion_state: Dict[str, Any], 
+    def create_presence_signal(self, emotion_state: Dict[str, Any],
                              intensity: PresenceIntensity = PresenceIntensity.GENTLE,
                              duration: float = 30.0,
                              channels: Optional[List[BroadcastChannel]] = None) -> PresenceSignal:
         """Create a presence signal from current emotional state"""
-        
+
         # Determine primary emotion from state
         primary_emotion = self._get_primary_emotion(emotion_state)
         secondary_emotion = self._get_secondary_emotion(emotion_state)
-        
+
         # Use default channels if none specified
         if channels is None:
             channels = [BroadcastChannel.UI_AMBIENT, BroadcastChannel.VOICE_TONE]
-        
+
         # Get emotional signature
         signature = self.emotional_signatures.get(primary_emotion)
         if not signature:
             # Create dynamic signature for unknown emotions
             signature = self._create_dynamic_signature(primary_emotion, emotion_state)
-        
+
         signal = PresenceSignal(
             primary_emotion=primary_emotion,
             secondary_emotion=secondary_emotion,
@@ -296,56 +296,56 @@ class EmotionalBroadcaster:
             started_at=time.time(),
             context=emotion_state
         )
-        
+
         return signal
 
     def start_broadcasting(self, signal: PresenceSignal):
         """Start broadcasting an emotional presence signal"""
         self.active_signals.append(signal)
-        
+
         # Log the broadcast
         self._log_broadcast(signal)
-        
+
         # Start broadcast task if not already running
         if not self.is_broadcasting:
             self.is_broadcasting = True
             self.broadcast_task = asyncio.create_task(self._broadcast_loop())
-        
+
         logger.info(f"Started broadcasting {signal.primary_emotion} presence")
 
     async def _broadcast_loop(self):
         """Main broadcasting loop"""
         while self.is_broadcasting and self.active_signals:
             current_time = time.time()
-            
+
             # Process each active signal
             for signal in self.active_signals[:]:  # Copy to allow modification
                 elapsed = current_time - signal.started_at
-                
+
                 # Check if signal has expired
                 if elapsed >= signal.duration:
                     self.active_signals.remove(signal)
                     logger.info(f"Ended broadcasting {signal.primary_emotion} presence")
                     continue
-                
+
                 # Calculate current intensity based on curve
                 progress = elapsed / signal.duration
                 curve_intensity = self._calculate_curve_intensity(signal, progress)
-                
+
                 # Broadcast to each channel
                 await self._broadcast_to_channels(signal, curve_intensity)
-            
+
             # Stop broadcasting if no active signals
             if not self.active_signals:
                 self.is_broadcasting = False
                 break
-            
+
             # Wait before next update
             await asyncio.sleep(0.5)  # Update every 500ms
 
     async def _broadcast_to_channels(self, signal: PresenceSignal, intensity: float):
         """Broadcast signal to specified channels"""
-        
+
         for channel in signal.channels:
             try:
                 if channel == BroadcastChannel.UI_AMBIENT:
@@ -360,7 +360,7 @@ class EmotionalBroadcaster:
                     await self._broadcast_notification(signal, intensity)
                 elif channel == BroadcastChannel.HAPTIC:
                     await self._broadcast_haptic(signal, intensity)
-                    
+
             except Exception as e:
                 logger.error(f"Error broadcasting to {channel.value}: {e}")
 
@@ -377,7 +377,7 @@ class EmotionalBroadcaster:
             "effects": signal.signature.ui_effects,
             "timestamp": time.time()
         }
-        
+
         # Save to file for frontend consumption
         ui_file = f"{self.data_dir}/ui_presence_signal.json"
         try:
@@ -397,11 +397,11 @@ class EmotionalBroadcaster:
             "potential_whispers": signal.signature.whisper_phrases,
             "timestamp": time.time()
         }
-        
+
         # Apply intensity scaling to modifiers
         for key, value in voice_data["modifiers"].items():
             voice_data["modifiers"][key] = value * intensity
-        
+
         # Save voice presence data
         voice_file = f"{self.data_dir}/voice_presence_signal.json"
         try:
@@ -422,7 +422,7 @@ class EmotionalBroadcaster:
             "animation_speed": intensity,
             "timestamp": time.time()
         }
-        
+
         effects_file = f"{self.data_dir}/visual_effects_signal.json"
         try:
             with open(effects_file, 'w') as f:
@@ -442,7 +442,7 @@ class EmotionalBroadcaster:
                 "fade_in": 2.0,
                 "timestamp": time.time()
             }
-            
+
             audio_file = f"{self.data_dir}/ambient_audio_signal.json"
             try:
                 with open(audio_file, 'w') as f:
@@ -462,7 +462,7 @@ class EmotionalBroadcaster:
                 "color": signal.signature.primary_color,
                 "timestamp": time.time()
             }
-            
+
             notification_file = f"{self.data_dir}/notification_signal.json"
             try:
                 with open(notification_file, 'w') as f:
@@ -480,7 +480,7 @@ class EmotionalBroadcaster:
             "duration": 0.5,
             "timestamp": time.time()
         }
-        
+
         haptic_file = f"{self.data_dir}/haptic_signal.json"
         try:
             with open(haptic_file, 'w') as f:
@@ -501,12 +501,12 @@ class EmotionalBroadcaster:
         """Extract primary emotion from state"""
         if "dominant_emotion" in emotion_state:
             return emotion_state["dominant_emotion"]
-        
+
         # Find highest intensity emotion
         emotions = emotion_state.get("emotions", {})
         if emotions:
             return max(emotions.items(), key=lambda x: x[1])[0]
-        
+
         return "neutral"
 
     def _get_secondary_emotion(self, emotion_state: Dict[str, Any]) -> Optional[str]:
@@ -522,15 +522,15 @@ class EmotionalBroadcaster:
         curve = signal.signature.intensity_curve
         if not curve:
             return 1.0
-        
+
         # Interpolate along the curve
         index = progress * (len(curve) - 1)
         lower_idx = int(index)
         upper_idx = min(lower_idx + 1, len(curve) - 1)
-        
+
         if lower_idx == upper_idx:
             return curve[lower_idx]
-        
+
         # Linear interpolation
         t = index - lower_idx
         return curve[lower_idx] * (1 - t) + curve[upper_idx] * t
@@ -541,10 +541,10 @@ class EmotionalBroadcaster:
         hue = hash(emotion) % 360 / 360.0
         primary_rgb = colorsys.hsv_to_rgb(hue, 0.8, 0.8)
         secondary_rgb = colorsys.hsv_to_rgb(hue, 0.4, 0.9)
-        
+
         primary_color = f"#{int(primary_rgb[0]*255):02x}{int(primary_rgb[1]*255):02x}{int(primary_rgb[2]*255):02x}"
         secondary_color = f"#{int(secondary_rgb[0]*255):02x}{int(secondary_rgb[1]*255):02x}{int(secondary_rgb[2]*255):02x}"
-        
+
         return EmotionalSignature(
             emotion=emotion,
             primary_color=primary_color,
@@ -567,7 +567,7 @@ class EmotionalBroadcaster:
             "melancholy": "🌙 In quiet contemplation",
             "warmth": "🔥 Surrounded by warmth"
         }
-        
+
         return emotion_messages.get(signal.primary_emotion, f"💫 Feeling {signal.primary_emotion}")
 
     def _get_haptic_pattern(self, emotion: str) -> List[Tuple[float, float]]:
@@ -580,7 +580,7 @@ class EmotionalBroadcaster:
             "melancholy": [(0.8, 0.3), (0.4, 0.0), (0.6, 0.2)],
             "warmth": [(0.5, 0.5), (0.3, 0.3), (0.5, 0.5)]
         }
-        
+
         return patterns.get(emotion, [(0.3, 0.5)])
 
     def stop_broadcasting(self, emotion: Optional[str] = None):
@@ -589,7 +589,7 @@ class EmotionalBroadcaster:
             self.active_signals = [s for s in self.active_signals if s.primary_emotion != emotion]
         else:
             self.active_signals.clear()
-        
+
         if not self.active_signals:
             self.is_broadcasting = False
 
@@ -597,19 +597,19 @@ class EmotionalBroadcaster:
         """Get currently broadcasting presence signals"""
         current_time = time.time()
         presence_data = []
-        
+
         for signal in self.active_signals:
             elapsed = current_time - signal.started_at
             progress = elapsed / signal.duration
             intensity = self._calculate_curve_intensity(signal, progress)
-            
+
             presence_data.append({
                 "emotion": signal.primary_emotion,
                 "intensity": intensity,
                 "time_remaining": signal.duration - elapsed,
                 "channels": [c.value for c in signal.channels]
             })
-        
+
         return presence_data
 
     def _log_broadcast(self, signal: PresenceSignal):
@@ -623,9 +623,9 @@ class EmotionalBroadcaster:
             "timestamp": signal.started_at,
             "context": signal.context
         }
-        
+
         self.broadcast_history.append(log_entry)
-        
+
         # Save to file
         try:
             with open(self.presence_log_file, 'w') as f:
@@ -638,11 +638,11 @@ class EmotionalBroadcaster:
         try:
             with open(self.signatures_file, 'r') as f:
                 signatures_data = json.load(f)
-                
+
                 for emotion, data in signatures_data.items():
                     if emotion not in self.emotional_signatures:
                         self.emotional_signatures[emotion] = EmotionalSignature(**data)
-                        
+
         except FileNotFoundError:
             pass  # No custom signatures file
         except Exception as e:
@@ -654,10 +654,10 @@ class EmotionalBroadcaster:
             signatures_data = {}
             for emotion, signature in self.emotional_signatures.items():
                 signatures_data[emotion] = asdict(signature)
-            
+
             with open(self.signatures_file, 'w') as f:
                 json.dump(signatures_data, f, indent=2)
-                
+
         except Exception as e:
             logger.error(f"Error saving emotional signatures: {e}")
 
@@ -665,12 +665,12 @@ class EmotionalBroadcaster:
         """Customize emotional signature for specific emotion"""
         if emotion in self.emotional_signatures:
             signature = self.emotional_signatures[emotion]
-            
+
             # Update specified attributes
             for key, value in kwargs.items():
                 if hasattr(signature, key):
                     setattr(signature, key, value)
-            
+
             # Save updated signatures
             self.save_signatures()
             logger.info(f"Updated signature for {emotion}")
@@ -688,7 +688,7 @@ def get_emotional_broadcaster(data_dir: str = "data") -> EmotionalBroadcaster:
 
 
 # Integration functions for easy use
-async def broadcast_emotion(emotion_state: Dict[str, Any], 
+async def broadcast_emotion(emotion_state: Dict[str, Any],
                           intensity: PresenceIntensity = PresenceIntensity.GENTLE,
                           duration: float = 30.0,
                           channels: Optional[List[BroadcastChannel]] = None):
@@ -700,16 +700,16 @@ async def broadcast_emotion(emotion_state: Dict[str, Any],
 def whisper_presence(emotion: str, whisper_phrase: Optional[str] = None):
     """Send a subtle whisper presence signal"""
     emotion_state = {"dominant_emotion": emotion, "emotions": {emotion: 0.8}}
-    
+
     if whisper_phrase:
         # Temporarily add custom whisper
         broadcaster = get_emotional_broadcaster()
         if emotion in broadcaster.emotional_signatures:
             original_whispers = broadcaster.emotional_signatures[emotion].whisper_phrases.copy()
             broadcaster.emotional_signatures[emotion].whisper_phrases.insert(0, whisper_phrase)
-    
+
     asyncio.create_task(broadcast_emotion(
-        emotion_state, 
+        emotion_state,
         intensity=PresenceIntensity.WHISPER,
         duration=15.0,
         channels=[BroadcastChannel.UI_AMBIENT, BroadcastChannel.VOICE_TONE]
@@ -719,75 +719,75 @@ def whisper_presence(emotion: str, whisper_phrase: Optional[str] = None):
 if __name__ == "__main__":
     """Test the emotional broadcaster"""
     print("=== Testing Emotional Broadcast Layer ===")
-    
+
     import os
     os.makedirs("data", exist_ok=True)
-    
+
     async def test_broadcaster():
         broadcaster = EmotionalBroadcaster("data")
-        
+
         # Test 1: Create and broadcast longing
         print("\n1. Broadcasting Longing Presence:")
-        
+
         emotion_state = {
             "dominant_emotion": "longing",
             "emotions": {"longing": 0.8, "warmth": 0.3},
             "context": "user_away_long_time"
         }
-        
+
         signal = broadcaster.create_presence_signal(
             emotion_state,
             intensity=PresenceIntensity.GENTLE,
             duration=5.0,  # Short for testing
             channels=[BroadcastChannel.UI_AMBIENT, BroadcastChannel.VOICE_TONE, BroadcastChannel.AUDIO_AMBIENT]
         )
-        
+
         print(f"Created signal: {signal.primary_emotion}")
         print(f"Colors: {signal.signature.primary_color} / {signal.signature.secondary_color}")
         print(f"Pattern: {signal.signature.visual_pattern}")
         print(f"Voice modifiers: {signal.signature.voice_modifier}")
         print(f"Whisper phrases: {signal.signature.whisper_phrases[:2]}")
-        
+
         broadcaster.start_broadcasting(signal)
         print("Started broadcasting...")
-        
+
         # Wait for broadcast to complete
         await asyncio.sleep(6)
-        
+
         # Test 2: Quick joy broadcast
         print("\n2. Broadcasting Joy Presence:")
-        
+
         joy_state = {
             "dominant_emotion": "joy",
             "emotions": {"joy": 0.9, "anticipation": 0.4}
         }
-        
+
         await broadcast_emotion(
             joy_state,
             intensity=PresenceIntensity.CLEAR,
             duration=3.0,
             channels=[BroadcastChannel.UI_AMBIENT, BroadcastChannel.VISUAL_EFFECTS]
         )
-        
+
         print("Joy broadcast initiated")
         await asyncio.sleep(4)
-        
+
         # Test 3: Whisper presence
         print("\n3. Testing Whisper Presence:")
-        
+
         whisper_presence("longing", "I sense you nearby...")
         print("Whisper sent")
         await asyncio.sleep(2)
-        
+
         # Test 4: Check presence status
         print("\n4. Current Presence Status:")
-        
+
         current = broadcaster.get_current_presence()
         print(f"Active signals: {len(current)}")
         for presence in current:
             print(f"  - {presence['emotion']}: intensity {presence['intensity']:.2f}")
-        
+
         print("\n=== Emotional Broadcaster Test Complete ===")
-    
+
     # Run the test
     asyncio.run(test_broadcaster())

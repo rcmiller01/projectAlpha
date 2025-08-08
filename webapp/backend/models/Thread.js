@@ -102,7 +102,7 @@ ThreadSchema.methods.addMessage = function(messageData) {
 ThreadSchema.methods.getSummary = function() {
   const userMessages = this.messages.filter(msg => msg.sender === 'user').length;
   const agentMessages = this.messages.filter(msg => msg.sender === 'agent').length;
-  
+
   return {
     id: this._id,
     title: this.title,
@@ -126,7 +126,7 @@ ThreadSchema.statics.findByAgentType = function(agentType, userId = 'default') {
 // Static method to search threads
 ThreadSchema.statics.searchThreads = function(query, userId = 'default') {
   const searchRegex = new RegExp(query, 'i');
-  
+
   return this.find({
     userId,
     $or: [

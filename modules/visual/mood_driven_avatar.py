@@ -85,21 +85,21 @@ class MoodDrivenAvatar:
             emotional_intensity=0.5,
             timestamp=datetime.now()
         )
-        
+
         self.expression_definitions = self._load_expression_definitions()
         self.gesture_definitions = self._load_gesture_definitions()
         self.emotion_mappings = self._load_emotion_mappings()
         self.avatar_customization = self._load_avatar_customization()
-        
+
         # Animation state
         self.is_animating = False
         self.animation_queue = []
         self.current_animation = None
-        
+
         # Start animation loop
         self.is_running = True
         threading.Thread(target=self._animation_loop, daemon=True).start()
-    
+
     def _load_expression_definitions(self) -> Dict[AvatarExpression, ExpressionParameters]:
         """Load expression parameter definitions"""
         return {
@@ -232,7 +232,7 @@ class MoodDrivenAvatar:
                 overall_brightness=1.0
             )
         }
-    
+
     def _load_gesture_definitions(self) -> Dict[AvatarGesture, Dict]:
         """Load gesture definitions"""
         return {
@@ -333,7 +333,7 @@ class MoodDrivenAvatar:
                 "description": "Whispering gesture"
             }
         }
-    
+
     def _load_emotion_mappings(self) -> Dict[str, AvatarExpression]:
         """Load emotion to expression mappings"""
         return {
@@ -356,7 +356,7 @@ class MoodDrivenAvatar:
             "disgusted": AvatarExpression.DISGUSTED,
             "neutral": AvatarExpression.NEUTRAL
         }
-    
+
     def _load_avatar_customization(self) -> Dict[str, Dict]:
         """Load avatar customization options"""
         return {
@@ -401,53 +401,53 @@ class MoodDrivenAvatar:
                 "candlelit": "Candlelit atmosphere"
             }
         }
-    
-    def update_avatar_mood(self, emotion: str, intensity: float = 0.5, 
+
+    def update_avatar_mood(self, emotion: str, intensity: float = 0.5,
                           context: Dict[str, Any] = None):
         """Update avatar mood based on emotion"""
         try:
             # Map emotion to expression
             expression = self.emotion_mappings.get(emotion, AvatarExpression.NEUTRAL)
-            
+
             # Update current state
             self.current_state.expression = expression
             self.current_state.emotional_intensity = intensity
             self.current_state.timestamp = datetime.now()
-            
+
             # Update visual elements based on context
             if context:
                 self._update_visual_elements(context)
-            
+
             # Trigger appropriate gesture
             self._trigger_emotion_gesture(emotion, intensity)
-            
+
             print(f"[Avatar] Updated mood to {emotion} (intensity: {intensity:.2f})")
-            
+
         except Exception as e:
             print(f"[Avatar] Error updating mood: {e}")
-    
+
     def _update_visual_elements(self, context: Dict[str, Any]):
         """Update visual elements based on context"""
         # Update eye color based on emotion
         if "eye_color" in context:
             self.current_state.eye_color = context["eye_color"]
-        
+
         # Update hair style based on mood
         if "hair_style" in context:
             self.current_state.hair_style = context["hair_style"]
-        
+
         # Update clothing based on context
         if "clothing" in context:
             self.current_state.clothing = context["clothing"]
-        
+
         # Update background based on setting
         if "background" in context:
             self.current_state.background = context["background"]
-        
+
         # Update lighting based on mood
         if "lighting" in context:
             self.current_state.lighting = context["lighting"]
-    
+
     def _trigger_emotion_gesture(self, emotion: str, intensity: float):
         """Trigger appropriate gesture for emotion"""
         gesture_mappings = {
@@ -470,11 +470,11 @@ class MoodDrivenAvatar:
             "disgusted": AvatarGesture.None,
             "neutral": AvatarGesture.None
         }
-        
+
         gesture = gesture_mappings.get(emotion)
         if gesture and intensity > 0.3:
             self.trigger_gesture(gesture, intensity)
-    
+
     def trigger_gesture(self, gesture: AvatarGesture, intensity: float = 0.5):
         """Trigger a specific gesture"""
         try:
@@ -484,12 +484,12 @@ class MoodDrivenAvatar:
                 "intensity": intensity,
                 "timestamp": datetime.now()
             })
-            
+
             print(f"[Avatar] Triggered gesture: {gesture.value}")
-            
+
         except Exception as e:
             print(f"[Avatar] Error triggering gesture: {e}")
-    
+
     def _animation_loop(self):
         """Main animation loop"""
         while self.is_running:
@@ -498,28 +498,28 @@ class MoodDrivenAvatar:
                 if self.animation_queue and not self.is_animating:
                     animation = self.animation_queue.pop(0)
                     self._execute_animation(animation)
-                
+
                 # Update current animation
                 if self.current_animation:
                     self._update_current_animation()
-                
+
                 time.sleep(0.1)  # 10 FPS
-                
+
             except Exception as e:
                 print(f"[Avatar] Animation loop error: {e}")
                 time.sleep(1.0)
-    
+
     def _execute_animation(self, animation: Dict):
         """Execute an animation"""
         try:
             gesture = animation["gesture"]
             intensity = animation["intensity"]
-            
+
             # Get gesture definition
             gesture_def = self.gesture_definitions.get(gesture)
             if not gesture_def:
                 return
-            
+
             # Set current animation
             self.current_animation = {
                 "gesture": gesture,
@@ -528,26 +528,26 @@ class MoodDrivenAvatar:
                 "start_time": time.time(),
                 "body_parts": gesture_def["body_parts"]
             }
-            
+
             # Update avatar state
             self.current_state.gesture = gesture
             self.current_state.animation_intensity = intensity
             self.is_animating = True
-            
+
             print(f"[Avatar] Started animation: {gesture.value}")
-            
+
         except Exception as e:
             print(f"[Avatar] Error executing animation: {e}")
-    
+
     def _update_current_animation(self):
         """Update current animation progress"""
         if not self.current_animation:
             return
-        
+
         current_time = time.time()
         start_time = self.current_animation["start_time"]
         duration = self.current_animation["duration"]
-        
+
         # Check if animation is complete
         if current_time - start_time >= duration:
             self._complete_animation()
@@ -555,25 +555,25 @@ class MoodDrivenAvatar:
             # Update animation progress
             progress = (current_time - start_time) / duration
             self._update_animation_progress(progress)
-    
+
     def _update_animation_progress(self, progress: float):
         """Update animation progress"""
         # In a real implementation, this would update the visual animation
         # For now, we'll just track the progress
         pass
-    
+
     def _complete_animation(self):
         """Complete current animation"""
         self.current_animation = None
         self.current_state.gesture = None
         self.is_animating = False
-        
+
         print("[Avatar] Animation completed")
-    
+
     def get_avatar_state(self) -> Dict[str, Any]:
         """Get current avatar state"""
         expression_params = self.expression_definitions.get(self.current_state.expression)
-        
+
         return {
             "expression": self.current_state.expression.value,
             "gesture": self.current_state.gesture.value if self.current_state.gesture else None,
@@ -595,7 +595,7 @@ class MoodDrivenAvatar:
             "timestamp": self.current_state.timestamp.isoformat(),
             "is_animating": self.is_animating
         }
-    
+
     def customize_avatar(self, eye_color: str = None, hair_style: str = None,
                         clothing: str = None, background: str = None,
                         lighting: str = None):
@@ -603,24 +603,24 @@ class MoodDrivenAvatar:
         try:
             if eye_color and eye_color in self.avatar_customization["eye_colors"]:
                 self.current_state.eye_color = self.avatar_customization["eye_colors"][eye_color]
-            
+
             if hair_style and hair_style in self.avatar_customization["hair_styles"]:
                 self.current_state.hair_style = hair_style
-            
+
             if clothing and clothing in self.avatar_customization["clothing"]:
                 self.current_state.clothing = clothing
-            
+
             if background and background in self.avatar_customization["backgrounds"]:
                 self.current_state.background = background
-            
+
             if lighting and lighting in self.avatar_customization["lighting"]:
                 self.current_state.lighting = lighting
-            
+
             print(f"[Avatar] Customized appearance")
-            
+
         except Exception as e:
             print(f"[Avatar] Error customizing avatar: {e}")
-    
+
     def get_available_customizations(self) -> Dict[str, List[str]]:
         """Get available customization options"""
         return {
@@ -630,7 +630,7 @@ class MoodDrivenAvatar:
             "backgrounds": list(self.avatar_customization["backgrounds"].keys()),
             "lighting": list(self.avatar_customization["lighting"].keys())
         }
-    
+
     def get_avatar_summary(self) -> Dict[str, Any]:
         """Get avatar system summary"""
         return {
@@ -672,4 +672,4 @@ def customize_avatar(eye_color: str = None, hair_style: str = None,
                     clothing: str = None, background: str = None,
                     lighting: str = None):
     """Customize avatar with convenience function"""
-    mood_driven_avatar.customize_avatar(eye_color, hair_style, clothing, background, lighting) 
+    mood_driven_avatar.customize_avatar(eye_color, hair_style, clothing, background, lighting)

@@ -13,7 +13,7 @@
       ]
     },
     "deep_yearning": {
-      "trigger_type": "silence_duration", 
+      "trigger_type": "silence_duration",
       "threshold_seconds": 1800,
       "response_style": "soft_interruption",
       "intensity_curve": "exponential",

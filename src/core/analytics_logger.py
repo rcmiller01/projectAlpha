@@ -20,11 +20,11 @@ class AnalyticsLogger:
     """
     Comprehensive logging and analytics for AI orchestration
     """
-    
+
     def __init__(self, logs_dir: str = "logs"):
         self.logs_dir = Path(logs_dir)
         self.logs_dir.mkdir(exist_ok=True)
-        
+
         # Log files
         self.routing_log_file = self.logs_dir / "routing_decisions.jsonl"
         self.performance_log_file = self.logs_dir / "performance_metrics.jsonl"
@@ -32,7 +32,7 @@ class AnalyticsLogger:
         self.route_map_file = self.logs_dir / "routing_map.jsonl"
         self.custom_events_file = self.logs_dir / "custom_events.jsonl"
         self.preference_votes_file = self.logs_dir / "emotion_votes.jsonl"
-        
+
         # In-memory buffers for real-time analytics
         self.recent_requests = deque(maxlen=1000)  # Last 1000 requests
         self.handler_stats = defaultdict(lambda: {
@@ -43,7 +43,7 @@ class AnalyticsLogger:
             "error_count": 0,
             "total_tokens": 0
         })
-        
+
         self.daily_stats: Dict[str, Dict[str, Any]] = defaultdict(lambda: {
             "requests": 0,
             "handlers_used": defaultdict(int),
@@ -53,13 +53,13 @@ class AnalyticsLogger:
 
         # Preference vote tracking
         self.vote_counts = {"a": 0, "b": 0, "total": 0}
-        
+
         logger.info("📊 Analytics Logger initialized")
-    
-    def log_routing_decision(self, request_data: Dict[str, Any], routing_result: Dict[str, Any], 
+
+    def log_routing_decision(self, request_data: Dict[str, Any], routing_result: Dict[str, Any],
                            persona: str = "unknown") -> str:
         """Log a routing decision with full context"""
-        
+
         log_entry = {
             "timestamp": datetime.now().isoformat(),
             "request_id": f"{int(time.time() * 1000)}_{hash(request_data.get('message', ''))%10000:04d}",
@@ -78,7 +78,7 @@ class AnalyticsLogger:
                 "context_size": len(str(request_data.get("context", {})))
             }
         }
-        
+
         # Write to log file
         self._append_to_jsonl(self.routing_log_file, log_entry)
 
@@ -90,7 +90,7 @@ class AnalyticsLogger:
             persona,
             routing_result.get("confidence")
         )
-        
+
         # Add to recent requests
         self.recent_requests.append(log_entry)
 
@@ -110,13 +110,13 @@ class AnalyticsLogger:
         }
 
         self._append_to_jsonl(self.route_map_file, entry)
-    
-    def log_performance_metrics(self, request_id: str, handler: str, 
-                              latency: float, success: bool, 
+
+    def log_performance_metrics(self, request_id: str, handler: str,
+                              latency: float, success: bool,
                               token_usage: Optional[Dict[str, int]] = None,
                               error_message: Optional[str] = None):
         """Log performance metrics for a completed request"""
-        
+
         perf_entry = {
             "timestamp": datetime.now().isoformat(),
             "request_id": request_id,
@@ -126,39 +126,39 @@ class AnalyticsLogger:
             "token_usage": token_usage or {},
             "error_message": error_message
         }
-        
+
         # Write to performance log
         self._append_to_jsonl(self.performance_log_file, perf_entry)
-        
+
         # Update handler statistics
         stats = self.handler_stats[handler]
         stats["count"] += 1
         stats["total_latency"] += latency
         stats["avg_latency"] = stats["total_latency"] / stats["count"]
-        
+
         if success:
             stats["success_count"] += 1
         else:
             stats["error_count"] += 1
-        
+
         if token_usage:
             total_tokens = token_usage.get("prompt_tokens", 0) + token_usage.get("completion_tokens", 0)
             stats["total_tokens"] += total_tokens
-        
+
         # Update daily stats
         today = datetime.now().strftime("%Y-%m-%d")
         daily = self.daily_stats[today]
         daily["requests"] += 1
         daily["handlers_used"][handler] += 1
-        
+
         if not success:
             # Recalculate error rate
             total_requests = daily["requests"]
-            error_requests = sum(1 for req in self.recent_requests 
-                               if req["timestamp"].startswith(today) and 
+            error_requests = sum(1 for req in self.recent_requests
+                               if req["timestamp"].startswith(today) and
                                req.get("success", True) is False)
             daily["error_rate"] = error_requests / total_requests if total_requests > 0 else 0.0
-    
+
     def _append_to_jsonl(self, file_path: Path, data: Dict[str, Any]):
         """Append JSON data to a JSONL file"""
         try:
@@ -196,33 +196,33 @@ class AnalyticsLogger:
             "a_percent": round(self.vote_counts["a"] / total * 100, 2) if total else 0.0,
             "b_percent": round(self.vote_counts["b"] / total * 100, 2) if total else 0.0,
         }
-    
+
     def get_real_time_stats(self) -> Dict[str, Any]:
         """Get real-time analytics summary"""
-        
+
         # Calculate stats from recent requests
         recent_count = len(self.recent_requests)
         if recent_count == 0:
             return {"status": "no_data", "message": "No recent requests"}
-        
+
         # Handler distribution
         handler_counts = defaultdict(int)
         persona_counts = defaultdict(int)
         recent_latencies = []
-        
+
         for req in self.recent_requests:
             handler = req.get("routing", {}).get("handler", "unknown")
             persona = req.get("persona", "unknown")
             handler_counts[handler] += 1
             persona_counts[persona] += 1
-        
+
         # Get latencies from handler stats
         for handler, stats in self.handler_stats.items():
             if stats["count"] > 0:
                 recent_latencies.append(stats["avg_latency"])
-        
+
         avg_latency = sum(recent_latencies) / len(recent_latencies) if recent_latencies else 0.0
-        
+
         return {
             "timestamp": datetime.now().isoformat(),
             "recent_requests": recent_count,
@@ -244,12 +244,12 @@ class AnalyticsLogger:
                 if stats["count"] > 0
             }
         }
-    
+
     def _count_active_sessions(self) -> int:
         """Count unique session IDs in recent requests"""
         recent_sessions = set()
         cutoff_time = datetime.now() - timedelta(hours=1)  # Last hour
-        
+
         for req in self.recent_requests:
             try:
                 req_time = datetime.fromisoformat(req["timestamp"])
@@ -259,29 +259,29 @@ class AnalyticsLogger:
                         recent_sessions.add(session_id)
             except:
                 continue
-        
+
         return len(recent_sessions)
-    
+
     def get_daily_analytics(self, days_back: int = 7) -> Dict[str, Any]:
         """Get daily analytics for the past N days"""
-        
+
         analytics = {
             "period": f"last_{days_back}_days",
             "generated_at": datetime.now().isoformat(),
             "daily_breakdown": {}
         }
-        
+
         # Generate daily summaries
         for i in range(days_back):
             date = (datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d")
-            
+
             if date in self.daily_stats:
                 daily_data = self.daily_stats[date]
                 analytics["daily_breakdown"][date] = {
                     "total_requests": daily_data["requests"],
                     "handlers_used": dict(daily_data["handlers_used"]),
                     "error_rate": round(daily_data["error_rate"], 3),
-                    "most_used_handler": max(daily_data["handlers_used"].items(), 
+                    "most_used_handler": max(daily_data["handlers_used"].items(),
                                            key=lambda x: x[1])[0] if daily_data["handlers_used"] else "none"
                 }
             else:
@@ -291,34 +291,34 @@ class AnalyticsLogger:
                     "error_rate": 0.0,
                     "most_used_handler": "none"
                 }
-        
+
         # Calculate totals
         total_requests = sum(day["total_requests"] for day in analytics["daily_breakdown"].values())
         avg_error_rate = sum(day["error_rate"] for day in analytics["daily_breakdown"].values()) / days_back
-        
+
         analytics["summary"] = {
             "total_requests": total_requests,
             "avg_daily_requests": round(total_requests / days_back, 1),
             "avg_error_rate": round(avg_error_rate, 3),
             "active_days": sum(1 for day in analytics["daily_breakdown"].values() if day["total_requests"] > 0)
         }
-        
+
         return analytics
-    
+
     def get_handler_performance_report(self) -> Dict[str, Any]:
         """Get detailed performance report for each handler"""
-        
+
         report = {
             "generated_at": datetime.now().isoformat(),
             "handlers": {}
         }
-        
+
         for handler, stats in self.handler_stats.items():
             if stats["count"] > 0:
                 success_rate = stats["success_count"] / stats["count"]
                 error_rate = stats["error_count"] / stats["count"]
                 avg_tokens_per_request = stats["total_tokens"] / stats["count"] if stats["count"] > 0 else 0
-                
+
                 # Performance rating
                 if success_rate >= 0.95 and stats["avg_latency"] < 5.0:
                     performance_rating = "excellent"
@@ -328,7 +328,7 @@ class AnalyticsLogger:
                     performance_rating = "fair"
                 else:
                     performance_rating = "poor"
-                
+
                 report["handlers"][handler] = {
                     "total_requests": stats["count"],
                     "success_rate": round(success_rate, 3),
@@ -338,19 +338,19 @@ class AnalyticsLogger:
                     "avg_tokens_per_request": round(avg_tokens_per_request, 1),
                     "performance_rating": performance_rating
                 }
-        
+
         return report
-    
-    def search_logs(self, query: str, log_type: str = "routing", 
+
+    def search_logs(self, query: str, log_type: str = "routing",
                    hours_back: int = 24, limit: int = 50) -> List[Dict[str, Any]]:
         """Search through logs for specific patterns"""
-        
+
         results = []
         cutoff_time = datetime.now() - timedelta(hours=hours_back)
         query_lower = query.lower()
-        
+
         log_file = self.routing_log_file if log_type == "routing" else self.performance_log_file
-        
+
         try:
             if log_file.exists():
                 with open(log_file, 'r', encoding='utf-8') as f:
@@ -358,7 +358,7 @@ class AnalyticsLogger:
                         try:
                             entry = json.loads(line.strip())
                             entry_time = datetime.fromisoformat(entry["timestamp"])
-                            
+
                             if entry_time > cutoff_time:
                                 # Search in various fields
                                 searchable_text = json.dumps(entry).lower()
@@ -370,15 +370,15 @@ class AnalyticsLogger:
                             continue
         except Exception as e:
             logger.error(f"Error searching logs: {e}")
-        
+
         return results
-    
+
     def export_analytics(self, filename: Optional[str] = None) -> str:
         """Export comprehensive analytics to JSON file"""
-        
+
         if filename is None:
             filename = f"analytics_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        
+
         export_data = {
             "export_info": {
                 "generated_at": datetime.now().isoformat(),
@@ -400,50 +400,50 @@ class AnalyticsLogger:
                 )
             }
         }
-        
+
         export_path = self.logs_dir / filename
         try:
             with open(export_path, 'w', encoding='utf-8') as f:
                 json.dump(export_data, f, indent=2)
-            
+
             logger.info(f"Analytics exported to: {export_path}")
             return str(export_path)
-            
+
         except Exception as e:
             logger.error(f"Error exporting analytics: {e}")
             return f"Error: {e}"
-    
+
     def cleanup_old_logs(self, days_to_keep: int = 30) -> Dict[str, int]:
         """Clean up log files older than specified days"""
-        
+
         cutoff_date = datetime.now() - timedelta(days=days_to_keep)
         cleaned_count = {"routing": 0, "performance": 0}
-        
+
         # Clean routing logs
         cleaned_count["routing"] = self._clean_jsonl_file(self.routing_log_file, cutoff_date)
-        
-        # Clean performance logs  
+
+        # Clean performance logs
         cleaned_count["performance"] = self._clean_jsonl_file(self.performance_log_file, cutoff_date)
-        
+
         logger.info(f"Cleaned {cleaned_count['routing']} routing entries and {cleaned_count['performance']} performance entries")
         return cleaned_count
-    
+
     def _clean_jsonl_file(self, file_path: Path, cutoff_date: datetime) -> int:
         """Clean entries older than cutoff date from a JSONL file"""
-        
+
         if not file_path.exists():
             return 0
-        
+
         kept_lines = []
         removed_count = 0
-        
+
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 for line in f:
                     try:
                         entry = json.loads(line.strip())
                         entry_date = datetime.fromisoformat(entry["timestamp"])
-                        
+
                         if entry_date >= cutoff_date:
                             kept_lines.append(line)
                         else:
@@ -451,12 +451,12 @@ class AnalyticsLogger:
                     except:
                         # Keep malformed lines
                         kept_lines.append(line)
-            
+
             # Rewrite file with kept lines
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.writelines(kept_lines)
-                
+
         except Exception as e:
             logger.error(f"Error cleaning log file {file_path}: {e}")
-        
+
         return removed_count

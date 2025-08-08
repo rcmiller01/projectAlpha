@@ -31,14 +31,14 @@ logger = logging.getLogger(__name__)
 
 class ProductionDeployer:
     """Comprehensive production deployment orchestrator"""
-    
+
     def __init__(self, config_path: str = "deployment/production_config.yml"):
         self.config_path = config_path
         self.config = self.load_deployment_config()
         self.docker_client = docker.from_env()
         self.deployment_root = Path(__file__).parent.parent
         self.backup_dir = self.deployment_root / "backups"
-        
+
     def load_deployment_config(self) -> Dict[str, Any]:
         """Load production deployment configuration"""
         try:
@@ -51,7 +51,7 @@ class ProductionDeployer:
         except Exception as e:
             logger.error(f"Failed to load config: {e}")
             return self.create_default_config()
-    
+
     def create_default_config(self) -> Dict[str, Any]:
         """Create default production configuration"""
         return {
@@ -104,13 +104,13 @@ class ProductionDeployer:
                 "encryption": True
             }
         }
-    
+
     def check_system_requirements(self) -> bool:
         """Verify system meets production requirements"""
         logger.info("🔍 Checking system requirements...")
-        
+
         requirements_met = True
-        
+
         # Check available memory (minimum 8GB)
         memory_gb = psutil.virtual_memory().total / (1024**3)
         if memory_gb < 8:
@@ -118,7 +118,7 @@ class ProductionDeployer:
             requirements_met = False
         else:
             logger.info(f"✅ Memory: {memory_gb:.1f}GB")
-        
+
         # Check available disk space (minimum 50GB)
         disk_usage = psutil.disk_usage('/')
         disk_gb = disk_usage.free / (1024**3)
@@ -127,7 +127,7 @@ class ProductionDeployer:
             requirements_met = False
         else:
             logger.info(f"✅ Disk space: {disk_gb:.1f}GB available")
-        
+
         # Check Docker availability
         try:
             docker_version = self.docker_client.version()
@@ -135,7 +135,7 @@ class ProductionDeployer:
         except Exception as e:
             logger.error(f"❌ Docker not available: {e}")
             requirements_met = False
-        
+
         # Check Python version (minimum 3.8)
         python_version = sys.version_info
         if python_version < (3, 8):
@@ -143,61 +143,61 @@ class ProductionDeployer:
             requirements_met = False
         else:
             logger.info(f"✅ Python: {python_version.major}.{python_version.minor}.{python_version.micro}")
-        
+
         return requirements_met
-    
+
     def create_production_env_file(self):
         """Generate production environment variables"""
         logger.info("📝 Creating production environment file...")
-        
+
         env_vars = {
             # Core Configuration
             "NODE_ENV": "production",
             "PYTHON_ENV": "production",
             "DEBUG": "false",
-            
+
             # Database
             "MONGODB_URI": "mongodb://mongodb:27017/ai_companion_prod",
             "MONGODB_DATABASE": "ai_companion_prod",
-            
+
             # API Configuration
             "API_BASE_URL": f"https://{self.config['deployment']['domain']}/api",
             "FRONTEND_URL": f"https://{self.config['deployment']['domain']}",
-            
+
             # Security
             "JWT_SECRET": self.generate_secure_key(),
             "ENCRYPTION_KEY": self.generate_secure_key(),
             "SESSION_SECRET": self.generate_secure_key(),
-            
+
             # External APIs (placeholder - to be configured)
             "OPENAI_API_KEY": "${OPENAI_API_KEY}",
             "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}",
             "ELEVENLABS_API_KEY": "${ELEVENLABS_API_KEY}",
             "TWILIO_ACCOUNT_SID": "${TWILIO_ACCOUNT_SID}",
             "TWILIO_AUTH_TOKEN": "${TWILIO_AUTH_TOKEN}",
-            
+
             # Performance
             "MAX_WORKERS": str(psutil.cpu_count()),
             "REDIS_URL": "redis://redis:6379/0",
-            
+
             # Monitoring
             "PROMETHEUS_ENABLED": "true",
             "LOG_LEVEL": "info",
-            
+
             # Features
             "CREATIVE_DISCOVERY_ENABLED": "true",
             "VOICE_SYNTHESIS_ENABLED": "true",
             "SMS_INTEGRATION_ENABLED": "true",
             "BIOMETRIC_INTEGRATION_ENABLED": "true"
         }
-        
+
         env_file_path = self.deployment_root / ".env.production"
         with open(env_file_path, 'w') as f:
             for key, value in env_vars.items():
                 f.write(f"{key}={value}\n")
-        
+
         logger.info(f"✅ Environment file created: {env_file_path}")
-        
+
         # Create template for secrets
         secrets_template_path = self.deployment_root / ".env.secrets.template"
         with open(secrets_template_path, 'w') as f:
@@ -207,20 +207,20 @@ class ProductionDeployer:
             f.write("ELEVENLABS_API_KEY=your_elevenlabs_key_here\n")
             f.write("TWILIO_ACCOUNT_SID=your_twilio_sid_here\n")
             f.write("TWILIO_AUTH_TOKEN=your_twilio_token_here\n")
-        
+
         logger.info(f"📋 Secrets template created: {secrets_template_path}")
-    
+
     def generate_secure_key(self, length: int = 64) -> str:
         """Generate cryptographically secure random key"""
         import secrets
         import string
         alphabet = string.ascii_letters + string.digits
         return ''.join(secrets.choice(alphabet) for _ in range(length))
-    
+
     def create_docker_compose_production(self):
         """Generate production-ready docker-compose.yml"""
         logger.info("🐳 Creating production Docker Compose configuration...")
-        
+
         compose_config = {
             "version": "3.8",
             "services": {
@@ -322,7 +322,7 @@ class ProductionDeployer:
                 "uploads_data": None
             }
         }
-        
+
         # Add monitoring services if enabled
         if self.config['monitoring']['prometheus']:
             compose_config['services']['prometheus'] = {
@@ -335,7 +335,7 @@ class ProductionDeployer:
                 "restart": "unless-stopped",
                 "networks": ["ai_companion_network"]
             }
-        
+
         if self.config['monitoring']['grafana']:
             compose_config['services']['grafana'] = {
                 "image": "grafana/grafana:latest",
@@ -350,21 +350,21 @@ class ProductionDeployer:
                 "restart": "unless-stopped",
                 "networks": ["ai_companion_network"]
             }
-        
+
         # Write production docker-compose file
         compose_file_path = self.deployment_root / "docker-compose.production.yml"
         with open(compose_file_path, 'w') as f:
             yaml.dump(compose_config, f, default_flow_style=False, indent=2)
-        
+
         logger.info(f"✅ Production Docker Compose created: {compose_file_path}")
-    
+
     def create_nginx_config(self):
         """Generate production Nginx configuration"""
         logger.info("🌐 Creating Nginx configuration...")
-        
+
         nginx_dir = self.deployment_root / "nginx"
         nginx_dir.mkdir(exist_ok=True)
-        
+
         nginx_config = f"""
 # Production Nginx Configuration for AI Companion System
 user nginx;
@@ -417,7 +417,7 @@ http {{
     upstream frontend {{
         server frontend:{self.config['services']['frontend']['port']} max_fails=3 fail_timeout=30s;
     }}
-    
+
     upstream backend {{
         server backend:{self.config['services']['backend']['port']} max_fails=3 fail_timeout=30s;
     }}
@@ -512,17 +512,17 @@ http {{
     }}
 }}
 """
-        
+
         nginx_config_path = nginx_dir / "nginx.conf"
         with open(nginx_config_path, 'w') as f:
             f.write(nginx_config.strip())
-        
+
         logger.info(f"✅ Nginx configuration created: {nginx_config_path}")
-    
+
     def create_production_dockerfiles(self):
         """Create optimized production Dockerfiles"""
         logger.info("🐳 Creating production Dockerfiles...")
-        
+
         # Frontend production Dockerfile
         frontend_dockerfile = """
 # Frontend Production Dockerfile
@@ -542,12 +542,12 @@ COPY nginx.conf /etc/nginx/nginx.conf
 EXPOSE 3000
 CMD ["nginx", "-g", "daemon off;"]
 """
-        
+
         frontend_docker_path = self.deployment_root / "frontend" / "Dockerfile.production"
         frontend_docker_path.parent.mkdir(exist_ok=True)
         with open(frontend_docker_path, 'w') as f:
             f.write(frontend_dockerfile.strip())
-        
+
         # Backend production Dockerfile
         backend_dockerfile = """
 # Backend Production Dockerfile
@@ -581,21 +581,21 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \\
 EXPOSE 8000
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "main:app"]
 """
-        
+
         backend_docker_path = self.deployment_root / "backend" / "Dockerfile.production"
         backend_docker_path.parent.mkdir(exist_ok=True)
         with open(backend_docker_path, 'w') as f:
             f.write(backend_dockerfile.strip())
-        
+
         logger.info("✅ Production Dockerfiles created")
-    
+
     def setup_monitoring(self):
         """Configure monitoring and observability"""
         logger.info("📊 Setting up monitoring and observability...")
-        
+
         monitoring_dir = self.deployment_root / "monitoring"
         monitoring_dir.mkdir(exist_ok=True)
-        
+
         # Prometheus configuration
         prometheus_config = {
             "global": {
@@ -631,17 +631,17 @@ CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--worker-class", "
                 }
             ]
         }
-        
+
         prometheus_config_path = monitoring_dir / "prometheus.yml"
         with open(prometheus_config_path, 'w') as f:
             yaml.dump(prometheus_config, f, default_flow_style=False)
-        
+
         logger.info("✅ Monitoring configuration created")
-    
+
     def create_backup_scripts(self):
         """Create automated backup scripts"""
         logger.info("💾 Creating backup scripts...")
-        
+
         backup_script = f"""#!/bin/bash
 # Automated Backup Script for AI Companion System
 
@@ -685,23 +685,23 @@ find "$BACKUP_DIR" -name "ai_companion_backup_*.tar.gz" -mtime +{self.config['ba
 
 echo "Backup completed: $BACKUP_NAME.tar.gz"
 """
-        
+
         backup_script_path = self.deployment_root / "scripts" / "backup.sh"
         backup_script_path.parent.mkdir(exist_ok=True)
         with open(backup_script_path, 'w') as f:
             f.write(backup_script.strip())
-        
+
         backup_script_path.chmod(0o755)
-        
+
         logger.info("✅ Backup scripts created")
-    
+
     def create_deployment_scripts(self):
         """Create deployment and management scripts"""
         logger.info("📜 Creating deployment scripts...")
-        
+
         scripts_dir = self.deployment_root / "scripts"
         scripts_dir.mkdir(exist_ok=True)
-        
+
         # Deploy script
         deploy_script = """#!/bin/bash
 # AI Companion Production Deployment Script
@@ -747,12 +747,12 @@ done
 echo "🎉 Deployment completed successfully!"
 echo "🌐 Application available at: https://$(grep FRONTEND_URL .env.production | cut -d'=' -f2)"
 """
-        
+
         deploy_script_path = scripts_dir / "deploy.sh"
         with open(deploy_script_path, 'w') as f:
             f.write(deploy_script.strip())
         deploy_script_path.chmod(0o755)
-        
+
         # Update script
         update_script = """#!/bin/bash
 # AI Companion System Update Script
@@ -779,12 +779,12 @@ docker-compose -f docker-compose.production.yml up -d
 
 echo "✅ Update completed successfully!"
 """
-        
+
         update_script_path = scripts_dir / "update.sh"
         with open(update_script_path, 'w') as f:
             f.write(update_script.strip())
         update_script_path.chmod(0o755)
-        
+
         # Status script
         status_script = """#!/bin/bash
 # AI Companion System Status Check
@@ -811,21 +811,21 @@ echo ""
 echo "📈 Recent Logs:"
 docker-compose -f docker-compose.production.yml logs --tail=10 backend
 """
-        
+
         status_script_path = scripts_dir / "status.sh"
         with open(status_script_path, 'w') as f:
             f.write(status_script.strip())
         status_script_path.chmod(0o755)
-        
+
         logger.info("✅ Deployment scripts created")
-    
+
     def create_security_configurations(self):
         """Set up security configurations and firewall rules"""
         logger.info("🔒 Setting up security configurations...")
-        
+
         security_dir = self.deployment_root / "security"
         security_dir.mkdir(exist_ok=True)
-        
+
         # Firewall rules script
         firewall_script = """#!/bin/bash
 # Production Firewall Configuration
@@ -853,12 +853,12 @@ ufw --force enable
 
 echo "🔒 Firewall configured successfully"
 """
-        
+
         firewall_script_path = security_dir / "setup_firewall.sh"
         with open(firewall_script_path, 'w') as f:
             f.write(firewall_script.strip())
         firewall_script_path.chmod(0o755)
-        
+
         # SSL certificate generation script
         ssl_script = """#!/bin/bash
 # SSL Certificate Setup Script
@@ -878,52 +878,52 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 \\
 echo "🔐 SSL certificate generated for $DOMAIN"
 echo "⚠️  This is a self-signed certificate. Use Let's Encrypt for production."
 """
-        
+
         ssl_script_path = security_dir / "setup_ssl.sh"
         with open(ssl_script_path, 'w') as f:
             f.write(ssl_script.strip())
         ssl_script_path.chmod(0o755)
-        
+
         logger.info("✅ Security configurations created")
-    
+
     def run_full_deployment(self):
         """Execute complete production deployment"""
         logger.info("🚀 Starting full production deployment...")
-        
+
         try:
             # System checks
             if not self.check_system_requirements():
                 logger.error("❌ System requirements not met. Aborting deployment.")
                 return False
-            
+
             # Create configuration files
             self.create_production_env_file()
             self.create_docker_compose_production()
             self.create_nginx_config()
             self.create_production_dockerfiles()
-            
+
             # Setup monitoring and backup
             self.setup_monitoring()
             self.create_backup_scripts()
-            
+
             # Create deployment scripts
             self.create_deployment_scripts()
             self.create_security_configurations()
-            
+
             # Create data directories
             data_dirs = ["data/mongodb", "data/redis", "data/uploads", "data/generated_content", "logs", "backups"]
             for dir_path in data_dirs:
                 (self.deployment_root / dir_path).mkdir(parents=True, exist_ok=True)
-            
+
             logger.info("✅ Production deployment preparation completed successfully!")
             logger.info("📋 Next steps:")
             logger.info("1. Copy .env.secrets.template to .env.secrets and fill in your API keys")
             logger.info("2. Configure SSL certificates: ./security/setup_ssl.sh your-domain.com")
             logger.info("3. Run deployment: ./scripts/deploy.sh")
             logger.info("4. Check status: ./scripts/status.sh")
-            
+
             return True
-            
+
         except Exception as e:
             logger.error(f"❌ Deployment preparation failed: {e}")
             return False
@@ -931,7 +931,7 @@ echo "⚠️  This is a self-signed certificate. Use Let's Encrypt for productio
 def main():
     """Main deployment function"""
     deployer = ProductionDeployer()
-    
+
     if len(sys.argv) > 1:
         command = sys.argv[1]
         if command == "check":

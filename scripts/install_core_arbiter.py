@@ -52,7 +52,7 @@ def setup_react_component():
     """Set up React component dependencies"""
     if not check_node_npm():
         return False
-    
+
     try:
         print("📦 Installing React dependencies...")
         subprocess.check_call(["npm", "install"])
@@ -91,7 +91,7 @@ def create_sample_configs():
             "last_update": "2024-01-01T00:00:00Z"
         }
     }
-    
+
     for file_path, content in configs.items():
         path = Path(file_path)
         if not path.exists():
@@ -105,28 +105,28 @@ def run_tests():
     """Run basic tests to verify installation"""
     try:
         print("🧪 Running basic tests...")
-        
+
         # Test CoreArbiter import
         from core.core_arbiter import CoreArbiter
         arbiter = CoreArbiter()
         print("✅ CoreArbiter import and initialization successful")
-        
+
         # Test async functionality
         import asyncio
         async def test_process():
             response = await arbiter.process_input("Hello", {"context": "test"})
             return response.final_output is not None
-        
+
         result = asyncio.run(test_process())
         if result:
             print("✅ CoreArbiter processing test successful")
         else:
             print("❌ CoreArbiter processing test failed")
             return False
-        
+
         print("✅ All tests passed")
         return True
-        
+
     except Exception as e:
         print(f"❌ Test failed: {e}")
         return False
@@ -134,7 +134,7 @@ def run_tests():
 def print_next_steps():
     """Print next steps for the user"""
     print("\n🎯 === Setup Complete! ===\n")
-    
+
     print("📚 Quick Start:")
     print("1. Run the complete system demo:")
     print("   python demo_complete_system.py")
@@ -142,16 +142,16 @@ def print_next_steps():
     print("   python simple_chat_demo.py")
     print("\n3. Start API server for web integration:")
     print("   python core_arbiter_api.py")
-    
+
     print("\n🌐 For React/Web Integration:")
     print("   - Copy ui/EmotionallyInfusedChat.jsx to your React project")
     print("   - Install dependencies: npm install axios")
     print("   - Configure TailwindCSS with provided tailwind.config.js")
     print("   - Point component to your API server (default: http://localhost:5000)")
-    
+
     print("\n📖 Documentation:")
     print("   README_CoreArbiter.md - Complete system documentation")
-    
+
     print("\n📁 Key Files Created:")
     print("   ✓ core_arbiter.py - Main CoreArbiter decision engine")
     print("   ✓ ui/EmotionallyInfusedChat.jsx - React chat component with mood ring")
@@ -159,7 +159,7 @@ def print_next_steps():
     print("   ✓ data/ - Configuration files for weighting strategies")
     print("   ✓ Demo and test scripts")
     print("   ✓ package.json & tailwind.config.js - React component setup")
-    
+
     print("\n🔗 API Endpoints:")
     print("   • POST /api/arbiter/process - Process input through CoreArbiter")
     print("   • GET /api/arbiter/status - System health and statistics")
@@ -169,31 +169,31 @@ def print_next_steps():
 def main():
     """Main setup function"""
     print("🌟 === CoreArbiter & EmotionallyInfusedChat Installation ===\n")
-    
+
     # Check prerequisites
     if not check_python_version():
         return False
-    
+
     # Create directories
     create_directories()
-    
+
     # Install Python dependencies
     if not install_python_dependencies():
         print("⚠️  Continuing without Flask - API server won't work")
-    
+
     # Create configuration files
     create_sample_configs()
-    
+
     # Set up React component
     react_setup = setup_react_component()
-    
+
     # Run tests
     if not run_tests():
         print("⚠️  Some tests failed, but basic setup is complete")
-    
+
     # Print next steps
     print_next_steps()
-    
+
     print(f"\n✨ Installation complete! The CoreArbiter system is ready to use.")
     print(f"💡 Start with: python demo_complete_system.py")
     return True

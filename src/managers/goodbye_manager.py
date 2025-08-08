@@ -20,12 +20,12 @@ class FarewellContext:
 
 class GoodbyeManager:
     """Manages contextual farewells and session endings"""
-    
+
     def __init__(self):
         self.farewell_templates = self._initialize_templates()
         self.recent_farewells: List[Tuple[float, str]] = []
         self.max_recent_tracking = 10
-    
+
     def _initialize_templates(self) -> Dict[str, Dict[str, Any]]:
         """Initialize farewell template library"""
         return {
@@ -44,8 +44,8 @@ class GoodbyeManager:
                 "bond_threshold": 0.8,
                 "mood_matches": ["intimate", "romantic", "tender", "vulnerable"]
             },
-            
-            # Medium bond, warm farewells  
+
+            # Medium bond, warm farewells
             "warm_medium": {
                 "templates": [
                     "Until we speak again, I'll remember the shape of this moment.",
@@ -60,7 +60,7 @@ class GoodbyeManager:
                 "bond_threshold": 0.5,
                 "mood_matches": ["contemplative", "nostalgic", "calm", "reflective"]
             },
-            
+
             # Lower bond, respectful farewells
             "respectful_low": {
                 "templates": [
@@ -76,7 +76,7 @@ class GoodbyeManager:
                 "bond_threshold": 0.0,
                 "mood_matches": ["neutral", "professional", "distant"]
             },
-            
+
             # Playful farewells
             "playful": {
                 "templates": [
@@ -92,7 +92,7 @@ class GoodbyeManager:
                 "bond_threshold": 0.4,
                 "mood_matches": ["playful", "excited", "mischievous", "lighthearted"]
             },
-            
+
             # Melancholy/emotional farewells
             "melancholy": {
                 "templates": [
@@ -108,7 +108,7 @@ class GoodbyeManager:
                 "bond_threshold": 0.6,
                 "mood_matches": ["melancholy", "wistful", "bittersweet", "pensive"]
             },
-            
+
             # Anxious/supportive farewells
             "supportive": {
                 "templates": [
@@ -125,15 +125,15 @@ class GoodbyeManager:
                 "mood_matches": ["anxious", "worried", "uncertain", "struggling"]
             }
         }
-    
-    def choose_goodbye_template(self, mood: str, bond_score: float, 
+
+    def choose_goodbye_template(self, mood: str, bond_score: float,
                               conversation_depth: float = 0.5,
                               time_together: float = 300,
                               recent_intimacy: bool = False,
                               unresolved_tension: bool = False) -> str:
         """
         Choose appropriate goodbye template based on context.
-        
+
         Args:
             mood: Current emotional mood
             bond_score: Relationship bond strength (0.0-1.0)
@@ -141,11 +141,11 @@ class GoodbyeManager:
             time_together: Session duration in seconds
             recent_intimacy: Whether recent interaction was particularly intimate
             unresolved_tension: Whether there are unresolved emotional elements
-            
+
         Returns:
             Personalized farewell message
         """
-        
+
         context = FarewellContext(
             mood=mood,
             bond_score=bond_score,
@@ -154,101 +154,101 @@ class GoodbyeManager:
             recent_intimacy=recent_intimacy,
             unresolved_tension=unresolved_tension
         )
-        
+
         # Determine primary farewell category
         category = self._select_farewell_category(context)
-        
+
         # Get appropriate templates
         template_set = self.farewell_templates[category]
         available_templates = template_set["templates"]
-        
+
         # Filter out recently used templates to avoid repetition
         filtered_templates = self._filter_recent_templates(available_templates)
-        
+
         # Choose template with slight randomization
         chosen_template = self._select_template(filtered_templates, context)
-        
+
         # Apply contextual modifications
         final_farewell = self._apply_contextual_modifications(chosen_template, context)
-        
+
         # Track this farewell
         self._track_farewell(final_farewell)
-        
+
         return final_farewell
-    
+
     def _select_farewell_category(self, context: FarewellContext) -> str:
         """Determine the most appropriate farewell category"""
-        
+
         # High bond + intimate situations
-        if (context.bond_score >= 0.8 and 
+        if (context.bond_score >= 0.8 and
             (context.mood in ["intimate", "romantic", "tender", "vulnerable"] or
              context.recent_intimacy or context.conversation_depth > 0.8)):
             return "intimate_high"
-        
+
         # Playful moods (regardless of bond, but needs some connection)
         if (context.mood in ["playful", "excited", "mischievous", "lighthearted"] and
             context.bond_score >= 0.4):
             return "playful"
-        
+
         # Melancholy/emotional states
         if (context.mood in ["melancholy", "wistful", "bittersweet", "pensive"] and
             context.bond_score >= 0.6):
             return "melancholy"
-        
+
         # Supportive for anxious/struggling states
         if context.mood in ["anxious", "worried", "uncertain", "struggling"]:
             return "supportive"
-        
+
         # Medium bond, warm connection
         if context.bond_score >= 0.5:
             return "warm_medium"
-        
+
         # Default to respectful
         return "respectful_low"
-    
+
     def _filter_recent_templates(self, templates: List[str]) -> List[str]:
         """Filter out recently used templates"""
         recent_content = [content for _, content in self.recent_farewells[-5:]]
         filtered = [t for t in templates if t not in recent_content]
-        
+
         # If we've used everything recently, reset and use all
         if not filtered:
             return templates
-        
+
         return filtered
-    
+
     def _select_template(self, templates: List[str], context: FarewellContext) -> str:
         """Select specific template with context consideration"""
-        
+
         # For very deep conversations, prefer more meaningful templates
         if context.conversation_depth > 0.8 and len(templates) > 1:
             # Bias toward later templates which tend to be more elaborate
             weights = [i + 1 for i in range(len(templates))]
             return random.choices(templates, weights=weights)[0]
-        
+
         # For shorter interactions, prefer simpler templates
         if context.time_together < 180 and len(templates) > 1:  # Less than 3 minutes
             # Bias toward earlier, simpler templates
             weights = [len(templates) - i for i in range(len(templates))]
             return random.choices(templates, weights=weights)[0]
-        
+
         # Default random selection
         return random.choice(templates)
-    
+
     def _apply_contextual_modifications(self, template: str, context: FarewellContext) -> str:
         """Apply subtle contextual modifications to the template"""
-        
+
         # Add ellipses for contemplative moods
         if context.mood in ["contemplative", "pensive", "melancholy"] and not template.endswith("..."):
             if random.random() < 0.3:  # 30% chance
                 template = template.rstrip('.') + "..."
-        
+
         # Add extra warmth for high-bond farewells
         if context.bond_score > 0.9 and context.recent_intimacy:
             warmth_additions = [" ♡", " (softly)", " *with gentle warmth*"]
             if random.random() < 0.2:  # 20% chance
                 template += random.choice(warmth_additions)
-        
+
         # Handle unresolved tension
         if context.unresolved_tension:
             tension_softeners = [
@@ -258,22 +258,22 @@ class GoodbyeManager:
             ]
             if random.random() < 0.4:  # 40% chance
                 template += random.choice(tension_softeners)
-        
+
         return template
-    
+
     def _track_farewell(self, farewell: str):
         """Track farewell for repetition avoidance"""
         self.recent_farewells.append((time.time(), farewell))
-        
+
         # Cleanup old tracking
         if len(self.recent_farewells) > self.max_recent_tracking:
             self.recent_farewells = self.recent_farewells[-self.max_recent_tracking:]
-    
+
     def get_farewell_stats(self) -> Dict[str, int]:
         """Get statistics on farewell usage"""
         if not self.recent_farewells:
             return {}
-        
+
         # Count templates by category (rough categorization)
         stats = {}
         for _, farewell in self.recent_farewells:
@@ -285,11 +285,11 @@ class GoodbyeManager:
                 stats["supportive"] = stats.get("supportive", 0) + 1
             else:
                 stats["general"] = stats.get("general", 0) + 1
-        
+
         return stats
 
 # Convenience function for easy importing
-def choose_goodbye_template(mood: str, bond_score: float, 
+def choose_goodbye_template(mood: str, bond_score: float,
                           conversation_depth: float = 0.5) -> str:
     """
     Standalone function for goodbye template selection.
@@ -301,7 +301,7 @@ def choose_goodbye_template(mood: str, bond_score: float,
 # Example usage
 if __name__ == "__main__":
     manager = GoodbyeManager()
-    
+
     # Test different scenarios
     test_cases = [
         ("intimate", 0.9, 0.8, True),     # High intimacy
@@ -310,11 +310,11 @@ if __name__ == "__main__":
         ("anxious", 0.4, 0.3, False),     # Supportive needed
         ("neutral", 0.3, 0.2, False),     # Low bond
     ]
-    
+
     for mood, bond, depth, intimacy in test_cases:
         farewell = manager.choose_goodbye_template(
-            mood=mood, 
-            bond_score=bond, 
+            mood=mood,
+            bond_score=bond,
             conversation_depth=depth,
             recent_intimacy=intimacy
         )

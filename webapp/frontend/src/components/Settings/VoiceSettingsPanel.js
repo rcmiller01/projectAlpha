@@ -127,7 +127,7 @@ const VoiceSettingsPanel = () => {
             step={0.1}
             marks={energyLevels}
             valueLabelDisplay="auto"
-            valueLabelFormat={(value) => 
+            valueLabelFormat={(value) =>
               energyLevels.find(level => level.value === value)?.label || value
             }
             sx={{ mt: 2 }}
@@ -149,7 +149,7 @@ const VoiceSettingsPanel = () => {
             step={0.1}
             marks={intimacyLevels}
             valueLabelDisplay="auto"
-            valueLabelFormat={(value) => 
+            valueLabelFormat={(value) =>
               intimacyLevels.find(level => level.value === value)?.label || value
             }
             sx={{ mt: 2 }}
@@ -179,35 +179,35 @@ const VoiceSettingsPanel = () => {
           {voiceSettings.agentSpecific && voiceSettings.enabled && (
             <Grid container spacing={1} sx={{ ml: 4 }}>
               <Grid item>
-                <Chip 
-                  label="Deduction: Analytical" 
-                  size="small" 
-                  color="primary" 
-                  variant="outlined" 
+                <Chip
+                  label="Deduction: Analytical"
+                  size="small"
+                  color="primary"
+                  variant="outlined"
                 />
               </Grid>
               <Grid item>
-                <Chip 
-                  label="Metaphor: Melodic" 
-                  size="small" 
-                  color="secondary" 
-                  variant="outlined" 
+                <Chip
+                  label="Metaphor: Melodic"
+                  size="small"
+                  color="secondary"
+                  variant="outlined"
                 />
               </Grid>
               <Grid item>
-                <Chip 
-                  label="Planner: Confident" 
-                  size="small" 
-                  color="success" 
-                  variant="outlined" 
+                <Chip
+                  label="Planner: Confident"
+                  size="small"
+                  color="success"
+                  variant="outlined"
                 />
               </Grid>
               <Grid item>
-                <Chip 
-                  label="Ritual: Whispery" 
-                  size="small" 
-                  color="warning" 
-                  variant="outlined" 
+                <Chip
+                  label="Ritual: Whispery"
+                  size="small"
+                  color="warning"
+                  variant="outlined"
                 />
               </Grid>
             </Grid>

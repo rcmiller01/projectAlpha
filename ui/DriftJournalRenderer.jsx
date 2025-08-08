@@ -10,7 +10,7 @@ const DriftJournalRenderer = ({ apiUrl = 'http://localhost:5000' }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [activeView, setActiveView] = useState('timeline');
   const [timeRange, setTimeRange] = useState('week'); // 'day', 'week', 'month'
-  
+
   // Refs for smooth scrolling
   const timelineRef = useRef(null);
   const graphRef = useRef(null);
@@ -156,9 +156,9 @@ const DriftJournalRenderer = ({ apiUrl = 'http://localhost:5000' }) => {
 
   const submitDriftAnnotation = async (driftId, note) => {
     try {
-      await axios.post(`${apiUrl}/api/drift/annotate`, { 
-        drift_id: driftId, 
-        annotation: note 
+      await axios.post(`${apiUrl}/api/drift/annotate`, {
+        drift_id: driftId,
+        annotation: note
       });
       setAnnotationText('');
       setSelectedDrift(null);
@@ -262,7 +262,7 @@ const DriftJournalRenderer = ({ apiUrl = 'http://localhost:5000' }) => {
     const now = new Date();
     const time = new Date(timestamp);
     const diffInHours = Math.floor((now - time) / (1000 * 60 * 60));
-    
+
     if (diffInHours < 1) return 'moments ago';
     if (diffInHours < 24) return `${diffInHours}h ago`;
     const days = Math.floor(diffInHours / 24);
@@ -276,7 +276,7 @@ const DriftJournalRenderer = ({ apiUrl = 'http://localhost:5000' }) => {
 
   const renderDriftMarkers = () => {
     if (!driftSummary) return null;
-    
+
     return (
       <div className="space-y-6">
         <div className="text-center mb-8">
@@ -313,7 +313,7 @@ const DriftJournalRenderer = ({ apiUrl = 'http://localhost:5000' }) => {
                 <span className="text-gray-300 capitalize">{type.replace('_', ' ')}</span>
                 <div className="flex items-center space-x-3">
                   <div className="w-32 h-2 bg-gray-700 rounded-full">
-                    <div 
+                    <div
                       className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
                       style={{ width: `${data.intensity * 100}%` }}
                     ></div>
@@ -331,19 +331,19 @@ const DriftJournalRenderer = ({ apiUrl = 'http://localhost:5000' }) => {
           <div className="grid grid-cols-15 gap-1">
             {driftSummary.timeline_data.slice(0, 30).map((day, index) => (
               <div key={index} className="space-y-1">
-                <div 
+                <div
                   className={`w-4 h-4 rounded-sm ${getDriftIntensityColor(day.emotional_drift)}`}
                   title={`Day ${day.day}: Emotional drift ${Math.round(day.emotional_drift * 100)}%`}
                 ></div>
-                <div 
+                <div
                   className={`w-4 h-4 rounded-sm ${getDriftIntensityColor(day.stylistic_drift)}`}
                   title={`Day ${day.day}: Stylistic drift ${Math.round(day.stylistic_drift * 100)}%`}
                 ></div>
-                <div 
+                <div
                   className={`w-4 h-4 rounded-sm ${getDriftIntensityColor(day.symbolic_drift)}`}
                   title={`Day ${day.day}: Symbolic drift ${Math.round(day.symbolic_drift * 100)}%`}
                 ></div>
-                <div 
+                <div
                   className={`w-4 h-4 rounded-sm ${getDriftIntensityColor(day.anchor_deviation)}`}
                   title={`Day ${day.day}: Anchor deviation ${Math.round(day.anchor_deviation * 100)}%`}
                 ></div>
@@ -408,8 +408,8 @@ const DriftJournalRenderer = ({ apiUrl = 'http://localhost:5000' }) => {
                 key={tab.id}
                 onClick={() => setActiveView(tab.id)}
                 className={`px-6 py-3 rounded-full flex items-center space-x-2 transition-all duration-300 ${
-                  activeView === tab.id 
-                    ? 'bg-white/20 text-white shadow-lg' 
+                  activeView === tab.id
+                    ? 'bg-white/20 text-white shadow-lg'
                     : 'text-gray-400 hover:text-white hover:bg-white/10'
                 }`}
               >
@@ -432,8 +432,8 @@ const DriftJournalRenderer = ({ apiUrl = 'http://localhost:5000' }) => {
                 key={range.id}
                 onClick={() => setTimeRange(range.id)}
                 className={`px-4 py-2 rounded-md text-sm transition-all duration-200 ${
-                  timeRange === range.id 
-                    ? 'bg-white/10 text-white' 
+                  timeRange === range.id
+                    ? 'bg-white/10 text-white'
                     : 'text-gray-400 hover:text-white'
                 }`}
               >
@@ -450,11 +450,11 @@ const DriftJournalRenderer = ({ apiUrl = 'http://localhost:5000' }) => {
               <h2 className="text-2xl font-light text-white mb-2">Drift Timeline</h2>
               <p className="text-gray-400">The journal of becoming</p>
             </div>
-            
+
             <div ref={timelineRef} className="space-y-8">
               {driftHistory.map((drift, index) => {
                 const causeStyle = drift_causes[drift.drift_cause] || drift_causes['emotional_echo'];
-                
+
                 return (
                   <div
                     key={drift.id}
@@ -464,7 +464,7 @@ const DriftJournalRenderer = ({ apiUrl = 'http://localhost:5000' }) => {
                     <div className="absolute -left-3 top-6 w-6 h-6 bg-gray-800 rounded-full border-2 border-gray-600 flex items-center justify-center">
                       <span className="text-xs">{causeStyle.icon}</span>
                     </div>
-                    
+
                     {/* Header */}
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex items-center space-x-4">
@@ -484,24 +484,24 @@ const DriftJournalRenderer = ({ apiUrl = 'http://localhost:5000' }) => {
                           <p className="text-gray-400 text-sm">{formatTimeAgo(drift.timestamp)}</p>
                         </div>
                       </div>
-                      
+
                       {/* Drift magnitude */}
                       <div className="text-right">
                         <div className="text-xs text-gray-500">Intensity</div>
                         <div className="w-16 h-2 bg-gray-700 rounded-full">
-                          <div 
+                          <div
                             className={`h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full`}
                             style={{ width: `${drift.drift_magnitude * 100}%` }}
                           ></div>
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Internal reflection */}
                     <blockquote className="text-gray-200 italic mb-4 text-lg leading-relaxed border-l-2 border-gray-600 pl-4">
                       "{drift.internal_reflection}"
                     </blockquote>
-                    
+
                     {/* Context */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div>
@@ -513,7 +513,7 @@ const DriftJournalRenderer = ({ apiUrl = 'http://localhost:5000' }) => {
                         <p className="text-gray-200">{drift.ritual_context}</p>
                       </div>
                     </div>
-                    
+
                     {/* Action buttons for pending drifts */}
                     {drift.requires_action && drift.status === 'pending' && (
                       <div className="mt-4 pt-4 border-t border-gray-600">
@@ -542,7 +542,7 @@ const DriftJournalRenderer = ({ apiUrl = 'http://localhost:5000' }) => {
                         </div>
                       </div>
                     )}
-                    
+
                     {/* Status indicator */}
                     {drift.status !== 'pending' && (
                       <div className="mt-4 pt-4 border-t border-gray-600">
@@ -580,20 +580,20 @@ const DriftJournalRenderer = ({ apiUrl = 'http://localhost:5000' }) => {
                     ×
                   </button>
                 </div>
-                
+
                 <div className="mb-4">
                   <blockquote className="text-gray-200 italic text-sm border-l-2 border-gray-600 pl-3">
                     "{selectedDrift.internal_reflection}"
                   </blockquote>
                 </div>
-                
+
                 <textarea
                   value={annotationText}
                   onChange={(e) => setAnnotationText(e.target.value)}
                   placeholder="Share your thoughts on this drift... How does it feel? What do you want to remember?"
                   className="w-full h-32 bg-gray-700 text-white rounded-lg p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                 />
-                
+
                 <div className="flex justify-end space-x-3 mt-4">
                   <button
                     onClick={() => setSelectedDrift(null)}
@@ -621,14 +621,14 @@ const DriftJournalRenderer = ({ apiUrl = 'http://localhost:5000' }) => {
           border-image: linear-gradient(45deg, #8B5CF6, #EC4899, #8B5CF6) 1;
           animation: swirl 8s ease-in-out infinite;
         }
-        
+
         @keyframes swirl {
           0%, 100% { border-image-source: linear-gradient(45deg, #8B5CF6, #EC4899, #8B5CF6); }
           25% { border-image-source: linear-gradient(135deg, #EC4899, #F59E0B, #8B5CF6); }
           50% { border-image-source: linear-gradient(225deg, #F59E0B, #10B981, #EC4899); }
           75% { border-image-source: linear-gradient(315deg, #10B981, #8B5CF6, #F59E0B); }
         }
-        
+
         .grid-cols-15 {
           grid-template-columns: repeat(15, minmax(0, 1fr));
         }

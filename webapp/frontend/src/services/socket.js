@@ -13,7 +13,7 @@ class SocketService {
     }
 
     const serverUrl = process.env.REACT_APP_SOCKET_URL || 'http://localhost:3001';
-    
+
     this.socket = io(serverUrl, {
       transports: ['websocket'],
       upgrade: true,

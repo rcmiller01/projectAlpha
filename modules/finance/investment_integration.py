@@ -22,12 +22,12 @@ class InvestmentCompanionIntegration:
     Integration layer between investment tracking and AI companion
     Provides emotionally-aware investment guidance and goal-oriented trading
     """
-    
+
     def __init__(self, data_dir: str = "data"):
         self.investment_tracker = get_investment_tracker(data_dir)
         self.goals_tracker = get_goals_tracker(data_dir)
         self.data_dir = data_dir
-        
+
         # Emotional response templates
         self.emotional_templates = {
             "strategy_analysis": {
@@ -80,7 +80,7 @@ class InvestmentCompanionIntegration:
             "current_mood": user_mood,
             "building_confidence": True
         }
-        
+
         analysis = self.investment_tracker.analyze_strategy(
             ticker=ticker,
             strategy_type=strategy_type,
@@ -88,12 +88,12 @@ class InvestmentCompanionIntegration:
             expiration_date=expiration_date,
             user_context=user_context
         )
-        
+
         # Add emotional companion perspective
         emotional_tone = self._determine_emotional_tone(analysis, user_mood, risk_preference)
         companion_advice = self._generate_companion_advice(analysis, emotional_tone)
         goal_relevance = self._assess_goal_relevance(analysis)
-        
+
         # Create enhanced response
         enhanced_response = {
             "technical_analysis": {
@@ -121,7 +121,7 @@ class InvestmentCompanionIntegration:
                 "personalized": True
             }
         }
-        
+
         logger.info(f"Enhanced strategy analysis for {ticker} {strategy_type.value}")
         return enhanced_response
 
@@ -138,7 +138,7 @@ class InvestmentCompanionIntegration:
             exit_date=exit_date,
             notes=notes
         )
-        
+
         response = {
             "trade_result": {
                 "outcome": trade_result.outcome,
@@ -150,11 +150,11 @@ class InvestmentCompanionIntegration:
             "companion_response": self._generate_trade_response(trade_result),
             "goal_allocation": None
         }
-        
+
         # Handle profit allocation to goals if profitable
         if trade_result.profit_loss > 0 and allocate_to_goals:
             goal_suggestions = self.goals_tracker.get_goal_suggestions(trade_result.profit_loss)
-            
+
             response["goal_allocation"] = {
                 "profit_available": trade_result.profit_loss,
                 "suggestions": goal_suggestions["suggestions"],
@@ -163,7 +163,7 @@ class InvestmentCompanionIntegration:
                     trade_result.profit_loss, goal_suggestions
                 )
             }
-        
+
         return response
 
     def create_investment_goal_with_companion(self, name: str, target_amount: float,
@@ -182,13 +182,13 @@ class InvestmentCompanionIntegration:
             target_date=target_date,
             priority=priority
         )
-        
+
         # Generate companion response
         companion_response = self._generate_goal_creation_response(goal)
-        
+
         # Suggest initial funding strategy
         strategy_suggestion = self._suggest_funding_strategy(goal)
-        
+
         return {
             "goal_created": {
                 "goal_id": goal.goal_id,
@@ -207,10 +207,10 @@ class InvestmentCompanionIntegration:
         """
         # Get recent performance
         performance = self.investment_tracker.get_performance_summary(days=recent_days)
-        
+
         # Get goals status
         goals_summary = self.goals_tracker.get_goals_summary()
-        
+
         # Generate guidance
         guidance = {
             "performance_review": self._generate_performance_review(performance),
@@ -219,7 +219,7 @@ class InvestmentCompanionIntegration:
             "companion_mood": self._assess_companion_mood(performance, goals_summary),
             "encouragement": self._generate_overall_encouragement(performance, goals_summary)
         }
-        
+
         return guidance
 
     def _determine_emotional_tone(self, analysis, user_mood: str, risk_preference: str) -> str:
@@ -235,7 +235,7 @@ class InvestmentCompanionIntegration:
         """Generate companion-style advice"""
         templates = self.emotional_templates["strategy_analysis"][emotional_tone]
         base_advice = templates[0]  # Use first template for simplicity
-        
+
         # Add specific context
         if analysis.probability_of_profit > 0.70:
             context = " The odds are really working in your favor here."
@@ -243,25 +243,25 @@ class InvestmentCompanionIntegration:
             context = " Just make sure you're comfortable with the potential loss."
         else:
             context = " This feels like a balanced approach to building your account."
-        
+
         return base_advice + context
 
     def _assess_goal_relevance(self, analysis) -> Dict[str, Any]:
         """Assess how this trade relates to investment goals"""
         active_goals = [g for g in self.goals_tracker.goals.values() if g.status.value == "active"]
-        
+
         if not active_goals:
             return {
                 "has_active_goals": False,
                 "suggestion": "Consider creating some investment goals to give your trading purpose!"
             }
-        
+
         # Find highest priority goal
         top_goal = min(active_goals, key=lambda g: g.priority)
-        
+
         potential_contribution = analysis.max_gain * 0.6  # Conservative estimate
         impact_on_goal = (potential_contribution / top_goal.remaining_amount) * 100
-        
+
         return {
             "has_active_goals": True,
             "top_goal": {
@@ -289,9 +289,9 @@ class InvestmentCompanionIntegration:
         """Generate companion perspective on profit allocation"""
         if not suggestions["suggestions"]:
             return "This profit gives you a great opportunity to create some investment goals!"
-        
+
         top_suggestion = suggestions["suggestions"][0]
-        
+
         if top_suggestion.get("would_complete", False):
             return f"This could complete your {top_suggestion['goal_name']} goal! That would be such an amazing achievement!"
         else:
@@ -305,7 +305,7 @@ class InvestmentCompanionIntegration:
         """Suggest strategy for funding the goal"""
         monthly_target = goal.target_amount / 6  # Assume 6-month timeline
         weekly_target = monthly_target / 4
-        
+
         return {
             "monthly_target": monthly_target,
             "weekly_target": weekly_target,
@@ -317,10 +317,10 @@ class InvestmentCompanionIntegration:
         """Generate companion performance review"""
         if not performance.get("total_trades"):
             return "You haven't placed any trades recently. When you're ready, I'm here to help analyze opportunities!"
-        
+
         win_rate = performance.get("win_rate", 0)
         total_pnl = performance.get("total_pnl", 0)
-        
+
         if total_pnl > 0 and win_rate > 0.6:
             return f"You're doing really well! {win_rate:.1%} win rate with ${total_pnl:.2f} profit shows great discipline."
         elif total_pnl > 0:
@@ -332,9 +332,9 @@ class InvestmentCompanionIntegration:
         """Generate goals progress review"""
         if not goals_summary.get("active_goals"):
             return "You don't have any active investment goals yet. Creating some targets could give your trading more purpose!"
-        
+
         progress = goals_summary.get("overall_progress", 0)
-        
+
         if progress > 60:
             return f"Your investment goals are {progress:.1f}% funded - you're making real progress toward the things you want!"
         elif progress > 30:
@@ -342,33 +342,33 @@ class InvestmentCompanionIntegration:
         else:
             return f"You're {progress:.1f}% toward your goals - every profitable trade gets you closer!"
 
-    def _generate_next_steps_guidance(self, performance: Dict[str, Any], 
+    def _generate_next_steps_guidance(self, performance: Dict[str, Any],
                                     goals_summary: Dict[str, Any]) -> List[str]:
         """Generate next steps guidance"""
         guidance = []
-        
+
         # Performance-based guidance
         win_rate = performance.get("win_rate", 0)
         if win_rate < 0.5:
             guidance.append("Consider focusing on higher-probability strategies to improve your win rate.")
-        
+
         # Goals-based guidance
         if not goals_summary.get("active_goals"):
             guidance.append("Create some investment goals to give your trading profits clear purpose.")
         elif goals_summary.get("goals_almost_complete"):
             guidance.append("You have goals that are almost complete - one good trade could finish them!")
-        
+
         # General guidance
         guidance.append("Keep analyzing each trade to understand what works best for you.")
-        
+
         return guidance
 
-    def _assess_companion_mood(self, performance: Dict[str, Any], 
+    def _assess_companion_mood(self, performance: Dict[str, Any],
                              goals_summary: Dict[str, Any]) -> str:
         """Assess companion's mood based on user progress"""
         total_pnl = performance.get("total_pnl", 0)
         goals_progress = goals_summary.get("overall_progress", 0)
-        
+
         if total_pnl > 0 and goals_progress > 50:
             return "excited"
         elif total_pnl > 0 or goals_progress > 25:
@@ -378,18 +378,18 @@ class InvestmentCompanionIntegration:
         else:
             return "optimistic"
 
-    def _generate_overall_encouragement(self, performance: Dict[str, Any], 
+    def _generate_overall_encouragement(self, performance: Dict[str, Any],
                                       goals_summary: Dict[str, Any]) -> str:
         """Generate overall encouragement"""
         mood = self._assess_companion_mood(performance, goals_summary)
-        
+
         encouragements = {
             "excited": "I'm so excited about the progress you're making! Your dedication to both trading and your goals is really paying off.",
             "encouraging": "You're building something real here - both your trading skills and your progress toward your goals.",
             "supportive": "Trading can be challenging, but I believe in your ability to learn and grow from every experience.",
             "optimistic": "Every expert trader started where you are now. You're building the foundation for long-term success."
         }
-        
+
         return encouragements.get(mood, encouragements["optimistic"])
 
 
@@ -407,22 +407,22 @@ def get_investment_integration(data_dir: str = "data") -> InvestmentCompanionInt
 if __name__ == "__main__":
     """Test the investment-companion integration"""
     print("=== Testing Investment-Companion Integration ===")
-    
+
     import os
     os.makedirs("data", exist_ok=True)
-    
+
     integration = InvestmentCompanionIntegration("data")
-    
+
     # Test 1: Strategy analysis with emotional context
     print("\n1. Testing Strategy Analysis with Emotional Context:")
-    
+
     legs = [
         OptionsLeg(action="sell", option_type="put", strike=450.0, premium=2.50, delta=-0.20),
         OptionsLeg(action="buy", option_type="put", strike=445.0, premium=1.20, delta=-0.15)
     ]
-    
+
     expiration = datetime.now() + timedelta(days=30)
-    
+
     enhanced_analysis = integration.analyze_strategy_with_emotional_context(
         ticker="SPY",
         strategy_type=StrategyType.CREDIT_SPREAD,
@@ -431,26 +431,26 @@ if __name__ == "__main__":
         user_mood="confident",
         risk_preference="moderate"
     )
-    
+
     print(f"Technical Analysis:")
     tech = enhanced_analysis["technical_analysis"]
     print(f"  Max Gain: ${tech['max_gain']:.2f}, Max Loss: ${tech['max_loss']:.2f}")
     print(f"  Probability of Profit: {tech['probability_of_profit']:.1%}")
-    
+
     print(f"\nCompanion Perspective:")
     comp = enhanced_analysis["companion_perspective"]
     print(f"  Emotional Tone: {comp['emotional_tone']}")
     print(f"  Advice: {comp['companion_advice']}")
     print(f"  Encouragement: {comp['encouragement']}")
-    
+
     print(f"\nGoal Integration:")
     goal = enhanced_analysis["goal_integration"]
     print(f"  Has Active Goals: {goal['has_active_goals']}")
     print(f"  Suggestion: {goal['suggestion']}")
-    
+
     # Test 2: Create goal with companion
     print("\n2. Testing Goal Creation with Companion:")
-    
+
     goal_response = integration.create_investment_goal_with_companion(
         name="New Gaming Setup",
         target_amount=2500.0,
@@ -458,50 +458,50 @@ if __name__ == "__main__":
         description="Upgrade gaming rig for better performance",
         priority=2
     )
-    
+
     print(f"Goal Created: {goal_response['goal_created']['name']}")
     print(f"Target: ${goal_response['goal_created']['target_amount']:.2f}")
     print(f"Companion Response: {goal_response['companion_response']}")
     print(f"Funding Strategy: {goal_response['funding_strategy']['suggested_approach']}")
-    
+
     # Test 3: Process trade result with goals
     print("\n3. Testing Trade Result Processing:")
-    
+
     strategy_id = enhanced_analysis["technical_analysis"]["strategy_id"]
-    
+
     trade_response = integration.process_trade_result_with_goals(
         strategy_id=strategy_id,
         exit_value=65.0,  # Kept $65 of $130 credit
         notes="Closed at 50% profit target"
     )
-    
+
     print(f"Trade Result:")
     result = trade_response["trade_result"]
     print(f"  Outcome: {result['outcome']}")
     print(f"  Profit: ${result['profit_loss']:.2f}")
     print(f"  Companion Response: {trade_response['companion_response']}")
-    
+
     if trade_response["goal_allocation"]:
         alloc = trade_response["goal_allocation"]
         print(f"\nGoal Allocation:")
         print(f"  Available Profit: ${alloc['profit_available']:.2f}")
         print(f"  Companion Perspective: {alloc['companion_perspective']}")
-        
+
         if alloc["suggestions"]:
             print(f"  Top Suggestion: {alloc['suggestions'][0]['goal_name']} (${alloc['suggestions'][0]['suggested_amount']:.2f})")
-    
+
     # Test 4: Get investment guidance
     print("\n4. Testing Investment Guidance:")
-    
+
     guidance = integration.get_investment_guidance(recent_days=30)
-    
+
     print(f"Performance Review: {guidance['performance_review']}")
     print(f"Goals Progress: {guidance['goals_progress']}")
     print(f"Companion Mood: {guidance['companion_mood']}")
     print(f"Overall Encouragement: {guidance['encouragement']}")
-    
+
     print(f"\nNext Steps:")
     for step in guidance['next_steps']:
         print(f"  - {step}")
-    
+
     print("\n=== Investment-Companion Integration Test Complete ===")

@@ -12,13 +12,13 @@ try:
     from quant_tracking import QuantTracker, QuantLoopResult
     import uuid
     from datetime import datetime
-    
+
     print("✅ Imports successful")
-    
+
     # Create tracker
     tracker = QuantTracker()
     print("✅ Tracker initialized")
-    
+
     # Create test result
     result = QuantLoopResult(
         loop_id=str(uuid.uuid4()),
@@ -37,29 +37,29 @@ try:
         creativity_index=0.73
     )
     print("✅ Test result created")
-    
+
     # Save result
     tracker.save_loop_result(result)
     print("✅ Result saved")
-    
+
     # Check file
     if os.path.exists('data/quant_results.jsonl'):
         size = os.path.getsize('data/quant_results.jsonl')
         print(f"✅ File created: {size} bytes")
     else:
         print("❌ File not found")
-    
+
     # Load results
     results = tracker.load_results()
     print(f"✅ Loaded {len(results)} results")
-    
+
     if results:
         r = results[0]
         print(f"   - Model: {r.model_name}")
         print(f"   - Format: {r.quant_format}")
         print(f"   - Emotion: {r.emotional_score}")
         print(f"   - Quality: {r.token_quality}")
-    
+
 except Exception as e:
     print(f"❌ Error: {e}")
     import traceback

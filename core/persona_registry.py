@@ -16,7 +16,7 @@ async def _load_personas_async() -> Dict[str, Any]:
         # Create database interface
         database = create_database_interface()
         await database.initialize()
-        
+
         # For now, return default personas since we don't have a persona collection
         # In the future, this could be expanded to load from a dedicated personas table
         personas = {
@@ -32,7 +32,7 @@ async def _load_personas_async() -> Dict[str, Any]:
                 }
             },
             "solene": {
-                "_id": "solene_default", 
+                "_id": "solene_default",
                 "name": "solene",
                 "personality": "logical, supportive, analytical",
                 "traits": ["logical", "supportive", "methodical"],
@@ -43,10 +43,10 @@ async def _load_personas_async() -> Dict[str, Any]:
                 }
             }
         }
-        
+
         logger.info(f"Loaded {len(personas)} personas from registry")
         return personas
-        
+
     except Exception as e:
         logger.error(f"Error loading personas: {e}")
         # Return minimal fallback personas
@@ -57,4 +57,4 @@ async def _load_personas_async() -> Dict[str, Any]:
                 "personality": "balanced, helpful, adaptive",
                 "traits": ["balanced", "helpful", "adaptive"]
             }
-        } 
+        }

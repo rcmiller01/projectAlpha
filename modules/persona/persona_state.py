@@ -9,14 +9,14 @@ class PersonaState:
     """
     Unified persona state management using the database interface
     """
-    
+
     def __init__(self, database: Optional[DatabaseInterface] = None):
         if database:
             self.database = database
         else:
             # Create default database interface
             self.database = create_database_interface()
-        
+
     async def initialize(self):
         """Initialize the database connection"""
         await self.database.initialize()
@@ -26,7 +26,7 @@ async def get_active_persona() -> Optional[str]:
     try:
         persona_state = PersonaState()
         await persona_state.initialize()
-        
+
         # For now, we'll use user profile to store active persona
         # This could be expanded to a dedicated configuration system
         user_profile = await persona_state.database.get_user_profile("system")
@@ -42,7 +42,7 @@ async def set_active_persona(name: str):
     try:
         persona_state = PersonaState()
         await persona_state.initialize()
-        
+
         # Update system user profile with active persona
         await persona_state.database.update_user_profile("system", {
             "preferences": {"active_persona": name}
@@ -55,7 +55,7 @@ async def load_personas() -> Dict[str, Any]:
     try:
         persona_state = PersonaState()
         await persona_state.initialize()
-        
+
         # For now, return default personas
         # This could be expanded to load from database/configuration
         personas = {
@@ -65,7 +65,7 @@ async def load_personas() -> Dict[str, Any]:
                 "traits": ["creative", "emotional", "intuitive"]
             },
             "solene": {
-                "name": "solene", 
+                "name": "solene",
                 "personality": "logical, supportive, analytical",
                 "traits": ["logical", "supportive", "methodical"]
             }
@@ -74,4 +74,4 @@ async def load_personas() -> Dict[str, Any]:
     except Exception as e:
         logger.error(f"Error loading personas: {e}")
         return {}
-    return personas 
+    return personas

@@ -56,12 +56,12 @@ class InvestmentGoal:
         if self.target_amount <= 0:
             return 0.0
         return min(100.0, (self.current_amount / self.target_amount) * 100)
-    
+
     @property
     def remaining_amount(self) -> float:
         """Calculate remaining amount needed"""
         return max(0.0, self.target_amount - self.current_amount)
-    
+
     @property
     def is_completed(self) -> bool:
         """Check if goal is completed"""
@@ -79,13 +79,13 @@ class InvestmentGoalsTracker:
     """
     Track and manage personal investment goals with emotional engagement
     """
-    
+
     def __init__(self, data_dir: str = "data"):
         self.data_dir = data_dir
         self.goals_file = f"{data_dir}/investment_goals.json"
-        
+
         self.goals: Dict[str, InvestmentGoal] = {}
-        
+
         # Goal templates with emotional language
         self.goal_templates = {
             GoalType.VACATION: {
@@ -125,7 +125,7 @@ class InvestmentGoalsTracker:
                 }
             }
         }
-        
+
         # Load existing goals
         self._load_goals()
 
@@ -135,15 +135,15 @@ class InvestmentGoalsTracker:
                    celebration_plan: str = "") -> InvestmentGoal:
         """Create a new investment goal"""
         goal_id = f"goal_{int(time.time())}_{name.lower().replace(' ', '_')}"
-        
+
         # Set default emotional value if not provided
         if not emotional_value:
             emotional_value = self._generate_default_emotional_value(goal_type, name)
-        
+
         # Set default celebration plan if not provided
         if not celebration_plan:
             celebration_plan = self._generate_default_celebration_plan(goal_type, name)
-        
+
         goal = InvestmentGoal(
             goal_id=goal_id,
             name=name,
@@ -160,10 +160,10 @@ class InvestmentGoalsTracker:
             milestone_percentages=[25, 50, 75],
             contributions=[]
         )
-        
+
         self.goals[goal_id] = goal
         self._save_goals()
-        
+
         logger.info(f"Created investment goal: {name} (${target_amount:.2f})")
         return goal
 
@@ -172,12 +172,12 @@ class InvestmentGoalsTracker:
         """Add money to a goal from trading profits or other sources"""
         if goal_id not in self.goals:
             raise ValueError(f"Goal {goal_id} not found")
-        
+
         goal = self.goals[goal_id]
-        
+
         if goal.status != GoalStatus.ACTIVE:
             raise ValueError(f"Cannot contribute to {goal.status.value} goal")
-        
+
         # Record the contribution
         contribution = {
             "amount": amount,
@@ -187,27 +187,27 @@ class InvestmentGoalsTracker:
             "timestamp": time.time(),
             "date": datetime.now().isoformat()
         }
-        
+
         goal.contributions.append(contribution)
-        
+
         # Update current amount
         previous_amount = goal.current_amount
         goal.current_amount += amount
-        
+
         # Check for milestone achievements
         milestone_message = self._check_milestone_achievement(goal, previous_amount)
-        
+
         # Check if goal is completed
         completion_message = None
         if goal.current_amount >= goal.target_amount and goal.status == GoalStatus.ACTIVE:
             goal.status = GoalStatus.COMPLETED
             completion_message = self._generate_completion_message(goal)
-        
+
         self._save_goals()
-        
+
         # Generate encouraging message
         encouragement = self._generate_encouragement_message(goal, amount)
-        
+
         result = {
             "goal_name": goal.name,
             "contribution_amount": amount,
@@ -219,30 +219,30 @@ class InvestmentGoalsTracker:
             "completion_message": completion_message,
             "is_completed": goal.is_completed
         }
-        
+
         logger.info(f"Added ${amount:.2f} to goal '{goal.name}' - now at {goal.progress_percentage:.1f}%")
         return result
 
     def get_goal_suggestions(self, available_profit: float) -> Dict[str, Any]:
         """Get suggestions for allocating trading profits to goals"""
         active_goals = [goal for goal in self.goals.values() if goal.status == GoalStatus.ACTIVE]
-        
+
         if not active_goals:
             return {
                 "message": "No active goals found. Consider creating some investment targets!",
                 "suggestions": []
             }
-        
+
         # Sort goals by priority and progress
         active_goals.sort(key=lambda g: (g.priority, -g.progress_percentage))
-        
+
         suggestions = []
         remaining_profit = available_profit
-        
+
         for goal in active_goals[:3]:  # Top 3 goals
             if remaining_profit <= 0:
                 break
-            
+
             # Calculate suggested allocation
             if goal.remaining_amount <= remaining_profit * 0.5:
                 # Can fund significantly or complete this goal
@@ -250,7 +250,7 @@ class InvestmentGoalsTracker:
             else:
                 # Partial allocation
                 suggested_amount = min(remaining_profit * 0.3, goal.remaining_amount)
-            
+
             if suggested_amount > 5:  # Minimum meaningful contribution
                 suggestions.append({
                     "goal_id": goal.goal_id,
@@ -262,9 +262,9 @@ class InvestmentGoalsTracker:
                     "emotional_impact": self._get_emotional_phrase(goal.goal_type),
                     "priority": goal.priority
                 })
-                
+
                 remaining_profit -= suggested_amount
-        
+
         return {
             "total_profit_available": available_profit,
             "suggestions": suggestions,
@@ -275,29 +275,29 @@ class InvestmentGoalsTracker:
     def get_goals_summary(self, include_completed: bool = False) -> Dict[str, Any]:
         """Get summary of all goals"""
         goals_list = list(self.goals.values())
-        
+
         if not include_completed:
             goals_list = [g for g in goals_list if g.status == GoalStatus.ACTIVE]
-        
+
         # Sort by priority and progress
         goals_list.sort(key=lambda g: (g.priority, -g.progress_percentage))
-        
+
         total_target = sum(goal.target_amount for goal in goals_list)
         total_current = sum(goal.current_amount for goal in goals_list)
         overall_progress = (total_current / total_target * 100) if total_target > 0 else 0
-        
+
         # Goals needing attention (low progress, high priority)
         attention_goals = [
-            goal for goal in goals_list 
+            goal for goal in goals_list
             if goal.status == GoalStatus.ACTIVE and goal.progress_percentage < 25 and goal.priority <= 2
         ]
-        
+
         # Nearly completed goals
         almost_done = [
             goal for goal in goals_list
             if goal.status == GoalStatus.ACTIVE and goal.progress_percentage >= 75
         ]
-        
+
         return {
             "total_goals": len(goals_list),
             "active_goals": len([g for g in goals_list if g.status == GoalStatus.ACTIVE]),
@@ -330,24 +330,24 @@ class InvestmentGoalsTracker:
         """Check if a milestone was achieved and return celebration message"""
         previous_percentage = (previous_amount / goal.target_amount * 100) if goal.target_amount > 0 else 0
         current_percentage = goal.progress_percentage
-        
+
         for milestone in goal.milestone_percentages:
             if previous_percentage < milestone <= current_percentage:
                 # Milestone achieved!
                 template = self.goal_templates.get(goal.goal_type, {})
                 milestone_phrases = template.get("milestone_phrases", {})
-                
+
                 if milestone in milestone_phrases:
                     return milestone_phrases[milestone]
                 else:
                     return f"Milestone achieved: {milestone}% complete on '{goal.name}'! 🎉"
-        
+
         return None
 
     def _generate_completion_message(self, goal: InvestmentGoal) -> str:
         """Generate message for goal completion"""
         base_message = f"🎉 GOAL COMPLETED: '{goal.name}' is fully funded at ${goal.current_amount:.2f}!"
-        
+
         if goal.celebration_plan:
             return f"{base_message} Time to {goal.celebration_plan.lower()}!"
         else:
@@ -356,16 +356,16 @@ class InvestmentGoalsTracker:
     def _generate_encouragement_message(self, goal: InvestmentGoal, contribution_amount: float) -> str:
         """Generate encouraging message for contribution"""
         progress = goal.progress_percentage
-        
+
         # Get goal-specific emotional phrases
         template = self.goal_templates.get(goal.goal_type, {})
         emotional_phrases = template.get("emotional_phrases", [])
-        
+
         if emotional_phrases:
             base_message = emotional_phrases[min(len(emotional_phrases) - 1, int(progress / 35))]
         else:
             base_message = f"Great contribution to '{goal.name}'!"
-        
+
         # Add progress context
         if progress >= 90:
             context = f" You're so close - just ${goal.remaining_amount:.2f} to go!"
@@ -377,7 +377,7 @@ class InvestmentGoalsTracker:
             context = f" Building momentum at {progress:.1f}% complete!"
         else:
             context = f" Every contribution counts - you're at {progress:.1f}%!"
-        
+
         return base_message + context
 
     def _get_emotional_phrase(self, goal_type: GoalType) -> str:
@@ -390,9 +390,9 @@ class InvestmentGoalsTracker:
         """Generate encouragement for profit allocation"""
         if not suggestions:
             return "Consider creating some investment goals to give your trading profits purpose!"
-        
+
         high_impact = [s for s in suggestions if s.get("would_complete", False)]
-        
+
         if high_impact:
             goal_names = [s["goal_name"] for s in high_impact[:2]]
             if len(goal_names) == 1:
@@ -413,7 +413,7 @@ class InvestmentGoalsTracker:
             GoalType.GIFT_FUND: f"Showing care for people who matter",
             GoalType.EXPERIENCE: f"Creating meaningful memories and experiences"
         }
-        
+
         return emotional_defaults.get(goal_type, f"Working toward something important: {name}")
 
     def _generate_default_celebration_plan(self, goal_type: GoalType, name: str) -> str:
@@ -427,7 +427,7 @@ class InvestmentGoalsTracker:
             GoalType.GIFT_FUND: "surprise someone special",
             GoalType.EXPERIENCE: "create those memories you've been planning"
         }
-        
+
         return celebration_defaults.get(goal_type, f"celebrate achieving {name}")
 
     def _load_goals(self):
@@ -435,18 +435,18 @@ class InvestmentGoalsTracker:
         try:
             with open(self.goals_file, 'r') as f:
                 goals_data = json.load(f)
-                
+
                 for goal_id, data in goals_data.items():
                     # Convert string enums back to enum objects
                     data['goal_type'] = GoalType(data['goal_type'])
                     data['status'] = GoalStatus(data['status'])
-                    
+
                     # Convert target_date back to datetime if present
                     if data.get('target_date'):
                         data['target_date'] = datetime.fromisoformat(data['target_date'])
-                    
+
                     self.goals[goal_id] = InvestmentGoal(**data)
-                    
+
         except FileNotFoundError:
             pass  # No existing goals file
         except Exception as e:
@@ -456,24 +456,24 @@ class InvestmentGoalsTracker:
         """Save goals to file"""
         try:
             goals_data = {}
-            
+
             for goal_id, goal in self.goals.items():
                 data = asdict(goal)
                 # Convert enums to strings for JSON serialization
                 data['goal_type'] = goal.goal_type.value
                 data['status'] = goal.status.value
-                
+
                 # Convert datetime to ISO string if present
                 if goal.target_date:
                     data['target_date'] = goal.target_date.isoformat()
                 else:
                     data['target_date'] = None
-                
+
                 goals_data[goal_id] = data
-            
+
             with open(self.goals_file, 'w') as f:
                 json.dump(goals_data, f, indent=2)
-                
+
         except Exception as e:
             logger.error(f"Error saving goals: {e}")
 
@@ -492,15 +492,15 @@ def get_goals_tracker(data_dir: str = "data") -> InvestmentGoalsTracker:
 if __name__ == "__main__":
     """Test the investment goals tracker"""
     print("=== Testing Investment Goals Tracker ===")
-    
+
     import os
     os.makedirs("data", exist_ok=True)
-    
+
     tracker = InvestmentGoalsTracker("data")
-    
+
     # Test goal creation
     print("\n1. Creating Investment Goals:")
-    
+
     vacation_goal = tracker.create_goal(
         name="European Vacation",
         target_amount=3000.0,
@@ -511,7 +511,7 @@ if __name__ == "__main__":
         emotional_value="Creating amazing memories and experiencing new cultures together",
         celebration_plan="book the flights and start planning our itinerary"
     )
-    
+
     server_goal = tracker.create_goal(
         name="Server Upgrade",
         target_amount=1200.0,
@@ -519,13 +519,13 @@ if __name__ == "__main__":
         description="Upgrade home server for better AI performance",
         priority=2
     )
-    
+
     print(f"Created vacation goal: {vacation_goal.name} (${vacation_goal.target_amount:.2f})")
     print(f"Created server goal: {server_goal.name} (${server_goal.target_amount:.2f})")
-    
+
     # Test contributions
     print("\n2. Testing Goal Contributions:")
-    
+
     # Add some trading profits to goals
     vacation_contribution = tracker.add_contribution(
         goal_id=vacation_goal.goal_id,
@@ -533,35 +533,35 @@ if __name__ == "__main__":
         source="credit_spread_profit",
         notes="SPY credit spread closed at 60% profit"
     )
-    
+
     print(f"Vacation Goal Contribution:")
     print(f"  Amount: ${vacation_contribution['contribution_amount']:.2f}")
     print(f"  Progress: {vacation_contribution['progress_percentage']:.1f}%")
     print(f"  Encouragement: {vacation_contribution['encouragement']}")
     if vacation_contribution['milestone_message']:
         print(f"  Milestone: {vacation_contribution['milestone_message']}")
-    
+
     server_contribution = tracker.add_contribution(
         goal_id=server_goal.goal_id,
         amount=280.0,
         source="iron_condor_profit",
         notes="QQQ iron condor expired worthless"
     )
-    
+
     print(f"\nServer Goal Contribution:")
     print(f"  Amount: ${server_contribution['contribution_amount']:.2f}")
     print(f"  Progress: {server_contribution['progress_percentage']:.1f}%")
     print(f"  Encouragement: {server_contribution['encouragement']}")
-    
+
     # Test profit allocation suggestions
     print("\n3. Testing Profit Allocation Suggestions:")
-    
+
     suggestions = tracker.get_goal_suggestions(available_profit=850.0)
-    
+
     print(f"Available Profit: ${suggestions['total_profit_available']:.2f}")
     print(f"Encouragement: {suggestions['encouragement']}")
     print(f"Suggestions:")
-    
+
     for suggestion in suggestions['suggestions']:
         print(f"  - {suggestion['goal_name']}: ${suggestion['suggested_amount']:.2f}")
         print(f"    Current: {suggestion['current_progress']:.1f}% → New: {suggestion['new_progress']:.1f}%")
@@ -569,21 +569,21 @@ if __name__ == "__main__":
         if suggestion['would_complete']:
             print(f"    🎉 This would COMPLETE the goal!")
         print()
-    
+
     # Test goals summary
     print("\n4. Testing Goals Summary:")
-    
+
     summary = tracker.get_goals_summary()
-    
+
     print(f"Total Goals: {summary['total_goals']}")
     print(f"Active Goals: {summary['active_goals']}")
     print(f"Overall Progress: {summary['overall_progress']:.1f}%")
     print(f"Total Target: ${summary['total_target_amount']:.2f}")
     print(f"Total Current: ${summary['total_current_amount']:.2f}")
-    
+
     print(f"\nActive Goals Details:")
     for goal in summary['goals']:
         print(f"  - {goal['name']}: {goal['progress_percentage']:.1f}% (${goal['current_amount']:.2f}/${goal['target_amount']:.2f})")
         print(f"    Priority: {goal['priority']}, Remaining: ${goal['remaining_amount']:.2f}")
-    
+
     print("\n=== Investment Goals Tracker Test Complete ===")

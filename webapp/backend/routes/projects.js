@@ -5,14 +5,14 @@ const { Project } = require('../models');
 // GET /api/projects - Get all projects for user
 router.get('/', async (req, res) => {
   try {
-    const { 
-      status, 
-      type, 
-      priority, 
-      search, 
-      page = 1, 
+    const {
+      status,
+      type,
+      priority,
+      search,
+      page = 1,
       limit = 20,
-      userId = 'default' 
+      userId = 'default'
     } = req.query;
 
     let query = { userId };
@@ -33,7 +33,7 @@ router.get('/', async (req, res) => {
     }
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    
+
     const [projects, total] = await Promise.all([
       Project.find(query)
         .sort({ priority: -1, updatedAt: -1 })
@@ -74,10 +74,10 @@ router.get('/stats', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { userId = 'default' } = req.query;
-    
-    const project = await Project.findOne({ 
-      _id: req.params.id, 
-      userId 
+
+    const project = await Project.findOne({
+      _id: req.params.id,
+      userId
     }).populate('activeThreads');
 
     if (!project) {
@@ -95,7 +95,7 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const { userId = 'default' } = req.body;
-    
+
     const projectData = {
       ...req.body,
       userId
@@ -118,10 +118,10 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { userId = 'default' } = req.body;
-    
+
     const project = await Project.findOneAndUpdate(
       { _id: req.params.id, userId },
-      { 
+      {
         $set: {
           ...req.body,
           userId,
@@ -146,10 +146,10 @@ router.put('/:id', async (req, res) => {
 router.put('/:id/progress', async (req, res) => {
   try {
     const { progress, userId = 'default' } = req.body;
-    
-    const project = await Project.findOne({ 
-      _id: req.params.id, 
-      userId 
+
+    const project = await Project.findOne({
+      _id: req.params.id,
+      userId
     });
 
     if (!project) {
@@ -168,10 +168,10 @@ router.put('/:id/progress', async (req, res) => {
 router.post('/:id/threads', async (req, res) => {
   try {
     const { threadId, userId = 'default' } = req.body;
-    
-    const project = await Project.findOne({ 
-      _id: req.params.id, 
-      userId 
+
+    const project = await Project.findOne({
+      _id: req.params.id,
+      userId
     });
 
     if (!project) {
@@ -190,10 +190,10 @@ router.post('/:id/threads', async (req, res) => {
 router.delete('/:id/threads/:threadId', async (req, res) => {
   try {
     const { userId = 'default' } = req.query;
-    
-    const project = await Project.findOne({ 
-      _id: req.params.id, 
-      userId 
+
+    const project = await Project.findOne({
+      _id: req.params.id,
+      userId
     });
 
     if (!project) {
@@ -212,10 +212,10 @@ router.delete('/:id/threads/:threadId', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const { userId = 'default' } = req.query;
-    
-    const project = await Project.findOneAndDelete({ 
-      _id: req.params.id, 
-      userId 
+
+    const project = await Project.findOneAndDelete({
+      _id: req.params.id,
+      userId
     });
 
     if (!project) {
@@ -233,11 +233,11 @@ router.delete('/:id', async (req, res) => {
 router.post('/:id/archive', async (req, res) => {
   try {
     const { userId = 'default' } = req.body;
-    
+
     const project = await Project.findOneAndUpdate(
       { _id: req.params.id, userId },
-      { 
-        $set: { 
+      {
+        $set: {
           status: 'archived',
           'metadata.lastActivity': new Date()
         }

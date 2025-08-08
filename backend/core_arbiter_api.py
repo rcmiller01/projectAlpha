@@ -62,23 +62,23 @@ def cleanup_idempotency_cache():
 def check_idempotency(idempotency_key: str) -> tuple[bool, Optional[Dict[str, Any]]]:
     """
     Check if request is idempotent and return cached response if available.
-    
+
     Args:
         idempotency_key: Unique key for this operation
-        
+
     Returns:
         Tuple of (is_duplicate, cached_response)
     """
     if not idempotency_key:
         return False, None
-    
+
     cleanup_idempotency_cache()
-    
+
     if idempotency_key in idempotency_cache:
         cached_response, timestamp = idempotency_cache[idempotency_key]
         logger.info(f"Returning cached response for idempotency key: {mask_token(idempotency_key)}")
         return True, cached_response
-    
+
     return False, None
 
 def store_idempotency_response(idempotency_key: str, response: Dict[str, Any]):
@@ -93,7 +93,7 @@ def require_idempotency(func):
     def wrapper(*args, **kwargs):
         # Get idempotency key from header
         idempotency_key = request.headers.get('Idempotency-Key')
-        
+
         if idempotency_key:
             # Check if this is a duplicate request
             is_duplicate, cached_response = check_idempotency(idempotency_key)
@@ -105,16 +105,16 @@ def require_idempotency(func):
                     details={"idempotency_key": mask_token(idempotency_key)}
                 )
                 return jsonify(cached_response)
-        
+
         # Execute the original function
         response = func(*args, **kwargs)
-        
+
         # Store response in cache if idempotency key provided
         if idempotency_key and hasattr(response, 'get_json'):
             response_data = response.get_json()
             if response_data and response.status_code == 200:
                 store_idempotency_response(idempotency_key, response_data)
-        
+
         return response
     return wrapper
 
@@ -156,10 +156,10 @@ def log_request_with_masked_tokens():
     """Log requests with properly masked tokens."""
     token = extract_token()
     masked_token = mask_token(token)
-    
+
     logger.info(f"API Request: {request.method} {request.endpoint} - "
                f"IP: {request.remote_addr} - Token: {masked_token}")
-    
+
     # Create audit context
     audit_action('api_request',
                 endpoint=request.endpoint,
@@ -181,27 +181,27 @@ def process_input():
     try:
         # Get validated data
         data = g.validated_data
-        
+
         user_input = data.get('message', '')
         state = data.get('state', {})
         context = data.get('context', {})
         options = data.get('options', {})
-        
+
         # Audit log the processing request
         audit_action('arbiter_process_input',
                     input_length=len(user_input),
                     has_state=bool(state),
                     has_context=bool(context),
                     success=True)
-        
+
         # Run async function in new event loop
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        
+
         try:
             arbiter = get_arbiter()
             response = loop.run_until_complete(arbiter.process_input(user_input, state))
-            
+
             # Convert response to JSON-serializable format
             response_data = {
                 'final_output': response.final_output,
@@ -218,12 +218,12 @@ def process_input():
                 'timestamp': response.timestamp.isoformat(),
                 'metadata': response.metadata
             }
-            
+
             return jsonify(response_data)
-            
+
         finally:
             loop.close()
-            
+
     except Exception as e:
         logger.error(f"Error processing input: {e}")
         logger.error(traceback.format_exc())
@@ -236,7 +236,7 @@ def get_status():
     try:
         arbiter = get_arbiter()
         status = arbiter.get_system_status()
-        
+
         audit_action('arbiter_status_request', success=True)
         return jsonify(status)
     except Exception as e:
@@ -262,7 +262,7 @@ def set_strategy():
     try:
         data = g.validated_data
         strategy_name = data.get('strategy')
-        
+
         # Map strategy names to enum values (simplified for now)
         strategy_map = {
             'balanced': 'balanced',
@@ -270,22 +270,22 @@ def set_strategy():
             'logical': 'logical',
             'creative': 'creative'
         }
-        
+
         if strategy_name not in strategy_map:
             audit_action('arbiter_strategy_invalid', strategy=strategy_name, success=False)
             return jsonify({'error': f'Invalid strategy: {strategy_name}'}), 400
-        
+
         arbiter = get_arbiter()
         strategy = strategy_map[strategy_name]
         arbiter.set_weighting_strategy(strategy)
-        
-        audit_action('arbiter_strategy_changed', 
+
+        audit_action('arbiter_strategy_changed',
                     old_strategy='unknown',
                     new_strategy=strategy_name,
                     success=True)
-        
+
         return jsonify({
-            'success': True, 
+            'success': True,
             'strategy': strategy_name,
             'message': f'Strategy changed to {strategy_name}'
         })
@@ -295,24 +295,24 @@ def set_strategy():
         return jsonify({'error': str(e)}), 500
             logger.warning(f"No JSON data in strategy request from {source_ip}")
             return jsonify({'error': 'JSON data required'}), 400
-            
+
         strategy_name = data.get('strategy', 'harmonic')
-        
+
         # Validate strategy
         try:
             strategy = WeightingStrategy(strategy_name)
         except ValueError:
             return jsonify({'error': f'Invalid strategy: {strategy_name}'}), 400
-        
+
         arbiter = get_arbiter()
         arbiter.set_weighting_strategy(strategy)
-        
+
         return jsonify({
             'status': 'success',
             'strategy': strategy.value,
             'message': f'Strategy changed to {strategy.value}'
         })
-        
+
     except Exception as e:
         logger.error(f"Error setting strategy: {e}")
         return jsonify({'error': str(e)}), 500
@@ -323,23 +323,23 @@ def regulate_system():
     try:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        
+
         try:
             arbiter = get_arbiter()
             loop.run_until_complete(arbiter.regulate_system())
-            
+
             # Get updated status
             status = arbiter.get_system_status()
-            
+
             return jsonify({
                 'status': 'success',
                 'message': 'System regulation completed',
                 'system_status': status
             })
-            
+
         finally:
             loop.close()
-            
+
     except Exception as e:
         logger.error(f"Error regulating system: {e}")
         return jsonify({'error': str(e)}), 500
@@ -350,7 +350,7 @@ def get_emotional_state():
     try:
         # Load from file or generate current state
         emotional_state_path = Path("data/emotional_state.json")
-        
+
         if emotional_state_path.exists():
             with open(emotional_state_path, 'r') as f:
                 state = json.load(f)
@@ -368,14 +368,14 @@ def get_emotional_state():
                     "concern": 0.3
                 }
             }
-        
+
         # Add arbiter status if available
         if core_arbiter:
             arbiter_status = core_arbiter.get_system_status()
             state['arbiter_status'] = arbiter_status
-        
+
         return jsonify(state)
-        
+
     except Exception as e:
         logger.error(f"Error getting emotional state: {e}")
         return jsonify({'error': str(e)}), 500
@@ -387,7 +387,7 @@ def generate_symbolic_response():
         data = request.json
         current_state = data.get('current_state', {})
         context = data.get('context', [])
-        
+
         # Create symbolic input for arbiter
         symbolic_input = "Express the deeper symbolic meaning of our connection"
         state = {
@@ -396,24 +396,24 @@ def generate_symbolic_response():
             'recent_context': context,
             'ritual_request': True
         }
-        
+
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        
+
         try:
             arbiter = get_arbiter()
             response = loop.run_until_complete(arbiter.process_input(symbolic_input, state))
-            
+
             return jsonify({
                 'symbolic_output': response.final_output,
                 'reflection': response.reflection,
                 'symbolic_context': response.symbolic_context,
                 'ritual_strength': response.symbolic_context.get('ritual_strength', 0.5)
             })
-            
+
         finally:
             loop.close()
-            
+
     except Exception as e:
         logger.error(f"Error generating symbolic response: {e}")
         return jsonify({'error': str(e)}), 500
@@ -423,7 +423,7 @@ def log_emotional_message():
     """Log message with emotional context"""
     try:
         data = request.json
-        
+
         # Create log entry
         log_entry = {
             'timestamp': datetime.now().isoformat(),
@@ -432,28 +432,28 @@ def log_emotional_message():
             'emotional_state': data.get('emotional_state'),
             'mood_profile': data.get('mood_profile')
         }
-        
+
         # Append to emotional conversation log
         log_path = Path("logs/emotional_conversations.json")
         log_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         if log_path.exists():
             with open(log_path, 'r') as f:
                 logs = json.load(f)
         else:
             logs = []
-        
+
         logs.append(log_entry)
-        
+
         # Keep only last 1000 entries
         if len(logs) > 1000:
             logs = logs[-1000:]
-        
+
         with open(log_path, 'w') as f:
             json.dump(logs, f, indent=2)
-        
+
         return jsonify({'status': 'logged'})
-        
+
     except Exception as e:
         logger.error(f"Error logging message: {e}")
         return jsonify({'error': str(e)}), 500
@@ -463,11 +463,11 @@ def get_traces():
     """Get arbiter decision traces"""
     try:
         trace_path = Path("logs/core_arbiter_trace.json")
-        
+
         if trace_path.exists():
             with open(trace_path, 'r') as f:
                 traces = json.load(f)
-            
+
             # Return last N traces
             limit = request.args.get('limit', 50, type=int)
             return jsonify({
@@ -479,7 +479,7 @@ def get_traces():
                 'traces': [],
                 'total_count': 0
             })
-            
+
     except Exception as e:
         logger.error(f"Error getting traces: {e}")
         return jsonify({'error': str(e)}), 500
@@ -492,10 +492,10 @@ def chat_with_arbiter():
         message = data.get('message', '')
         emotional_context = data.get('emotional_context', {})
         mood_profile = data.get('mood_profile', {})
-        
+
         if not message:
             return jsonify({'error': 'Message is required'}), 400
-        
+
         # Prepare state for arbiter
         state = {
             'context': 'conversational_chat',
@@ -503,30 +503,30 @@ def chat_with_arbiter():
             'mood_profile': mood_profile,
             'user_message': message
         }
-        
+
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        
+
         try:
             arbiter = get_arbiter()
             response = loop.run_until_complete(arbiter.process_input(message, state))
-            
+
             # Generate mood profile based on response
             mood_colors = {
                 'emotional': {'primary': '#EC4899', 'secondary': '#F9A8D4'},
                 'balanced': {'primary': '#8B5CF6', 'secondary': '#C4B5FD'},
                 'objective': {'primary': '#06B6D4', 'secondary': '#67E8F9'}
             }
-            
+
             colors = mood_colors.get(response.tone, mood_colors['balanced'])
-            
+
             response_mood = {
                 'emotion': response.symbolic_context.get('mood_primary', 'contemplative'),
                 'intensity': response.confidence,
                 'colors': colors,
                 'icon': '🤔' if response.tone == 'objective' else '💭' if response.tone == 'balanced' else '💖'
             }
-            
+
             return jsonify({
                 'response': response.final_output,
                 'mood_profile': response_mood,
@@ -541,10 +541,10 @@ def chat_with_arbiter():
                 'reflection': response.reflection,
                 'timestamp': response.timestamp.isoformat()
             })
-            
+
         finally:
             loop.close()
-            
+
     except Exception as e:
         logger.error(f"Error in chat: {e}")
         logger.error(traceback.format_exc())
@@ -559,7 +559,7 @@ def health_check():
             arbiter_status = core_arbiter.get_system_status()
             if arbiter_status['health_status'] in ['critical', 'concerning']:
                 status = "degraded"
-        
+
         return jsonify({
             'status': status,
             'timestamp': datetime.now().isoformat(),
@@ -576,10 +576,10 @@ if __name__ == '__main__':
     # Ensure directories exist
     Path("data").mkdir(exist_ok=True)
     Path("logs").mkdir(exist_ok=True)
-    
+
     # Initialize arbiter
     get_arbiter()
-    
+
     # Run Flask app
     app.run(
         host='0.0.0.0',

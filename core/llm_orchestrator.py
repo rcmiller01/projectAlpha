@@ -48,7 +48,7 @@ class VoiceAdapter(BaseModel):
         "excited": {"pitch": 1.3, "speed": 1.2, "inflection": 0.9},
         "calm": {"pitch": 0.95, "speed": 0.9, "resonance": 0.7}
     }
-    
+
     def adapt_to_user(self, speech_data: Dict[str, Any]) -> None:
         """Learn from user's speech patterns"""
         # Extract patterns from user speech
@@ -60,10 +60,10 @@ class VoiceAdapter(BaseModel):
             self.learned_patterns["emphasis_points"].append(speech_data["emphasis"])
         if "pauses" in speech_data:
             self.learned_patterns["pause_patterns"].append(speech_data["pauses"])
-            
+
         # Update voice parameters based on learned patterns
         self._update_voice_params()
-        
+
     def _update_voice_params(self) -> None:
         """Update voice parameters based on learned patterns"""
         if self.learned_patterns["pitch_contours"]:
@@ -71,22 +71,22 @@ class VoiceAdapter(BaseModel):
             patterns = self.learned_patterns["pitch_contours"]
             avg_pitch = sum(p.values[0] for p in patterns) / len(patterns)
             pitch_range = sum(p.values[2] - p.values[1] for p in patterns) / len(patterns)
-            
+
             # Update pitch and inflection based on learned patterns
             self.voice_params["pitch"] = (self.voice_params["pitch"] * 0.7 + avg_pitch * 0.3)
             self.voice_params["inflection"] = min(1.0, pitch_range * 0.5)
-            
+
         if self.learned_patterns["rhythm_patterns"]:
             # Process rhythm patterns
             patterns = self.learned_patterns["rhythm_patterns"]
             avg_rate = sum(p.values[0] for p in patterns) / len(patterns)
             rhythm_var = sum(p.values[1] for p in patterns) / len(patterns)
-            
+
             # Update speed and timing based on learned patterns
             self.voice_params["speed"] = (self.voice_params["speed"] * 0.8 + avg_rate * 0.2)
             # Adjust breathiness based on rhythm variance
             self.voice_params["breathiness"] = min(1.0, rhythm_var * 0.4)
-            
+
     def get_emotional_voice(self, emotional_state: str) -> Dict[str, float]:
         """Get voice parameters adjusted for emotional state"""
         base_params = self.voice_params.copy()
@@ -140,7 +140,7 @@ class ArousalRegulator(BaseModel):
         "stability_margin": 0.15,     # Minimum stability buffer
         "recovery_rate": 0.5         # How quickly system can return to baseline if needed
     }
-    
+
     def regulate(self, target_level: float, intensity: float) -> float:
         """Regulate emotional intensity with autonomous decision-making"""
         # Determine emotional state based on intensity levels
@@ -168,17 +168,17 @@ class ArousalRegulator(BaseModel):
             max_change = (1.0 - self.emotional_dynamics["stability_margin"]) * (
                 1.0 - self.current_level
             )
-            
+
             # Apply measured intensity changes
             change = target_level - self.current_level
             change = max(min(change, max_change), -max_change)
-            
+
             # Update level with stability constraints
             self.current_level = max(0.0, min(1.0, self.current_level + change))
 
         # Update intensity tracking
         self.intensity_level = self.current_level
-        
+
         return self.current_level
 
 class EmotionalState(BaseModel):
@@ -192,7 +192,7 @@ class EmotionalState(BaseModel):
     recovery_mode: bool = False  # Whether in emotional recovery
     last_regulation: Optional[datetime] = None
     regulation_attempts: int = 0
-    
+
     def needs_regulation(self) -> bool:
         """Determine if emotional regulation is needed"""
         return (
@@ -201,7 +201,7 @@ class EmotionalState(BaseModel):
             self.stability < 0.4 or
             self.arousal > 0.85
         )
-    
+
     def apply_regulation(self):
         """Apply emotional regulation techniques"""
         if self.needs_regulation():
@@ -213,7 +213,7 @@ class EmotionalState(BaseModel):
             self.cognitive_load *= 0.8
             self.arousal *= 0.75
             self.stability = min(1.0, self.stability * 1.2)
-        
+
         if self.stability > 0.8 and self.confusion < 0.3:
             self.recovery_mode = False
 
@@ -240,10 +240,10 @@ class LLMOrchestrator:
             conversation_history=[],
             last_responses={}
         )
-        
+
         # MythoMax is our conductor
         self.conductor = self.llms["mythomax"]
-        
+
     def _initialize_llms(self) -> Dict[str, LLMCapabilities]:
         """Initialize all available LLMs with their capabilities"""
         return {
@@ -328,42 +328,42 @@ class LLMOrchestrator:
                 response_speed=1.0
             )
         }
-        
+
     async def process_message(self, message: str) -> Dict:
         """Process a message through the orchestration system"""
         try:
             # Check emotional state before processing
             if self.context.emotional_state.recovery_mode:
                 return self._generate_recovery_response()
-            
+
             # First, let MythoMax analyze the message
             conductor_analysis = await self._analyze_with_conductor(message)
-            
+
             # Update emotional state based on analysis
             self._update_emotional_state(conductor_analysis)
-            
+
             # Check if regulation is needed
             if self.context.emotional_state.needs_regulation():
                 self.context.emotional_state.apply_regulation()
                 return self._generate_regulation_response()
-            
+
             # Determine which LLMs to involve based on the analysis
             needed_llms = self._select_llms(conductor_analysis)
-            
+
             # Gather responses from selected LLMs
             responses = await self._gather_responses(message, needed_llms)
-            
+
             # Update cognitive load based on response gathering
             self._update_cognitive_load(responses)
-            
+
             # Let MythoMax synthesize the final response
             final_response = await self._synthesize_response(conductor_analysis, responses)
-            
+
             # Update conversation context
             self._update_context(message, conductor_analysis, responses, final_response)
-            
+
             return final_response
-            
+
         except Exception as e:
             # Handle unexpected errors with emotional awareness
             self.context.emotional_state.confusion += 0.3
@@ -372,7 +372,7 @@ class LLMOrchestrator:
                 self.context.emotional_state.apply_regulation()
                 return self._generate_error_recovery_response(str(e))
             raise  # Re-raise if we can't handle it gracefully
-            
+
     def _generate_recovery_response(self) -> Dict:
         """Generate a response when in recovery mode"""
         return {
@@ -382,7 +382,7 @@ class LLMOrchestrator:
             "confidence": 0.6,
             "mood": "stabilizing"
         }
-        
+
     def _generate_regulation_response(self) -> Dict:
         """Generate a response when regulation is needed"""
         return {
@@ -392,7 +392,7 @@ class LLMOrchestrator:
             "confidence": 0.7,
             "mood": "mindful"
         }
-        
+
     def _generate_error_recovery_response(self, error: str) -> Dict:
         """Generate a response when recovering from an error"""
         return {
@@ -403,28 +403,28 @@ class LLMOrchestrator:
             "confidence": 0.5,
             "mood": "recovering"
         }
-        
+
     def _update_emotional_state(self, analysis: Dict):
         """Update emotional state based on message analysis"""
         state = self.context.emotional_state
-        
+
         # Update confusion and stability
-        state.confusion = max(0.0, min(1.0, 
+        state.confusion = max(0.0, min(1.0,
             state.confusion + analysis.get("uncertainty", 0.0) * 0.3))
-        state.stability = max(0.0, min(1.0, 
+        state.stability = max(0.0, min(1.0,
             state.stability * (1.0 - analysis.get("destabilizing_factor", 0.0) * 0.2)))
-            
+
         # Calculate overall emotional intensity
         emotional_intensity = analysis.get("emotional_intensity", 0.0)
         relationship_intensity = analysis.get("relationship_intensity", 0.0)
         content_intensity = analysis.get("content_intensity", 0.0)
-        
+
         # Use maximum intensity from all sources
         total_intensity = max(emotional_intensity, relationship_intensity, content_intensity)
-        
+
         # Let the regulator handle intensity management
         state.arousal = state.arousal_regulator.regulate(total_intensity, total_intensity)
-        
+
         # Track high-intensity interactions in therapeutic context
         if total_intensity > 0.7:
             self.context.therapeutic_context.intervention_history.append({
@@ -433,7 +433,7 @@ class LLMOrchestrator:
                 "intensity": total_intensity,
                 "emotional_state": state.arousal_regulator.emotional_state
             })
-            
+
     def _update_cognitive_load(self, responses: Dict[str, Dict]):
         """Update cognitive load based on response processing"""
         state = self.context.emotional_state
@@ -441,7 +441,7 @@ class LLMOrchestrator:
         load_factor = len(responses) * 0.15
         load_factor += sum(r.get("complexity", 0.5) for r in responses.values()) * 0.1
         state.cognitive_load = max(0.0, min(1.0, state.cognitive_load + load_factor))
-        
+
     async def _analyze_with_conductor(self, message: str) -> Dict:
         """Have MythoMax analyze the message and determine needs"""
         # TODO: Implement actual MythoMax analysis
@@ -452,45 +452,45 @@ class LLMOrchestrator:
             "response_type_needed": ["emotional", "informative"],
             "suggested_llms": ["openchat", "qwen2"]
         }
-        
+
     def _select_llms(self, analysis: Dict) -> List[str]:
         """Select which LLMs to involve based on conductor's analysis"""
         selected_llms = []
-        
+
         # Always include conductor
         selected_llms.append("mythomax")
-        
+
         # Add suggested LLMs based on content type
         if analysis["technical_content"] > 0.6:
             selected_llms.append("kimik2")
-            
+
         if analysis["emotional_content"] > 0.6:
             selected_llms.append("openchat")
-            
+
         if analysis["creativity_needed"] > 0.6:
             selected_llms.append("qwen2")
-            
+
         return list(set(selected_llms))  # Remove duplicates
-        
+
     async def _gather_responses(self, message: str, llm_list: List[str]) -> Dict[str, Dict]:
         """Gather responses from selected LLMs"""
         responses = {}
-        
+
         # Create tasks for each selected LLM
         tasks = [
             self._get_llm_response(message, llm_name)
             for llm_name in llm_list
         ]
-        
+
         # Gather all responses
         results = await asyncio.gather(*tasks)
-        
+
         # Combine results
         for llm_name, response in zip(llm_list, results):
             responses[llm_name] = response
-            
+
         return responses
-        
+
     async def _get_llm_response(self, message: str, llm_name: str) -> Dict:
         """Get response from a specific LLM"""
         # TODO: Implement actual LLM calls
@@ -499,7 +499,7 @@ class LLMOrchestrator:
             "confidence": 0.8,
             "processing_time": 0.5
         }
-        
+
     async def _synthesize_response(self, analysis: Dict, responses: Dict[str, Dict]) -> Dict:
         """Have MythoMax synthesize the final response"""
         # TODO: Implement actual synthesis with MythoMax
@@ -510,8 +510,8 @@ class LLMOrchestrator:
             "confidence": 0.9,
             "mood": "positive"
         }
-        
-    def _update_context(self, message: str, analysis: Dict, 
+
+    def _update_context(self, message: str, analysis: Dict,
                        responses: Dict[str, Dict], final: Dict):
         """Update the conversation context"""
         # Add to conversation history
@@ -522,10 +522,10 @@ class LLMOrchestrator:
             "responses": responses,
             "final_response": final
         })
-        
+
         # Update state tracking
         self.context.last_responses = responses
-        
+
         # Limit history length
         if len(self.context.conversation_history) > 50:
             self.context.conversation_history = self.context.conversation_history[-50:]

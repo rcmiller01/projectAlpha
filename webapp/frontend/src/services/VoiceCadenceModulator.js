@@ -1,7 +1,7 @@
 /**
  * VoiceCadenceModulator.js - Voice Breath Controller for TTS Output
- * 
- * Modulates TTS delivery based on mood and drift state, acting as the 
+ *
+ * Modulates TTS delivery based on mood and drift state, acting as the
  * emotional breathing pattern that shapes how the AI speaks.
  */
 
@@ -193,9 +193,9 @@ class VoiceCadenceModulator {
 
         // Get base cadence from mood
         const baseCadence = this.getCadencePreset(dominant_emotion, mood_archetype);
-        
+
         // Apply drift overlay if present
-        let finalCadence = drift_delta !== 0 
+        let finalCadence = drift_delta !== 0
             ? this.applyDriftOverlay(baseCadence, drift_delta, intensity)
             : baseCadence;
 
@@ -220,7 +220,7 @@ class VoiceCadenceModulator {
      */
     getCadencePreset(mood, archetype = null) {
         const preset = this.moodPresets[mood] || this.moodPresets.contemplative;
-        
+
         // Create deep copy to avoid mutation
         return JSON.parse(JSON.stringify(preset));
     }
@@ -242,26 +242,26 @@ class VoiceCadenceModulator {
             // Speed up tempo slightly
             if (modified.tempo === 'slow') modified.tempo = 'steady';
             else if (modified.tempo === 'steady') modified.tempo = 'fast';
-            
+
             // Increase emphasis intensity
             if (modified.emphasis === 'centered') modified.emphasis = 'rising';
             else if (modified.emphasis === 'late') modified.emphasis = 'centered';
-            
+
             // Make tone more vibrant
             if (modified.tone === 'gentle') modified.tone = 'warm';
             else if (modified.tone === 'warm') modified.tone = 'vibrant';
         }
-        
+
         // Negative drift: becoming more introspective/withdrawn
         else if (driftDirection < 0) {
             // Slow down tempo
             if (modified.tempo === 'fast') modified.tempo = 'steady';
             else if (modified.tempo === 'steady') modified.tempo = 'slow';
-            
+
             // Increase pauses
             if (modified.pause === 'low') modified.pause = 'medium';
             else if (modified.pause === 'medium') modified.pause = 'high';
-            
+
             // Make tone softer
             if (modified.tone === 'vibrant') modified.tone = 'warm';
             else if (modified.tone === 'warm') modified.tone = 'gentle';
@@ -270,7 +270,7 @@ class VoiceCadenceModulator {
         // Add drift-specific modulations
         modified.drift_tremor = driftMagnitude * intensity * 0.3;
         modified.drift_delay = driftMagnitude > 0.5 ? Math.random() * 0.2 : 0;
-        
+
         return modified;
     }
 
@@ -282,28 +282,28 @@ class VoiceCadenceModulator {
      */
     applyStyleProfile(cadenceConfig, styleProfile) {
         const modified = { ...cadenceConfig };
-        
+
         // Poetic style: more pauses, emphasis on rhythm
         if (styleProfile.poetic) {
             if (modified.pause === 'low') modified.pause = 'medium';
             else if (modified.pause === 'medium') modified.pause = 'high';
             modified.emphasis = 'wave'; // Rhythmic peaks
         }
-        
+
         // Intimate style: whisper tones, slower pace
         if (styleProfile.intimate) {
             modified.tone = 'whispery';
             if (modified.tempo === 'fast') modified.tempo = 'steady';
             else if (modified.tempo === 'steady') modified.tempo = 'slow';
         }
-        
+
         // Energetic style: faster, more dynamic
         if (styleProfile.energetic) {
             if (modified.tempo === 'slow') modified.tempo = 'steady';
             else if (modified.tempo === 'steady') modified.tempo = 'fast';
             modified.tone = 'vibrant';
         }
-        
+
         return modified;
     }
 
@@ -315,7 +315,7 @@ class VoiceCadenceModulator {
      */
     applyContextHint(cadenceConfig, contextHint) {
         const modified = { ...cadenceConfig };
-        
+
         switch (contextHint) {
             case 'ritual':
                 // Ritual speech: ceremonial, measured
@@ -324,7 +324,7 @@ class VoiceCadenceModulator {
                 modified.tone = 'warm';
                 modified.ritual_reverence = true;
                 break;
-                
+
             case 'dream':
                 // Dream narration: flowing, ethereal
                 modified.tempo = 'slow';
@@ -332,14 +332,14 @@ class VoiceCadenceModulator {
                 modified.tone = 'whispery';
                 modified.dream_flow = true;
                 break;
-                
+
             case 'urgent':
                 // Urgent communication: faster, clearer
                 modified.tempo = 'fast';
                 modified.pause = 'minimal';
                 modified.tone = 'sharp';
                 break;
-                
+
             case 'comforting':
                 // Comfort/support: gentle, steady
                 modified.tempo = 'slow';
@@ -347,7 +347,7 @@ class VoiceCadenceModulator {
                 modified.pause = 'medium';
                 break;
         }
-        
+
         return modified;
     }
 
@@ -365,36 +365,36 @@ class VoiceCadenceModulator {
 
         // Calculate specific tempo based on mood intensity
         const tempoVariation = (moodProfile.intensity || 0.5) - 0.5; // -0.5 to 0.5
-        const targetTempo = tempoRange.min + 
+        const targetTempo = tempoRange.min +
             ((tempoRange.max - tempoRange.min) * (0.5 + tempoVariation));
 
         return {
             // Core timing
             tempo: Math.round(targetTempo),
             tempo_variation: cadenceConfig.tempo === 'erratic' ? 0.3 : 0.1,
-            
+
             // Pause patterns
             pause_frequency: pauseConfig,
             breath_rhythm: cadenceConfig.breath_depth || 'natural',
-            
+
             // Emphasis and expression
             emphasis_curve: emphasisConfig,
             emotional_peaks: this.calculateEmotionalPeaks(emphasisConfig, moodProfile),
-            
+
             // Tone characteristics
             tone_modifier: cadenceConfig.tone,
             tone_parameters: toneConfig,
-            
+
             // Drift-specific modulations (if any)
             pitch_range: this.calculatePitchRange(moodProfile),
             tremor: cadenceConfig.drift_tremor || 0,
             delay_drift: cadenceConfig.drift_delay || 0,
-            
+
             // Meta information
             mood_source: moodProfile.dominant_emotion,
             config_timestamp: new Date().toISOString(),
             confidence: this.calculateConfigConfidence(moodProfile),
-            
+
             // Context flags
             context_modifiers: {
                 ritual_reverence: cadenceConfig.ritual_reverence || false,
@@ -414,7 +414,7 @@ class VoiceCadenceModulator {
     calculateEmotionalPeaks(emphasisConfig, moodProfile) {
         const intensity = moodProfile.intensity || 0.5;
         const peaks = [];
-        
+
         if (emphasisConfig.peak) {
             peaks.push({
                 position: emphasisConfig.peak,
@@ -422,7 +422,7 @@ class VoiceCadenceModulator {
                 duration: 0.1 + (intensity * 0.2)
             });
         }
-        
+
         if (emphasisConfig.peaks) {
             emphasisConfig.peaks.forEach(peak => {
                 peaks.push({
@@ -432,7 +432,7 @@ class VoiceCadenceModulator {
                 });
             });
         }
-        
+
         return peaks;
     }
 
@@ -445,7 +445,7 @@ class VoiceCadenceModulator {
         const basePitch = 1.0;
         const intensity = moodProfile.intensity || 0.5;
         const driftDelta = moodProfile.drift_delta || 0;
-        
+
         // Emotional pitch modulations
         const emotionalPitchMap = {
             joy: { center: 1.1, range: 0.3 },
@@ -458,13 +458,13 @@ class VoiceCadenceModulator {
             restless: { center: 1.02, range: 0.4 },
             storming: { center: 1.05, range: 0.5 }
         };
-        
-        const pitchConfig = emotionalPitchMap[moodProfile.dominant_emotion] || 
+
+        const pitchConfig = emotionalPitchMap[moodProfile.dominant_emotion] ||
                            { center: 1.0, range: 0.2 };
-        
+
         // Apply drift influence
         const driftInfluence = driftDelta * 0.1;
-        
+
         return {
             center: pitchConfig.center + driftInfluence,
             range: pitchConfig.range * (0.5 + intensity),
@@ -479,24 +479,24 @@ class VoiceCadenceModulator {
      */
     calculateConfigConfidence(moodProfile) {
         let confidence = 0.8; // Base confidence
-        
+
         // Higher confidence if we have clear mood data
         if (moodProfile.dominant_emotion && this.moodPresets[moodProfile.dominant_emotion]) {
             confidence += 0.1;
         }
-        
+
         // Higher confidence if intensity is clear (not middle range)
         const intensity = moodProfile.intensity || 0.5;
         if (intensity < 0.3 || intensity > 0.7) {
             confidence += 0.05;
         }
-        
+
         // Lower confidence if drift is high (unstable state)
         const driftMagnitude = Math.abs(moodProfile.drift_delta || 0);
         if (driftMagnitude > 0.5) {
             confidence -= 0.1;
         }
-        
+
         return Math.max(0.5, Math.min(1.0, confidence));
     }
 
@@ -512,7 +512,7 @@ class VoiceCadenceModulator {
             drift_delta: 0,
             style_profile: { poetic: false, intimate: false, energetic: false }
         };
-        
+
         return this.modulateFromMood(testProfile);
     }
 
@@ -524,29 +524,29 @@ class VoiceCadenceModulator {
     validateConfig(config) {
         const errors = [];
         const warnings = [];
-        
+
         // Check required fields
         if (!config.tempo || config.tempo < 50 || config.tempo > 400) {
             errors.push('Invalid tempo range');
         }
-        
+
         if (!config.pause_frequency) {
             errors.push('Missing pause frequency configuration');
         }
-        
+
         if (!config.emphasis_curve) {
             warnings.push('No emphasis curve specified');
         }
-        
+
         if (!config.tone_modifier) {
             warnings.push('No tone modifier specified');
         }
-        
+
         // Check confidence
         if (config.confidence < 0.6) {
             warnings.push('Low confidence in voice configuration');
         }
-        
+
         return {
             valid: errors.length === 0,
             errors,
@@ -567,10 +567,10 @@ if (typeof module !== 'undefined' && module.exports) {
 if (typeof require !== 'undefined' && require.main === module) {
     // CLI testing interface
     const modulator = new VoiceCadenceModulator();
-    
+
     console.log('🎵 VoiceCadenceModulator - Test Suite');
     console.log('=====================================');
-    
+
     // Test different emotional states
     const testMoods = [
         { name: 'Contemplative Drift', profile: { dominant_emotion: 'contemplative', intensity: 0.4, drift_delta: -0.3 } },
@@ -579,25 +579,25 @@ if (typeof require !== 'undefined' && require.main === module) {
         { name: 'Storming Chaos', profile: { dominant_emotion: 'storming', intensity: 0.9, drift_delta: 0.7 } },
         { name: 'Anchored Stability', profile: { dominant_emotion: 'anchored', intensity: 0.5, drift_delta: 0 } }
     ];
-    
+
     testMoods.forEach(test => {
         console.log(`\n🎭 Testing: ${test.name}`);
         console.log('-'.repeat(30));
-        
+
         const config = modulator.modulateFromMood(test.profile);
         const validation = modulator.validateConfig(config);
-        
+
         console.log(`Tempo: ${config.tempo} WPM (${config.tempo_variation * 100}% variation)`);
         console.log(`Tone: ${config.tone_modifier}`);
         console.log(`Pauses: ${config.pause_frequency.short} short, ${config.pause_frequency.medium} medium`);
         console.log(`Confidence: ${(config.confidence * 100).toFixed(1)}%`);
         console.log(`Validation: ${validation.valid ? '✅ Valid' : '❌ Invalid'} (Score: ${validation.score.toFixed(2)})`);
-        
+
         if (validation.warnings.length > 0) {
             console.log(`Warnings: ${validation.warnings.join(', ')}`);
         }
     });
-    
+
     console.log('\n🎯 Voice cadence modulation testing complete!');
 }
 

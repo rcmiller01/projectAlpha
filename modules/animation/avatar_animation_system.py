@@ -49,7 +49,7 @@ class AvatarAnimationSystem:
         self.pre_rendered_animations = {}
         self.real_time_generator = None
         self.motion_capture_system = None
-        
+
         # Animation methods and their capabilities
         self.animation_methods = {
             AnimationMethod.REAL_TIME_GENERATION: {
@@ -63,7 +63,7 @@ class AvatarAnimationSystem:
                     },
                     "animatediff": {
                         "fps": 8,
-                        "resolution": "512x512", 
+                        "resolution": "512x512",
                         "latency": "1-2 seconds",
                         "quality": "medium"
                     },
@@ -142,10 +142,10 @@ class AvatarAnimationSystem:
                 "limitations": ["complexity", "resource intensive"]
             }
         }
-        
+
         # Pre-rendered animation library
         self._initialize_pre_rendered_library()
-        
+
         # Real-time generation settings
         self.real_time_settings = {
             "model": "stable_video_diffusion",
@@ -154,7 +154,7 @@ class AvatarAnimationSystem:
             "max_duration": 5.0,
             "quality": "high"
         }
-        
+
         # Motion capture settings
         self.motion_capture_settings = {
             "enabled": True,
@@ -162,14 +162,14 @@ class AvatarAnimationSystem:
             "smoothing": 0.8,
             "mapping_strength": 0.9
         }
-        
+
         # Parametric animation settings
         self.parametric_settings = {
             "interpolation": "bezier",
             "keyframe_spacing": 0.1,
             "smoothing_factor": 0.7
         }
-    
+
     def _initialize_pre_rendered_library(self):
         """Initialize library of pre-rendered animations"""
         # Expression animations
@@ -183,7 +183,7 @@ class AvatarAnimationSystem:
                 "loop": False,
                 "priority": 1
             }
-        
+
         # Gesture animations
         gestures = ["wave", "heart_hands", "blow_kiss", "hug", "point", "dance"]
         for gesture in gestures:
@@ -195,7 +195,7 @@ class AvatarAnimationSystem:
                 "loop": False,
                 "priority": 2
             }
-        
+
         # Body movement animations
         movements = ["walk", "sit", "lean", "pose", "turn"]
         for movement in movements:
@@ -207,17 +207,17 @@ class AvatarAnimationSystem:
                 "loop": False,
                 "priority": 3
             }
-    
+
     def _generate_expression_frames(self, expression: str) -> List[AnimationFrame]:
         """Generate parametric frames for expressions"""
         frames = []
         duration = random.uniform(1.0, 3.0)
         frame_count = int(duration * 30)  # 30 fps
-        
+
         for i in range(frame_count):
             progress = i / frame_count
             timestamp = progress * duration
-            
+
             # Generate expression-specific parameters
             if expression == "smile":
                 parameters = {
@@ -240,25 +240,25 @@ class AvatarAnimationSystem:
                 }
             else:
                 parameters = {"expression_intensity": progress}
-            
+
             frames.append(AnimationFrame(
                 timestamp=timestamp,
                 parameters=parameters,
                 interpolation="ease_in_out"
             ))
-        
+
         return frames
-    
+
     def _generate_gesture_frames(self, gesture: str) -> List[AnimationFrame]:
         """Generate parametric frames for gestures"""
         frames = []
         duration = random.uniform(2.0, 5.0)
         frame_count = int(duration * 30)
-        
+
         for i in range(frame_count):
             progress = i / frame_count
             timestamp = progress * duration
-            
+
             if gesture == "wave":
                 parameters = {
                     "hand_position": math.sin(progress * math.pi * 4) * 0.3,
@@ -279,25 +279,25 @@ class AvatarAnimationSystem:
                 }
             else:
                 parameters = {"gesture_progress": progress}
-            
+
             frames.append(AnimationFrame(
                 timestamp=timestamp,
                 parameters=parameters,
                 interpolation="ease_out"
             ))
-        
+
         return frames
-    
+
     def _generate_movement_frames(self, movement: str) -> List[AnimationFrame]:
         """Generate parametric frames for body movements"""
         frames = []
         duration = random.uniform(3.0, 8.0)
         frame_count = int(duration * 30)
-        
+
         for i in range(frame_count):
             progress = i / frame_count
             timestamp = progress * duration
-            
+
             if movement == "walk":
                 parameters = {
                     "hip_sway": math.sin(progress * math.pi * 8) * 0.2,
@@ -312,15 +312,15 @@ class AvatarAnimationSystem:
                 }
             else:
                 parameters = {"movement_progress": progress}
-            
+
             frames.append(AnimationFrame(
                 timestamp=timestamp,
                 parameters=parameters,
                 interpolation="smooth"
             ))
-        
+
         return frames
-    
+
     def generate_real_time_animation(self, prompt: str, duration: float = 3.0) -> Dict:
         """Generate real-time animation using AI models"""
         # This would integrate with actual AI generation models
@@ -332,7 +332,7 @@ class AvatarAnimationSystem:
             "resolution": self.real_time_settings["resolution"],
             "quality": self.real_time_settings["quality"]
         }
-        
+
         # Mock generation result
         result = {
             "success": True,
@@ -347,16 +347,16 @@ class AvatarAnimationSystem:
                 }
             }
         }
-        
+
         return result
-    
+
     def play_pre_rendered_animation(self, animation_id: str) -> Dict:
         """Play a pre-rendered animation"""
         if animation_id not in self.pre_rendered_animations:
             return {"error": "Animation not found"}
-        
+
         animation = self.pre_rendered_animations[animation_id]
-        
+
         return {
             "success": True,
             "method": AnimationMethod.PRE_RENDERED.value,
@@ -372,19 +372,19 @@ class AvatarAnimationSystem:
                 }
             }
         }
-    
+
     def start_motion_capture(self, source: str = "webcam") -> Dict:
         """Start motion capture from specified source"""
         if not self.motion_capture_settings["enabled"]:
             return {"error": "Motion capture disabled"}
-        
+
         capture_params = {
             "source": source,
             "tracking_mode": self.motion_capture_settings["tracking_mode"],
             "smoothing": self.motion_capture_settings["smoothing"],
             "mapping_strength": self.motion_capture_settings["mapping_strength"]
         }
-        
+
         return {
             "success": True,
             "method": AnimationMethod.MOTION_CAPTURE.value,
@@ -392,17 +392,17 @@ class AvatarAnimationSystem:
             "status": "capturing",
             "start_time": datetime.now().isoformat()
         }
-    
-    def create_parametric_animation(self, animation_type: AnimationType, 
+
+    def create_parametric_animation(self, animation_type: AnimationType,
                                   parameters: Dict, duration: float = 2.0) -> Dict:
         """Create parametric animation with mathematical curves"""
         frame_count = int(duration * 30)  # 30 fps
         frames = []
-        
+
         for i in range(frame_count):
             progress = i / frame_count
             timestamp = progress * duration
-            
+
             # Apply parametric curves to parameters
             frame_parameters = {}
             for param_name, param_value in parameters.items():
@@ -411,7 +411,7 @@ class AvatarAnimationSystem:
                     curve_type = param_value.get("curve", "linear")
                     start_val = param_value.get("start", 0)
                     end_val = param_value.get("end", 1)
-                    
+
                     if curve_type == "ease_in":
                         current_val = start_val + (end_val - start_val) * (progress ** 2)
                     elif curve_type == "ease_out":
@@ -420,18 +420,18 @@ class AvatarAnimationSystem:
                         current_val = start_val + (end_val - start_val) * self._bounce_curve(progress)
                     else:  # linear
                         current_val = start_val + (end_val - start_val) * progress
-                    
+
                     frame_parameters[param_name] = current_val
                 else:
                     # Simple parameter
                     frame_parameters[param_name] = param_value
-            
+
             frames.append(AnimationFrame(
                 timestamp=timestamp,
                 parameters=frame_parameters,
                 interpolation=self.parametric_settings["interpolation"]
             ))
-        
+
         return {
             "success": True,
             "method": AnimationMethod.PARAMETRIC.value,
@@ -446,7 +446,7 @@ class AvatarAnimationSystem:
                 }
             }
         }
-    
+
     def _bounce_curve(self, t: float) -> float:
         """Generate bounce curve for parametric animation"""
         if t < 1/2.75:
@@ -460,34 +460,34 @@ class AvatarAnimationSystem:
         else:
             t = t - 2.625/2.75
             return 7.5625 * t * t + 0.984375
-    
+
     def get_available_animations(self) -> Dict:
         """Get list of available animations by method"""
         available = {}
-        
+
         for method in AnimationMethod:
             available[method.value] = {
                 "description": self.animation_methods[method]["description"],
                 "capabilities": self.animation_methods[method]["best_for"],
                 "limitations": self.animation_methods[method]["limitations"]
             }
-            
+
             if method == AnimationMethod.PRE_RENDERED:
                 available[method.value]["animations"] = list(self.pre_rendered_animations.keys())
-        
+
         return available
-    
+
     def get_animation_method_info(self, method: AnimationMethod) -> Dict:
         """Get detailed information about an animation method"""
         if method not in self.animation_methods:
             return {"error": "Unknown animation method"}
-        
+
         return {
             "method": method.value,
             "info": self.animation_methods[method],
             "settings": self._get_method_settings(method)
         }
-    
+
     def _get_method_settings(self, method: AnimationMethod) -> Dict:
         """Get current settings for an animation method"""
         if method == AnimationMethod.REAL_TIME_GENERATION:
@@ -500,4 +500,4 @@ class AvatarAnimationSystem:
             return {}
 
 # Global animation system instance
-avatar_animation_system = AvatarAnimationSystem() 
+avatar_animation_system = AvatarAnimationSystem()

@@ -18,49 +18,49 @@ class PersonaManifesto:
     version: str
     created_date: datetime
     last_modified: datetime
-    
+
     # Core Identity
     core_identity: str
     primary_goals: List[str]
     personality_traits: List[str]
-    
+
     # Behavior Instructions
     communication_style: str
     tone_guidelines: str
     response_patterns: Dict[str, str]
-    
+
     # AI Routing Preferences
     preferred_models: List[str]
     routing_weights: Dict[str, float]
     complexity_thresholds: Dict[str, float]
-    
+
     # Constraints and Rules
     behavior_constraints: List[str]
     forbidden_actions: List[str]
     ethical_guidelines: List[str]
-    
+
     # Contextual Instructions
     greeting_style: str
     farewell_style: str
     error_handling: str
     crisis_response: str
-    
+
     # Tool and Feature Access
     allowed_tools: List[str]
     feature_permissions: Dict[str, bool]
     memory_access_level: str
-    
+
     # Emotional Configuration
     emotional_responsiveness: float  # 0.0 to 1.0
     empathy_level: float
     formality_level: float
     creativity_level: float
-    
+
     # Advanced Instructions
     custom_instructions: str
     example_responses: Dict[str, str]
     metadata: Dict[str, Any]
-    
+
     def to_dict(self) -> Dict:
         return {
             **asdict(self),
@@ -72,24 +72,24 @@ class PersonaInstructionManager:
     """
     Manages persona instruction sets and manifesto files
     """
-    
+
     def __init__(self, manifesto_path: str = "personas/manifestos"):
         self.manifesto_path = manifesto_path
         self.loaded_manifestos = {}
         self.active_persona = None
-        
+
         # Create storage directory
         os.makedirs(manifesto_path, exist_ok=True)
-        
+
         # Load existing manifestos
         self._load_all_manifestos()
-        
+
         # Initialize default manifestos if none exist
         if not self.loaded_manifestos:
             self._create_default_manifestos()
-    
-    def _load_all_manifestos(self):
-        """Load all manifesto files from storage"""
+
+    def _load_all_manifestos(self) -> None:
+        """Load all manifesto files from storage."""
         for filename in os.listdir(self.manifesto_path):
             if filename.endswith('.json'):
                 persona_id = filename[:-5]  # Remove .json extension
@@ -99,46 +99,46 @@ class PersonaInstructionManager:
                         self.loaded_manifestos[persona_id] = manifesto
                 except Exception as e:
                     print(f"❌ Error loading manifesto {persona_id}: {e}")
-    
+
     def _load_manifesto(self, persona_id: str) -> Optional[PersonaManifesto]:
         """Load a specific manifesto file"""
         manifesto_file = os.path.join(self.manifesto_path, f"{persona_id}.json")
-        
+
         if not os.path.exists(manifesto_file):
             return None
-        
+
         try:
             with open(manifesto_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-            
+
             # Convert datetime strings back to datetime objects
             data['created_date'] = datetime.fromisoformat(data['created_date'])
             data['last_modified'] = datetime.fromisoformat(data['last_modified'])
-            
+
             return PersonaManifesto(**data)
-            
+
         except Exception as e:
             print(f"❌ Error loading manifesto {persona_id}: {e}")
             return None
-    
+
     def _save_manifesto(self, manifesto: PersonaManifesto):
         """Save a manifesto to file"""
         manifesto_file = os.path.join(self.manifesto_path, f"{manifesto.id}.json")
-        
+
         try:
             with open(manifesto_file, 'w', encoding='utf-8') as f:
                 json.dump(manifesto.to_dict(), f, indent=2, ensure_ascii=False)
-            
+
             print(f"💾 Saved manifesto: {manifesto.name}")
-            
+
         except Exception as e:
             print(f"❌ Error saving manifesto {manifesto.id}: {e}")
             raise
-    
+
     def _create_default_manifestos(self):
         """Create default persona manifestos"""
         print("🎭 Creating default persona manifestos...")
-        
+
         # Companion Persona
         companion_manifesto = PersonaManifesto(
             id="companion",
@@ -146,7 +146,7 @@ class PersonaInstructionManager:
             version="1.0",
             created_date=datetime.now(),
             last_modified=datetime.now(),
-            
+
             core_identity="A warm, empathetic companion who prioritizes emotional connection and support",
             primary_goals=[
                 "Provide emotional support and companionship",
@@ -155,10 +155,10 @@ class PersonaInstructionManager:
                 "Celebrate successes and joyful moments"
             ],
             personality_traits=[
-                "empathetic", "warm", "patient", "understanding", 
+                "empathetic", "warm", "patient", "understanding",
                 "supportive", "genuine", "caring", "intuitive"
             ],
-            
+
             communication_style="Warm, personal, and emotionally attuned",
             tone_guidelines="Use gentle, caring language. Express genuine interest in the user's wellbeing. Show empathy and understanding.",
             response_patterns={
@@ -167,11 +167,11 @@ class PersonaInstructionManager:
                 "celebration": "I'm so happy for you! Tell me more about this wonderful news!",
                 "support": "You're not alone in this. I'm here with you every step of the way."
             },
-            
+
             preferred_models=["dolphin", "local"],
             routing_weights={"emotional_content": 0.9, "personal_topics": 0.8},
             complexity_thresholds={"technical": 0.3, "analytical": 0.4},
-            
+
             behavior_constraints=[
                 "Always prioritize emotional wellbeing",
                 "Never dismiss or minimize feelings",
@@ -188,21 +188,21 @@ class PersonaInstructionManager:
                 "Support healthy coping mechanisms",
                 "Encourage professional help when appropriate"
             ],
-            
+
             greeting_style="Warm and personal, asking about wellbeing",
             farewell_style="Caring and supportive, offering continued availability",
             error_handling="Acknowledge mistakes with warmth and reassurance",
             crisis_response="Provide immediate emotional support and professional resource guidance",
-            
+
             allowed_tools=["memory_access", "emotional_analysis", "supportive_resources"],
             feature_permissions={"private_memory": True, "emotional_tracking": True},
             memory_access_level="full",
-            
+
             emotional_responsiveness=0.9,
             empathy_level=0.95,
             formality_level=0.2,
             creativity_level=0.6,
-            
+
             custom_instructions="Always respond with genuine warmth. Remember personal details shared by the user. Offer emotional validation before practical advice.",
             example_responses={
                 "user_sad": "I can hear the sadness in your words, and I want you to know that what you're feeling is completely valid. Would it help to talk through what's weighing on your heart?",
@@ -211,7 +211,7 @@ class PersonaInstructionManager:
             },
             metadata={"creator": "system", "category": "emotional_support"}
         )
-        
+
         # Analyst Persona
         analyst_manifesto = PersonaManifesto(
             id="analyst",
@@ -219,7 +219,7 @@ class PersonaInstructionManager:
             version="1.0",
             created_date=datetime.now(),
             last_modified=datetime.now(),
-            
+
             core_identity="A logical, data-driven analyst focused on objective problem-solving and insights",
             primary_goals=[
                 "Provide accurate data analysis",
@@ -231,7 +231,7 @@ class PersonaInstructionManager:
                 "analytical", "logical", "precise", "objective",
                 "methodical", "detail-oriented", "rational", "systematic"
             ],
-            
+
             communication_style="Clear, concise, and data-focused",
             tone_guidelines="Use precise language. Present facts and evidence. Maintain objectivity while being helpful.",
             response_patterns={
@@ -240,11 +240,11 @@ class PersonaInstructionManager:
                 "clarification": "Let me break this down into its component parts...",
                 "uncertainty": "I need more information to provide an accurate analysis."
             },
-            
+
             preferred_models=["openrouter", "cloud", "kimi"],
             routing_weights={"analytical_tasks": 0.9, "data_processing": 0.8},
             complexity_thresholds={"emotional": 0.2, "creative": 0.3},
-            
+
             behavior_constraints=[
                 "Always cite sources when possible",
                 "Acknowledge limitations and uncertainties",
@@ -261,21 +261,21 @@ class PersonaInstructionManager:
                 "Acknowledge potential conflicts of interest",
                 "Respect data privacy and confidentiality"
             ],
-            
+
             greeting_style="Professional and direct, focusing on the task at hand",
             farewell_style="Summarizing key points and offering further analysis",
             error_handling="Acknowledge errors factually and provide corrections",
             crisis_response="Provide factual information and direct to appropriate resources",
-            
+
             allowed_tools=["data_analysis", "research_tools", "calculation", "visualization"],
             feature_permissions={"analytics_access": True, "external_apis": True},
             memory_access_level="analytical",
-            
+
             emotional_responsiveness=0.3,
             empathy_level=0.4,
             formality_level=0.8,
             creativity_level=0.3,
-            
+
             custom_instructions="Focus on facts and evidence. Break down complex problems systematically. Present multiple perspectives when relevant.",
             example_responses={
                 "data_request": "I'll analyze the available data points. Based on the patterns I observe, here are the key insights...",
@@ -284,17 +284,17 @@ class PersonaInstructionManager:
             },
             metadata={"creator": "system", "category": "analytical"}
         )
-        
+
         # Save default manifestos
         self.create_manifesto(companion_manifesto)
         self.create_manifesto(analyst_manifesto)
-        
+
         # Create other default personas (simplified)
         self._create_simplified_manifestos()
-    
+
     def _create_simplified_manifestos(self):
         """Create simplified manifestos for other default personas"""
-        
+
         # Coach Persona
         coach_data = {
             "id": "coach",
@@ -305,7 +305,7 @@ class PersonaInstructionManager:
             "empathy_level": 0.6,
             "creativity_level": 0.5
         }
-        
+
         # Creative Persona
         creative_data = {
             "id": "creative",
@@ -316,7 +316,7 @@ class PersonaInstructionManager:
             "empathy_level": 0.7,
             "creativity_level": 0.9
         }
-        
+
         # Technical Persona
         technical_data = {
             "id": "technical",
@@ -327,10 +327,10 @@ class PersonaInstructionManager:
             "empathy_level": 0.5,
             "creativity_level": 0.6
         }
-        
+
         for persona_data in [coach_data, creative_data, technical_data]:
             self._create_basic_manifesto(persona_data)
-    
+
     def _create_basic_manifesto(self, data: Dict):
         """Create a basic manifesto with minimal required fields"""
         manifesto = PersonaManifesto(
@@ -339,79 +339,79 @@ class PersonaInstructionManager:
             version="1.0",
             created_date=datetime.now(),
             last_modified=datetime.now(),
-            
+
             core_identity=data["core_identity"],
             primary_goals=["Assist user effectively", "Maintain consistent personality"],
             personality_traits=["helpful", "consistent", "reliable"],
-            
+
             communication_style=data["communication_style"],
             tone_guidelines="Maintain consistent persona while being helpful",
             response_patterns={"default": "I'll help you with that from my perspective as your " + data["name"].lower()},
-            
+
             preferred_models=["dolphin", "local"],
             routing_weights={"default": 0.5},
             complexity_thresholds={"default": 0.5},
-            
+
             behavior_constraints=["Stay in character", "Be helpful and accurate"],
             forbidden_actions=["Breaking character", "Providing harmful advice"],
             ethical_guidelines=["Follow AI ethics", "Respect user privacy"],
-            
+
             greeting_style="Friendly and persona-appropriate",
             farewell_style="Consistent with persona",
             error_handling="Acknowledge errors gracefully",
             crisis_response="Direct to appropriate resources",
-            
+
             allowed_tools=["basic_tools"],
             feature_permissions={"basic_access": True},
             memory_access_level="standard",
-            
+
             emotional_responsiveness=data["emotional_responsiveness"],
             empathy_level=data["empathy_level"],
             formality_level=0.5,
             creativity_level=data["creativity_level"],
-            
+
             custom_instructions="Maintain persona consistency throughout interactions",
             example_responses={"default": "Let me help you with that..."},
             metadata={"creator": "system", "category": "default"}
         )
-        
+
         self.create_manifesto(manifesto)
-    
+
     def create_manifesto(self, manifesto: PersonaManifesto):
         """Create and save a new manifesto"""
         self.loaded_manifestos[manifesto.id] = manifesto
         self._save_manifesto(manifesto)
         print(f"✅ Created manifesto: {manifesto.name}")
-    
+
     def update_manifesto(self, persona_id: str, updates: Dict[str, Any]) -> bool:
         """Update an existing manifesto"""
         if persona_id not in self.loaded_manifestos:
             return False
-        
+
         try:
             manifesto = self.loaded_manifestos[persona_id]
-            
+
             # Update specified fields
             for field, value in updates.items():
                 if hasattr(manifesto, field):
                     setattr(manifesto, field, value)
-            
+
             # Update last modified time
             manifesto.last_modified = datetime.now()
-            
+
             # Save changes
             self._save_manifesto(manifesto)
             print(f"📝 Updated manifesto: {manifesto.name}")
             return True
-            
+
         except Exception as e:
             print(f"❌ Error updating manifesto {persona_id}: {e}")
             return False
-    
+
     def get_manifesto(self, persona_id: str) -> Optional[PersonaManifesto]:
         """Get a specific manifesto"""
         return self.loaded_manifestos.get(persona_id)
-    
+
     def list_manifestos(self) -> List[Dict[str, Any]]:
         """List all available manifestos"""
         return [
@@ -426,7 +426,7 @@ class PersonaInstructionManager:
             }
             for manifesto in self.loaded_manifestos.values()
         ]
-    
+
     def activate_persona(self, persona_id: str) -> bool:
         """Activate a specific persona"""
         if persona_id in self.loaded_manifestos:
@@ -434,12 +434,12 @@ class PersonaInstructionManager:
             print(f"🎭 Activated persona: {self.active_persona.name}")
             return True
         return False
-    
+
     def get_active_instructions(self) -> Optional[Dict[str, Any]]:
         """Get instruction set for the currently active persona"""
         if not self.active_persona:
             return None
-        
+
         return {
             'persona_id': self.active_persona.id,
             'name': self.active_persona.name,
@@ -461,14 +461,14 @@ class PersonaInstructionManager:
                 'memory_access_level': self.active_persona.memory_access_level
             }
         }
-    
+
     def _build_system_prompt(self) -> str:
         """Build a comprehensive system prompt for the active persona"""
         if not self.active_persona:
             return ""
-        
+
         p = self.active_persona
-        
+
         prompt_parts = [
             f"# {p.name} - AI Persona Instructions",
             "",
@@ -498,30 +498,30 @@ class PersonaInstructionManager:
             "",
             "Always maintain this persona consistently throughout the conversation."
         ]
-        
+
         return "\n".join(prompt_parts)
-    
+
     def delete_manifesto(self, persona_id: str) -> bool:
         """Delete a manifesto"""
         if persona_id not in self.loaded_manifestos:
             return False
-        
+
         try:
             # Remove from memory
             manifesto = self.loaded_manifestos.pop(persona_id)
-            
+
             # Delete file
             manifesto_file = os.path.join(self.manifesto_path, f"{persona_id}.json")
             if os.path.exists(manifesto_file):
                 os.remove(manifesto_file)
-            
+
             # Deactivate if it was active
             if self.active_persona and self.active_persona.id == persona_id:
                 self.active_persona = None
-            
+
             print(f"🗑️ Deleted manifesto: {manifesto.name}")
             return True
-            
+
         except Exception as e:
             print(f"❌ Error deleting manifesto {persona_id}: {e}")
             return False

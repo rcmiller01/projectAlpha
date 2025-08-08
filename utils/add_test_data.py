@@ -77,7 +77,7 @@ print(f"Adding {len(test_results)} test results...")
 for i, data in enumerate(test_results):
     # Create result with slight time offsets
     timestamp = datetime.now() - timedelta(minutes=(len(test_results) - i) * 10)
-    
+
     result = QuantLoopResult(
         loop_id=str(uuid.uuid4()),
         model_name=data['model_name'],
@@ -95,7 +95,7 @@ for i, data in enumerate(test_results):
         coherence_score=data['emotional_score'] * 0.9,
         creativity_index=0.65 + (i * 0.03)
     )
-    
+
     tracker.save_loop_result(result)
     print(f"✅ Added {data['model_name']} ({data['quant_format']}) - Emotion: {data['emotional_score']:.3f}")
     time.sleep(0.1)  # Small delay between saves

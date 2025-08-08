@@ -11,7 +11,7 @@ BASE_URL = "http://localhost:8000"
 def test_emotion_detection():
     """Test romantic emotion detection"""
     print("🧪 Testing Romantic Emotion Detection...")
-    
+
     test_messages = [
         "I love you so much",
         "I miss you terribly",
@@ -19,9 +19,9 @@ def test_emotion_detection():
         "I feel so safe with you",
         "You're so tender and caring"
     ]
-    
+
     for message in test_messages:
-        response = requests.post(f"{BASE_URL}/emotion/from_text", 
+        response = requests.post(f"{BASE_URL}/emotion/from_text",
                                json={"text": message})
         if response.status_code == 200:
             data = response.json()
@@ -34,7 +34,7 @@ def test_emotion_detection():
 def test_romantic_interaction():
     """Test romantic interaction API"""
     print("\n💕 Testing Romantic Interactions...")
-    
+
     test_interactions = [
         {
             "message": "I love you with all my heart",
@@ -43,7 +43,7 @@ def test_romantic_interaction():
         },
         {
             "message": "I miss you so much",
-            "interaction_type": "conversation", 
+            "interaction_type": "conversation",
             "intensity": 0.8
         },
         {
@@ -52,9 +52,9 @@ def test_romantic_interaction():
             "intensity": 0.9
         }
     ]
-    
+
     for interaction in test_interactions:
-        response = requests.post(f"{BASE_URL}/api/romantic/interact", 
+        response = requests.post(f"{BASE_URL}/api/romantic/interact",
                                json=interaction)
         if response.status_code == 200:
             data = response.json()
@@ -67,7 +67,7 @@ def test_romantic_interaction():
 def test_mia_thoughts():
     """Test Mia's self-talk generation"""
     print("\n🤔 Testing Mia's Thoughts...")
-    
+
     response = requests.get(f"{BASE_URL}/api/romantic/mia/thoughts")
     if response.status_code == 200:
         data = response.json()
@@ -83,7 +83,7 @@ def test_mia_thoughts():
 def test_relationship_status():
     """Test relationship status API"""
     print("\n📊 Testing Relationship Status...")
-    
+
     response = requests.get(f"{BASE_URL}/api/romantic/status")
     if response.status_code == 200:
         data = response.json()
@@ -99,7 +99,7 @@ def test_relationship_status():
 def test_memory_system():
     """Test memory system"""
     print("\n🧠 Testing Memory System...")
-    
+
     # Add a milestone
     milestone = {
         "milestone": "First romantic conversation",
@@ -108,7 +108,7 @@ def test_memory_system():
     response = requests.post(f"{BASE_URL}/api/romantic/milestone", json=milestone)
     if response.status_code == 200:
         print("✅ Milestone added successfully")
-    
+
     # Get memories
     response = requests.get(f"{BASE_URL}/api/romantic/memories")
     if response.status_code == 200:
@@ -123,18 +123,18 @@ def main():
     """Run all Phase 1 tests"""
     print("🚀 Starting Phase 1 Romantic Features Test")
     print("=" * 50)
-    
+
     try:
         test_emotion_detection()
         test_romantic_interaction()
         test_mia_thoughts()
         test_relationship_status()
         test_memory_system()
-        
+
         print("\n" + "=" * 50)
         print("✅ Phase 1 Test Complete!")
         print("🎉 Romantic companionship features are working!")
-        
+
     except requests.exceptions.ConnectionError:
         print("❌ Cannot connect to server. Make sure the backend is running:")
         print("   python -m uvicorn backend.main:app --reload")
@@ -142,4 +142,4 @@ def main():
         print(f"❌ Test failed with error: {e}")
 
 if __name__ == "__main__":
-    main() 
+    main()

@@ -135,11 +135,11 @@ MODEL_CHECKSUMS_FILE = "config/model_checksums.json"
 def calculate_file_hash(file_path: str, algorithm: str = "sha256") -> Optional[str]:
     """
     Calculate hash checksum for a model file.
-    
+
     Args:
         file_path: Path to the model file
         algorithm: Hashing algorithm (sha256, md5, sha1)
-        
+
     Returns:
         Hex digest of the file hash, or None if error
     """
@@ -147,9 +147,9 @@ def calculate_file_hash(file_path: str, algorithm: str = "sha256") -> Optional[s
         if not os.path.exists(file_path):
             logger.warning(f"Model file not found for checksum: {file_path}")
             return None
-        
+
         hash_func = getattr(hashlib, algorithm.lower())()
-        
+
         with open(file_path, 'rb') as f:
             # Read in chunks to handle large model files
             chunk_size = 64 * 1024  # 64KB chunks
@@ -158,9 +158,9 @@ def calculate_file_hash(file_path: str, algorithm: str = "sha256") -> Optional[s
                 if not chunk:
                     break
                 hash_func.update(chunk)
-        
+
         return hash_func.hexdigest()
-    
+
     except Exception as e:
         logger.error(f"Error calculating hash for {file_path}: {e}")
         return None
@@ -168,11 +168,11 @@ def calculate_file_hash(file_path: str, algorithm: str = "sha256") -> Optional[s
 def verify_model_integrity(model_path: str, expected_checksum: Optional[str] = None) -> Dict[str, Any]:
     """
     Verify model file integrity using checksum verification.
-    
+
     Args:
         model_path: Path to the model file
         expected_checksum: Expected checksum (loads from config if None)
-        
+
     Returns:
         Verification result dictionary
     """
@@ -186,31 +186,31 @@ def verify_model_integrity(model_path: str, expected_checksum: Optional[str] = N
         "expected_checksum": expected_checksum,
         "timestamp": None
     }
-    
+
     try:
         if not os.path.exists(model_path):
             result["verification_status"] = "file_not_found"
             return result
-        
+
         # Get file stats
         stat = os.stat(model_path)
         result["exists"] = True
         result["size_bytes"] = stat.st_size
         result["size_mb"] = round(stat.st_size / (1024 * 1024), 2)
         result["timestamp"] = stat.st_mtime
-        
+
         # Calculate current checksum
         current_checksum = calculate_file_hash(model_path)
         result["checksum"] = current_checksum
-        
+
         if not current_checksum:
             result["verification_status"] = "checksum_error"
             return result
-        
+
         # Load expected checksum if not provided
         if expected_checksum is None:
             expected_checksum = load_expected_checksum(model_path)
-        
+
         if expected_checksum:
             result["expected_checksum"] = expected_checksum
             if current_checksum == expected_checksum:
@@ -223,9 +223,9 @@ def verify_model_integrity(model_path: str, expected_checksum: Optional[str] = N
             result["verification_status"] = "no_expected_checksum"
             logger.info(f"No expected checksum found for {model_path}, storing current: {current_checksum[:12]}...")
             store_model_checksum(model_path, current_checksum)
-        
+
         return result
-    
+
     except Exception as e:
         logger.error(f"Error verifying model integrity for {model_path}: {e}")
         result["verification_status"] = "error"
@@ -238,14 +238,14 @@ def load_expected_checksum(model_path: str) -> Optional[str]:
         if os.path.exists(MODEL_CHECKSUMS_FILE):
             with open(MODEL_CHECKSUMS_FILE, 'r') as f:
                 checksums = json.load(f)
-            
+
             # Normalize path for lookup
             normalized_path = os.path.normpath(model_path)
             return checksums.get(normalized_path)
-    
+
     except Exception as e:
         logger.error(f"Error loading expected checksum: {e}")
-    
+
     return None
 
 def store_model_checksum(model_path: str, checksum: str) -> bool:
@@ -256,21 +256,21 @@ def store_model_checksum(model_path: str, checksum: str) -> bool:
         if os.path.exists(MODEL_CHECKSUMS_FILE):
             with open(MODEL_CHECKSUMS_FILE, 'r') as f:
                 checksums = json.load(f)
-        
+
         # Normalize path and store
         normalized_path = os.path.normpath(model_path)
         checksums[normalized_path] = checksum
-        
+
         # Ensure directory exists
         os.makedirs(os.path.dirname(MODEL_CHECKSUMS_FILE), exist_ok=True)
-        
+
         # Save updated checksums
         with open(MODEL_CHECKSUMS_FILE, 'w') as f:
             json.dump(checksums, f, indent=2)
-        
+
         logger.info(f"Stored checksum for {model_path}: {checksum[:12]}...")
         return True
-    
+
     except Exception as e:
         logger.error(f"Error storing checksum: {e}")
         return False
@@ -283,38 +283,38 @@ def get_model_info(model: ModelInterface) -> Dict[str, Any]:
         "available": getattr(model, 'available', True),
         "verification": None
     }
-    
+
     # Add verification info if model has a file path
     if hasattr(model, 'model_path') and model.model_path:
         verification = verify_model_integrity(model.model_path)
         info["verification"] = verification
         info["file_size_mb"] = verification.get("size_mb", 0)
         info["integrity_status"] = verification.get("verification_status", "unknown")
-    
+
     return info
 
 class ModelInterface(Protocol):
     """Protocol defining the standard model interface"""
-    
+
     def generate(self, prompt: str, context: Optional[str] = None, **kwargs) -> str:
         """Generate response from the model"""
         ...
 
 class MockModel:
     """Mock model implementation for testing and fallback"""
-    
+
     def __init__(self, model_name: str):
         self.model_name = model_name
         self.call_count = 0
         logger.info(f"MockModel initialized: {model_name}")
-    
+
     def generate(self, prompt: str, context: Optional[str] = None, **kwargs) -> str:
         """Generate a mock response"""
         self.call_count += 1
-        
+
         # Create contextual mock responses based on prompt content
         prompt_lower = prompt.lower()
-        
+
         if "strategic" in prompt_lower or "plan" in prompt_lower:
             response = f"[MOCK STRATEGIC RESPONSE from {self.model_name}] Based on the strategic context, I recommend analyzing the current situation and developing a comprehensive action plan."
         elif "logic" in prompt_lower or "analyze" in prompt_lower:
@@ -325,54 +325,54 @@ class MockModel:
             response = f"[MOCK CREATIVE RESPONSE from {self.model_name}] Let's explore innovative possibilities and think outside conventional boundaries."
         else:
             response = f"[MOCK RESPONSE from {self.model_name}] This is a simulated response to: {prompt[:50]}..."
-        
+
         if context:
             response += f" [Context considered: {context[:30]}...]"
-        
+
         logger.debug(f"MockModel {self.model_name} generated response (call #{self.call_count})")
         return response
 
 class OllamaModel:
     """Ollama model implementation"""
-    
+
     def __init__(self, model_name: str):
         self.model_name = model_name
         self.available = self._check_ollama_availability()
-        
+
         if self.available:
             logger.info(f"OllamaModel initialized: {model_name}")
         else:
             logger.warning(f"Ollama not available, model {model_name} will use fallback")
-    
+
     def _check_ollama_availability(self) -> bool:
         """Check if Ollama is available"""
         try:
             import subprocess
-            result = subprocess.run(['ollama', 'list'], 
+            result = subprocess.run(['ollama', 'list'],
                                   capture_output=True, text=True, timeout=5)
             return result.returncode == 0
         except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
             return False
-    
+
     def generate(self, prompt: str, context: Optional[str] = None, **kwargs) -> str:
         """Generate response using Ollama"""
         if not self.available:
             # Fallback to mock if Ollama unavailable
             mock = MockModel(f"Mock-{self.model_name}")
             return mock.generate(prompt, context, **kwargs)
-        
+
         try:
             import subprocess
-            
+
             # Prepare the full prompt
             full_prompt = prompt
             if context:
                 full_prompt = f"Context: {context}\n\nPrompt: {prompt}"
-            
+
             # Call Ollama
             cmd = ['ollama', 'run', self.model_name, full_prompt]
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-            
+
             if result.returncode == 0:
                 response = result.stdout.strip()
                 logger.debug(f"OllamaModel {self.model_name} generated response")
@@ -382,7 +382,7 @@ class OllamaModel:
                 # Fallback to mock
                 mock = MockModel(f"Fallback-{self.model_name}")
                 return mock.generate(prompt, context, **kwargs)
-                
+
         except Exception as e:
             logger.error(f"Error running Ollama model {self.model_name}: {e}")
             # Fallback to mock
@@ -391,17 +391,17 @@ class OllamaModel:
 
 class LlamaCppModel:
     """llama.cpp model implementation"""
-    
+
     def __init__(self, model_name: str, model_path: Optional[str] = None):
         self.model_name = model_name
         self.model_path = model_path or self._find_model_path(model_name)
         self.available = self._check_llamacpp_availability()
-        
+
         if self.available:
             logger.info(f"LlamaCppModel initialized: {model_name} at {self.model_path}")
         else:
             logger.warning(f"llama.cpp not available, model {model_name} will use fallback")
-    
+
     def _find_model_path(self, model_name: str) -> Optional[str]:
         """Find model file path"""
         # Common model directories
@@ -411,7 +411,7 @@ class LlamaCppModel:
             "./models",
             "/opt/models"
         ]
-        
+
         for base_path in search_paths:
             if os.path.exists(base_path):
                 for root, dirs, files in os.walk(base_path):
@@ -419,37 +419,37 @@ class LlamaCppModel:
                         if model_name in file and file.endswith(('.gguf', '.bin', '.ggml')):
                             return os.path.join(root, file)
         return None
-    
+
     def _check_llamacpp_availability(self) -> bool:
         """Check if llama.cpp is available"""
         try:
             import subprocess
             # Check for llama.cpp executable
-            result = subprocess.run(['llama.cpp', '--help'], 
+            result = subprocess.run(['llama.cpp', '--help'],
                                   capture_output=True, text=True, timeout=5)
             return result.returncode == 0 and self.model_path is not None
         except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
             return False
-    
+
     def generate(self, prompt: str, context: Optional[str] = None, **kwargs) -> str:
         """Generate response using llama.cpp"""
         if not self.available:
             # Fallback to mock
             mock = MockModel(f"Mock-{self.model_name}")
             return mock.generate(prompt, context, **kwargs)
-        
+
         try:
             import subprocess
-            
+
             # Prepare the full prompt
             full_prompt = prompt
             if context:
                 full_prompt = f"Context: {context}\n\nPrompt: {prompt}"
-            
+
             # Call llama.cpp
             cmd = ['llama.cpp', '-m', self.model_path, '-p', full_prompt, '-n', '256']
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
-            
+
             if result.returncode == 0:
                 response = result.stdout.strip()
                 logger.debug(f"LlamaCppModel {self.model_name} generated response")
@@ -459,7 +459,7 @@ class LlamaCppModel:
                 # Fallback to mock
                 mock = MockModel(f"Fallback-{self.model_name}")
                 return mock.generate(prompt, context, **kwargs)
-                
+
         except Exception as e:
             logger.error(f"Error running llama.cpp model {self.model_name}: {e}")
             # Fallback to mock
@@ -469,77 +469,77 @@ class LlamaCppModel:
 def load_model(env_var: str, default_model: str, backend: str = "auto") -> ModelInterface:
     """
     Load a model based on environment variable or default.
-    
+
     Args:
         env_var: Environment variable name to check for model specification
         default_model: Default model name if environment variable is not set
         backend: Model backend to use ("ollama", "llamacpp", "mock", "auto")
-        
+
     Returns:
         Model instance implementing the ModelInterface protocol
     """
     model_name = os.getenv(env_var, default_model)
     backend_override = os.getenv(f"{env_var}_BACKEND", backend)
-    
+
     logger.info(f"Loading model for {env_var}: {model_name} (backend: {backend_override})")
-    
+
     # Auto-detect backend if not specified
     if backend_override == "auto":
         # Try Ollama first, then llama.cpp, then mock
         ollama_model = OllamaModel(model_name)
         if ollama_model.available:
             return ollama_model
-        
+
         llamacpp_model = LlamaCppModel(model_name)
         if llamacpp_model.available:
             return llamacpp_model
-        
+
         logger.info(f"No available backends found, using MockModel for {model_name}")
         return MockModel(model_name)
-    
+
     # Use specified backend
     elif backend_override == "ollama":
         return OllamaModel(model_name)
-    
+
     elif backend_override == "llamacpp":
         return LlamaCppModel(model_name)
-    
+
     elif backend_override == "mock":
         return MockModel(model_name)
-    
+
     else:
         logger.warning(f"Unknown backend '{backend_override}', falling back to mock")
         return MockModel(model_name)
 
 class MoEModelAdapter:
     """Adapter to make MoELoader compatible with ModelInterface protocol"""
-    
+
     def __init__(self, moe_loader):
         self.moe_loader = moe_loader
         self.model_name = "MoE-Expert-Router"
-    
+
     def generate(self, prompt: str, context: Optional[str] = None, **kwargs) -> str:
         """
         Generate response using MoE expert routing.
-        
+
         Args:
             prompt: Input prompt
             context: Optional context for expert selection
             **kwargs: Additional parameters
-            
+
         Returns:
             Generated response from appropriate expert(s)
         """
         try:
             # Use MoE system to score intent and run experts
             expert_weights = self.moe_loader.intent_classifier.score_intent(prompt)
-            
+
             # Convert context string to dict if provided
             context_dict = {"context": context} if context else None
-            
+
             # Execute experts based on weights
             responses = self.moe_loader.run_experts(prompt, context_dict)
-            
+
             if responses:
                 # Return summary of responses
                 expert_count = len(responses)
@@ -547,7 +547,7 @@ class MoEModelAdapter:
                 return f"[MoE Response from {expert_count} expert(s)] {best_response}"
             else:
                 return f"[MoE Fallback] No suitable experts available for: {prompt[:50]}..."
-                
+
         except Exception as e:
             logger.error(f"MoE adapter error: {e}")
             return f"[MoE Error] Failed to process request: {str(e)}"
@@ -556,16 +556,16 @@ class MoEModelAdapter:
 def initialize_moe_system(max_ram_gb: float = 8.0):
     """
     Initialize the Mixture-of-Experts system with expert registry.
-    
+
     Args:
         max_ram_gb: Maximum RAM allocation for experts in GB
-        
+
     Returns:
         MoELoader instance if successful, None otherwise
     """
     try:
         from .moe_loader import MoELoader, ExpertInfo
-        
+
         # Convert registry to ExpertInfo objects
         model_registry = {}
         for expert_id, config in MOE_EXPERT_REGISTRY.items():
@@ -578,16 +578,16 @@ def initialize_moe_system(max_ram_gb: float = 8.0):
                 priority=config["priority"],
                 dependencies=config["dependencies"]
             )
-        
+
         # Initialize MoE system
         moe_loader = MoELoader(
             model_registry=model_registry,
             ram_limit_gb=max_ram_gb
         )
-        
+
         logger.info(f"MoE system initialized with {len(model_registry)} experts, max RAM: {max_ram_gb}GB")
         return moe_loader
-        
+
     except ImportError as e:
         logger.warning(f"MoE system not available: {e}")
         return None
@@ -599,7 +599,7 @@ def initialize_moe_system(max_ram_gb: float = 8.0):
 def get_moe_configuration() -> Dict[str, Any]:
     """
     Get MoE system configuration from environment variables.
-    
+
     Returns:
         Configuration dictionary with MoE settings
     """
@@ -618,15 +618,15 @@ def load_conductor_models(use_moe: bool = True) -> Dict[str, Any]:
     """
     Load all standard conductor models with role-specific defaults.
     Optionally initializes MoE system for dynamic expert loading.
-    
+
     Args:
         use_moe: Whether to use Mixture-of-Experts system
-    
+
     Returns:
         Dictionary with model instances and MoE system if enabled
     """
     logger.info("Loading conductor model suite...")
-    
+
     # Standard models
     models = {
         "conductor": load_model("CONDUCTOR_MODEL", "gpt-oss-20b"),
@@ -634,7 +634,7 @@ def load_conductor_models(use_moe: bool = True) -> Dict[str, Any]:
         "emotion": load_model("EMOTION_MODEL", "mistral:7b"),
         "creative": load_model("CREATIVE_MODEL", "mixtral:8x7b")
     }
-    
+
     # Initialize MoE system if requested
     if use_moe:
         moe_config = get_moe_configuration()
@@ -644,70 +644,70 @@ def load_conductor_models(use_moe: bool = True) -> Dict[str, Any]:
             logger.info("MoE system integrated with conductor suite")
         else:
             logger.warning("MoE system initialization failed, using standard models only")
-    
+
     logger.info(f"Conductor model suite loaded: {list(models.keys())}")
     return models
 
 def load_slim_models() -> Dict[str, ModelInterface]:
     """
     Load all SLiM agent models for hemispheric processing.
-    
+
     Returns:
         Dictionary mapping SLiM role names to model instances
     """
     logger.info("Loading SLiM agent model suite...")
-    
+
     models = {
         # Main conductor
         "conductor": load_model("CONDUCTOR_MODEL", "gpt-oss-20b"),
-        
+
         # Left Brain (Logic) SLiMs - 4 agents
         "logic_high": load_model("LOGIC_HIGH_MODEL", "phi4-mini-reasoning:3.8b"),
         "logic_code": load_model("LOGIC_CODE_MODEL", "qwen2.5-coder:3b"),
         "logic_proof": load_model("LOGIC_PROOF_MODEL", "deepseek-r1:1.5b"),
         "logic_fallback": load_model("LOGIC_FALLBACK_MODEL", "granite3.3:2b"),
-        
+
         # Right Brain (Emotion & Creativity) SLiMs - 4 agents
         "emotion_valence": load_model("EMOTION_VALENCE_MODEL", "gemma3:1b"),
         "emotion_narrative": load_model("EMOTION_NARRATIVE_MODEL", "phi3:3.8b"),
         "emotion_uncensored": load_model("EMOTION_UNCENSORED_MODEL", "artifish/llama3.2-uncensored:latest"),
         "emotion_creative": load_model("EMOTION_CREATIVE_MODEL", "dolphin-phi:latest")
     }
-    
+
     logger.info(f"SLiM agent model suite loaded: {list(models.keys())}")
     return models
 
 def load_all_models() -> Dict[str, ModelInterface]:
     """
     Load complete model suite including conductor and all SLiM agents.
-    
+
     Returns:
         Dictionary mapping all role names to model instances
     """
     logger.info("Loading complete model suite (Conductor + SLiMs)...")
-    
+
     models = {
         # Main conductor
         "conductor": load_model("CONDUCTOR_MODEL", "gpt-oss-20b"),
-        
+
         # Legacy role mappings for backward compatibility
         "logic": load_model("LOGIC_MODEL", "deepseek-coder:1.3b"),
         "emotion": load_model("EMOTION_MODEL", "mistral:7b"),
         "creative": load_model("CREATIVE_MODEL", "mixtral:8x7b"),
-        
+
         # Left Brain (Logic) SLiMs - 4 agents
         "logic_high": load_model("LOGIC_HIGH_MODEL", "phi4-mini-reasoning:3.8b"),
         "logic_code": load_model("LOGIC_CODE_MODEL", "qwen2.5-coder:3b"),
         "logic_proof": load_model("LOGIC_PROOF_MODEL", "deepseek-r1:1.5b"),
         "logic_fallback": load_model("LOGIC_FALLBACK_MODEL", "granite3.3:2b"),
-        
+
         # Right Brain (Emotion & Creativity) SLiMs - 4 agents
         "emotion_valence": load_model("EMOTION_VALENCE_MODEL", "gemma3:1b"),
         "emotion_narrative": load_model("EMOTION_NARRATIVE_MODEL", "phi3:3.8b"),
         "emotion_uncensored": load_model("EMOTION_UNCENSORED_MODEL", "artifish/llama3.2-uncensored:latest"),
         "emotion_creative": load_model("EMOTION_CREATIVE_MODEL", "dolphin-phi:latest")
     }
-    
+
     logger.info(f"Complete model suite loaded: {list(models.keys())}")
     return models
 
@@ -717,51 +717,51 @@ def get_model_info(model: ModelInterface) -> Dict[str, Any]:
         "type": type(model).__name__,
         "available": True
     }
-    
+
     if hasattr(model, 'model_name'):
         info["model_name"] = getattr(model, 'model_name')
-    
+
     if hasattr(model, 'available'):
         info["available"] = getattr(model, 'available')
-    
+
     if hasattr(model, 'call_count'):
         info["call_count"] = getattr(model, 'call_count')
-    
+
     return info
 
 # Example usage and testing
 def example_usage():
     """Example usage of the model loading system"""
-    
+
     print("Model Loading System Example")
     print("=" * 40)
-    
+
     # Load individual models
     print("\n1. Loading individual models:")
     conductor_model = load_model("CONDUCTOR_MODEL", "llama3.1:8b")
-    logic_model = load_model("LOGIC_MODEL", "deepseek-coder:1.3b") 
-    
+    logic_model = load_model("LOGIC_MODEL", "deepseek-coder:1.3b")
+
     print(f"   Conductor model: {get_model_info(conductor_model)}")
     print(f"   Logic model: {get_model_info(logic_model)}")
-    
+
     # Load complete conductor suite
     print("\n2. Loading conductor model suite:")
     models = load_conductor_models()
-    
+
     for role, model in models.items():
         info = get_model_info(model)
         print(f"   {role}: {info['type']} ({info.get('model_name', 'unknown')})")
-    
+
     # Test model generation
     print("\n3. Testing model generation:")
-    
+
     test_prompts = {
         "conductor": "What strategic approach should we take for this decision?",
         "logic": "Analyze the logical implications of this choice",
         "emotion": "How might the user feel about this response?",
         "creative": "Generate an innovative solution to this problem"
     }
-    
+
     for role, prompt in test_prompts.items():
         if role in models:
             response = models[role].generate(prompt)

@@ -41,24 +41,24 @@ print_error() {
 # Check prerequisites
 check_prerequisites() {
     print_status "Checking prerequisites..."
-    
+
     # Check Docker
     if ! command -v docker &> /dev/null; then
         print_error "Docker is not installed. Please install Docker first."
         exit 1
     fi
-    
+
     # Check Docker Compose
     if ! command -v docker-compose &> /dev/null; then
         print_error "Docker Compose is not installed. Please install Docker Compose first."
         exit 1
     fi
-    
+
     # Check NVIDIA Docker (for GPU server)
     if ! command -v nvidia-docker &> /dev/null; then
         print_warning "NVIDIA Docker not found. GPU features may not work properly."
     fi
-    
+
     # Check if ports are available
     local ports=(80 443 8000 8001 27017 6379 9090 3000)
     for port in "${ports[@]}"; do
@@ -66,14 +66,14 @@ check_prerequisites() {
             print_warning "Port $port is already in use. Make sure it's not needed by another service."
         fi
     done
-    
+
     print_status "Prerequisites check completed"
 }
 
 # Create necessary directories
 create_directories() {
     print_status "Creating necessary directories..."
-    
+
     mkdir -p config/mongodb
     mkdir -p config/nginx/ssl
     mkdir -p config/prometheus
@@ -84,14 +84,14 @@ create_directories() {
     mkdir -p data/redis
     mkdir -p data/prometheus
     mkdir -p data/grafana
-    
+
     print_status "Directories created"
 }
 
 # Create MongoDB initialization script
 create_mongodb_init() {
     print_status "Creating MongoDB initialization script..."
-    
+
     cat > config/mongodb/init.js << EOF
 // MongoDB initialization script for EmotionalAI
 db = db.getSiblingDB('emotional_ai');
@@ -130,14 +130,14 @@ db.sessions.createIndex({"created_at": -1});
 
 print("MongoDB initialization completed");
 EOF
-    
+
     print_status "MongoDB initialization script created"
 }
 
 # Create Prometheus configuration
 create_prometheus_config() {
     print_status "Creating Prometheus configuration..."
-    
+
     cat > config/prometheus/prometheus.yml << EOF
 global:
   scrape_interval: 15s
@@ -176,16 +176,16 @@ scrape_configs:
     metrics_path: '/nginx_status'
     scrape_interval: 30s
 EOF
-    
+
     print_status "Prometheus configuration created"
 }
 
 # Create Grafana datasource configuration
 create_grafana_datasource() {
     print_status "Creating Grafana datasource configuration..."
-    
+
     mkdir -p config/grafana/datasources
-    
+
     cat > config/grafana/datasources/prometheus.yml << EOF
 apiVersion: 1
 
@@ -197,14 +197,14 @@ datasources:
     isDefault: true
     editable: true
 EOF
-    
+
     print_status "Grafana datasource configuration created"
 }
 
 # Create environment file
 create_env_file() {
     print_status "Creating environment configuration..."
-    
+
     cat > .env << EOF
 # EmotionalAI Cluster Configuration
 CLUSTER_NAME=$CLUSTER_NAME
@@ -235,68 +235,68 @@ SSL_ENABLED=false
 GPU_ENABLED=true
 NVIDIA_VISIBLE_DEVICES=all
 EOF
-    
+
     print_status "Environment configuration created"
 }
 
 # Deploy the cluster
 deploy_cluster() {
     print_status "Deploying EmotionalAI cluster..."
-    
+
     # Stop any existing containers
     docker-compose -f docker-compose.cluster.yml down --remove-orphans
-    
+
     # Build and start services
     docker-compose -f docker-compose.cluster.yml up -d --build
-    
+
     print_status "Cluster deployment initiated"
 }
 
 # Wait for services to be ready
 wait_for_services() {
     print_status "Waiting for services to be ready..."
-    
+
     local max_attempts=30
     local attempt=1
-    
+
     while [ $attempt -le $max_attempts ]; do
         echo -n "Checking services (attempt $attempt/$max_attempts)... "
-        
+
         # Check MongoDB
         if docker-compose -f docker-compose.cluster.yml exec -T mongodb mongosh --eval "db.adminCommand('ping')" > /dev/null 2>&1; then
             echo -e "${GREEN}MongoDB ✓${NC}"
         else
             echo -e "${YELLOW}MongoDB ⚠${NC}"
         fi
-        
+
         # Check Primary Server
         if curl -f http://localhost:8000/health > /dev/null 2>&1; then
             echo -e "${GREEN}Primary Server ✓${NC}"
         else
             echo -e "${YELLOW}Primary Server ⚠${NC}"
         fi
-        
+
         # Check GPU Server
         if curl -f http://localhost:8001/health > /dev/null 2>&1; then
             echo -e "${GREEN}GPU Server ✓${NC}"
         else
             echo -e "${YELLOW}GPU Server ⚠${NC}"
         fi
-        
+
         # Check Nginx
         if curl -f http://localhost/health > /dev/null 2>&1; then
             echo -e "${GREEN}Nginx ✓${NC}"
             print_status "All services are ready!"
             return 0
         fi
-        
+
         echo -e "${YELLOW}Nginx ⚠${NC}"
-        
+
         if [ $attempt -eq $max_attempts ]; then
             print_error "Services failed to start within the expected time"
             return 1
         fi
-        
+
         sleep 10
         ((attempt++))
     done
@@ -341,7 +341,7 @@ display_cluster_info() {
 main() {
     echo -e "${BLUE}Starting EmotionalAI UCS M3 cluster deployment...${NC}"
     echo ""
-    
+
     check_prerequisites
     create_directories
     create_mongodb_init
@@ -349,7 +349,7 @@ main() {
     create_grafana_datasource
     create_env_file
     deploy_cluster
-    
+
     if wait_for_services; then
         display_cluster_info
     else
@@ -359,4 +359,4 @@ main() {
 }
 
 # Run main function
-main "$@" 
+main "$@"

@@ -10,7 +10,7 @@ import json
 
 async def test_system_metrics():
     print("Testing System Metrics...")
-    
+
     try:
         async with aiohttp.ClientSession() as session:
             # Test real-time metrics
@@ -18,7 +18,7 @@ async def test_system_metrics():
                 if response.status == 200:
                     data = await response.json()
                     print("SUCCESS: Real-time metrics available")
-                    
+
                     system = data.get('system', {})
                     if system:
                         cpu = system.get('cpu_percent', 0)

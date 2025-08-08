@@ -34,11 +34,11 @@ def speak(text: str, emotion: Optional[str] = None):
 
     # Get current properties
     current_rate = engine.getProperty('rate')
-    
+
     # Apply voice modifications
     # Note: pyttsx3 has limited support for fine-grained control.
     # We'll primarily adjust rate and pitch.
-    
+
     # Adjust speed (rate)
     speed_multiplier = audio_params.get('speed_multiplier', 1.0)
     engine.setProperty('rate', int(current_rate * speed_multiplier))
@@ -51,7 +51,7 @@ def speak(text: str, emotion: Optional[str] = None):
     engine.setProperty('pitch', max(0, min(100, new_pitch)))
 
     print(f"Speaking with text: '{text}', emotion: {emotion}, pitch: {new_pitch:.1f}, speed_mult: {speed_multiplier:.2f}")
-    
+
     engine.say(text)
     engine.runAndWait()
 
@@ -64,7 +64,7 @@ def speak(text: str, emotion: Optional[str] = None):
 if __name__ == "__main__":
     print("Testing default voice...")
     speak("Hello, this is a test of the default voice.")
-    
+
     print("\nTesting emotional voices...")
     test_emotions = ["joy", "longing", "melancholy", "warmth"]
     for e in test_emotions:

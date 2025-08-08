@@ -40,74 +40,74 @@ apiClient.interceptors.response.use(
 // Agent API functions
 export const agentApi = {
   getAgents: () => apiClient.get('/agents'),
-  
-  invokeAgent: (agentType, data) => 
+
+  invokeAgent: (agentType, data) =>
     apiClient.post(`/agents/${agentType}/invoke`, data),
-  
-  streamAgent: (agentType, data) => 
+
+  streamAgent: (agentType, data) =>
     apiClient.post(`/agents/${agentType}/stream`, data),
-  
-  batchInvoke: (requests) => 
+
+  batchInvoke: (requests) =>
     apiClient.post('/agents/batch', { requests }),
 };
 
 // Thread API functions
 export const threadApi = {
-  getThreads: (params) => 
+  getThreads: (params) =>
     apiClient.get('/threads', { params }),
-  
-  getThread: (threadId) => 
+
+  getThread: (threadId) =>
     apiClient.get(`/threads/${threadId}`),
-  
-  createThread: (data) => 
+
+  createThread: (data) =>
     apiClient.post('/threads', data),
-  
-  updateThread: (threadId, data) => 
+
+  updateThread: (threadId, data) =>
     apiClient.put(`/threads/${threadId}`, data),
-  
-  deleteThread: (threadId) => 
+
+  deleteThread: (threadId) =>
     apiClient.delete(`/threads/${threadId}`),
-  
-  addMessage: (threadId, message) => 
+
+  addMessage: (threadId, message) =>
     apiClient.post(`/threads/${threadId}/messages`, message),
-  
-  archiveThread: (threadId) => 
+
+  archiveThread: (threadId) =>
     apiClient.post(`/threads/${threadId}/archive`),
-  
-  searchThreads: (query) => 
+
+  searchThreads: (query) =>
     apiClient.get('/threads/search', { params: { q: query } }),
 };
 
 // Project API functions
 export const projectApi = {
-  getProjects: (params) => 
+  getProjects: (params) =>
     apiClient.get('/projects', { params }),
-  
-  getProject: (projectId) => 
+
+  getProject: (projectId) =>
     apiClient.get(`/projects/${projectId}`),
-  
-  createProject: (data) => 
+
+  createProject: (data) =>
     apiClient.post('/projects', data),
-  
-  updateProject: (projectId, data) => 
+
+  updateProject: (projectId, data) =>
     apiClient.put(`/projects/${projectId}`, data),
-  
-  deleteProject: (projectId) => 
+
+  deleteProject: (projectId) =>
     apiClient.delete(`/projects/${projectId}`),
-  
-  updateProgress: (projectId, progress) => 
+
+  updateProgress: (projectId, progress) =>
     apiClient.put(`/projects/${projectId}/progress`, { progress }),
-  
-  addThread: (projectId, threadId) => 
+
+  addThread: (projectId, threadId) =>
     apiClient.post(`/projects/${projectId}/threads`, { threadId }),
-  
-  removeThread: (projectId, threadId) => 
+
+  removeThread: (projectId, threadId) =>
     apiClient.delete(`/projects/${projectId}/threads/${threadId}`),
-  
-  archiveProject: (projectId) => 
+
+  archiveProject: (projectId) =>
     apiClient.post(`/projects/${projectId}/archive`),
-  
-  getStats: () => 
+
+  getStats: () =>
     apiClient.get('/projects/stats'),
 };
 

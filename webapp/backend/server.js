@@ -113,7 +113,7 @@ app.get('/api/health', async (req, res) => {
   try {
     const mongoStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
     const agentStatus = await agentBridge.getStatus();
-    
+
     res.json({
       status: 'healthy',
       timestamp: new Date().toISOString(),

@@ -30,7 +30,7 @@ logger.info("🚀 Starting Unified AI Companion Backend")
 log_configuration_summary(settings)
 
 app = FastAPI(
-    title="Unified AI Companion Backend", 
+    title="Unified AI Companion Backend",
     version="1.0.0",
     debug=settings.DEBUG
 )
@@ -66,7 +66,7 @@ def load_anchor_settings() -> Dict[str, Any]:
             logger.warning(f"Anchor settings file not found at {ANCHOR_SETTINGS_PATH}")
     except (json.JSONDecodeError, IOError) as e:
         logger.error(f"Failed to load anchor settings: {e}")
-    
+
     # Return default settings
     default_settings = {
         "weights": {
@@ -75,7 +75,7 @@ def load_anchor_settings() -> Dict[str, Any]:
             "response_depth": 0.2,
             "memory_alignment": 0.1
         },
-        "signature": "Emberveil-01", 
+        "signature": "Emberveil-01",
         "locked": False,
         "last_updated": None
     }
@@ -87,13 +87,13 @@ def save_anchor_settings(settings: Dict[str, Any]) -> None:
     try:
         # Ensure config directory exists
         ANCHOR_SETTINGS_PATH.parent.mkdir(parents=True, exist_ok=True)
-        
+
         # Add timestamp
         settings["last_updated"] = datetime.utcnow().isoformat()
-        
+
         with open(ANCHOR_SETTINGS_PATH, 'w') as f:
             json.dump(settings, f, indent=2)
-        
+
         logger.info(f"Saved anchor settings to {ANCHOR_SETTINGS_PATH}")
     except (IOError, TypeError) as e:
         logger.error(f"Failed to save anchor settings: {e}")

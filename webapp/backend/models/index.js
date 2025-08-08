@@ -18,7 +18,7 @@ const connectDB = async (connectionString) => {
     });
 
     console.log(`MongoDB Connected: ${conn.connection.host}`);
-    
+
     // Create indexes if they don't exist
     await Promise.all([
       Thread.ensureIndexes(),

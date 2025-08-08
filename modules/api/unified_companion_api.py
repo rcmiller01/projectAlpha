@@ -97,10 +97,10 @@ logger = logging.getLogger(__name__)
 async def startup_event():
     """Initialize system components on startup"""
     global companion_system, database, system_config
-    
+
     try:
         logger.info("Initializing Unified Companion System...")
-        
+
         # Load system configuration
         system_config = {
             "mythomax": {
@@ -118,20 +118,20 @@ async def startup_event():
                 "content_filtering": True
             }
         }
-        
+
         # Initialize database
         database = create_database_interface(
             connection_string=system_config["database"]["connection_string"],
             database_type=system_config["database"]["type"]
         )
         await database.initialize()
-        
+
         # Initialize companion system
         companion_system = UnifiedCompanion(system_config)
         await companion_system.initialize()
-        
+
         logger.info("Unified Companion System initialized successfully")
-        
+
     except Exception as e:
         logger.error(f"Failed to initialize system: {e}")
         raise
@@ -140,7 +140,7 @@ async def startup_event():
 async def shutdown_event():
     """Cleanup system components on shutdown"""
     global database
-    
+
     try:
         if database:
             await database.close()
@@ -173,21 +173,21 @@ async def process_interaction(
     try:
         # Generate unique interaction ID
         interaction_id = str(uuid.uuid4())
-        
+
         # Build session context
         session_context = {
             "session_id": request.session_id or f"session_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
             "interaction_id": interaction_id,
             **request.context
         }
-        
+
         # Process interaction with companion system
         response_data = await companion.process_interaction(
             user_id=request.user_id,
             user_input=request.user_input,
             session_context=session_context
         )
-        
+
         # Schedule background tasks for data persistence
         background_tasks.add_task(
             save_interaction_data,
@@ -196,7 +196,7 @@ async def process_interaction(
             response_data,
             db
         )
-        
+
         # Return response
         return UserInteractionResponse(
             companion_response=response_data["companion_response"],
@@ -204,7 +204,7 @@ async def process_interaction(
             context_analysis=response_data["context_analysis"],
             metadata=response_data["interaction_metadata"]
         )
-        
+
     except Exception as e:
         logger.error(f"Error processing interaction: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to process interaction: {str(e)}")
@@ -218,7 +218,7 @@ async def save_interaction_data(
     """Background task to save interaction data to database"""
     try:
         from modules.database.database_interface import InteractionRecord, InteractionType
-        
+
         # Create interaction record
         interaction = InteractionRecord(
             interaction_id=interaction_id,
@@ -235,10 +235,10 @@ async def save_interaction_data(
             guidance_used={},
             response_metrics={}
         )
-        
+
         # Save to database
         await db.save_interaction(interaction)
-        
+
     except Exception as e:
         logger.error(f"Error saving interaction data: {e}")
 
@@ -251,10 +251,10 @@ async def create_user_profile(
     """Create or update user profile"""
     try:
         from modules.database.database_interface import UserProfile
-        
+
         # Check if user exists
         existing_user = await db.get_user_profile(user_id)
-        
+
         if existing_user:
             # Update existing user
             updates = {}
@@ -262,15 +262,15 @@ async def create_user_profile(
                 updates["display_name"] = profile_data.display_name
             if profile_data.preferences is not None:
                 updates["preferences"] = profile_data.preferences
-            
+
             success = await db.update_user_profile(user_id, updates)
             if not success:
                 raise HTTPException(status_code=500, detail="Failed to update user profile")
-            
+
             updated_user = await db.get_user_profile(user_id)
             if not updated_user:
                 raise HTTPException(status_code=500, detail="Failed to retrieve updated profile")
-            
+
             return UserProfileResponse(
                 user_id=updated_user.user_id,
                 display_name=updated_user.display_name,
@@ -289,11 +289,11 @@ async def create_user_profile(
                 preferences=profile_data.preferences or {},
                 adaptive_profile={}
             )
-            
+
             success = await db.create_user_profile(new_user)
             if not success:
                 raise HTTPException(status_code=500, detail="Failed to create user profile")
-            
+
             return UserProfileResponse(
                 user_id=new_user.user_id,
                 display_name=new_user.display_name,
@@ -302,7 +302,7 @@ async def create_user_profile(
                 created_at=new_user.created_at,
                 last_active=new_user.last_active
             )
-            
+
     except HTTPException:
         raise
     except Exception as e:
@@ -319,7 +319,7 @@ async def get_user_profile(
         user = await db.get_user_profile(user_id)
         if not user:
             raise HTTPException(status_code=404, detail="User profile not found")
-        
+
         return UserProfileResponse(
             user_id=user.user_id,
             display_name=user.display_name,
@@ -328,7 +328,7 @@ async def get_user_profile(
             created_at=user.created_at,
             last_active=user.last_active
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -344,7 +344,7 @@ async def get_user_summary(
     try:
         summary = await companion.get_interaction_summary(user_id)
         return summary
-        
+
     except Exception as e:
         logger.error(f"Error getting user summary: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to get user summary: {str(e)}")
@@ -358,7 +358,7 @@ async def get_user_interactions(
     """Get recent user interactions"""
     try:
         interactions = await db.get_recent_interactions(user_id, limit)
-        
+
         # Convert to response format
         return [
             {
@@ -372,7 +372,7 @@ async def get_user_interactions(
             }
             for interaction in interactions
         ]
-        
+
     except Exception as e:
         logger.error(f"Error getting user interactions: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to get user interactions: {str(e)}")
@@ -387,7 +387,7 @@ async def get_session_summary(
         session = await db.get_session(session_id)
         if not session:
             raise HTTPException(status_code=404, detail="Session not found")
-        
+
         return SessionSummaryResponse(
             session_id=session.session_id,
             user_id=session.user_id,
@@ -398,7 +398,7 @@ async def get_session_summary(
             start_time=session.start_time,
             end_time=session.end_time
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -415,16 +415,16 @@ async def get_system_status():
             "database": "operational" if database else "not_initialized",
             "mythomax_interface": "operational" if companion_system and companion_system.mythomax else "not_initialized"
         }
-        
+
         overall_status = "operational" if all(status == "operational" for status in components.values()) else "degraded"
-        
+
         return SystemStatusResponse(
             status=overall_status,
             components=components,
             uptime="system_startup",  # Would be calculated from startup time in production
             active_users=0  # Would be tracked in production
         )
-        
+
     except Exception as e:
         logger.error(f"Error getting system status: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to get system status: {str(e)}")

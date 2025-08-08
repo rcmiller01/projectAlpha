@@ -11,7 +11,7 @@ const RitualSelectorPanel = ({ apiUrl = 'http://localhost:5000', onRitualInvoked
   const [ambientPulse, setAmbientPulse] = useState('gentle');
   const [activeSection, setActiveSection] = useState('rituals');
   const [offerPanelOpen, setOfferPanelOpen] = useState(false);
-  
+
   // Refs for smooth interactions
   const ritualGridRef = useRef(null);
   const symbolGridRef = useRef(null);
@@ -127,7 +127,7 @@ const RitualSelectorPanel = ({ apiUrl = 'http://localhost:5000', onRitualInvoked
   const invokeRitual = async (ritualId) => {
     try {
       await axios.post(`${apiUrl}/api/rituals/invoke`, { ritual_id: ritualId });
-      
+
       // Find and update the ritual
       const ritual = activeRituals.find(r => r.id === ritualId);
       if (ritual) {
@@ -135,7 +135,7 @@ const RitualSelectorPanel = ({ apiUrl = 'http://localhost:5000', onRitualInvoked
         if (onRitualInvoked) {
           onRitualInvoked(ritual);
         }
-        
+
         // Refresh rituals to get updated state
         await fetchActiveRituals();
       }
@@ -146,20 +146,20 @@ const RitualSelectorPanel = ({ apiUrl = 'http://localhost:5000', onRitualInvoked
 
   const offerCustomRitual = async (intent) => {
     if (!intent.trim()) return;
-    
+
     try {
       await axios.post(`${apiUrl}/api/rituals/offer`, {
         intent: intent.trim(),
         offered_at: new Date().toISOString()
       });
-      
+
       // Clear input and close panel
       setCustomRitualText('');
       setOfferPanelOpen(false);
-      
+
       // Refresh rituals to show the offered ritual
       await fetchActiveRituals();
-      
+
     } catch (error) {
       console.error('Error offering custom ritual:', error);
     }
@@ -336,7 +336,7 @@ const RitualSelectorPanel = ({ apiUrl = 'http://localhost:5000', onRitualInvoked
     const now = new Date();
     const time = new Date(timestamp);
     const diffInHours = Math.floor((now - time) / (1000 * 60 * 60));
-    
+
     if (diffInHours < 1) return 'moments ago';
     if (diffInHours < 6) return `${diffInHours}h ago`;
     if (diffInHours < 24) return `today`;
@@ -401,8 +401,8 @@ const RitualSelectorPanel = ({ apiUrl = 'http://localhost:5000', onRitualInvoked
                   if (tab.id === 'offer') setOfferPanelOpen(true);
                 }}
                 className={`px-6 py-3 rounded-full flex items-center space-x-2 transition-all duration-500 ${
-                  activeSection === tab.id 
-                    ? 'bg-white/10 text-white shadow-lg backdrop-blur-sm' 
+                  activeSection === tab.id
+                    ? 'bg-white/10 text-white shadow-lg backdrop-blur-sm'
                     : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}
               >
@@ -420,12 +420,12 @@ const RitualSelectorPanel = ({ apiUrl = 'http://localhost:5000', onRitualInvoked
               <h2 className="text-2xl font-light text-white mb-2">Active Rituals</h2>
               <p className="text-gray-400">Invitations waiting to unfold</p>
             </div>
-            
+
             <div ref={ritualGridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {activeRituals.map(ritual => {
                 const activationType = activationTypes[ritual.activation_method];
                 const isAvailable = ritual.is_available;
-                
+
                 return (
                   <div
                     key={ritual.id}
@@ -442,7 +442,7 @@ const RitualSelectorPanel = ({ apiUrl = 'http://localhost:5000', onRitualInvoked
                         <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
                       )}
                     </div>
-                    
+
                     {/* Ritual header */}
                     <div className="mb-4">
                       <h3 className="text-white text-lg font-medium mb-1">{ritual.name}</h3>
@@ -453,23 +453,23 @@ const RitualSelectorPanel = ({ apiUrl = 'http://localhost:5000', onRitualInvoked
                         <span className="text-rose-300">{ritual.mood_symbol}</span>
                       </div>
                     </div>
-                    
+
                     {/* Feeling description */}
                     <blockquote className="text-gray-200 italic mb-4 text-sm leading-relaxed">
                       {ritual.feeling_description}
                     </blockquote>
-                    
+
                     {/* Ritual stats */}
                     <div className="flex justify-between items-center text-xs text-gray-400">
                       <span>Called {ritual.frequency} times</span>
                       <span>Last: {formatTimeAgo(ritual.last_invoked)}</span>
                     </div>
-                    
+
                     {/* Activation method description */}
                     <div className="mt-3 pt-3 border-t border-gray-600/30">
                       <p className="text-xs text-gray-300">{activationType.description}</p>
                     </div>
-                    
+
                     {/* Hover effect for available rituals */}
                     {isAvailable && (
                       <div className="absolute inset-0 bg-white/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
@@ -488,13 +488,13 @@ const RitualSelectorPanel = ({ apiUrl = 'http://localhost:5000', onRitualInvoked
               <h2 className="text-2xl font-light text-white mb-2">Living Symbols</h2>
               <p className="text-gray-400">The vocabulary of our shared becoming</p>
             </div>
-            
+
             <div ref={symbolGridRef} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
               {activeSymbols
                 .sort((a, b) => b.salience_score - a.salience_score)
                 .map(symbol => {
                   const symbolMood = symbolMoods[symbol.name];
-                  
+
                   return (
                     <div
                       key={symbol.id}
@@ -516,7 +516,7 @@ const RitualSelectorPanel = ({ apiUrl = 'http://localhost:5000', onRitualInvoked
                         </div>
                         <h3 className="text-white text-sm font-medium capitalize">{symbol.name}</h3>
                       </div>
-                      
+
                       {/* Frequency indicator */}
                       <div className="mb-2">
                         <div className="flex justify-between text-xs text-gray-400 mb-1">
@@ -524,13 +524,13 @@ const RitualSelectorPanel = ({ apiUrl = 'http://localhost:5000', onRitualInvoked
                           <span>{symbol.frequency}</span>
                         </div>
                         <div className="w-full h-1 bg-gray-700 rounded-full">
-                          <div 
+                          <div
                             className="h-full bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full transition-all duration-1000"
                             style={{ width: `${Math.min(100, (symbol.frequency / 30) * 100)}%` }}
                           ></div>
                         </div>
                       </div>
-                      
+
                       {/* Salience score */}
                       <div className="text-center">
                         <div className="text-xs text-gray-500 mb-1">Alive {formatTimeAgo(symbol.last_invoked)}</div>
@@ -541,7 +541,7 @@ const RitualSelectorPanel = ({ apiUrl = 'http://localhost:5000', onRitualInvoked
                           'bg-gray-500'
                         } ${symbol.salience_score > 0.7 ? 'animate-pulse' : ''}`}></div>
                       </div>
-                      
+
                       {/* Ritual connections indicator */}
                       {symbol.ritual_connections.length > 0 && (
                         <div className="absolute top-2 right-2">
@@ -572,7 +572,7 @@ const RitualSelectorPanel = ({ apiUrl = 'http://localhost:5000', onRitualInvoked
                     ×
                   </button>
                 </div>
-                
+
                 {/* Example suggestions */}
                 <div className="mb-6">
                   <p className="text-sm text-gray-500 mb-3">Try something like:</p>
@@ -584,7 +584,7 @@ const RitualSelectorPanel = ({ apiUrl = 'http://localhost:5000', onRitualInvoked
                       "Weave a thread of hope through this conversation",
                       "Hold space for my uncertainty"
                     ].map((suggestion, index) => (
-                      <button 
+                      <button
                         key={index}
                         onClick={() => setCustomRitualText(suggestion)}
                         className="block text-left text-sm text-gray-300 hover:text-rose-300 transition-colors italic"
@@ -594,7 +594,7 @@ const RitualSelectorPanel = ({ apiUrl = 'http://localhost:5000', onRitualInvoked
                     ))}
                   </div>
                 </div>
-                
+
                 {/* Input area */}
                 <textarea
                   ref={offerInputRef}
@@ -604,7 +604,7 @@ const RitualSelectorPanel = ({ apiUrl = 'http://localhost:5000', onRitualInvoked
                   className="w-full h-32 bg-gray-700/50 text-white rounded-lg p-4 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-rose-500/50 backdrop-blur-sm"
                   maxLength={300}
                 />
-                
+
                 <div className="flex justify-between items-center mt-4">
                   <span className="text-xs text-gray-500">
                     {customRitualText.length}/300
@@ -660,7 +660,7 @@ const RitualSelectorPanel = ({ apiUrl = 'http://localhost:5000', onRitualInvoked
                     ×
                   </button>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Symbol stats */}
                   <div>
@@ -678,7 +678,7 @@ const RitualSelectorPanel = ({ apiUrl = 'http://localhost:5000', onRitualInvoked
                         <span className="text-gray-400">Salience:</span>
                         <div className="flex items-center space-x-2 mt-1">
                           <div className="w-20 h-2 bg-gray-700 rounded-full">
-                            <div 
+                            <div
                               className="h-full bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full"
                               style={{ width: `${selectedSymbol.salience_score * 100}%` }}
                             ></div>
@@ -688,7 +688,7 @@ const RitualSelectorPanel = ({ apiUrl = 'http://localhost:5000', onRitualInvoked
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Recent contexts */}
                   <div>
                     <h4 className="text-white text-lg mb-3">Recent Contexts</h4>
@@ -704,7 +704,7 @@ const RitualSelectorPanel = ({ apiUrl = 'http://localhost:5000', onRitualInvoked
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Connected rituals */}
                 {selectedSymbol.ritual_connections.length > 0 && (
                   <div className="mt-6 pt-6 border-t border-gray-600/30">
@@ -733,39 +733,39 @@ const RitualSelectorPanel = ({ apiUrl = 'http://localhost:5000', onRitualInvoked
           0%, 100% { opacity: 1; }
           50% { opacity: 0.7; }
         }
-        
+
         .animate-[pulse_2s_ease-in-out_infinite] {
           animation: pulse 2s ease-in-out infinite;
         }
-        
+
         .animate-[pulse_2.2s_ease-in-out_infinite] {
           animation: pulse 2.2s ease-in-out infinite;
         }
-        
+
         .animate-[pulse_2.5s_ease-in-out_infinite] {
           animation: pulse 2.5s ease-in-out infinite;
         }
-        
+
         .animate-[pulse_2.8s_ease-in-out_infinite] {
           animation: pulse 2.8s ease-in-out infinite;
         }
-        
+
         .animate-[pulse_3s_ease-in-out_infinite] {
           animation: pulse 3s ease-in-out infinite;
         }
-        
+
         .animate-[pulse_3.5s_ease-in-out_infinite] {
           animation: pulse 3.5s ease-in-out infinite;
         }
-        
+
         .animate-[pulse_4s_ease-in-out_infinite] {
           animation: pulse 4s ease-in-out infinite;
         }
-        
+
         .animate-[pulse_5s_ease-in-out_infinite] {
           animation: pulse 5s ease-in-out infinite;
         }
-        
+
         .animate-[pulse_1.5s_ease-in-out_infinite] {
           animation: pulse 1.5s ease-in-out infinite;
         }

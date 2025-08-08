@@ -65,7 +65,7 @@ class MoodscapeAudioLayer:
     Manages ambient audio that responds to mood, persona, and interaction context.
     Creates immersive soundscapes that enhance the emotional experience.
     """
-    
+
     def __init__(self):
         self.storage_path = "storage/audio/moodscape_config.json"
         self.audio_library: Dict[str, AudioTrack] = {}
@@ -76,10 +76,10 @@ class MoodscapeAudioLayer:
         self.crossfade_duration = 3.0
         self._initialize_audio_library()
         self._load_configuration()
-    
+
     def _initialize_audio_library(self):
         """Initialize the audio library with predefined tracks"""
-        
+
         # Define audio tracks for different moods and personas
         tracks_data = [
             # Mia's Romantic/Nurturing Tracks
@@ -115,7 +115,7 @@ class MoodscapeAudioLayer:
                 'interaction_triggers': ['memory_sharing', 'vulnerability', 'emotional_depth'],
                 'metadata': {'genre': 'chamber', 'tempo': 'moderate', 'mood': 'emotive'}
             },
-            
+
             # Solene's Passionate/Intense Tracks
             {
                 'track_id': 'solene_flamenco_guitar',
@@ -149,7 +149,7 @@ class MoodscapeAudioLayer:
                 'interaction_triggers': ['conflict', 'emotional_release', 'intensity'],
                 'metadata': {'genre': 'nature', 'tempo': 'variable', 'mood': 'stormy'}
             },
-            
+
             # Lyra's Mystical/Ethereal Tracks
             {
                 'track_id': 'lyra_ethereal_choir',
@@ -183,7 +183,7 @@ class MoodscapeAudioLayer:
                 'interaction_triggers': ['deep_thought', 'meditation', 'spiritual_guidance'],
                 'metadata': {'genre': 'healing', 'tempo': 'timeless', 'mood': 'transcendent'}
             },
-            
+
             # Doc's Therapeutic/Stable Tracks
             {
                 'track_id': 'doc_soft_jazz',
@@ -217,7 +217,7 @@ class MoodscapeAudioLayer:
                 'interaction_triggers': ['healing_conversation', 'stress_relief', 'mindfulness'],
                 'metadata': {'genre': 'nature', 'tempo': 'natural', 'mood': 'restorative'}
             },
-            
+
             # Universal/Interactive Tracks
             {
                 'track_id': 'universal_heartbeat',
@@ -252,48 +252,48 @@ class MoodscapeAudioLayer:
                 'metadata': {'genre': 'therapeutic', 'tempo': 'breathing', 'mood': 'calming'}
             }
         ]
-        
+
         # Convert to AudioTrack objects
         for track_data in tracks_data:
             track = AudioTrack(**track_data)
             self.audio_library[track.track_id] = track
-    
-    def select_audio_for_mood(self, persona_name: str, current_mood: str, 
+
+    def select_audio_for_mood(self, persona_name: str, current_mood: str,
                              emotional_state: Dict[str, float], interaction_context: str,
                              user_preferences: Optional[Dict[str, Any]] = None) -> Optional[AudioTrack]:
         """
         Select appropriate audio track based on mood, persona, and context
-        
+
         Args:
             persona_name: Current active persona
             current_mood: Current mood state
             emotional_state: Emotional analysis values
             interaction_context: Type of interaction happening
             user_preferences: User's audio preferences
-            
+
         Returns:
             Selected audio track or None if no suitable track found
         """
-        
+
         # Filter tracks by persona affinity
         suitable_tracks = [
             track for track in self.audio_library.values()
             if track.persona_affinity.get(persona_name.lower(), 0) > 0.3
         ]
-        
+
         if not suitable_tracks:
             return None
-        
+
         # Score tracks based on multiple factors
         track_scores = []
-        
+
         for track in suitable_tracks:
             score = 0.0
-            
+
             # Persona affinity (40% weight)
             persona_score = track.persona_affinity.get(persona_name.lower(), 0)
             score += persona_score * 0.4
-            
+
             # Emotional trigger matching (30% weight)
             emotion_score = 0.0
             for emotion, intensity in emotional_state.items():
@@ -301,44 +301,44 @@ class MoodscapeAudioLayer:
                     emotion_score += intensity
             emotion_score = min(1.0, emotion_score / max(1, len(track.emotional_triggers)))
             score += emotion_score * 0.3
-            
+
             # Interaction context matching (20% weight)
             context_score = 1.0 if interaction_context in track.interaction_triggers else 0.0
             score += context_score * 0.2
-            
+
             # User preferences (10% weight)
             if user_preferences:
                 preference_score = user_preferences.get(track.track_id, 0.5)
                 score += preference_score * 0.1
-            
+
             track_scores.append((track, score))
-        
+
         # Sort by score and return best match
         track_scores.sort(key=lambda x: x[1], reverse=True)
-        
+
         if track_scores and track_scores[0][1] > 0.3:  # Minimum threshold
             return track_scores[0][0]
-        
+
         return None
-    
-    def start_audio_playback(self, track: AudioTrack, volume: Optional[float] = None, 
+
+    def start_audio_playback(self, track: AudioTrack, volume: Optional[float] = None,
                             trigger_context: str = "manual") -> bool:
         """
         Start audio playback with crossfading if another track is playing
-        
+
         Args:
             track: Audio track to play
             volume: Override volume (uses track default if None)
             trigger_context: What triggered this playback
-            
+
         Returns:
             Success status
         """
-        
+
         try:
             playback_volume = volume if volume is not None else track.volume_default
             playback_volume *= self.volume_master
-            
+
             # Create new playback instance
             new_playback = AudioPlayback(
                 track=track,
@@ -348,52 +348,52 @@ class MoodscapeAudioLayer:
                 loop_count=0,
                 trigger_context=trigger_context
             )
-            
+
             # Handle crossfading if another track is playing
             if self.current_playback and self.current_playback.is_playing:
                 self._crossfade_to_new_track(new_playback)
             else:
                 self._start_new_track(new_playback)
-            
+
             # Update current playback
             self.current_playback = new_playback
             self.playback_history.append(new_playback)
-            
+
             # Keep history manageable
             if len(self.playback_history) > 50:
                 self.playback_history = self.playback_history[-50:]
-            
+
             return True
-            
+
         except Exception as e:
             print(f"Error starting audio playback: {e}")
             return False
-    
+
     def _crossfade_to_new_track(self, new_playback: AudioPlayback):
         """Handle crossfading between tracks"""
         # In a real implementation, this would use audio processing libraries
         # to gradually fade out the current track while fading in the new one
-        
+
         if self.current_playback:
             print(f"Crossfading from {self.current_playback.track.name} to {new_playback.track.name}")
-            
+
             # Simulate crossfade timing
-            fade_duration = min(self.crossfade_duration, 
+            fade_duration = min(self.crossfade_duration,
                                self.current_playback.track.fade_out_duration,
                                new_playback.track.fade_in_duration)
-            
+
             # Mark current track as fading out
             self.current_playback.is_playing = False
-        
+
         # Here you would implement actual audio crossfading
         # For now, we'll just simulate the transition
         self._start_new_track(new_playback)
-    
+
     def _start_new_track(self, playback: AudioPlayback):
         """Start playing a new track"""
         # In a real implementation, this would interface with audio system
         print(f"Starting audio: {playback.track.name} at volume {playback.volume:.2f}")
-        
+
         # Simulate audio system interaction
         track_info = {
             'file_path': playback.track.file_path,
@@ -401,24 +401,24 @@ class MoodscapeAudioLayer:
             'fade_in': playback.track.fade_in_duration,
             'loop': playback.track.loop
         }
-        
+
         # Here you would call actual audio playback system
         # Examples: pygame.mixer, pydub, or web audio API
-    
+
     def stop_audio_playback(self, fade_out: bool = True) -> bool:
         """
         Stop current audio playback
-        
+
         Args:
             fade_out: Whether to fade out or stop immediately
-            
+
         Returns:
             Success status
         """
-        
+
         if not self.current_playback or not self.current_playback.is_playing:
             return False
-        
+
         try:
             if fade_out:
                 fade_duration = self.current_playback.track.fade_out_duration
@@ -426,71 +426,71 @@ class MoodscapeAudioLayer:
                 # Implement fade out logic here
             else:
                 print(f"Stopping {self.current_playback.track.name} immediately")
-            
+
             self.current_playback.is_playing = False
             return True
-            
+
         except Exception as e:
             print(f"Error stopping audio playback: {e}")
             return False
-    
+
     def adjust_volume(self, volume: float, fade_duration: float = 1.0) -> bool:
         """
         Adjust volume of current playback
-        
+
         Args:
             volume: New volume level (0.0 to 1.0)
             fade_duration: Time to fade to new volume
-            
+
         Returns:
             Success status
         """
-        
+
         if not self.current_playback or not self.current_playback.is_playing:
             return False
-        
+
         try:
             old_volume = self.current_playback.volume
             new_volume = max(0.0, min(1.0, volume)) * self.volume_master
-            
+
             print(f"Adjusting volume from {old_volume:.2f} to {new_volume:.2f} over {fade_duration}s")
-            
+
             self.current_playback.volume = new_volume
-            
+
             # Here you would implement volume fade logic
             return True
-            
+
         except Exception as e:
             print(f"Error adjusting volume: {e}")
             return False
-    
-    def get_mood_audio_recommendations(self, persona_name: str, 
+
+    def get_mood_audio_recommendations(self, persona_name: str,
                                      emotional_state: Dict[str, float]) -> List[Dict[str, Any]]:
         """
         Get audio recommendations for current mood without starting playback
-        
+
         Args:
             persona_name: Current persona
             emotional_state: Current emotional state
-            
+
         Returns:
             List of recommended tracks with scores
         """
-        
+
         recommendations = []
-        
+
         for track in self.audio_library.values():
             # Calculate compatibility score
             persona_score = track.persona_affinity.get(persona_name.lower(), 0)
-            
+
             emotion_score = 0.0
             for emotion, intensity in emotional_state.items():
                 if emotion in track.emotional_triggers:
                     emotion_score += intensity
             emotion_score = min(1.0, emotion_score / max(1, len(track.emotional_triggers)))
-            
+
             total_score = (persona_score * 0.6) + (emotion_score * 0.4)
-            
+
             if total_score > 0.2:  # Minimum relevance threshold
                 recommendations.append({
                     'track_id': track.track_id,
@@ -503,12 +503,12 @@ class MoodscapeAudioLayer:
                     'duration': track.duration,
                     'description': self._generate_track_description(track)
                 })
-        
+
         # Sort by score
         recommendations.sort(key=lambda x: x['score'], reverse=True)
-        
+
         return recommendations[:5]  # Return top 5 recommendations
-    
+
     def _generate_track_description(self, track: AudioTrack) -> str:
         """Generate a description of the track for the user"""
         descriptions = {
@@ -523,17 +523,17 @@ class MoodscapeAudioLayer:
             'universal_heartbeat': "Synchronized rhythms that connect hearts",
             'universal_breathing': "Guided breathing that centers and calms"
         }
-        
+
         return descriptions.get(track.track_id, f"A {track.audio_type.value} track for {', '.join([cat.value for cat in track.mood_categories])} moments")
-    
+
     def get_current_playback_status(self) -> Optional[Dict[str, Any]]:
         """Get current playback status information"""
         if not self.current_playback:
             return None
-        
+
         current_time = datetime.now()
         elapsed_time = (current_time - self.current_playback.start_time).total_seconds()
-        
+
         return {
             'track_id': self.current_playback.track.track_id,
             'track_name': self.current_playback.track.name,
@@ -546,24 +546,24 @@ class MoodscapeAudioLayer:
             'loop_count': self.current_playback.loop_count,
             'mood_categories': [cat.value for cat in self.current_playback.track.mood_categories]
         }
-    
+
     def update_user_preferences(self, track_id: str, preference_score: float):
         """Update user preferences for a specific track"""
         if track_id not in self.mood_preferences:
             self.mood_preferences[track_id] = {}
-        
+
         # Store as Dict[str, Any] to handle different data types
         preferences = self.mood_preferences[track_id]
         preferences['user_rating'] = max(0.0, min(1.0, preference_score))
         preferences['last_updated'] = datetime.now().isoformat()
-        
+
         # Save preferences
         self._save_configuration()
-    
+
     def get_audio_history(self, limit: int = 10) -> List[Dict[str, Any]]:
         """Get recent audio playback history"""
         recent_history = self.playback_history[-limit:] if self.playback_history else []
-        
+
         return [
             {
                 'track_name': playback.track.name,
@@ -575,85 +575,85 @@ class MoodscapeAudioLayer:
             }
             for playback in recent_history
         ]
-    
-    def create_mood_playlist(self, persona_name: str, target_mood: str, 
+
+    def create_mood_playlist(self, persona_name: str, target_mood: str,
                            duration_minutes: int = 30) -> List[str]:
         """
         Create a playlist for a specific mood and duration
-        
+
         Args:
             persona_name: Target persona
             target_mood: Desired mood category
             duration_minutes: Target playlist duration
-            
+
         Returns:
             List of track IDs for the playlist
         """
-        
+
         target_duration = duration_minutes * 60  # Convert to seconds
         playlist = []
         total_duration = 0.0
-        
+
         # Filter tracks by persona and mood
         suitable_tracks = [
             track for track in self.audio_library.values()
             if (track.persona_affinity.get(persona_name.lower(), 0) > 0.4 and
                 any(cat.value == target_mood for cat in track.mood_categories))
         ]
-        
+
         if not suitable_tracks:
             return []
-        
+
         # Sort by persona affinity
         suitable_tracks.sort(key=lambda x: x.persona_affinity.get(persona_name.lower(), 0), reverse=True)
-        
+
         # Build playlist
         while total_duration < target_duration and suitable_tracks:
             for track in suitable_tracks:
                 if total_duration + track.duration <= target_duration:
                     playlist.append(track.track_id)
                     total_duration += track.duration
-                    
+
                     if total_duration >= target_duration:
                         break
-            
+
             # If we can't fill the time with available tracks, repeat the best ones
             if total_duration < target_duration and playlist:
                 best_track = suitable_tracks[0]
                 playlist.append(best_track.track_id)
                 total_duration += best_track.duration
-        
+
         return playlist
-    
+
     def _load_configuration(self):
         """Load audio configuration and preferences"""
         if os.path.exists(self.storage_path):
             try:
                 with open(self.storage_path, 'r', encoding='utf-8') as f:
                     data = json.load(f)
-                
+
                 self.mood_preferences = data.get('mood_preferences', {})
                 self.volume_master = data.get('volume_master', 0.7)
                 self.crossfade_duration = data.get('crossfade_duration', 3.0)
-                
+
             except Exception as e:
                 print(f"Error loading audio configuration: {e}")
-    
+
     def _save_configuration(self):
         """Save audio configuration and preferences"""
         try:
             os.makedirs(os.path.dirname(self.storage_path), exist_ok=True)
-            
+
             data = {
                 'mood_preferences': self.mood_preferences,
                 'volume_master': self.volume_master,
                 'crossfade_duration': self.crossfade_duration,
                 'last_updated': datetime.now().isoformat()
             }
-            
+
             with open(self.storage_path, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
-                
+
         except Exception as e:
             print(f"Error saving audio configuration: {e}")
 
@@ -668,30 +668,30 @@ def get_moodscape_audio_layer() -> MoodscapeAudioLayer:
     return _moodscape_audio
 
 # Integration helpers
-def start_mood_audio(persona_name: str, current_mood: str, emotional_state: Dict[str, float], 
+def start_mood_audio(persona_name: str, current_mood: str, emotional_state: Dict[str, float],
                     interaction_context: str, user_preferences: Optional[Dict[str, Any]] = None) -> bool:
     """
     Start mood-appropriate audio for current context
-    
+
     This function can be called from persona engines or interaction handlers
     to automatically start appropriate ambient audio.
     """
     audio_layer = get_moodscape_audio_layer()
-    
+
     # Select appropriate track
     track = audio_layer.select_audio_for_mood(
         persona_name, current_mood, emotional_state, interaction_context, user_preferences
     )
-    
+
     if track:
         return audio_layer.start_audio_playback(track, trigger_context=interaction_context)
-    
+
     return False
 
 def get_mood_audio_suggestions(persona_name: str, emotional_state: Dict[str, float]) -> List[Dict[str, Any]]:
     """
     Get audio suggestions for current mood without starting playback
-    
+
     This can be used to show users what audio options are available
     for their current emotional state.
     """

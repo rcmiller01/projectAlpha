@@ -15,7 +15,7 @@ class BackgroundJournaling:
         recent_events = self.emotion_reflector._get_recent_events(hours=1)
         if not recent_events:
             return "She sat with the ache of an unspoken name."
-        
+
         dominant_emotion = self.emotion_reflector.run_daily_reflection().dominant_emotion
         if dominant_emotion == "joy":
             return "The light danced in her heart, unyielding."
