@@ -11,23 +11,25 @@ import random
 import time
 from collections.abc import Callable
 from enum import Enum
-from typing import Any, Optional, Tuple, Type, Union
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
 
 class CircuitState(Enum):
     """States for circuit breaker pattern."""
-    CLOSED = "closed"      # Normal operation
-    OPEN = "open"          # Failing - circuit is open
+
+    CLOSED = "closed"  # Normal operation
+    OPEN = "open"  # Failing - circuit is open
     HALF_OPEN = "half_open"  # Testing if service recovered
 
 
 class CircuitBreaker:
     """
     Circuit breaker pattern implementation for handling cascading failures.
-    
-    Monitors failure rates and opens the circuit when failure threshold is exceeded,
+
+    Monitors failure rates and opens the circuit when failure threshold is
+    exceeded,
     allowing the system to fail fast and recover gracefully.
     """
 
@@ -35,7 +37,7 @@ class CircuitBreaker:
         self,
         failure_threshold: int = 5,
         timeout: float = 60.0,
-        expected_exception: Type[Exception] = Exception,
+        expected_exception: type[Exception] = Exception,
     ):
         """
         Initialize circuit breaker.
@@ -48,14 +50,14 @@ class CircuitBreaker:
         self.failure_threshold = failure_threshold
         self.timeout = timeout
         self.expected_exception = expected_exception
-        
-        self.failure_count = 0
-        self.last_failure_time = None
-        self.state = CircuitState.CLOSED
+
+        self.failure_count: int = 0
+        self.last_failure_time: float | None = None
+        self.state: CircuitState = CircuitState.CLOSED
 
     def __call__(self, func: Callable) -> Callable:
         """Decorator to apply circuit breaker to a function."""
-        
+
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             if self._should_attempt_call():
@@ -63,28 +65,28 @@ class CircuitBreaker:
                     result = func(*args, **kwargs)
                     self._on_success()
                     return result
-                except self.expected_exception as e:
+                except self.expected_exception:
                     self._on_failure()
                     raise
             else:
                 raise CircuitBreakerOpenError(
-                    f"Circuit breaker is OPEN. Service calls are disabled for {self.timeout}s"
+                    f"Circuit breaker is OPEN. Calls disabled for {self.timeout}s"
                 )
-        
+
         return wrapper
 
     def _should_attempt_call(self) -> bool:
         """Check if we should attempt the call based on circuit state."""
         if self.state == CircuitState.CLOSED:
             return True
-        
+
         if self.state == CircuitState.OPEN:
             if self._timeout_expired():
                 self.state = CircuitState.HALF_OPEN
                 logger.info("Circuit breaker transitioning to HALF_OPEN")
                 return True
             return False
-        
+
         # HALF_OPEN state
         return True
 
@@ -105,7 +107,7 @@ class CircuitBreaker:
         """Handle failed call."""
         self.failure_count += 1
         self.last_failure_time = time.time()
-        
+
         if self.failure_count >= self.failure_threshold:
             self.state = CircuitState.OPEN
             logger.warning(
@@ -126,6 +128,7 @@ class CircuitBreaker:
 
 class CircuitBreakerOpenError(Exception):
     """Raised when circuit breaker is open and calls are blocked."""
+
     pass
 
 
@@ -294,7 +297,7 @@ def retry_hrm_call(func: Callable) -> Callable:
         exceptions=(NetworkError, ServiceUnavailableError, ConnectionError, TimeoutError),
         on_retry=lambda attempt, error: logger.info(f"HRM call retry #{attempt}: {error}"),
         on_final_failure=lambda error: {"error": "HRM service unavailable", "details": str(error)},
-    )(func)
+    )(func)  # type: ignore[no-any-return]
 
 
 def retry_arbiter_call(func: Callable) -> Callable:
@@ -307,7 +310,7 @@ def retry_arbiter_call(func: Callable) -> Callable:
             "error": "Arbiter service unavailable",
             "details": str(error),
         },
-    )(func)
+    )(func)  # type: ignore[no-any-return]
 
 
 def retry_memory_call(func: Callable) -> Callable:
@@ -317,7 +320,7 @@ def retry_memory_call(func: Callable) -> Callable:
         exceptions=(NetworkError, ServiceUnavailableError, OSError, IOError),
         on_retry=lambda attempt, error: logger.info(f"Memory operation retry #{attempt}: {error}"),
         on_final_failure=lambda error: {"error": "Memory operation failed", "details": str(error)},
-    )(func)
+    )(func)  # type: ignore[no-any-return]
 
 
 # Utility functions for checking service health
@@ -354,8 +357,8 @@ def backoff_delay(attempt: int, base_delay: float = 1.0, max_delay: float = 60.0
     Returns:
         Delay in seconds
     """
-    delay = base_delay * (2**attempt)
-    return min(delay, max_delay)
+    delay: float = base_delay * (2**attempt)
+    return delay if delay <= max_delay else max_delay
 
 
 # Context manager for handling retryable operations
@@ -394,7 +397,7 @@ def retry_with_circuit_breaker(
 ):
     """
     Combined decorator for retry with circuit breaker protection.
-    
+
     Args:
         retry_config: Retry configuration
         circuit_config: Circuit breaker configuration (failure_threshold, timeout, etc.)
@@ -404,10 +407,10 @@ def retry_with_circuit_breaker(
     """
     if retry_config is None:
         retry_config = RetryConfig()
-    
+
     if circuit_config is None:
         circuit_config = {"failure_threshold": 5, "timeout": 60.0}
-    
+
     def decorator(func: Callable) -> Callable:
         # Create circuit breaker for this function
         circuit_breaker = CircuitBreaker(
@@ -415,7 +418,7 @@ def retry_with_circuit_breaker(
             timeout=circuit_config.get("timeout", 60.0),
             expected_exception=exceptions[0] if exceptions else Exception,
         )
-        
+
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             # Check circuit breaker first
@@ -424,18 +427,16 @@ def retry_with_circuit_breaker(
                     f"Circuit breaker is OPEN for {func.__name__}. "
                     f"Service calls disabled for {circuit_breaker.timeout}s"
                 )
-            
+
             # Apply retry logic
-            last_exception = None
             for attempt in range(retry_config.max_attempts):
                 try:
                     result = func(*args, **kwargs)
                     circuit_breaker._on_success()
                     return result
                 except exceptions as e:
-                    last_exception = e
                     circuit_breaker._on_failure()
-                    
+
                     if attempt == retry_config.max_attempts - 1:
                         # Final attempt failed
                         logger.error(
@@ -445,19 +446,19 @@ def retry_with_circuit_breaker(
                         if on_final_failure:
                             return on_final_failure(e)
                         raise
-                    
+
                     # Calculate delay for next attempt
                     delay = calculate_delay(attempt, retry_config)
-                    
+
                     logger.warning(
                         f"Function {func.__name__} failed on attempt "
                         f"{attempt + 1}/{retry_config.max_attempts}. "
                         f"Error: {e!s}. Retrying in {delay:.2f}s..."
                     )
-                    
+
                     if on_retry:
                         on_retry(attempt + 1, e)
-                    
+
                     time.sleep(delay)
                 except Exception as e:
                     # Non-retryable exception
@@ -466,9 +467,9 @@ def retry_with_circuit_breaker(
                         f"Function {func.__name__} failed with non-retryable error: {e!s}"
                     )
                     raise
-        
+
         # Attach circuit breaker for monitoring
-        wrapper._circuit_breaker = circuit_breaker
+        wrapper._circuit_breaker = circuit_breaker  # type: ignore[attr-defined]
         return wrapper
-    
+
     return decorator

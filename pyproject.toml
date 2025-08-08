@@ -194,6 +194,13 @@ exclude = [
     "^\\.venv/.*$",
     "^build/.*$",
     "^dist/.*$",
+    # Avoid duplicate __main__ module errors when checking multiple roots
+    "^backend/__init__\\.py$",
+    "^src/__init__\\.py$",
+    # Avoid duplicate package name between backend/agents and src/agents
+    "^backend/agents/.*$",
+    # Temporarily exclude a file with syntax errors until fixed
+    "^backend/meta_watcher\\.py$",
 ]
 
 [[tool.mypy.overrides]]

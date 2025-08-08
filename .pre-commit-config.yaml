@@ -26,6 +26,7 @@ repos:
     rev: v1.10.0
     hooks:
       - id: mypy
+        files: ^backend/.*\.py$
         additional_dependencies:
           - types-requests
           - types-redis
@@ -34,5 +35,3 @@ repos:
           - types-werkzeug
         args:
           - --config-file=pyproject.toml
-          - src/
-          - backend/

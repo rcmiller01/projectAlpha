@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.python-version
+.mypy_cache/
+.pytest_cache/
+.coverage*
+htmlcov/
+
+# Environments
+.env
+.venv/
+venv/
+
+# Node / Frontend
+node_modules/
+webapp/frontend/node_modules/
+webapp/frontend/.next/
+webapp/frontend/.turbo/
+webapp/frontend/dist/
+
+# IDE/OS
+.vscode/
+*.code-workspace
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Build / dist
+build/
+dist/
+*.egg-info/
+
+# Coverage & Reports
+coverage.xml
+junit.xml
+
+# Misc
+*.swp
+*.swo
