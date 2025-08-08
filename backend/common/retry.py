@@ -10,9 +10,123 @@ import logging
 import random
 import time
 from collections.abc import Callable
+from enum import Enum
 from typing import Any, Optional, Tuple, Type, Union
 
 logger = logging.getLogger(__name__)
+
+
+class CircuitState(Enum):
+    """States for circuit breaker pattern."""
+    CLOSED = "closed"      # Normal operation
+    OPEN = "open"          # Failing - circuit is open
+    HALF_OPEN = "half_open"  # Testing if service recovered
+
+
+class CircuitBreaker:
+    """
+    Circuit breaker pattern implementation for handling cascading failures.
+    
+    Monitors failure rates and opens the circuit when failure threshold is exceeded,
+    allowing the system to fail fast and recover gracefully.
+    """
+
+    def __init__(
+        self,
+        failure_threshold: int = 5,
+        timeout: float = 60.0,
+        expected_exception: Type[Exception] = Exception,
+    ):
+        """
+        Initialize circuit breaker.
+
+        Args:
+            failure_threshold: Number of consecutive failures to open circuit
+            timeout: Seconds to wait before attempting to close circuit
+            expected_exception: Exception type that counts as a failure
+        """
+        self.failure_threshold = failure_threshold
+        self.timeout = timeout
+        self.expected_exception = expected_exception
+        
+        self.failure_count = 0
+        self.last_failure_time = None
+        self.state = CircuitState.CLOSED
+
+    def __call__(self, func: Callable) -> Callable:
+        """Decorator to apply circuit breaker to a function."""
+        
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            if self._should_attempt_call():
+                try:
+                    result = func(*args, **kwargs)
+                    self._on_success()
+                    return result
+                except self.expected_exception as e:
+                    self._on_failure()
+                    raise
+            else:
+                raise CircuitBreakerOpenError(
+                    f"Circuit breaker is OPEN. Service calls are disabled for {self.timeout}s"
+                )
+        
+        return wrapper
+
+    def _should_attempt_call(self) -> bool:
+        """Check if we should attempt the call based on circuit state."""
+        if self.state == CircuitState.CLOSED:
+            return True
+        
+        if self.state == CircuitState.OPEN:
+            if self._timeout_expired():
+                self.state = CircuitState.HALF_OPEN
+                logger.info("Circuit breaker transitioning to HALF_OPEN")
+                return True
+            return False
+        
+        # HALF_OPEN state
+        return True
+
+    def _timeout_expired(self) -> bool:
+        """Check if timeout has expired since last failure."""
+        if self.last_failure_time is None:
+            return True
+        return time.time() - self.last_failure_time >= self.timeout
+
+    def _on_success(self):
+        """Handle successful call."""
+        self.failure_count = 0
+        if self.state == CircuitState.HALF_OPEN:
+            self.state = CircuitState.CLOSED
+            logger.info("Circuit breaker transitioning to CLOSED")
+
+    def _on_failure(self):
+        """Handle failed call."""
+        self.failure_count += 1
+        self.last_failure_time = time.time()
+        
+        if self.failure_count >= self.failure_threshold:
+            self.state = CircuitState.OPEN
+            logger.warning(
+                f"Circuit breaker OPEN after {self.failure_count} failures. "
+                f"Will retry after {self.timeout}s"
+            )
+
+    def get_state(self) -> dict[str, Any]:
+        """Get current circuit breaker state for monitoring."""
+        return {
+            "state": self.state.value,
+            "failure_count": self.failure_count,
+            "failure_threshold": self.failure_threshold,
+            "last_failure_time": self.last_failure_time,
+            "timeout": self.timeout,
+        }
+
+
+class CircuitBreakerOpenError(Exception):
+    """Raised when circuit breaker is open and calls are blocked."""
+    pass
 
 
 class RetryConfig:
@@ -269,3 +383,92 @@ class RetryContext:
             logger.warning(f"Failed {self.operation_name} after {duration:.2f}s: {exc_val}")
 
         return False  # Don't suppress exceptions
+
+
+def retry_with_circuit_breaker(
+    retry_config: Optional[RetryConfig] = None,
+    circuit_config: Optional[dict[str, Any]] = None,
+    exceptions: tuple[type[Exception], ...] = (RetryableError,),
+    on_retry: Optional[Callable[[int, Exception], None]] = None,
+    on_final_failure: Optional[Callable[[Exception], Any]] = None,
+):
+    """
+    Combined decorator for retry with circuit breaker protection.
+    
+    Args:
+        retry_config: Retry configuration
+        circuit_config: Circuit breaker configuration (failure_threshold, timeout, etc.)
+        exceptions: Exception types to retry on
+        on_retry: Callback on each retry
+        on_final_failure: Callback on final failure
+    """
+    if retry_config is None:
+        retry_config = RetryConfig()
+    
+    if circuit_config is None:
+        circuit_config = {"failure_threshold": 5, "timeout": 60.0}
+    
+    def decorator(func: Callable) -> Callable:
+        # Create circuit breaker for this function
+        circuit_breaker = CircuitBreaker(
+            failure_threshold=circuit_config.get("failure_threshold", 5),
+            timeout=circuit_config.get("timeout", 60.0),
+            expected_exception=exceptions[0] if exceptions else Exception,
+        )
+        
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            # Check circuit breaker first
+            if not circuit_breaker._should_attempt_call():
+                raise CircuitBreakerOpenError(
+                    f"Circuit breaker is OPEN for {func.__name__}. "
+                    f"Service calls disabled for {circuit_breaker.timeout}s"
+                )
+            
+            # Apply retry logic
+            last_exception = None
+            for attempt in range(retry_config.max_attempts):
+                try:
+                    result = func(*args, **kwargs)
+                    circuit_breaker._on_success()
+                    return result
+                except exceptions as e:
+                    last_exception = e
+                    circuit_breaker._on_failure()
+                    
+                    if attempt == retry_config.max_attempts - 1:
+                        # Final attempt failed
+                        logger.error(
+                            f"Function {func.__name__} failed after "
+                            f"{retry_config.max_attempts} attempts. Final error: {e!s}"
+                        )
+                        if on_final_failure:
+                            return on_final_failure(e)
+                        raise
+                    
+                    # Calculate delay for next attempt
+                    delay = calculate_delay(attempt, retry_config)
+                    
+                    logger.warning(
+                        f"Function {func.__name__} failed on attempt "
+                        f"{attempt + 1}/{retry_config.max_attempts}. "
+                        f"Error: {e!s}. Retrying in {delay:.2f}s..."
+                    )
+                    
+                    if on_retry:
+                        on_retry(attempt + 1, e)
+                    
+                    time.sleep(delay)
+                except Exception as e:
+                    # Non-retryable exception
+                    circuit_breaker._on_failure()
+                    logger.error(
+                        f"Function {func.__name__} failed with non-retryable error: {e!s}"
+                    )
+                    raise
+        
+        # Attach circuit breaker for monitoring
+        wrapper._circuit_breaker = circuit_breaker
+        return wrapper
+    
+    return decorator

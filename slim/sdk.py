@@ -15,7 +15,7 @@ try:
     from common.dryrun import dry_log, is_dry_run
 except Exception:  # pragma: no cover - fallback stubs for type checkers
 
-    def dry_log(*args, **kwargs):  # type: ignore[no-redef]
+    def dry_log(*_args, **_kwargs):  # type: ignore[no-redef]
         return None
 
     def is_dry_run() -> bool:  # type: ignore[no-redef]
