@@ -7,8 +7,8 @@ status summary. It can be run alongside other services to watch the health of
 all active models without consuming significant resources.
 """
 
-import time
 import logging
+import time
 from pathlib import Path
 from typing import Optional
 
@@ -18,7 +18,9 @@ from quant_tracking import QuantTracker
 class CouncilMonitor:
     """Lightweight monitoring of council/core metrics"""
 
-    def __init__(self, tracking_file: str = "data/quantization_tracking.jsonl", interval: int = 300) -> None:
+    def __init__(
+        self, tracking_file: str = "data/quantization_tracking.jsonl", interval: int = 300
+    ) -> None:
         self.tracker = QuantTracker(tracking_file)
         self.interval = interval
         logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

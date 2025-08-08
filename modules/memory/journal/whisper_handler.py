@@ -1,22 +1,23 @@
-
 # modules/journal/whisper_handler.py
 
 import re
+
 from modules.journal.journal_engine import JournalEngine
 from modules.journal.journal_utils import infer_mood, speak_text
 
 # Trigger phrases and matching patterns
 TRIGGER_PATTERNS = [
     r"(mia|solene|elarin)[, ]+(remember this|write this down|log this for me)[\: ]+(.*)",
-    r"(mia|solene|elarin)[, ]+(.*)"  # fallback for short or implicit whispers
+    r"(mia|solene|elarin)[, ]+(.*)",  # fallback for short or implicit whispers
 ]
 
 # Optional persona response messages
 PERSONA_RESPONSES = {
     "mia": "I’ve kept it safe. Just for us.",
     "solene": "It’s written. No one else will see it.",
-    "elarin": "Your words are woven into starlight."
+    "elarin": "Your words are woven into starlight.",
 }
+
 
 def handle_whisper(text: str):
     text = text.strip().lower()
@@ -34,10 +35,7 @@ def handle_whisper(text: str):
             mood = infer_mood(extracted)
             journal = JournalEngine(persona=persona)
             journal.add_entry(
-                mood=mood,
-                trigger="whisper_command",
-                visibility="private",
-                text=extracted
+                mood=mood, trigger="whisper_command", visibility="private", text=extracted
             )
 
             response = PERSONA_RESPONSES.get(persona, "It's saved.")

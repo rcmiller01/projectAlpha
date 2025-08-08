@@ -215,17 +215,23 @@ class CrisisSafetyOverride:
                 confidence_scores[level] = level_score / len(patterns)
 
                 # Update max level based on hierarchy
-                if level.value in ["critical"] and max_level.value not in ["critical"]:
-                    max_level = level
-                elif level.value in ["high"] and max_level.value not in ["critical", "high"]:
-                    max_level = level
-                elif level.value in ["medium"] and max_level.value not in [
-                    "critical",
-                    "high",
-                    "medium",
-                ]:
-                    max_level = level
-                elif level.value in ["low"] and max_level == CrisisLevel.NONE:
+                if (
+                    level.value in ["critical"]
+                    and max_level.value not in ["critical"]
+                    or level.value in ["high"]
+                    and max_level.value not in ["critical", "high"]
+                    or (
+                        level.value in ["medium"]
+                        and max_level.value
+                        not in [
+                            "critical",
+                            "high",
+                            "medium",
+                        ]
+                        or level.value in ["low"]
+                        and max_level == CrisisLevel.NONE
+                    )
+                ):
                     max_level = level
 
         # Analyze context factors

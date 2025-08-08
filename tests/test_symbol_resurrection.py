@@ -1,10 +1,11 @@
-import unittest
 import asyncio
+import unittest
 from datetime import datetime, timedelta
 
-from backend.modules.memory.symbolic_memory import SymbolicMemorySystem
 from backend.modules.memory.symbol_resurrection import SymbolResurrectionEngine
+from backend.modules.memory.symbolic_memory import SymbolicMemorySystem
 from modules.core.guidance_coordinator import GuidanceCoordinator, GuidancePackage
+
 
 class TestSymbolResurrection(unittest.TestCase):
     def setUp(self):
@@ -40,5 +41,6 @@ class TestSymbolResurrection(unittest.TestCase):
         if line:
             self.assertEqual(guidance.symbolic_resurrection_line, line)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

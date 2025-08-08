@@ -24,7 +24,7 @@ EPHEMERAL_PATH = Path("data/ephemeral_layer.json")
 def _load_json(path: Path) -> dict[str, Any]:
     try:
         if path.exists():
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 return json.load(f)
     except Exception as e:
         logger.error(f"Failed to load {path}: {e}")

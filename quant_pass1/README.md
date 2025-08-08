@@ -218,7 +218,7 @@ The emotional evaluation set includes 50 carefully crafted prompts covering:
 
 ### Categories (10 prompts each)
 1. **Supportive Reflection**: Processing complex emotions
-2. **Intimate Confessions**: Personal vulnerabilities and fears  
+2. **Intimate Confessions**: Personal vulnerabilities and fears
 3. **Comfort in Crisis**: Acute emotional distress
 4. **Lighthearted Teasing**: Playful AI-human interaction
 5. **Compassionate Dialogue**: Deep empathy and understanding

@@ -534,9 +534,10 @@ def invoke_symbol():
 
         if layer == "beliefs" and token_type not in ["admin", "system"]:
             audit_action("layer_access_denied", layer="beliefs", reason="admin_or_system_required")
-            return jsonify(
-                {"error": "Admin or system access required for beliefs layer symbols"}
-            ), 403
+            return (
+                jsonify({"error": "Admin or system access required for beliefs layer symbols"}),
+                403,
+            )
 
         symbol_name = symbol_data.get("name")
 

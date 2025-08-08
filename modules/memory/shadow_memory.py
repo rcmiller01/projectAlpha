@@ -590,13 +590,15 @@ class ShadowMemoryLayer:
             "total_patterns": len(self.shadow_patterns),
             "active_patterns": len(active_patterns),
             "theme_distribution": dict(theme_distribution),
-            "strongest_pattern": {
-                "name": strongest_pattern[0],
-                "type": strongest_pattern[1].theme_type.value,
-                "strength": strongest_pattern[1].manifestation_strength,
-            }
-            if strongest_pattern
-            else None,
+            "strongest_pattern": (
+                {
+                    "name": strongest_pattern[0],
+                    "type": strongest_pattern[1].theme_type.value,
+                    "strength": strongest_pattern[1].manifestation_strength,
+                }
+                if strongest_pattern
+                else None
+            ),
             "recent_events_count": len(
                 [
                     event

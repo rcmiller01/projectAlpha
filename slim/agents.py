@@ -2,15 +2,16 @@
 Registered SLiM agent implementations (stubs) decorated with contracts.
 These provide simple, fast behaviors and enable health/metrics reporting.
 """
+
 from __future__ import annotations
 
-from typing import Any, Optional
 import time
+from typing import Any, Optional
 
 from .sdk import (
-    LOGIC_HIGH_CONTRACT,
-    EMOTION_VALENCE_CONTRACT,
     CREATIVE_METAPHOR_CONTRACT,
+    EMOTION_VALENCE_CONTRACT,
+    LOGIC_HIGH_CONTRACT,
     contract_validator,
 )
 
@@ -69,9 +70,7 @@ def creative_metaphor(
     if simulate_ms and simulate_ms > 0:
         time.sleep(simulate_ms / 1000.0)
     metaphor = f"{concept} is a lighthouse for the {target_audience}"
-    explanation = (
-        f"Framing '{concept}' as a lighthouse conveys guidance and clarity tailored to {target_audience}."
-    )
+    explanation = f"Framing '{concept}' as a lighthouse conveys guidance and clarity tailored to {target_audience}."
     effectiveness = 0.76
     alternatives = [f"{concept} as a compass", f"{concept} as a bridge"]
     return {

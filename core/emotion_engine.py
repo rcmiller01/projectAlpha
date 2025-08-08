@@ -6,7 +6,6 @@ Provides adjectives, emojis, and metaphors based on valence and arousal.
 
 from typing import Tuple
 
-
 POS_ADJECTIVES = ["joyful", "cheerful", "uplifting", "bright"]
 NEG_ADJECTIVES = ["somber", "gloomy", "downcast", "heavy"]
 NEU_ADJECTIVES = ["calm", "steady", "balanced"]

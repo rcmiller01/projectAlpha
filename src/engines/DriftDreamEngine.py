@@ -737,9 +737,9 @@ class DriftDreamEngine:
             return
 
         dream_context = {
-            "dominant_emotion": dream_entry.mood_palette[0]
-            if dream_entry.mood_palette
-            else "contemplative",
+            "dominant_emotion": (
+                dream_entry.mood_palette[0] if dream_entry.mood_palette else "contemplative"
+            ),
             "intensity": dream_entry.emotional_intensity,
             "context": f"dream: {dream_entry.scene_title}",
             "dream_context": True,

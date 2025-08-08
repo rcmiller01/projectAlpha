@@ -9,6 +9,7 @@ import json
 import os
 from datetime import datetime
 
+
 class MemoryEngine:
     def __init__(self, persona_name="Mia", path="storage/memory"):
         self.persona = persona_name
@@ -17,7 +18,7 @@ class MemoryEngine:
 
     def _load_memory(self):
         if os.path.exists(self.memory_path):
-            with open(self.memory_path, "r") as f:
+            with open(self.memory_path) as f:
                 self.memories = json.load(f)
         else:
             self.memories = []
@@ -33,14 +34,16 @@ class MemoryEngine:
             "entry": entry,
             "tags": tags or [],
             "emotional_weight": emotional_weight,
-            "private": private
+            "private": private,
         }
         self.memories.append(memory)
         self._save_memory()
         return {"status": "stored", "memory": memory}
 
     def recall_memories(self, tag_filter=None, limit=5):
-        filtered = [m for m in self.memories if not tag_filter or any(t in m["tags"] for t in tag_filter)]
+        filtered = [
+            m for m in self.memories if not tag_filter or any(t in m["tags"] for t in tag_filter)
+        ]
         sorted_memories = sorted(filtered, key=lambda x: x["emotional_weight"], reverse=True)
         return sorted_memories[:limit]
 

@@ -7,7 +7,7 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -29,29 +29,34 @@ app.add_middleware(
 # Anchor settings configuration
 ANCHOR_SETTINGS_PATH = Path("config/anchor_settings.json")
 
+
 class AnchorSettings(BaseModel):
     """Model for anchor settings configuration."""
-    weights: Dict[str, float]
+
+    weights: dict[str, float]
     signature: str = "Emberveil-01"
     locked: bool = False
     last_updated: Optional[str] = None
 
-def load_anchor_settings() -> Dict[str, Any]:
+
+def load_anchor_settings() -> dict[str, Any]:
     """Load anchor settings from configuration file."""
     try:
         if ANCHOR_SETTINGS_PATH.exists():
-            with open(ANCHOR_SETTINGS_PATH, 'r') as f:
+            with open(ANCHOR_SETTINGS_PATH) as f:
                 settings = json.load(f)
                 logger.info(f"Loaded anchor settings from {ANCHOR_SETTINGS_PATH}")
                 return settings
         else:
             logger.warning(f"Anchor settings file not found at {ANCHOR_SETTINGS_PATH}")
-    except (json.JSONDecodeError, IOError) as e:
+    except (OSError, json.JSONDecodeError) as e:
         logger.error(f"Failed to load anchor settings: {e}")
     return {"weights": {}, "signature": "", "locked": False, "last_updated": None}
+
 
 # TODO: Add additional routes and logic as needed
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

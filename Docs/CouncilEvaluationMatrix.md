@@ -26,4 +26,3 @@ This document defines the metrics used to evaluate potential **Council Minds** a
 - All evaluation results are logged by `quant_tracking.py` for lineage tracking.
 - Scores should trend upward generation over generation, ensuring continuous improvement.
 - Failing candidates are archived for future retraining or role changes.
-

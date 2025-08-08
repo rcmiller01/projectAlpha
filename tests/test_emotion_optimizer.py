@@ -1,8 +1,8 @@
 import asyncio
-import os
 import json
-import unittest
+import os
 import sys
+import unittest
 
 # Ensure project root is in path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -43,4 +43,3 @@ class TestEmotionOptimizer(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

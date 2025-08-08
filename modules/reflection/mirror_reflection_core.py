@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import Dict
 
+
 # SECTION 1: User Signal Inference
 def infer_emotional_state(user_input: str) -> str:
     """Infer the user's emotional state using simple heuristics."""
@@ -15,8 +16,9 @@ def infer_emotional_state(user_input: str) -> str:
         return "anxiety"
     return "neutral"
 
+
 # SECTION 2: Reflection Adjustment Rules
-mirror_adjustments: Dict[str, Dict[str, float]] = {
+mirror_adjustments: dict[str, dict[str, float]] = {
     "melancholy": {"vulnerability": 0.2, "restraint": -0.1},
     "joy": {"playfulness": 0.2, "intimacy": 0.1},
     "anxiety": {"responsiveness": 0.2, "restraint": 0.1},
@@ -24,7 +26,7 @@ mirror_adjustments: Dict[str, Dict[str, float]] = {
 }
 
 
-def reflect_emotion_back(expression_dial: Dict[str, float], detected_state: str) -> None:
+def reflect_emotion_back(expression_dial: dict[str, float], detected_state: str) -> None:
     """Mirror back the emotion into the expression dial."""
     adjustments = mirror_adjustments.get(detected_state, {})
     for axis, delta in adjustments.items():
@@ -35,7 +37,7 @@ def reflect_emotion_back(expression_dial: Dict[str, float], detected_state: str)
 
 
 # SECTION 3: Regulated Feedback Loop
-def mirror_loop(user_input: str, expression_dial: Dict[str, float]) -> str:
+def mirror_loop(user_input: str, expression_dial: dict[str, float]) -> str:
     """Process user input and adjust the dial based on the reflected emotion."""
     state = infer_emotional_state(user_input)
     reflect_emotion_back(expression_dial, state)

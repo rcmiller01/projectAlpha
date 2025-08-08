@@ -119,9 +119,9 @@ class VisualizationEngine:
                 metadata={
                     "emotion_count": len(emotions),
                     "data_points": len(timestamps),
-                    "time_range": f"{timestamps[0]} to {timestamps[-1]}"
-                    if timestamps
-                    else "No data",
+                    "time_range": (
+                        f"{timestamps[0]} to {timestamps[-1]}" if timestamps else "No data"
+                    ),
                 },
                 timestamp=datetime.now(),
             )
@@ -236,14 +236,16 @@ class VisualizationEngine:
                 metadata={
                     "total_interactions": len(interaction_data),
                     "unique_types": len(interaction_types),
-                    "avg_satisfaction": sum(satisfaction_scores) / len(satisfaction_scores)
-                    if satisfaction_scores
-                    else 0,
-                    "peak_hour": max(
-                        hourly_distribution.keys(), key=lambda x: hourly_distribution[x]
-                    )
-                    if hourly_distribution
-                    else "0",
+                    "avg_satisfaction": (
+                        sum(satisfaction_scores) / len(satisfaction_scores)
+                        if satisfaction_scores
+                        else 0
+                    ),
+                    "peak_hour": (
+                        max(hourly_distribution.keys(), key=lambda x: hourly_distribution[x])
+                        if hourly_distribution
+                        else "0"
+                    ),
                 },
                 timestamp=datetime.now(),
             )
@@ -343,9 +345,9 @@ class VisualizationEngine:
                     "total_crisis_events": len(crisis_data),
                     "max_crisis_level": max(crisis_levels) if crisis_levels else 0,
                     "total_interventions": sum(intervention_counts.values()),
-                    "avg_crisis_level": sum(crisis_levels) / len(crisis_levels)
-                    if crisis_levels
-                    else 0,
+                    "avg_crisis_level": (
+                        sum(crisis_levels) / len(crisis_levels) if crisis_levels else 0
+                    ),
                 },
                 timestamp=datetime.now(),
             )

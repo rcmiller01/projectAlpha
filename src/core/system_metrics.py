@@ -292,21 +292,31 @@ class MetricsCollector:
 
         return [
             {
-                "timestamp": metrics.timestamp.isoformat()
-                if hasattr(metrics, "timestamp")
-                else metrics["timestamp"],
-                "cpu_percent": metrics.cpu_percent
-                if hasattr(metrics, "cpu_percent")
-                else metrics["cpu_percent"],
-                "memory_percent": metrics.memory_percent
-                if hasattr(metrics, "memory_percent")
-                else metrics["memory_percent"],
-                "active_sessions": metrics.active_sessions
-                if hasattr(metrics, "active_sessions")
-                else metrics["active_sessions"],
-                "avg_response_time": metrics.avg_response_time
-                if hasattr(metrics, "avg_response_time")
-                else metrics["avg_response_time"],
+                "timestamp": (
+                    metrics.timestamp.isoformat()
+                    if hasattr(metrics, "timestamp")
+                    else metrics["timestamp"]
+                ),
+                "cpu_percent": (
+                    metrics.cpu_percent
+                    if hasattr(metrics, "cpu_percent")
+                    else metrics["cpu_percent"]
+                ),
+                "memory_percent": (
+                    metrics.memory_percent
+                    if hasattr(metrics, "memory_percent")
+                    else metrics["memory_percent"]
+                ),
+                "active_sessions": (
+                    metrics.active_sessions
+                    if hasattr(metrics, "active_sessions")
+                    else metrics["active_sessions"]
+                ),
+                "avg_response_time": (
+                    metrics.avg_response_time
+                    if hasattr(metrics, "avg_response_time")
+                    else metrics["avg_response_time"]
+                ),
             }
             for metrics in data_source
         ]

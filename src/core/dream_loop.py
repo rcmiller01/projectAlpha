@@ -226,9 +226,9 @@ class DreamLoop:
             return {
                 "total_dreams": total_dreams,
                 "trust_breakdown": trust_counts,
-                "validation_rate": trust_counts["validated"] / total_dreams
-                if total_dreams > 0
-                else 0,
+                "validation_rate": (
+                    trust_counts["validated"] / total_dreams if total_dreams > 0 else 0
+                ),
             }
 
         except Exception as e:

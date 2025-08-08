@@ -1,16 +1,19 @@
 from dataclasses import dataclass
 from typing import Dict, Tuple
 
+
 @dataclass
 class MoodStyleProfile:
     """Defines stylistic traits based on mood and mode."""
+
     metaphor_density: float
     sentence_length_avg: int
     warmth_level: float
     directness_level: float
 
+
 # Sample style profiles for common mood/mode pairs
-MOOD_MODE_STYLE_MAP: Dict[Tuple[str, str], MoodStyleProfile] = {
+MOOD_MODE_STYLE_MAP: dict[tuple[str, str], MoodStyleProfile] = {
     ("calm", "personal"): MoodStyleProfile(
         metaphor_density=0.3,
         sentence_length_avg=14,

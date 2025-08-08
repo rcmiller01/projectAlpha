@@ -252,9 +252,9 @@ class ProactiveEngine:
     def get_engine_status(self) -> dict[str, Any]:
         """Get current status of the proactive engine"""
         return {
-            "last_interaction": self.last_interaction.isoformat()
-            if self.last_interaction
-            else None,
+            "last_interaction": (
+                self.last_interaction.isoformat() if self.last_interaction else None
+            ),
             "pending_messages": len(self.pending_outreach),
             "user_emotional_state": self.user_state.get("emotional_state", {}),
             "interaction_count": len(self.interaction_history),

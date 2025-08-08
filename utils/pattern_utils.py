@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+from typing import Any, Dict, List
+
 import pandas as pd
-from typing import List, Dict, Any
 
 
-def group_memories(memories: List[Dict[str, Any]], keys: List[str]) -> Dict[str, pd.DataFrame]:
+def group_memories(memories: list[dict[str, Any]], keys: list[str]) -> dict[str, pd.DataFrame]:
     """Group memory dicts by the given keys using pandas."""
     if not memories:
         return {}
@@ -21,7 +22,7 @@ def smooth_series(series: pd.Series, window: int = 3) -> pd.Series:
     return series.rolling(window=window, min_periods=1).mean()
 
 
-def emotional_shift(values: List[float]) -> float:
+def emotional_shift(values: list[float]) -> float:
     """Return shift between first and last value in a list."""
     if not values:
         return 0.0

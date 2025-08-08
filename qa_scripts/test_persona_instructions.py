@@ -205,9 +205,11 @@ class PersonaInstructionQA:
             analysis[persona_id] = {
                 "name": name,
                 "characteristics": characteristics,
-                "response_sample": response_data["response"][:200] + "..."
-                if len(response_data["response"]) > 200
-                else response_data["response"],
+                "response_sample": (
+                    response_data["response"][:200] + "..."
+                    if len(response_data["response"]) > 200
+                    else response_data["response"]
+                ),
             }
 
         # Display analysis
@@ -366,12 +368,12 @@ class PersonaInstructionQA:
                     # Now modify the persona (make it very formal)
                     modified_persona = custom_persona.copy()
                     modified_persona["prompt_style"]["tone"] = "extremely formal and academic"
-                    modified_persona["prompt_style"][
-                        "conversation_style"
-                    ] = "Use formal language with no exclamation points or casual expressions."
-                    modified_persona["prompt_style"][
-                        "prefix"
-                    ] = "As your formal academic assistant, "
+                    modified_persona["prompt_style"]["conversation_style"] = (
+                        "Use formal language with no exclamation points or casual expressions."
+                    )
+                    modified_persona["prompt_style"]["prefix"] = (
+                        "As your formal academic assistant, "
+                    )
 
                     modify_response = self.make_request(
                         "POST", "/api/personas/create", json=modified_persona

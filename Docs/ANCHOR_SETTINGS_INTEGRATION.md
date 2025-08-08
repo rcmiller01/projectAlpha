@@ -169,13 +169,13 @@ python emotional_test_cli.py --analysis-only results.json
 
 ### Test Categories
 - **Loss & Grief**: Complex emotional processing
-- **Hope & Meaning**: Existential understanding  
+- **Hope & Meaning**: Existential understanding
 - **Safety & Belonging**: Attachment and security
 - **Relationships**: Interpersonal dynamics
 - **Resilience**: Coping and adaptation
 
 ### Comparative Analysis
 - Performance ranking across candidates
-- Score distribution statistics  
+- Score distribution statistics
 - Best/worst performer identification
 - Category-specific analysis

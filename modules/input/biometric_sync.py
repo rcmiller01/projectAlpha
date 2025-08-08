@@ -155,9 +155,12 @@ class BiometricSync:
                 score += 0.4
 
             # HRV analysis
-            if "hrv_min" in thresholds and hrv >= thresholds["hrv_min"]:
-                score += 0.3
-            elif "hrv_max" in thresholds and hrv <= thresholds["hrv_max"]:
+            if (
+                "hrv_min" in thresholds
+                and hrv >= thresholds["hrv_min"]
+                or "hrv_max" in thresholds
+                and hrv <= thresholds["hrv_max"]
+            ):
                 score += 0.3
 
             # Breathing rate analysis
@@ -262,11 +265,9 @@ class BiometricSync:
             "heart_rate": hr,
             "hrv": hrv,
             "breathing_rate": br,
-            "sync_quality": "excellent"
-            if romantic_score > 0.8
-            else "good"
-            if romantic_score > 0.6
-            else "fair",
+            "sync_quality": (
+                "excellent" if romantic_score > 0.8 else "good" if romantic_score > 0.6 else "fair"
+            ),
             "recommendations": self._get_romantic_recommendations(romantic_score),
         }
 

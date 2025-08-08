@@ -7,11 +7,12 @@ and private memory blooms for personas.
 
 import json
 from datetime import datetime
-from typing import List, Optional, Dict
 from pathlib import Path
+from typing import Dict, List, Optional
 
 JOURNAL_PATH = "memory/journal/"
 Path(JOURNAL_PATH).mkdir(parents=True, exist_ok=True)
+
 
 class JournalCore:
     def __init__(self, persona_name: str):
@@ -19,9 +20,9 @@ class JournalCore:
         self.journal_file = f"{JOURNAL_PATH}{persona_name.lower()}_journal_log.json"
         self.entries = self.load_entries()
 
-    def load_entries(self) -> List[Dict]:
+    def load_entries(self) -> list[dict]:
         try:
-            with open(self.journal_file, "r") as f:
+            with open(self.journal_file) as f:
                 return json.load(f)
         except FileNotFoundError:
             return []
@@ -30,14 +31,21 @@ class JournalCore:
         with open(self.journal_file, "w") as f:
             json.dump(self.entries, f, indent=2)
 
-    def log_entry(self, content: str, tags: List[str], emotion: str, private: bool = False, bloom: bool = False):
+    def log_entry(
+        self,
+        content: str,
+        tags: list[str],
+        emotion: str,
+        private: bool = False,
+        bloom: bool = False,
+    ):
         entry = {
             "timestamp": datetime.now().isoformat(),
             "content": content,
             "tags": tags,
             "emotion": emotion,
             "private": private,
-            "bloom": bloom
+            "bloom": bloom,
         }
         self.entries.append(entry)
         self.save_entries()
@@ -46,13 +54,14 @@ class JournalCore:
         """Automatically trigger private bloom entry from emotional spike"""
         self.log_entry(content=content, tags=["bloom"], emotion=emotion, private=True, bloom=True)
 
-    def tag_entry(self, index: int, new_tags: List[str]):
+    def tag_entry(self, index: int, new_tags: list[str]):
         if 0 <= index < len(self.entries):
             self.entries[index]["tags"].extend(new_tags)
             self.save_entries()
 
-    def retrieve_recent(self, count: int = 5) -> List[Dict]:
+    def retrieve_recent(self, count: int = 5) -> list[dict]:
         return self.entries[-count:]
+
 
 # Example:
 # jc = JournalCore("Mia")

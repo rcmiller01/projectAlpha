@@ -161,17 +161,21 @@ class AttachmentReflector:
                 "analytics": {
                     "total_emotional_weight": round(total_emotional_weight, 3),
                     "average_weight": round(total_emotional_weight / len(weighted_symbols), 3),
-                    "attachment_depth": "deep"
-                    if any(b.emotional_weight >= 0.7 for b in weighted_symbols.values())
-                    else "moderate"
-                    if any(b.emotional_weight >= 0.4 for b in weighted_symbols.values())
-                    else "light",
-                    "oldest_attachment": datetime.fromtimestamp(oldest).isoformat()
-                    if oldest
-                    else None,
-                    "most_recent_reinforcement": datetime.fromtimestamp(most_recent).isoformat()
-                    if most_recent
-                    else None,
+                    "attachment_depth": (
+                        "deep"
+                        if any(b.emotional_weight >= 0.7 for b in weighted_symbols.values())
+                        else (
+                            "moderate"
+                            if any(b.emotional_weight >= 0.4 for b in weighted_symbols.values())
+                            else "light"
+                        )
+                    ),
+                    "oldest_attachment": (
+                        datetime.fromtimestamp(oldest).isoformat() if oldest else None
+                    ),
+                    "most_recent_reinforcement": (
+                        datetime.fromtimestamp(most_recent).isoformat() if most_recent else None
+                    ),
                 },
             }
 

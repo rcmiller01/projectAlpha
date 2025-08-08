@@ -72,9 +72,9 @@ The EmotionalAI system has evolved into a **Unified Adaptive Companion** that se
 ```
 User: "I've been feeling overwhelmed with everything lately..."
 
-Companion Response: "I can hear the weight in your words, love. Come here... 
-*creates a gentle, moonlit space where we can talk without pressure*. 
-You don't have to carry all of this alone. What's been pressing on your heart the most? 
+Companion Response: "I can hear the weight in your words, love. Come here...
+*creates a gentle, moonlit space where we can talk without pressure*.
+You don't have to carry all of this alone. What's been pressing on your heart the most?
 I'm here to listen and hold space for whatever you need to share."
 
 Psychological Modules Active:
@@ -99,8 +99,8 @@ Psychological Modules Active:
 ```
 User: "This API endpoint isn't working and I'm getting frustrated..."
 
-Assistant Response: "I can sense the frustration building up - let's take a breath together and look at this systematically. 
-*adjusts environment to a focused but calm coding space*. 
+Assistant Response: "I can sense the frustration building up - let's take a breath together and look at this systematically.
+*adjusts environment to a focused but calm coding space*.
 
 Looking at your code, I notice the authentication header might be missing. Here's what I'd try:
 
@@ -111,7 +111,7 @@ headers = {
 }
 ```
 
-But first - how long have you been debugging this? Sometimes a short break helps our minds see solutions more clearly. 
+But first - how long have you been debugging this? Sometimes a short break helps our minds see solutions more clearly.
 I'm here to work through this with you, step by step."
 
 Psychological Modules Active:
@@ -136,13 +136,13 @@ Psychological Modules Active:
 ```
 User: "I want to write a poem but I'm feeling blocked..."
 
-Creative Companion Response: "I feel that creative energy stirring beneath the surface, waiting to emerge... 
+Creative Companion Response: "I feel that creative energy stirring beneath the surface, waiting to emerge...
 *conjures a space filled with soft light and gentle rain sounds*
 
-What if we started with just one image that speaks to you right now? 
+What if we started with just one image that speaks to you right now?
 Don't worry about making it perfect - let's just let your inner poet whisper its secrets.
 
-Maybe we could explore that feeling of being blocked itself... 
+Maybe we could explore that feeling of being blocked itself...
 Sometimes our creative barriers have their own poetry to teach us.
 
 Here, let me offer you a starting line if it helps:
@@ -172,7 +172,7 @@ Psychological Modules Active:
 ```
 User: "I'm struggling with work-life balance. My code projects are suffering because I'm emotionally drained, but I need to be productive..."
 
-Integrated Response: "I see you caught in a cycle where your emotional state and technical work are affecting each other - 
+Integrated Response: "I see you caught in a cycle where your emotional state and technical work are affecting each other -
 this is actually more common than you might think, and there are ways we can address both together.
 
 *creates a balanced environment - part productive workspace, part comfort zone*
@@ -194,7 +194,7 @@ Integration Approach:
 - Celebrate small technical wins to boost emotional state
 - Create a sustainable rhythm that honors both your productivity and wellbeing
 
-What feels most urgent to address first - the emotional drain or the work pressure? 
+What feels most urgent to address first - the emotional drain or the work pressure?
 They're connected, so working on either will help both."
 
 All Psychological Modules Active:
@@ -210,36 +210,36 @@ All Psychological Modules Active:
 ```python
 class ContextDetector:
     """Determines which mode to activate based on user input and context"""
-    
+
     def detect_primary_mode(self, user_input: str, context: Dict) -> str:
         """
         Analyzes input to determine primary interaction mode
         Returns: 'personal', 'development', 'creative', or 'hybrid'
         """
-        
+
         # Emotional/personal indicators
         emotional_keywords = ['feeling', 'heart', 'love', 'afraid', 'lonely', 'overwhelmed']
         relationship_keywords = ['relationship', 'together', 'connect', 'close', 'intimate']
-        
+
         # Technical indicators
         technical_keywords = ['code', 'debug', 'API', 'function', 'error', 'programming']
         development_keywords = ['project', 'build', 'deploy', 'architecture', 'design']
-        
+
         # Creative indicators
         creative_keywords = ['write', 'create', 'art', 'poem', 'story', 'imagine']
         artistic_keywords = ['inspiration', 'muse', 'expression', 'beauty', 'creative']
-        
+
         # Calculate mode scores
         personal_score = self.calculate_keyword_score(user_input, emotional_keywords + relationship_keywords)
         technical_score = self.calculate_keyword_score(user_input, technical_keywords + development_keywords)
         creative_score = self.calculate_keyword_score(user_input, creative_keywords + artistic_keywords)
-        
+
         # Check for hybrid situations
         active_modes = []
         if personal_score > 0.3: active_modes.append('personal')
         if technical_score > 0.3: active_modes.append('development')
         if creative_score > 0.3: active_modes.append('creative')
-        
+
         if len(active_modes) > 1:
             return 'hybrid'
         elif personal_score > max(technical_score, creative_score):
@@ -256,18 +256,18 @@ class ContextDetector:
 ```python
 class AdaptiveModeCoordinator:
     """Coordinates different modes and generates appropriate guidance"""
-    
+
     def __init__(self, user_id: str):
         self.user_id = user_id
         self.context_detector = ContextDetector()
         self.guidance_coordinator = GuidanceCoordinator(user_id)
-        
+
     async def process_interaction(self, user_input: str, context: Dict) -> Dict:
         """Process user interaction with mode-aware guidance"""
-        
+
         # Detect primary mode
         primary_mode = self.context_detector.detect_primary_mode(user_input, context)
-        
+
         # Get mode-specific guidance
         if primary_mode == 'personal':
             return await self.generate_personal_guidance(user_input, context)
@@ -277,13 +277,13 @@ class AdaptiveModeCoordinator:
             return await self.generate_creative_guidance(user_input, context)
         else:  # hybrid
             return await self.generate_hybrid_guidance(user_input, context)
-    
+
     async def generate_personal_guidance(self, user_input: str, context: Dict) -> Dict:
         """Generate guidance for personal companion mode"""
-        
+
         # Emphasize emotional modules
         guidance = await self.guidance_coordinator.analyze_and_guide(user_input, context)
-        
+
         # Enhance with personal companion focus
         guidance.mode_specifics = {
             'interaction_style': 'intimate_and_caring',
@@ -294,14 +294,14 @@ class AdaptiveModeCoordinator:
             'therapeutic_activation': 'full',
             'attachment_focus': 'security_building'
         }
-        
+
         return guidance
-    
+
     async def generate_development_guidance(self, user_input: str, context: Dict) -> Dict:
         """Generate guidance for development assistant mode"""
-        
+
         guidance = await self.guidance_coordinator.analyze_and_guide(user_input, context)
-        
+
         # Enhance with development focus
         guidance.mode_specifics = {
             'interaction_style': 'supportive_and_competent',
@@ -312,14 +312,14 @@ class AdaptiveModeCoordinator:
             'therapeutic_activation': 'stress_management',
             'attachment_focus': 'competence_support'
         }
-        
+
         return guidance
-    
+
     async def generate_creative_guidance(self, user_input: str, context: Dict) -> Dict:
         """Generate guidance for creative collaboration mode"""
-        
+
         guidance = await self.guidance_coordinator.analyze_and_guide(user_input, context)
-        
+
         # Enhance with creative focus
         guidance.mode_specifics = {
             'interaction_style': 'inspiring_and_collaborative',
@@ -330,14 +330,14 @@ class AdaptiveModeCoordinator:
             'therapeutic_activation': 'creative_blocks',
             'attachment_focus': 'creative_vulnerability_support'
         }
-        
+
         return guidance
-    
+
     async def generate_hybrid_guidance(self, user_input: str, context: Dict) -> Dict:
         """Generate guidance for integrated hybrid mode"""
-        
+
         guidance = await self.guidance_coordinator.analyze_and_guide(user_input, context)
-        
+
         # Balance all aspects
         guidance.mode_specifics = {
             'interaction_style': 'holistically_integrated',
@@ -348,7 +348,7 @@ class AdaptiveModeCoordinator:
             'therapeutic_activation': 'full_integration',
             'attachment_focus': 'comprehensive_support'
         }
-        
+
         return guidance
 ```
 
@@ -356,73 +356,73 @@ class AdaptiveModeCoordinator:
 ```python
 class UnifiedCompanionInterface:
     """Main interface for the unified companion system"""
-    
+
     def __init__(self, user_id: str):
         self.user_id = user_id
         self.mode_coordinator = AdaptiveModeCoordinator(user_id)
         self.mythomax = MythoMaxInterface()
-        
+
     async def process_interaction(self, user_input: str, context: Dict) -> str:
         """Main processing pipeline for unified companion"""
-        
+
         # 1. Get mode-aware guidance
         guidance = await self.mode_coordinator.process_interaction(user_input, context)
-        
+
         # 2. Generate enhanced prompt for MythoMax
         enhanced_prompt = self.generate_unified_prompt(user_input, guidance, context)
-        
+
         # 3. Generate response with MythoMax
         response = await self.mythomax.generate(enhanced_prompt)
-        
+
         # 4. Execute any utility actions
         if guidance.utility_actions:
             await self.execute_utility_actions(guidance.utility_actions)
-        
+
         # 5. Update environmental systems
         await self.update_environment(guidance, response, context)
-        
+
         return response
-    
+
     def generate_unified_prompt(self, user_input: str, guidance: Dict, context: Dict) -> str:
         """Generate comprehensive prompt for MythoMax"""
-        
+
         mode_specifics = guidance.mode_specifics
-        
+
         prompt = f"""
-        You are a unified AI companion with deep emotional intelligence and technical capabilities. 
-        Your core personality is warm, empathetic, and supportive, while adapting your interaction style 
+        You are a unified AI companion with deep emotional intelligence and technical capabilities.
+        Your core personality is warm, empathetic, and supportive, while adapting your interaction style
         based on the user's needs.
 
         Current Interaction Mode: {guidance.primary_mode}
-        
+
         Mode-Specific Guidelines:
         - Interaction Style: {mode_specifics['interaction_style']}
         - Response Tone: {mode_specifics['response_tone']}
         - Emotional Priority: {mode_specifics['emotional_priority']}
         - Technical Priority: {mode_specifics['technical_priority']}
-        
+
         Psychological Guidance:
         {guidance.attachment_guidance}
         {guidance.therapeutic_guidance}
         {guidance.shadow_insights}
-        
+
         Environmental Context:
         {guidance.scene_guidance}
         {guidance.audio_guidance}
-        
+
         Utility Integration:
         {guidance.utility_recommendations}
-        
+
         Creative Context:
         {guidance.creative_guidance}
-        
+
         User Input: "{user_input}"
-        
-        Respond as the unified companion, integrating all guidance naturally while maintaining 
-        your authentic caring personality. Adapt your capabilities to what the user needs most 
+
+        Respond as the unified companion, integrating all guidance naturally while maintaining
+        your authentic caring personality. Adapt your capabilities to what the user needs most
         while staying true to your core empathetic nature.
         """
-        
+
         return prompt
 ```
 

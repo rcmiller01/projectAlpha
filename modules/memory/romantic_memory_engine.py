@@ -514,9 +514,11 @@ class RomanticMemoryEngine:
                 "memory_stats": {
                     "total_memories": len(self.memories),
                     "memory_types": self._get_memory_type_distribution(),
-                    "average_importance": np.mean([m.importance_score for m in self.memories])
-                    if self.memories
-                    else 0.0,
+                    "average_importance": (
+                        np.mean([m.importance_score for m in self.memories])
+                        if self.memories
+                        else 0.0
+                    ),
                     "recent_activity": len(
                         [m for m in self.memories if (datetime.now() - m.timestamp).days < 7]
                     ),
@@ -561,22 +563,22 @@ class RomanticMemoryEngine:
         recommendations = []
 
         # Pattern-based recommendations
-        if "emotional_escalation" in patterns and patterns["emotional_escalation"]:
+        if patterns.get("emotional_escalation"):
             recommendations.append(
                 "Consider discussing the increasing emotional intensity to ensure both partners are comfortable"
             )
 
-        if "conflict_patterns" in patterns and patterns["conflict_patterns"]:
+        if patterns.get("conflict_patterns"):
             recommendations.append(
                 "Focus on conflict resolution skills and consider relationship counseling"
             )
 
-        if "intimacy_growth" in patterns and patterns["intimacy_growth"]:
+        if patterns.get("intimacy_growth"):
             recommendations.append(
                 "Continue nurturing the growing intimacy through shared experiences"
             )
 
-        if "communication_improvement" in patterns and patterns["communication_improvement"]:
+        if patterns.get("communication_improvement"):
             recommendations.append(
                 "Maintain the improved communication patterns and consider regular check-ins"
             )
@@ -648,9 +650,9 @@ class RomanticMemoryEngine:
             "total_memories": len(self.memories),
             "memory_types": self._get_memory_type_distribution(),
             "patterns_detected": len([p for p in self.patterns.values() if p is not None]),
-            "average_importance": np.mean([m.importance_score for m in self.memories])
-            if self.memories
-            else 0.0,
+            "average_importance": (
+                np.mean([m.importance_score for m in self.memories]) if self.memories else 0.0
+            ),
             "recent_memories": len(
                 [m for m in self.memories if (datetime.now() - m.timestamp).days < 7]
             ),

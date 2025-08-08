@@ -545,9 +545,11 @@ class MemorySystem:
                             "type": "short_term",
                             "source": "recent_interaction",
                             "content": interaction,
-                            "relevance": "high"
-                            if query_lower in interaction["preview"][:50].lower()
-                            else "medium",
+                            "relevance": (
+                                "high"
+                                if query_lower in interaction["preview"][:50].lower()
+                                else "medium"
+                            ),
                         }
                     )
 
@@ -649,7 +651,7 @@ class MemorySystem:
             "last_accessed": datetime.now().isoformat(),
         }
 
-    # Add to layer
+        # Add to layer
         self.long_term_memory[layer].append(memory_entry)
 
         # Log the addition

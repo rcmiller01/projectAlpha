@@ -5,9 +5,9 @@ companion to express emotions and sensuality while respecting
 user preferences and safety constraints.
 """
 
+import logging
 from dataclasses import dataclass, field
 from typing import Dict, Optional
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class ExpressionDial:
     """Tuneable levels for individual emotions."""
 
-    levels: Dict[str, float] = field(default_factory=dict)
+    levels: dict[str, float] = field(default_factory=dict)
     max_level: float = 10.0
 
     def set_level(self, emotion: str, value: float) -> None:
@@ -33,7 +33,7 @@ class MirrorReflectionCore:
     """Tracks user feedback and adjusts expression levels."""
 
     expression_dial: ExpressionDial
-    feedback_log: Dict[str, list] = field(default_factory=dict)
+    feedback_log: dict[str, list] = field(default_factory=dict)
 
     def record_feedback(self, emotion: str, user_reaction: float) -> None:
         self.feedback_log.setdefault(emotion, []).append(user_reaction)
@@ -66,14 +66,14 @@ class AnchorSystem:
 class UserProfile:
     """Stores user preference for expression levels."""
 
-    preferences: Dict[str, float] = field(default_factory=dict)
+    preferences: dict[str, float] = field(default_factory=dict)
 
 
 class PersonalizationEngine:
     """Learns and applies user preferences over time."""
 
     def __init__(self):
-        self.profiles: Dict[str, UserProfile] = {}
+        self.profiles: dict[str, UserProfile] = {}
 
     def get_profile(self, user_id: str) -> UserProfile:
         return self.profiles.setdefault(user_id, UserProfile())
@@ -107,4 +107,3 @@ class SensualExpressionAlignmentSystem:
         for emotion, level in profile.preferences.items():
             self.dial.set_level(emotion, level)
         self.anchor.enforce_safety()
-

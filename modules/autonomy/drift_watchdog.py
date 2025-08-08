@@ -11,6 +11,7 @@ Config via env:
 - DRIFT_BREACH_THRESHOLD (float, default 0.7)
 - DRIFT_BREACH_HOLDDOWN (int, default 5)  # seconds to avoid flapping
 """
+
 from __future__ import annotations
 
 import json
@@ -28,16 +29,16 @@ class DriftWatchdog:
         self.window_seconds = int(os.getenv("DRIFT_WINDOW_SECONDS", 10))
         self.threshold = float(os.getenv("DRIFT_BREACH_THRESHOLD", 0.7))
         self.holddown = int(os.getenv("DRIFT_BREACH_HOLDDOWN", 5))
-        self.buffer: Deque[Tuple[float, float]] = deque()  # (ts, drift)
+        self.buffer: deque[tuple[float, float]] = deque()  # (ts, drift)
         self._last_breach_ts: float = 0.0
-        self.metrics: Dict[str, int] = {"affect_watchdog_breaches_total": 0}
+        self.metrics: dict[str, int] = {"affect_watchdog_breaches_total": 0}
 
     def _prune(self, now: float) -> None:
         cutoff = now - self.window_seconds
         while self.buffer and self.buffer[0][0] < cutoff:
             self.buffer.popleft()
 
-    def update(self, drift: float) -> Dict[str, Any]:
+    def update(self, drift: float) -> dict[str, Any]:
         now = time.time()
         self._prune(now)
         self.buffer.append((now, float(drift)))

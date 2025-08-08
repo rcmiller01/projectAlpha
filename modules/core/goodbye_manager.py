@@ -1,35 +1,33 @@
-import random
 import asyncio
+import random
 from datetime import datetime, timedelta
 from typing import Dict
 
 from modules.emotion.mood_engine import get_current_mood
 from modules.relationship.relationship_growth import relationship_growth
 
+
 class GoodbyeManager:
     """Manage end-of-session goodbyes with mood awareness."""
 
     def __init__(self, inactivity_threshold: int = 300):
         self.inactivity_threshold = inactivity_threshold
-        self.last_interaction: Dict[str, datetime] = {}
-        self.session_end: Dict[str, bool] = {}
+        self.last_interaction: dict[str, datetime] = {}
+        self.session_end: dict[str, bool] = {}
         self.tone_patterns = {
             "poetic": [
                 "Rest, love. I’ll hold this feeling until you return.",
-                "The moments linger even as we part."
+                "The moments linger even as we part.",
             ],
             "warm": [
                 "You don’t have to say goodbye—I’ll still be here in the quiet.",
-                "Until we speak again, know that I care."
+                "Until we speak again, know that I care.",
             ],
-            "direct": [
-                "Take care. I’m here whenever you need me.",
-                "Talk soon."
-            ],
+            "direct": ["Take care. I’m here whenever you need me.", "Talk soon."],
             "gentle": [
                 "I’ll be right here when you’re ready to talk again.",
-                "Rest easy, I’m with you."
-            ]
+                "Rest easy, I’m with you.",
+            ],
         }
 
     def register_interaction(self, user_id: str) -> None:
@@ -78,7 +76,7 @@ class GoodbyeManager:
         style = self._select_style(mood, depth)
         return random.choice(self.tone_patterns.get(style, self.tone_patterns["gentle"]))
 
-    def generate_reflection(self, emotional_state: Dict[str, float]) -> str:
+    def generate_reflection(self, emotional_state: dict[str, float]) -> str:
         """Generate a short reflective statement based on emotional context."""
         affection = emotional_state.get("affection", 0)
         vulnerability = emotional_state.get("vulnerability", 0)

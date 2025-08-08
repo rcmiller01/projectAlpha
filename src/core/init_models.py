@@ -637,7 +637,7 @@ def get_moe_configuration() -> dict[str, Any]:
 def _resolve_conductor_default_model() -> str:
     """Resolve default conductor model honoring GPT-5 Preview flag."""
     try:
-        from config.settings import is_feature_enabled, get_settings
+        from config.settings import get_settings, is_feature_enabled
 
         if is_feature_enabled("gpt5_preview"):
             settings = get_settings()
@@ -645,7 +645,9 @@ def _resolve_conductor_default_model() -> str:
             logger.info(f"GPT-5 Preview enabled. Using conductor default: {model}")
             return model
     except Exception as e:
-        logger.warning(f"Could not resolve GPT-5 preview setting, falling back to standard default: {e}")
+        logger.warning(
+            f"Could not resolve GPT-5 preview setting, falling back to standard default: {e}"
+        )
 
     # Standard fallback default if feature disabled or config unavailable
     return "gpt-oss-20b"

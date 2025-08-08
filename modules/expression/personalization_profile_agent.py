@@ -8,19 +8,19 @@ re-tuning.
 
 from __future__ import annotations
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 class PersonalizationProfileAgent:
     """Manage user personalization profiles for expression tuning."""
 
     def __init__(self):
-        self.profiles: Dict[str, Dict[str, Any]] = {}
+        self.profiles: dict[str, dict[str, Any]] = {}
 
-    def set_preferences(self, user_id: str, preferences: Dict[str, Any]) -> None:
+    def set_preferences(self, user_id: str, preferences: dict[str, Any]) -> None:
         self.profiles[user_id] = preferences
 
-    def get_preferences(self, user_id: str) -> Dict[str, Any]:
+    def get_preferences(self, user_id: str) -> dict[str, Any]:
         return self.profiles.get(user_id, {})
 
     def tune_biases(self, user_id: str, dial_agent) -> None:

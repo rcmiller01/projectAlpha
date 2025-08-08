@@ -7,7 +7,7 @@
 # HRM Router
 from backend.hrm_router import HRMRouter, HRMMode, RequestType
 
-# HRM API  
+# HRM API
 from backend.hrm_api import hrm_api_function
 
 # Subagent Router

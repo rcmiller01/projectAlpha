@@ -7,7 +7,7 @@ A sophisticated AI companion system implementing Hierarchical Reasoning Model (H
 The system consists of three core components working within a 44GB total memory budget:
 
 - **HRM-R**: <10GB Logical/Reasoning Model
-- **HRM-E**: <10GB Emotional/Symbolic Model  
+- **HRM-E**: <10GB Emotional/Symbolic Model
 - **CoreArbiter**: <24GB Central Decision Layer
 
 ## 🧠 CoreArbiter Module
@@ -38,7 +38,7 @@ async def chat_example():
         "I'm feeling overwhelmed and need guidance",
         {"context": "emotional_support", "intensity": 0.8}
     )
-    
+
     print(f"Response: {response.final_output}")
     print(f"Tone: {response.tone} | Confidence: {response.confidence}")
     print(f"Strategy: {response.resolution_strategy}")
@@ -374,7 +374,7 @@ Generate symbolic/ritual response
 ### Backend
 - Python 3.8+
 - asyncio (built-in)
-- json (built-in)  
+- json (built-in)
 - pathlib (built-in)
 - dataclasses (built-in)
 - Flask (for API server)

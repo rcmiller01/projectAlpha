@@ -214,9 +214,11 @@ class ReflectionAgent:
 
         return {
             "theme_scores": top_themes,
-            "primary_theme": max(theme_scores.keys(), key=lambda k: theme_scores[k])
-            if theme_scores
-            else "general",
+            "primary_theme": (
+                max(theme_scores.keys(), key=lambda k: theme_scores[k])
+                if theme_scores
+                else "general"
+            ),
             "theme_diversity": len([score for score in theme_scores.values() if score > 0]),
         }
 

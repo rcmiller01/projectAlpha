@@ -453,14 +453,16 @@ class HumanPreferenceCollector:
             "rejected_count": len(rejected_candidates),
             "accepted_candidates": accepted_candidates,
             "rejected_candidates": rejected_candidates,
-            "avg_overall_rating": sum(f.overall_rating for f in all_feedback) / len(all_feedback)
-            if all_feedback
-            else 0,
-            "top_candidate": max(
-                report["candidate_scores"].items(), key=lambda x: x[1]["weighted_score"]
-            )[0]
-            if report["candidate_scores"]
-            else None,
+            "avg_overall_rating": (
+                sum(f.overall_rating for f in all_feedback) / len(all_feedback)
+                if all_feedback
+                else 0
+            ),
+            "top_candidate": (
+                max(report["candidate_scores"].items(), key=lambda x: x[1]["weighted_score"])[0]
+                if report["candidate_scores"]
+                else None
+            ),
         }
 
         return report

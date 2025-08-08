@@ -54,14 +54,12 @@ class EmotionalGuidanceIntegrator:
                 # Symbol already exists - reinforce it
                 emotion_config.update_symbol_weight(word, "connection", 0.1)
                 self.active_symbols[word] = current_weight + 0.1
-            else:
-                # New potential symbol - light tracking
-                if len(word) > 3:  # Ignore short words
-                    self.active_symbols[word] = self.active_symbols.get(word, 0) + 0.05
+            elif len(word) > 3:  # Ignore short words
+                self.active_symbols[word] = self.active_symbols.get(word, 0) + 0.05
 
-                    # If word reaches threshold, create symbol binding
-                    if self.active_symbols[word] > 0.2:
-                        emotion_config.update_symbol_weight(word, "emerging", 0.3)
+                # If word reaches threshold, create symbol binding
+                if self.active_symbols[word] > 0.2:
+                    emotion_config.update_symbol_weight(word, "emerging", 0.3)
 
     def check_time_triggers(self):
         """Check for time-based emotional hooks"""

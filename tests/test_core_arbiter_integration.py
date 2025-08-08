@@ -356,14 +356,10 @@ async def test_offline_arbiter_simulation():
         ), f"Confidence too high for offline mode: {result['confidence']}"
 
         # Assert fallback reason is provided
-        assert (
-            "fallback_reason" in result and result["fallback_reason"]
-        ), "Fallback reason must be provided"
+        assert result.get("fallback_reason"), "Fallback reason must be provided"
 
         # Assert response content exists
-        assert (
-            "response" in result and result["response"]
-        ), "Fallback response content must be provided"
+        assert result.get("response"), "Fallback response content must be provided"
 
         print("✅ Fallback behavior assertions passed")
 

@@ -3,14 +3,16 @@
 import re
 from typing import Dict, List, Optional
 
-from persona_instruction_manager import PersonaInstructionManager
 from memory_system import MemorySystem
+from persona_instruction_manager import PersonaInstructionManager
 
 
 class JudgeAgent:
     """Simple agent that scores responses for persona adherence and memory usage."""
 
-    def __init__(self, manifesto_path: str = "personas/manifestos", memory_dir: str = "memory") -> None:
+    def __init__(
+        self, manifesto_path: str = "personas/manifestos", memory_dir: str = "memory"
+    ) -> None:
         self.persona_manager = PersonaInstructionManager(manifesto_path)
         self.memory_system = MemorySystem(memory_dir)
 
@@ -24,11 +26,11 @@ class JudgeAgent:
             "length_score": round(length_score, 2),
             "persona_alignment": round(persona_alignment, 2),
             "relevance": round(relevance, 2),
-            "overall": overall
+            "overall": overall,
         }
 
     @staticmethod
-    def _extract_keywords(text: str) -> List[str]:
+    def _extract_keywords(text: str) -> list[str]:
         return re.findall(r"\b\w+\b", text.lower())
 
     def score_persona(self, content: str, persona: Optional[object]) -> float:
@@ -51,7 +53,7 @@ class JudgeAgent:
         matches = len(keywords.intersection(content_words))
         return matches / len(keywords)
 
-    def score_memory(self, content: str, memories: List[Dict[str, any]]) -> float:
+    def score_memory(self, content: str, memories: list[dict[str, any]]) -> float:
         """Reward references to recent memory snippets."""
         if not memories:
             return 0.0

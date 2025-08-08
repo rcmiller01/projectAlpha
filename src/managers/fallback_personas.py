@@ -1,15 +1,17 @@
 from dataclasses import dataclass
 from typing import Dict
 
+
 @dataclass
 class FallbackPersona:
     """Template for emergency fallback personas."""
+
     name: str
     system_prompt: str
     behavior: str
 
 
-_FALLBACK_PERSONAS: Dict[str, FallbackPersona] = {
+_FALLBACK_PERSONAS: dict[str, FallbackPersona] = {
     "safe_mode": FallbackPersona(
         name="Safe Mode",
         system_prompt=(

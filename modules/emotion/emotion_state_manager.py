@@ -1,5 +1,6 @@
 from .emotion_state import emotion_state
 
+
 class EmotionStateManager:
     """Simple wrapper around global emotion_state providing accessor methods."""
 

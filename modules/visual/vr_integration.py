@@ -550,12 +550,12 @@ class VRIntegration:
             "user_position": self.user_position,
             "avatar_position": self.avatar_position,
             "available_scenes": [scene.value for scene in VRSceneType],
-            "recent_interactions": self.interaction_history[-5:]
-            if self.interaction_history
-            else [],
-            "romantic_intensity": self.current_scene.romantic_intensity
-            if self.current_scene
-            else 0.0,
+            "recent_interactions": (
+                self.interaction_history[-5:] if self.interaction_history else []
+            ),
+            "romantic_intensity": (
+                self.current_scene.romantic_intensity if self.current_scene else 0.0
+            ),
         }
 
 

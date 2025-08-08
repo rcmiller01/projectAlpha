@@ -259,11 +259,13 @@ def generate_report():
     health_status = (
         "🟢 EXCELLENT"
         if overall_health >= 90
-        else "🟡 GOOD"
-        if overall_health >= 75
-        else "🟠 FAIR"
-        if overall_health >= 60
-        else "🔴 NEEDS WORK"
+        else (
+            "🟡 GOOD"
+            if overall_health >= 75
+            else "🟠 FAIR"
+            if overall_health >= 60
+            else "🔴 NEEDS WORK"
+        )
     )
 
     print(f"Overall Health Score: {overall_health:.1f}% - {health_status}")

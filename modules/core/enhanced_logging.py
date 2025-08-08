@@ -176,9 +176,11 @@ class EnhancedLogger:
 
         # Log decision with appropriate level
         log_level = LogLevel.DEBUG
-        if category == DecisionCategory.CRISIS_ASSESSMENT and confidence_score > 0.5:
-            log_level = LogLevel.WARNING
-        elif confidence_score < 0.3:
+        if (
+            category == DecisionCategory.CRISIS_ASSESSMENT
+            and confidence_score > 0.5
+            or confidence_score < 0.3
+        ):
             log_level = LogLevel.WARNING
 
         self.decision_logger.log(
@@ -217,11 +219,13 @@ class EnhancedLogger:
             "total_decisions": len(self.current_trace.decision_points),
             "processing_time_ms": self.current_trace.total_processing_time_ms,
             "average_decision_time_ms": (
-                sum(dp.processing_time_ms for dp in self.current_trace.decision_points)
-                / len(self.current_trace.decision_points)
-            )
-            if self.current_trace.decision_points
-            else 0.0,
+                (
+                    sum(dp.processing_time_ms for dp in self.current_trace.decision_points)
+                    / len(self.current_trace.decision_points)
+                )
+                if self.current_trace.decision_points
+                else 0.0
+            ),
             "crisis_decisions": len(
                 [
                     dp
@@ -344,9 +348,11 @@ class EnhancedLogger:
             # Find specific interaction
             trace = next(
                 (t for t in self.decision_history if t.interaction_id == interaction_id),
-                self.current_trace
-                if self.current_trace and self.current_trace.interaction_id == interaction_id
-                else None,
+                (
+                    self.current_trace
+                    if self.current_trace and self.current_trace.interaction_id == interaction_id
+                    else None
+                ),
             )
             if not trace:
                 return {"error": f"Interaction {interaction_id} not found"}

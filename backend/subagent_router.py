@@ -15,6 +15,7 @@ import asyncio
 import json
 import logging
 import random
+import sys
 import time
 from collections.abc import Callable
 from dataclasses import asdict, dataclass
@@ -22,8 +23,8 @@ from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
-import sys
-from flask import Flask, request, jsonify
+
+from flask import Flask, jsonify, request
 
 # Ensure project root on sys.path for local imports when run as a script
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -31,10 +32,10 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 # Arbitration imports
-from router.arbitration import Candidate, AffectContext, HRMStateView, arbitrate
-from router.chaining import Step, ChainPlan, plan_for, vector_retrieve, reflector_call
 from modules.autonomy.affect_governor import AffectGovernor
 from modules.autonomy.drift_watchdog import DriftWatchdog
+from router.arbitration import AffectContext, Candidate, HRMStateView, arbitrate
+from router.chaining import ChainPlan, Step, plan_for, reflector_call, vector_retrieve
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -470,7 +471,9 @@ class SubAgentRouter:
         try:
             # Apply affect governor and check watchdog before routing
             drift_delta = float(context.get("affect_drift", 0.0))
-            gov = self.governor.apply({"source": context.get("source", "chat"), "delta": drift_delta})
+            gov = self.governor.apply(
+                {"source": context.get("source", "chat"), "delta": drift_delta}
+            )
             wd = self.watchdog.update(drift_delta)
             # If watchdog breach and risk_mode, prefer safe agent or early exit
             risk_mode = str(context.get("risk_mode", "normal"))
@@ -478,9 +481,13 @@ class SubAgentRouter:
                 # Prefer reasoning agent (safer) or refuse long draft
                 if len(message) > 300:
                     # refuse long form
-                    logger.warning(json.dumps({"event": "router.calm_down", "reason": "breach_long_form"}))
+                    logger.warning(
+                        json.dumps({"event": "router.calm_down", "reason": "breach_long_form"})
+                    )
                     safe_agent = self.agents[AgentType.REASONING]
-                    return await safe_agent.process("Let's take a breath and simplify the request.", context)
+                    return await safe_agent.process(
+                        "Let's take a breath and simplify the request.", context
+                    )
             # Step 1: Run a small cohort (2-3) of candidate agents in parallel and arbitrate
             intent_based = self._make_routing_decision(message, context)
             cohort = [intent_based.selected_agent]
@@ -492,7 +499,8 @@ class SubAgentRouter:
 
             # Execute cohort
             start = time.time()
-            results: List[tuple[AgentType, AgentResponse, float]] = []
+            results: list[tuple[AgentType, AgentResponse, float]] = []
+
             async def run_agent(at: AgentType):
                 a = self.agents[at]
                 t0 = time.time()
@@ -505,7 +513,7 @@ class SubAgentRouter:
                 results.append((at, r, latency_ms))
 
             # Build candidates
-            candidates: List[Candidate] = []
+            candidates: list[Candidate] = []
             for at, r, latency_ms in results:
                 # Heuristic cost_weight: lower cost (0.2) for Reasoning/Analytical, higher (0.6) for Creative/Emotional; default 0.4
                 if at in (AgentType.REASONING, AgentType.ANALYTICAL):
@@ -538,12 +546,19 @@ class SubAgentRouter:
                 belief_vectors = {}
             hrm_view = HRMStateView(
                 identity_fingerprint=str(context.get("identity_fingerprint", "anon")),
-                belief_vectors={str(k): float(v) for k, v in belief_vectors.items() if isinstance(v, (int, float))},
+                belief_vectors={
+                    str(k): float(v)
+                    for k, v in belief_vectors.items()
+                    if isinstance(v, (int, float))
+                },
             )
 
             result = arbitrate(candidates, hrm_view, affect)
             # Pick the agent matching the winner
-            winner_agent_type = next((at for at, r, _ in results if at.value == result.winner.slim_name), intent_based.selected_agent)
+            winner_agent_type = next(
+                (at for at, r, _ in results if at.value == result.winner.slim_name),
+                intent_based.selected_agent,
+            )
             selected_agent = self.agents[winner_agent_type]
 
             logger.info(
@@ -555,7 +570,9 @@ class SubAgentRouter:
             logger.debug("Arbitration rationale: %s", json.dumps(result.rationale))
 
             # Step 2: Forward only the winner's response (reuse computed response)
-            winner_resp = next((r for at, r, _ in results if at.value == result.winner.slim_name), None)
+            winner_resp = next(
+                (r for at, r, _ in results if at.value == result.winner.slim_name), None
+            )
             if winner_resp is None:
                 # Fallback to running selected agent if not in cohort for any reason
                 winner_resp = await selected_agent.process(message, context)
@@ -618,8 +635,15 @@ class SubAgentRouter:
         # Enforce total budget before starting
         if plan.budget_ms <= 0:
             over = 0
-            logger.info(json.dumps({"event": "chain.budget.invalid", "plan": [s.type for s in plan.steps]}))
-            return {"status": 429, "error": "invalid_budget", "overage_ms": over, "plan": [s.type for s in plan.steps]}
+            logger.info(
+                json.dumps({"event": "chain.budget.invalid", "plan": [s.type for s in plan.steps]})
+            )
+            return {
+                "status": 429,
+                "error": "invalid_budget",
+                "overage_ms": over,
+                "plan": [s.type for s in plan.steps],
+            }
 
         outputs: dict[str, Any] = {}
         revision_used = False
@@ -630,12 +654,16 @@ class SubAgentRouter:
             if remaining_ms < 0:
                 # Budget exceeded
                 over = -remaining_ms
-                logger.warning(json.dumps({
-                    "event": "chain.budget.exceeded",
-                    "plan": [s.type for s in plan.steps],
-                    "budget_ms": plan.budget_ms,
-                    "overage_ms": over,
-                }))
+                logger.warning(
+                    json.dumps(
+                        {
+                            "event": "chain.budget.exceeded",
+                            "plan": [s.type for s in plan.steps],
+                            "budget_ms": plan.budget_ms,
+                            "overage_ms": over,
+                        }
+                    )
+                )
                 return {
                     "status": 429,
                     "error": "budget_exceeded",
@@ -657,7 +685,13 @@ class SubAgentRouter:
                         vector_retrieve(task, hrm_view), timeout=max(0.01, per_cap / 1000.0)
                     )
                     outputs["retrieve"] = resp
-                    step_log.update({"_elapsed_ms": resp.get("_elapsed_ms", int((time.perf_counter() - s_t0) * 1000))})
+                    step_log.update(
+                        {
+                            "_elapsed_ms": resp.get(
+                                "_elapsed_ms", int((time.perf_counter() - s_t0) * 1000)
+                            )
+                        }
+                    )
                 elif step.type in ("reason", "draft"):
                     # Map target to local AgentType if possible
                     # Fallback to Reasoning for unknown
@@ -687,7 +721,13 @@ class SubAgentRouter:
                         timeout=max(0.02, per_cap / 1000.0),
                     )
                     outputs["reflect"] = resp
-                    step_log.update({"_elapsed_ms": resp.get("_elapsed_ms", int((time.perf_counter() - s_t0) * 1000))})
+                    step_log.update(
+                        {
+                            "_elapsed_ms": resp.get(
+                                "_elapsed_ms", int((time.perf_counter() - s_t0) * 1000)
+                            )
+                        }
+                    )
                     # If reflect requests revise and we haven't revised yet, insert one extra draft pass
                     if resp.get("decision") == "revise" and not revision_used:
                         revision_used = True
@@ -698,11 +738,25 @@ class SubAgentRouter:
                         if agent is None:
                             agent = self.agents[AgentType.REASONING]
                         resp2 = await asyncio.wait_for(
-                            agent.process(task, {**context, "affect": affect, "hrm_view": hrm_view, "revise": True}),
+                            agent.process(
+                                task,
+                                {**context, "affect": affect, "hrm_view": hrm_view, "revise": True},
+                            ),
                             timeout=max(0.05, rev_cap / 1000.0),
                         )
-                        outputs["draft"] = {"text": resp2.content, "_elapsed_ms": int((time.perf_counter() - a_t0) * 1000), "revision": True}
-                        logs.append({"step": "draft", "target": agent.agent_type.value, "_elapsed_ms": outputs["draft"]["_elapsed_ms"], "revision": True})
+                        outputs["draft"] = {
+                            "text": resp2.content,
+                            "_elapsed_ms": int((time.perf_counter() - a_t0) * 1000),
+                            "revision": True,
+                        }
+                        logs.append(
+                            {
+                                "step": "draft",
+                                "target": agent.agent_type.value,
+                                "_elapsed_ms": outputs["draft"]["_elapsed_ms"],
+                                "revision": True,
+                            }
+                        )
                 else:
                     step_log.update({"warning": "unknown_step"})
             except Exception as e:
@@ -714,12 +768,16 @@ class SubAgentRouter:
             now_ms = int((time.perf_counter() - t0) * 1000)
             if now_ms > plan.budget_ms:
                 over = now_ms - plan.budget_ms
-                logger.warning(json.dumps({
-                    "event": "chain.budget.exceeded",
-                    "plan": [s.type for s in plan.steps],
-                    "budget_ms": plan.budget_ms,
-                    "overage_ms": over,
-                }))
+                logger.warning(
+                    json.dumps(
+                        {
+                            "event": "chain.budget.exceeded",
+                            "plan": [s.type for s in plan.steps],
+                            "budget_ms": plan.budget_ms,
+                            "overage_ms": over,
+                        }
+                    )
+                )
                 return {
                     "status": 429,
                     "error": "budget_exceeded",

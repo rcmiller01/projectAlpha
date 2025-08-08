@@ -11,7 +11,7 @@ class BaseAgent:
         self.emotion_scores = {}  # TODO: Connect to emotion engine for scoring
         # TODO: Include future training scaffolds
 
-    def recall(self, query: str) -> List[Any]:
+    def recall(self, query: str) -> list[Any]:
         """Return memories related to the query."""
         if self.memory_system:
             return self.memory_system.recall(query)

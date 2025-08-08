@@ -1,8 +1,9 @@
 import asyncio
+
 import pytest
 
-from router.chaining import plan_for, Step, ChainPlan
 from backend.subagent_router import SubAgentRouter
+from router.chaining import ChainPlan, Step, plan_for
 
 
 @pytest.mark.asyncio
@@ -15,7 +16,7 @@ async def test_chain_happy_path():
     assert "reflect" in res["plan"]
     # Logs are ranked by occurrence; ensure present and have elapsed
     assert isinstance(res["logs"], list) and len(res["logs"]) >= 2
-    assert any("_elapsed_ms" in l for l in res["logs"]) 
+    assert any("_elapsed_ms" in l for l in res["logs"])
 
 
 @pytest.mark.asyncio

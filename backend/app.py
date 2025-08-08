@@ -11,6 +11,7 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from typing import Any, Dict
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -67,6 +68,7 @@ async def startup_event() -> None:
     # Ensure SLiM agents are registered
     try:
         import slim.agents  # noqa: F401
+
         logger.info("🧩 SLiM agents registered")
     except Exception as e:
         logger.warning(f"SLiM agents not available: {e}")
@@ -93,7 +95,7 @@ async def shutdown_event() -> None:
 
 
 @app.get("/")
-async def root() -> Dict[str, Any]:
+async def root() -> dict[str, Any]:
     """Root endpoint with system status."""
     return {
         "name": "ProjectAlpha Backend",
@@ -109,7 +111,7 @@ async def root() -> Dict[str, Any]:
 
 
 @app.get("/slim/health")
-async def slim_health() -> Dict[str, Any]:
+async def slim_health() -> dict[str, Any]:
     """SLiM registry status and ecosystem validation."""
     try:
         from slim.sdk import get_slim_status, validate_slim_ecosystem
@@ -123,7 +125,7 @@ async def slim_health() -> Dict[str, Any]:
 
 
 @app.get("/health")
-async def health_check() -> Dict[str, Any]:
+async def health_check() -> dict[str, Any]:
     """Enhanced health check endpoint with dependency status."""
     from datetime import datetime
 
@@ -181,7 +183,7 @@ async def health_check() -> Dict[str, Any]:
 
 
 @app.get("/config")
-async def get_config_summary() -> Dict[str, Any]:
+async def get_config_summary() -> dict[str, Any]:
     """Get non-sensitive configuration summary."""
     if not settings:
         return {

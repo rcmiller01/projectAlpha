@@ -14,7 +14,6 @@ import os
 from typing import Any, List
 
 import aiohttp
-
 from memory_system import MemorySystem
 from reflection_engine import initialize_reflection_engine
 
@@ -31,17 +30,15 @@ async def trigger_self_training() -> None:
     engine = initialize_reflection_engine(memory_system, None)
 
     try:
-        memory_batch: List[Any] = memory_system.get_recent_memories()
+        memory_batch: list[Any] = memory_system.get_recent_memories()
     except AttributeError:
         memory_batch = memory_system.short_term_memory.get("recent_interactions", [])[-100:]
 
     if hasattr(engine, "run"):
         await engine.run(memory_batch)
-    else:
-        # Fallback for older engines
-        if hasattr(engine, "_generate_reflections"):
-            engine.reflection_queue.extend(memory_batch)
-            await engine._generate_reflections()
+    elif hasattr(engine, "_generate_reflections"):
+        engine.reflection_queue.extend(memory_batch)
+        await engine._generate_reflections()
 
     logger.info("Self-training routine completed")
 

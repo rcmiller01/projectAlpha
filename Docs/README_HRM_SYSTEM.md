@@ -339,7 +339,7 @@ class CustomAgent(BaseAgent):
     def __init__(self):
         super().__init__(AgentType.CUSTOM)
         self.specialties = ["custom_capability"]
-    
+
     async def _generate_response(self, message, context):
         # Custom processing logic
         return "Custom response"
@@ -475,7 +475,7 @@ The system is production-ready and designed for seamless integration with your e
 
 ---
 
-**Version**: 1.0.0  
-**Last Updated**: January 2025  
-**Compatibility**: projectAlpha v2.1+  
+**Version**: 1.0.0
+**Last Updated**: January 2025
+**Compatibility**: projectAlpha v2.1+
 **License**: MIT

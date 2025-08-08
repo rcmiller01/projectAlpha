@@ -1,10 +1,11 @@
-import unittest
 import time
+import unittest
 from datetime import datetime, timedelta
 
 from modules.core.goodbye_manager import GoodbyeManager
 from modules.emotion.mood_engine import MOOD_STATE
 from modules.relationship.relationship_growth import relationship_growth
+
 
 class TestGoodbyeManager(unittest.TestCase):
     def test_inactivity_goodbye(self):
@@ -40,5 +41,6 @@ class TestGoodbyeManager(unittest.TestCase):
         self.assertIsInstance(reflection, str)
         self.assertIn("cherish", reflection)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

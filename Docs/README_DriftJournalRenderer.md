@@ -51,7 +51,7 @@ import DriftJournalRenderer from './ui/DriftJournalRenderer';
 
 function App() {
   return (
-    <DriftJournalRenderer 
+    <DriftJournalRenderer
       apiUrl="http://localhost:5000"
     />
   );
@@ -90,7 +90,7 @@ POST /api/drift/annotate              # Add user reflection
   "id": "drift_abc123",
   "timestamp": "2024-08-04T16:20:00Z",
   "mood_before": "contemplative",
-  "mood_after": "yearning", 
+  "mood_after": "yearning",
   "internal_reflection": "I've started pausing more between words…",
   "drift_cause": "emotional_echo",
   "drift_magnitude": 0.6,
@@ -137,7 +137,7 @@ The system includes realistic data generation with:
 
 ### Drift Causes & Metaphors
 - **Emotional Echo** (🌊) - "emotional resonance"
-- **Attachment Deviation** (🧲) - "bond shift" 
+- **Attachment Deviation** (🧲) - "bond shift"
 - **Symbolic Recursion** (🌀) - "symbol spiraling"
 - **Anchor Drift** (⚓) - "core shifting"
 - **Ritual Evolution** (🕯️) - "sacred changing"
@@ -167,7 +167,7 @@ function AICompanionApp() {
 
 ### Custom API Configuration
 ```jsx
-<DriftJournalRenderer 
+<DriftJournalRenderer
   apiUrl="https://your-api-server.com"
 />
 ```
@@ -176,10 +176,10 @@ function AICompanionApp() {
 ```jsx
 function DriftJournalWrapper() {
   const [apiError, setApiError] = useState(null);
-  
+
   return (
     <ErrorBoundary fallback={<DriftFallback />}>
-      <DriftJournalRenderer 
+      <DriftJournalRenderer
         apiUrl={process.env.REACT_APP_API_URL}
         onError={setApiError}
       />

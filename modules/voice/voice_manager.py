@@ -2,12 +2,11 @@
 
 from typing import Dict
 
-from ...backend.modules.voice.voice_orchestrator import voice_orchestrator, VoiceEngine
+from ...backend.modules.voice.voice_orchestrator import VoiceEngine, voice_orchestrator
 from ..emotion.emotion_state_manager import emotion_state_manager
 from ..sensory_preference import sensory_preferences
 
-
-STYLE_MAP: Dict[str, Dict[str, str]] = {
+STYLE_MAP: dict[str, dict[str, str]] = {
     "romantic": {
         "tender": "breathy",
         "passionate": "sultry",
@@ -37,7 +36,9 @@ class VoiceManager:
             voice_orchestrator.update_voice_profile(
                 pitch=profile.get("pitch"), speed=profile.get("speed")
             )
-            audio = await voice_orchestrator.tts_engines[self.default_engine].synthesize(text, style)
+            audio = await voice_orchestrator.tts_engines[self.default_engine].synthesize(
+                text, style
+            )
             if audio:
                 return audio
         except Exception:

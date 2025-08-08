@@ -794,30 +794,25 @@ class AutopilotBootloader:
                                     f"fluency: {comparison_result['fluency_gain']:+.3f}, "
                                     f"confidence: {comparison_result['confidence_score']:.1%})"
                                 )
+                        elif (
+                            emotional_score > 0.7 and token_quality > 0.65
+                        ):  # Basic quality threshold
+                            self.logger.info(
+                                f"🆕 No baseline model found, setting new baseline: {model_path}"
+                            )
+                            swap_out_baseline(model_path)
+                            self.logger.info("✅ Initial baseline model established!")
                         else:
-                            # No baseline exists, set this as the first baseline
-                            if (
-                                emotional_score > 0.7 and token_quality > 0.65
-                            ):  # Basic quality threshold
-                                self.logger.info(
-                                    f"🆕 No baseline model found, setting new baseline: {model_path}"
-                                )
-                                swap_out_baseline(model_path)
-                                self.logger.info("✅ Initial baseline model established!")
-                            else:
-                                self.logger.info(
-                                    "📋 Model quality too low to establish as baseline"
-                                )
+                            self.logger.info("📋 Model quality too low to establish as baseline")
 
                     except Exception as e:
                         self.logger.error(f"❌ Error during model quality evaluation: {e}")
-                else:
-                    if not JUDGING_AVAILABLE:
-                        self.logger.debug("Model judging system not available")
-                    elif not model_path:
-                        self.logger.debug("No model path available for judging")
-                    elif not passed_threshold:
-                        self.logger.debug("Model did not pass quality threshold, skipping judging")
+                elif not JUDGING_AVAILABLE:
+                    self.logger.debug("Model judging system not available")
+                elif not model_path:
+                    self.logger.debug("No model path available for judging")
+                elif not passed_threshold:
+                    self.logger.debug("Model did not pass quality threshold, skipping judging")
 
             else:
                 self.logger.error(f"Failed to save tracking result for {loop_id}")
@@ -871,9 +866,11 @@ class AutopilotBootloader:
                 "new_model": {
                     "path": new_model_path,
                     "name": Path(new_model_path).name,
-                    "size_mb": Path(new_model_path).stat().st_size / (1024 * 1024)
-                    if Path(new_model_path).exists()
-                    else 0,
+                    "size_mb": (
+                        Path(new_model_path).stat().st_size / (1024 * 1024)
+                        if Path(new_model_path).exists()
+                        else 0
+                    ),
                 },
                 "old_baseline": {
                     "path": old_baseline_path,

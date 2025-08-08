@@ -44,4 +44,3 @@ Include the tag: `#ref-mcp-integration` in all future Codex prompt scaffolds tha
 ---
 
 Maintained as part of the evolving roadmap for Dolphin AI Orchestrator v3.0+
-

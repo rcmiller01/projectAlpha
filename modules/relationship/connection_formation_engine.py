@@ -8,8 +8,8 @@ helps the companion take initiative to deepen relationships when appropriate.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List
 from datetime import datetime
+from typing import Dict, List
 
 
 @dataclass
@@ -23,10 +23,12 @@ class ConnectionFormationEngine:
     """Evaluate and encourage relationship growth."""
 
     def __init__(self):
-        self.events: Dict[str, List[IntimacyEvent]] = {}
+        self.events: dict[str, list[IntimacyEvent]] = {}
 
     def record_event(self, user_id: str, description: str, intensity: float) -> None:
-        event = IntimacyEvent(timestamp=datetime.utcnow(), description=description, intensity=intensity)
+        event = IntimacyEvent(
+            timestamp=datetime.utcnow(), description=description, intensity=intensity
+        )
         self.events.setdefault(user_id, []).append(event)
 
     def connection_score(self, user_id: str) -> float:

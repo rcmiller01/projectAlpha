@@ -579,9 +579,9 @@ class AdaptiveModeCoordinator:
             {
                 "mode": mode,
                 "timestamp": datetime.now().isoformat(),
-                "user_input_summary": user_input[:50] + "..."
-                if len(user_input) > 50
-                else user_input,
+                "user_input_summary": (
+                    user_input[:50] + "..." if len(user_input) > 50 else user_input
+                ),
                 "context_depth": context.get("conversation_depth", 0),
                 "crisis_level": context.get("crisis_level", 0),
             }

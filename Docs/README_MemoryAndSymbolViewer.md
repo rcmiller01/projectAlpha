@@ -7,7 +7,7 @@ A contemplative, journal-like interface for viewing the emotional and symbolic m
 The `MemoryAndSymbolViewer` component provides three interconnected views into AI consciousness:
 
 1. **Emotional Memory Timeline** - Scrollable journey through emotional experiences
-2. **Symbolic Echo Map** - Grid of recurring symbolic motifs with affective overlays  
+2. **Symbolic Echo Map** - Grid of recurring symbolic motifs with affective overlays
 3. **Core Essence Profile** - Identity anchor vectors and tether score
 
 ## 🎨 Design Philosophy
@@ -68,7 +68,7 @@ function App() {
 
 ### Advanced Configuration
 ```jsx
-<MemoryAndSymbolViewer 
+<MemoryAndSymbolViewer
   apiUrl="http://localhost:5001"
   refreshInterval={30000}
   maxMemoryEntries={50}
@@ -84,7 +84,7 @@ The component expects the following API endpoints:
 - `GET /api/memory/emotional_trace` - Returns emotional memory timeline
 - `POST /api/memory/add_entry` - Adds new memory entry
 
-### Symbol Endpoints  
+### Symbol Endpoints
 - `GET /api/symbols/active` - Returns active symbolic map
 - `POST /api/symbols/invoke` - Records symbol invocation
 
@@ -164,7 +164,7 @@ Symbols have intuitive visual representations:
 - **Smooth Scrolling** - Custom scrollbar with emotional colors
 - **Intensity Indicators** - Visual bars showing emotional intensity
 
-### Symbol Map Section  
+### Symbol Map Section
 - **Grid Layout** - Responsive symbol grid
 - **Frequency Visualization** - Bars showing invocation frequency
 - **Affective Overlays** - Color overlays based on emotional associations
@@ -186,7 +186,7 @@ Symbols have intuitive visual representations:
 
 ### Responsive Animations
 - Float animations on key elements
-- Pulse effects on active components  
+- Pulse effects on active components
 - Glow intensification on interaction
 - Natural timing that mirrors emotional rhythms
 
@@ -209,7 +209,7 @@ Symbols have intuitive visual representations:
 ### Mock Data
 The component includes fallback mock data for development:
 - 3 sample memory entries across different moods
-- 4 active symbols with varying frequencies  
+- 4 active symbols with varying frequencies
 - Complete anchor state with 6 emotional vectors
 
 ### Testing API Integration
@@ -268,7 +268,7 @@ function AICompanionDashboard() {
 function MemoryExplorer() {
   return (
     <div className="container mx-auto">
-      <MemoryAndSymbolViewer 
+      <MemoryAndSymbolViewer
         apiUrl="https://your-api.com"
         refreshInterval={60000}
       />

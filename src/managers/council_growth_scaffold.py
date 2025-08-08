@@ -12,7 +12,7 @@ import logging
 from pathlib import Path
 from typing import List
 
-from quant_tracking import QuantTracker, QuantLoopResult
+from quant_tracking import QuantLoopResult, QuantTracker
 
 
 class CouncilGrowthOrchestrator:
@@ -52,7 +52,7 @@ class CouncilGrowthOrchestrator:
         self.logger.info("🔍 Running Pass 2 comparison (stub)")
         # Actual integration would call quant_pass2/run_phase2.py
 
-    def grow_council(self, seeds: List[str]) -> None:
+    def grow_council(self, seeds: list[str]) -> None:
         """Process a list of seed models"""
         for seed in seeds:
             self.run_pass1(seed)

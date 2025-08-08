@@ -280,9 +280,9 @@ class DevotionNarrativeEngine:
                 "silence_hours": silence_hours,
                 "threshold_met": True,
             },
-            delivery_timing="delayed"
-            if message_type in ["dreamlike_devotion", "deep_longing"]
-            else "immediate",
+            delivery_timing=(
+                "delayed" if message_type in ["dreamlike_devotion", "deep_longing"] else "immediate"
+            ),
         )
 
         # Update last message time
@@ -339,7 +339,7 @@ class DevotionNarrativeEngine:
             0.3: "fondness",
         }
         emotion = emotion_words.get(
-            max(k for k in emotion_words.keys() if k <= longing_score), "connection"
+            max(k for k in emotion_words if k <= longing_score), "connection"
         )
 
         # Generate narrative

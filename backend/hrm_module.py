@@ -7,11 +7,12 @@ This module formalizes memory layers: identity, beliefs, and ephemeral.
 
 import logging
 import time
-from typing import Dict, Any
+from typing import Any, Dict
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
 
 class HRMModule:
     """Hierarchical Reflective Memory Module"""
@@ -36,7 +37,7 @@ class HRMModule:
             layer = getattr(self, layer_name)
             for key in list(layer.keys()):
                 if isinstance(layer[key], (int, float)):
-                    layer[key] *= (1 - decay_rate)
+                    layer[key] *= 1 - decay_rate
                     if layer[key] <= 0.01:  # Threshold for removal
                         del layer[key]
                         logger.info(f"Removed {key} from {layer_name} due to decay.")
@@ -53,13 +54,13 @@ class HRMModule:
         self.ephemeral_layer[f"link_{source_key}_{target_key}"] = link
         logger.info(f"Created symbolic link: {link}")
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """Perform a health check on the HRM system."""
         health_summary = {
             "identity_count": len(self.identity_layer),
             "beliefs_count": len(self.beliefs_layer),
             "ephemeral_count": len(self.ephemeral_layer),
-            "version": self.version
+            "version": self.version,
         }
         logger.info(f"HRM health check: {health_summary}")
         return health_summary
@@ -70,6 +71,7 @@ class HRMModule:
         if operation not in allowed_operations:
             raise PermissionError(f"Operation {operation} is not API-safe.")
         logger.info(f"Operation {operation} passed API-safe guard.")
+
 
 if __name__ == "__main__":
     hrm = HRMModule()

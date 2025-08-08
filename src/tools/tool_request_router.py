@@ -122,22 +122,26 @@ class ToolRequestRouter:
             parameters = {}
             for param_name, param in sig.parameters.items():
                 param_info = {
-                    "type": str(param.annotation)
-                    if param.annotation != inspect.Parameter.empty
-                    else "Any",
+                    "type": (
+                        str(param.annotation)
+                        if param.annotation != inspect.Parameter.empty
+                        else "Any"
+                    ),
                     "required": param.default == inspect.Parameter.empty,
-                    "default": str(param.default)
-                    if param.default != inspect.Parameter.empty
-                    else None,
+                    "default": (
+                        str(param.default) if param.default != inspect.Parameter.empty else None
+                    ),
                 }
                 parameters[param_name] = param_info
 
             return {
                 "description": doc,
                 "parameters": parameters,
-                "return_type": str(sig.return_annotation)
-                if sig.return_annotation != inspect.Signature.empty
-                else "Any",
+                "return_type": (
+                    str(sig.return_annotation)
+                    if sig.return_annotation != inspect.Signature.empty
+                    else "Any"
+                ),
                 "module": handler.__module__,
                 "registered_at": datetime.now().isoformat(),
             }

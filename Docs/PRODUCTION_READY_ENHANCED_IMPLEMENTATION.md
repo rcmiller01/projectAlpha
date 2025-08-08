@@ -36,7 +36,7 @@ All missing features from the unified companion architecture analysis have been 
 # Automatic memory storage
 await self._store_memory_fragment(user_id, user_input, companion_response, context_analysis)
 
-# Context-aware memory retrieval  
+# Context-aware memory retrieval
 relevant_memories = await self.database.get_relevant_memories(
     user_id=user_id, memory_type=None, tags=None, limit=5
 )
@@ -192,7 +192,7 @@ patterns = self.emotional_weight_tracker.get_emotional_pattern_analysis(user_id)
 
 - **Multi-Factor Template Selection**
   - Effectiveness score (50% weight)
-  - Variety bonus (30% weight) 
+  - Variety bonus (30% weight)
   - Context relevance (20% weight)
   - Emotional alignment optimization
 
@@ -252,7 +252,7 @@ symbolic_context = self.symbolic_context_manager.get_relevant_symbolic_context(
 
 ### Test Coverage:
 - ✅ **Crisis Safety Override**: All crisis levels correctly detected and handled
-- ✅ **Enhanced Logging**: Decision tracking and explainability working  
+- ✅ **Enhanced Logging**: Decision tracking and explainability working
 - ✅ **Persistent Memory**: Context continuity and memory retrieval functional
 - ✅ **Emotional Weight Tracking**: Pattern analysis and attachment indicators
 - ✅ **Dynamic Templates**: Context-aware template selection and effectiveness
@@ -313,7 +313,7 @@ config = {
 The enhanced unified companion system now provides:
 
 1. ✅ **Complete Persistent Memory Integration** with MongoDB backend
-2. ✅ **Crisis Safety Override** with immediate intervention capability  
+2. ✅ **Crisis Safety Override** with immediate intervention capability
 3. ✅ **Enhanced Logging & Explainability** with decision tracking
 4. ✅ **Emotional Weight Tracking** with attachment pattern analysis
 5. ✅ **Dynamic Response Templates** with effectiveness learning

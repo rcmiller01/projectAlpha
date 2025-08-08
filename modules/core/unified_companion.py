@@ -168,7 +168,7 @@ class EmotionalWeightTracker:
         recent_weights = [entry["total_weights"] for entry in history[-10:]]
         variances = []
 
-        for emotion in weights.keys():
+        for emotion in weights:
             emotion_values = [w.get(emotion, 0) for w in recent_weights]
             if len(emotion_values) > 1:
                 mean_val = sum(emotion_values) / len(emotion_values)
@@ -475,11 +475,6 @@ class UnifiedCompanion:
         self.dynamic_template_engine = DynamicTemplateEngine()
 
         # Expansion scaffolds
-        from ..emotion.mood_inflection import MoodInflection
-        from ..memory.narrative_memory_templates import NarrativeMemoryTemplateManager
-        from ..relationship.connection_depth_tracker import ConnectionDepthTracker
-        from ..symbolic.symbol_resurrection import SymbolResurrectionManager
-        from .goodbye_protocol import GoodbyeProtocol
 
         self.narrative_templates = NarrativeMemoryTemplateManager()
         self.mood_inflection = MoodInflection()
@@ -1589,11 +1584,13 @@ Emotional Characteristics:
                 for priority in set(emotional_priorities)
             },
             "conversation_length": len(recent_interactions),
-            "engagement_level": "high"
-            if len(recent_interactions) >= 5
-            else "moderate"
-            if len(recent_interactions) >= 2
-            else "low",
+            "engagement_level": (
+                "high"
+                if len(recent_interactions) >= 5
+                else "moderate"
+                if len(recent_interactions) >= 2
+                else "low"
+            ),
         }
 
     async def _handle_utility_actions(
@@ -1611,9 +1608,9 @@ Emotional Characteristics:
 
             elif action_type == "memory_preservation":
                 # Mark important interactions for long-term memory
-                interaction_state.adaptive_profile[
-                    "important_interactions"
-                ] = interaction_state.adaptive_profile.get("important_interactions", [])
+                interaction_state.adaptive_profile["important_interactions"] = (
+                    interaction_state.adaptive_profile.get("important_interactions", [])
+                )
                 interaction_state.adaptive_profile["important_interactions"].append(
                     {
                         "timestamp": action.get("timestamp"),
@@ -1736,9 +1733,9 @@ Emotional Characteristics:
         }
 
         # Add emotional patterns
-        context[
-            "emotional_patterns"
-        ] = self.emotional_weight_tracker.get_emotional_pattern_analysis(interaction_state.user_id)
+        context["emotional_patterns"] = (
+            self.emotional_weight_tracker.get_emotional_pattern_analysis(interaction_state.user_id)
+        )
 
         return context
 
@@ -1783,9 +1780,11 @@ Emotional Characteristics:
             memory_fragment = relevant_memories[0]
             narrative = self.narrative_templates.generate_narrative(
                 {
-                    "symbol": list(memory_fragment.get("symbols", {}).keys())[0]
-                    if memory_fragment.get("symbols")
-                    else "this",
+                    "symbol": (
+                        list(memory_fragment.get("symbols", {}).keys())[0]
+                        if memory_fragment.get("symbols")
+                        else "this"
+                    ),
                     "event": memory_fragment.get("interaction_type", "an event"),
                     "date": memory_fragment.get("timestamp", "earlier"),
                 },

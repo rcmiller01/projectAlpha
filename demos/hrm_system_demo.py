@@ -412,9 +412,11 @@ class HRMSystemDemo:
                     "step": "mirror_mode",
                     "reflection_added": mirror_reflection is not None,
                     "reflection_types": ["reasoning", "emotional", "routing"],
-                    "reflection_content": mirror_reflection[:100] + "..."
-                    if mirror_reflection and len(mirror_reflection) > 100
-                    else mirror_reflection,
+                    "reflection_content": (
+                        mirror_reflection[:100] + "..."
+                        if mirror_reflection and len(mirror_reflection) > 100
+                        else mirror_reflection
+                    ),
                 }
                 scenario_result["processing_steps"].append(step4_result)
 

@@ -2,6 +2,7 @@
 
 Tracks user touch preferences and influences voice style.
 """
+
 from collections import defaultdict
 from typing import Dict, List
 
@@ -10,17 +11,17 @@ class SensoryPreferenceModel:
     """Records touch interactions and computes preference weights."""
 
     def __init__(self):
-        self.preferences: Dict[str, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
+        self.preferences: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
 
     def update_touch(self, user_id: str, region: str, texture: str, intensity: str):
         key = f"{region}:{texture}:{intensity}"
         self.preferences[user_id][key] += 1
 
-    def get_top_preferences(self, user_id: str, limit: int = 3) -> List[str]:
+    def get_top_preferences(self, user_id: str, limit: int = 3) -> list[str]:
         prefs = self.preferences.get(user_id, {})
         return sorted(prefs, key=prefs.get, reverse=True)[:limit]
 
-    def influence_voice_style(self, user_id: str) -> Dict[str, float]:
+    def influence_voice_style(self, user_id: str) -> dict[str, float]:
         """Return simple modifiers based on sensory preferences."""
         top = self.get_top_preferences(user_id)
         breathy = 0.0

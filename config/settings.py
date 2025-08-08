@@ -176,8 +176,8 @@ def load_settings() -> ProjectAlphaSettings:
         "EMOTION_LOOP_ENABLED": os.getenv("EMOTION_LOOP_ENABLED", "true").lower() == "true",
         "AUTOPILOT_ENABLED": os.getenv("AUTOPILOT_ENABLED", "true").lower() == "true",
         "SAFE_MODE_FORCE": os.getenv("SAFE_MODE_FORCE", "false").lower() == "true",
-    "GPT5_PREVIEW_ENABLED": os.getenv("GPT5_PREVIEW_ENABLED", "true").lower() == "true",
-    "GPT5_PREVIEW_MODEL": os.getenv("GPT5_PREVIEW_MODEL", "gpt-5-preview"),
+        "GPT5_PREVIEW_ENABLED": os.getenv("GPT5_PREVIEW_ENABLED", "true").lower() == "true",
+        "GPT5_PREVIEW_MODEL": os.getenv("GPT5_PREVIEW_MODEL", "gpt-5-preview"),
         # Security
         "ADMIN_MASTER_KEY": os.getenv("ADMIN_MASTER_KEY"),
         # Graceful degradation
@@ -282,7 +282,7 @@ def is_feature_enabled(feature_name: str) -> bool:
         "debug": current_settings.DEBUG,
         "gpu": current_settings.GPU_ENABLED,
         "cluster": current_settings.CLUSTER_ENABLED,
-    "gpt5_preview": current_settings.GPT5_PREVIEW_ENABLED,
+        "gpt5_preview": current_settings.GPT5_PREVIEW_ENABLED,
     }
     return feature_map.get(feature_name, False)
 

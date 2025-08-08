@@ -314,9 +314,9 @@ class JudgeAgent(BaseAgent):
                 "score": evaluation_score,
                 "report": evaluation_report,
                 "criteria_used": clean_criteria,
-                "output_summary": clean_output[:200] + "..."
-                if len(clean_output) > 200
-                else clean_output,
+                "output_summary": (
+                    clean_output[:200] + "..." if len(clean_output) > 200 else clean_output
+                ),
                 "evaluation_count": self.evaluation_count,
                 "timestamp": datetime.now().isoformat(),
                 "session_token": current_token[:8] + "...",

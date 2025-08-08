@@ -8,13 +8,13 @@ reinforcement-style comparison.
 
 from __future__ import annotations
 
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 
 class ExpressionHarmonyEvaluator:
     """Score expression outputs to guide tuning and training."""
 
-    def evaluate(self, responses: List[str]) -> Dict[str, Any]:
+    def evaluate(self, responses: list[str]) -> dict[str, Any]:
         """Return scores for a list of alternate responses."""
         scores = []
         for text in responses:

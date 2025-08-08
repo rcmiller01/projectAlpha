@@ -244,9 +244,9 @@ class PrivateMemoryManager:
                 "category": category,
                 "session_id": session_id,
                 "access_level": access_level,
-                "content_preview": content[:50] + "..."
-                if len(content) > 50
-                else content,  # Preview only
+                "content_preview": (
+                    content[:50] + "..." if len(content) > 50 else content
+                ),  # Preview only
             }
 
             # Save updated index
@@ -409,9 +409,9 @@ class PrivateMemoryManager:
         """Get private memory system status"""
         return {
             "is_unlocked": self.is_unlocked,
-            "session_unlock_time": self.session_unlock_time.isoformat()
-            if self.session_unlock_time
-            else None,
+            "session_unlock_time": (
+                self.session_unlock_time.isoformat() if self.session_unlock_time else None
+            ),
             "total_private_memories": len(self.private_index),
             "unlocked_memories_count": len(self.unlocked_memories),
             "storage_path": self.storage_path,

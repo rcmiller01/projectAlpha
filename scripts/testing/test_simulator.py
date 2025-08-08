@@ -652,9 +652,11 @@ class BackendSimulator:
             "trust_level": trust_level,
             "unlock_conditions_met": trust_level >= 0.8,
             "content_preview": "A deeply personal moment shared in trust...",
-            "full_content": "This is the full private content that requires trust to access."
-            if trust_level >= 0.8
-            else None,
+            "full_content": (
+                "This is the full private content that requires trust to access."
+                if trust_level >= 0.8
+                else None
+            ),
         }
 
     def _simulate_privacy_list(self) -> dict[str, Any]:

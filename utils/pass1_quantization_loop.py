@@ -759,9 +759,9 @@ class Pass1QuantizationLoop:
             "target_met": target_met,
             "total_iterations": len(results),
             "best_result": None,
-            "baseline_score": self.baseline_metrics.overall_score()
-            if self.baseline_metrics
-            else 0.0,
+            "baseline_score": (
+                self.baseline_metrics.overall_score() if self.baseline_metrics else 0.0
+            ),
             "final_degradation": 0.0,
             "results": [],
             "timestamp": datetime.now().isoformat(),

@@ -32,7 +32,7 @@ class CoreConductor:
     def __init__(self):
         self.models = load_conductor_models(use_moe=True)
         self.moe_system = self.models.get("moe_loader")
-    
+
     def process_query(self, query: str, context: dict = None) -> str:
         # Use MoE for intelligent routing
         if self.moe_system:
@@ -51,11 +51,11 @@ class HRMRouter:
     def __init__(self):
         self.models = load_conductor_models(use_moe=True)
         self.moe_system = self.models.get("moe_loader")
-    
+
     def route_to_slim(self, agent_type: str, query: str) -> str:
         # Instead of direct SLiM model loading:
         # Old: slim_model = load_slim_model(agent_type)
-        
+
         # New: Use MoE routing based on query content
         if self.moe_system:
             context = {"agent_type": agent_type}
@@ -72,7 +72,7 @@ class MemorySystem:
     def __init__(self):
         self.models = load_conductor_models(use_moe=True)
         self.moe_system = self.models.get("moe_loader")
-    
+
     def recall_memory(self, query: str) -> str:
         # Route memory queries to specialized expert
         memory_query = f"Recall: {query}"
@@ -89,7 +89,7 @@ class RitualSystem:
     def __init__(self):
         self.models = load_conductor_models(use_moe=True)
         self.moe_system = self.models.get("moe_loader")
-    
+
     def process_ritual(self, ritual_description: str) -> str:
         ritual_query = f"Design ritual: {ritual_description}"
         if self.moe_system:

@@ -489,9 +489,11 @@ class EmotionalVoicePresence:
             "ambient_sound_active": self.ambient_sound_active,
             "whispers_queued": len(self.whisper_manager.whisper_queue),
             "whisper_history": len(self.whisper_manager.whisper_history),
-            "active_whisper": self.whisper_manager.active_whisper.text
-            if self.whisper_manager.active_whisper
-            else None,
+            "active_whisper": (
+                self.whisper_manager.active_whisper.text
+                if self.whisper_manager.active_whisper
+                else None
+            ),
         }
 
     def clear_voice_presence(self):

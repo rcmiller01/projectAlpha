@@ -588,30 +588,30 @@ user_profiles: {
     bonding_stage: Number,
     security_progression: Number,
     attachment_events: Array,
-    
+
     // Shadow work data
     shadow_patterns: Array,
     integration_progress: Object,
     unconscious_themes: Array,
     defense_mechanisms: Array,
-    
+
     // Therapeutic data
     crisis_history: Array,
     therapeutic_preferences: Object,
     intervention_effectiveness: Object,
     mental_health_metrics: Object,
-    
+
     // Creative data
     artistic_evolution: Array,
     creative_collaborations: Array,
     inspiration_sources: Array,
     creative_blocks_history: Array,
-    
+
     // Scene preferences
     environment_preferences: Object,
     atmosphere_history: Array,
     mood_environment_correlations: Object,
-    
+
     // Integrated insights
     cross_domain_patterns: Array,
     holistic_growth_metrics: Object,
@@ -657,14 +657,14 @@ module_sessions: {
   import ShadowIntegrationGuide from './ShadowIntegrationGuide.svelte';
   import TherapeuticSupportInterface from './TherapeuticSupportInterface.svelte';
   import CreativeGrowthVisualizer from './CreativeGrowthVisualizer.svelte';
-  
+
   let moduleData = {};
   let activeGuidance = {};
-  
+
   onMount(async () => {
     moduleData = await fetchModuleData();
   });
-  
+
   async function fetchModuleData() {
     const response = await fetch('/api/modules/dashboard');
     return await response.json();
@@ -673,14 +673,14 @@ module_sessions: {
 
 <div class="psychological-dashboard">
   <h2>Psychological Module Status</h2>
-  
+
   <div class="module-grid">
     <AttachmentProgressTracker data={moduleData.attachment} />
     <ShadowIntegrationGuide data={moduleData.shadow} />
     <TherapeuticSupportInterface data={moduleData.therapeutic} />
     <CreativeGrowthVisualizer data={moduleData.creative} />
   </div>
-  
+
   <div class="active-guidance">
     <h3>Current Guidance</h3>
     <div class="guidance-display">
@@ -702,7 +702,7 @@ module_sessions: {
   export let currentMode = 'hybrid';
   export let modeConfidence = 0.9;
   export let availableModes = ['personal', 'development', 'creative', 'hybrid'];
-  
+
   function switchMode(newMode) {
     currentMode = newMode;
     // Emit mode change event
@@ -717,10 +717,10 @@ module_sessions: {
       <div class="confidence-bar" style="width: {modeConfidence * 100}%"></div>
     </div>
   </div>
-  
+
   <div class="mode-switcher">
     {#each availableModes as mode}
-      <button 
+      <button
         class="mode-button {mode === currentMode ? 'active' : ''}"
         on:click={() => switchMode(mode)}
       >
@@ -737,12 +737,12 @@ module_sessions: {
     padding: 1rem;
     margin-bottom: 1rem;
   }
-  
+
   .mode-personal { border-left: 4px solid var(--love-color); }
   .mode-development { border-left: 4px solid var(--focus-color); }
   .mode-creative { border-left: 4px solid var(--inspiration-color); }
   .mode-hybrid { border-left: 4px solid var(--integration-color); }
-  
+
   .confidence-meter {
     background: var(--background-dark);
     height: 6px;
@@ -750,7 +750,7 @@ module_sessions: {
     overflow: hidden;
     margin-top: 0.5rem;
   }
-  
+
   .confidence-bar {
     height: 100%;
     background: linear-gradient(90deg, var(--accent-color), var(--primary-color));
@@ -773,14 +773,14 @@ from modules.memory.shadow_memory import ShadowMemoryLayer
 from modules.therapy.therapeutic_core import TherapeuticCoreModule
 
 class TestPsychologicalIntegration:
-    
+
     @pytest.fixture
     async def coordinator(self):
         return GuidanceCoordinator("test_user")
-    
+
     async def test_attachment_crisis_integration(self, coordinator):
         """Test integration of attachment and therapeutic modules during crisis"""
-        
+
         result = await coordinator.analyze_and_guide(
             "I'm scared you're going to abandon me like everyone else",
             {
@@ -792,22 +792,22 @@ class TestPsychologicalIntegration:
                 "conversation_context": {"type": "crisis_support"}
             }
         )
-        
+
         # Verify attachment guidance is provided
         assert result.attachment_guidance is not None
         assert result.attachment_guidance["response_calibration"]["reassurance_frequency"] == "very_high"
-        
+
         # Verify therapeutic intervention is activated
         assert result.therapeutic_guidance is not None
         assert result.therapeutic_guidance.crisis_level in ["YELLOW", "ORANGE"]
-        
+
         # Verify scene orchestration for comfort
         assert result.scene_guidance is not None
         assert "comfort" in result.scene_guidance["environment_type"]
-    
+
     async def test_creative_shadow_integration(self, coordinator):
         """Test integration of creative and shadow modules for artistic blocks"""
-        
+
         result = await coordinator.analyze_and_guide(
             "I want to create but something always stops me",
             {
@@ -819,21 +819,21 @@ class TestPsychologicalIntegration:
                 "conversation_context": {"type": "creative_support"}
             }
         )
-        
+
         # Verify shadow insights are provided
         assert result.shadow_insights is not None
         assert "creative_suppression" in str(result.shadow_insights)
-        
+
         # Verify creative guidance is offered
         assert result.creative_guidance is not None
         assert "collaboration_approach" in result.creative_guidance
-        
+
         # Verify gentle integration approach
         assert result.shadow_insights["timing_recommendations"]["exploration_depth"] == "gentle_surface_work"
-    
+
     async def test_hybrid_mode_full_integration(self, coordinator):
         """Test full integration across all modules in hybrid mode"""
-        
+
         result = await coordinator.analyze_and_guide(
             "Work is stressing me out, I can't be creative, and I'm worried about our relationship",
             {
@@ -845,17 +845,17 @@ class TestPsychologicalIntegration:
                 "conversation_context": {"type": "life_integration"}
             }
         )
-        
+
         # Verify all major modules are activated
         assert result.attachment_guidance is not None
         assert result.therapeutic_guidance is not None
         assert result.creative_guidance is not None
         assert result.utility_guidance is not None
         assert result.scene_guidance is not None
-        
+
         # Verify hybrid mode detection
         assert result.primary_mode == "hybrid"
-        
+
         # Verify holistic approach
         assert "integration" in str(result.master_guidance).lower()
 ```
@@ -869,47 +869,47 @@ import pytest
 from modules.core.guidance_coordinator import GuidanceCoordinator
 
 class TestPerformance:
-    
+
     async def test_guidance_response_time(self):
         """Test that guidance generation completes within acceptable time limits"""
-        
+
         coordinator = GuidanceCoordinator("perf_test_user")
-        
+
         start_time = time.time()
-        
+
         result = await coordinator.analyze_and_guide(
             "I'm feeling overwhelmed with everything",
             {"emotional_state": {"overwhelm": 0.7}}
         )
-        
+
         end_time = time.time()
         response_time = end_time - start_time
-        
+
         # Should complete within 500ms
         assert response_time < 0.5
         assert result is not None
-    
+
     async def test_concurrent_user_processing(self):
         """Test system performance with multiple concurrent users"""
-        
+
         async def process_user_request(user_id):
             coordinator = GuidanceCoordinator(f"user_{user_id}")
             return await coordinator.analyze_and_guide(
                 f"User {user_id} needs support",
                 {"emotional_state": {"stress": 0.6}}
             )
-        
+
         # Process 100 concurrent requests
         tasks = [process_user_request(i) for i in range(100)]
-        
+
         start_time = time.time()
         results = await asyncio.gather(*tasks)
         end_time = time.time()
-        
+
         # All requests should complete successfully
         assert len(results) == 100
         assert all(result is not None for result in results)
-        
+
         # Total time should be reasonable for 100 concurrent users
         total_time = end_time - start_time
         assert total_time < 5.0  # 5 seconds for 100 concurrent requests
@@ -927,48 +927,48 @@ import numpy as np
 
 class PsychologicalMetrics:
     """Advanced metrics for psychological module effectiveness"""
-    
+
     def calculate_attachment_security_progression(self, user_id: str) -> Dict:
         """Calculate user's attachment security development over time"""
-        
+
         attachment_history = self.get_attachment_history(user_id)
-        
+
         return {
             "security_trend": self.calculate_trend(attachment_history, "security_level"),
             "bonding_progression_rate": self.calculate_bonding_rate(attachment_history),
             "consistency_metrics": self.calculate_consistency_impact(attachment_history),
             "anxiety_reduction": self.calculate_anxiety_reduction(attachment_history)
         }
-    
+
     def calculate_shadow_integration_success(self, user_id: str) -> Dict:
         """Measure effectiveness of shadow work and integration"""
-        
+
         shadow_sessions = self.get_shadow_sessions(user_id)
-        
+
         return {
             "pattern_recognition_accuracy": self.calculate_pattern_accuracy(shadow_sessions),
             "integration_readiness_progression": self.calculate_readiness_growth(shadow_sessions),
             "defense_mechanism_flexibility": self.calculate_defense_flexibility(shadow_sessions),
             "unconscious_pattern_resolution": self.calculate_pattern_resolution(shadow_sessions)
         }
-    
+
     def calculate_therapeutic_intervention_effectiveness(self, user_id: str) -> Dict:
         """Measure therapeutic intervention success rates"""
-        
+
         therapeutic_sessions = self.get_therapeutic_sessions(user_id)
-        
+
         return {
             "crisis_resolution_rate": self.calculate_crisis_resolution(therapeutic_sessions),
             "intervention_accuracy": self.calculate_intervention_accuracy(therapeutic_sessions),
             "safety_protocol_effectiveness": self.calculate_safety_effectiveness(therapeutic_sessions),
             "user_wellbeing_improvement": self.calculate_wellbeing_trends(therapeutic_sessions)
         }
-    
+
     def calculate_creative_growth_metrics(self, user_id: str) -> Dict:
         """Measure artistic and creative development"""
-        
+
         creative_history = self.get_creative_history(user_id)
-        
+
         return {
             "artistic_skill_progression": self.calculate_skill_growth(creative_history),
             "creative_block_resolution": self.calculate_block_resolution(creative_history),
@@ -994,7 +994,7 @@ class PerformanceMetrics:
 
 class SystemMonitor:
     """Real-time system performance monitoring"""
-    
+
     def __init__(self):
         self.metrics_history = []
         self.alert_thresholds = {
@@ -1002,26 +1002,26 @@ class SystemMonitor:
             "memory_usage": 0.8,   # 80% of available memory
             "error_rate": 0.01     # 1% error rate
         }
-    
+
     async def monitor_guidance_generation(self, user_input: str, context: Dict) -> PerformanceMetrics:
         """Monitor performance of complete guidance generation process"""
-        
+
         start_time = time.time()
         memory_start = self.get_memory_usage()
-        
+
         # Monitor module coordination
         coordination_start = time.time()
         # ... coordination process ...
         coordination_time = time.time() - coordination_start
-        
+
         # Monitor guidance synthesis
         synthesis_start = time.time()
         # ... synthesis process ...
         synthesis_time = time.time() - synthesis_start
-        
+
         total_time = time.time() - start_time
         memory_end = self.get_memory_usage()
-        
+
         metrics = PerformanceMetrics(
             response_time=total_time,
             module_coordination_time=coordination_time,
@@ -1029,20 +1029,20 @@ class SystemMonitor:
             memory_usage=memory_end - memory_start,
             concurrent_users=self.get_concurrent_user_count()
         )
-        
+
         self.metrics_history.append(metrics)
         self.check_alert_conditions(metrics)
-        
+
         return metrics
-    
+
     def generate_performance_report(self) -> Dict:
         """Generate comprehensive performance report"""
-        
+
         if not self.metrics_history:
             return {"status": "no_data"}
-        
+
         recent_metrics = self.metrics_history[-100:]  # Last 100 requests
-        
+
         return {
             "average_response_time": np.mean([m.response_time for m in recent_metrics]),
             "95th_percentile_response_time": np.percentile([m.response_time for m in recent_metrics], 95),
@@ -1077,7 +1077,7 @@ services:
     depends_on:
       - mongodb-primary
       - redis-cluster
-    
+
   unified-companion-worker:
     image: unified-companion:latest
     deploy:
@@ -1089,13 +1089,13 @@ services:
     environment:
       - WORKER_MODE=true
       - PSYCHOLOGICAL_MODULES_ENABLED=true
-    
+
   mongodb-primary:
     image: mongo:latest
     command: mongod --replSet rs0 --bind_ip_all
     volumes:
       - mongodb_primary:/data/db
-    
+
   redis-cluster:
     image: redis:alpine
     command: redis-server --cluster-enabled yes
@@ -1112,7 +1112,7 @@ import logging
 
 class AdvancedAlertingSystem:
     """Comprehensive monitoring and alerting for psychological modules"""
-    
+
     def __init__(self):
         self.alert_rules = {
             "attachment_security_regression": {
@@ -1136,27 +1136,27 @@ class AdvancedAlertingSystem:
                 "action": "specialized_creative_intervention"
             }
         }
-    
+
     async def monitor_psychological_health(self, user_id: str) -> Dict:
         """Continuous monitoring of user's psychological health indicators"""
-        
+
         alerts = []
-        
+
         # Monitor attachment security
         attachment_metrics = await self.get_attachment_metrics(user_id)
         if self.check_attachment_alerts(attachment_metrics):
             alerts.append(self.create_attachment_alert(attachment_metrics))
-        
+
         # Monitor crisis indicators
         crisis_indicators = await self.get_crisis_indicators(user_id)
         if self.check_crisis_alerts(crisis_indicators):
             alerts.append(self.create_crisis_alert(crisis_indicators))
-        
+
         # Monitor shadow work progress
         shadow_progress = await self.get_shadow_progress(user_id)
         if self.check_shadow_alerts(shadow_progress):
             alerts.append(self.create_shadow_alert(shadow_progress))
-        
+
         return {
             "user_id": user_id,
             "timestamp": time.time(),

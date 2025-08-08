@@ -406,11 +406,13 @@ class InvestmentTracker:
         prob_text = (
             "excellent"
             if probability_of_profit > 0.70
-            else "good"
-            if probability_of_profit > 0.60
-            else "moderate"
-            if probability_of_profit > 0.50
-            else "challenging"
+            else (
+                "good"
+                if probability_of_profit > 0.60
+                else "moderate"
+                if probability_of_profit > 0.50
+                else "challenging"
+            )
         )
         review_parts.append(
             f"The probability of profit is {probability_of_profit:.1%}, which gives you {prob_text} odds of success."

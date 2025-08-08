@@ -1,23 +1,25 @@
-from typing import Dict, Any
-import aiohttp
 import logging
+from typing import Any, Dict
+
+import aiohttp
 
 logger = logging.getLogger(__name__)
+
 
 class N8nAgent:
     """Simple agent to trigger n8n workflows via webhooks."""
 
     def __init__(self, base_url: str = "http://localhost:5678") -> None:
-        self.base_url = base_url.rstrip('/')
+        self.base_url = base_url.rstrip("/")
         # default workflow mapping
-        self.workflow_routes: Dict[str, str] = {
+        self.workflow_routes: dict[str, str] = {
             "create_reminder": f"{self.base_url}/webhook/create-reminder"
         }
 
     def register_workflow(self, name: str, url: str) -> None:
         self.workflow_routes[name] = url
 
-    async def execute(self, workflow: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, workflow: str, payload: dict[str, Any]) -> dict[str, Any]:
         """Execute a workflow and return JSON response."""
         url = self.workflow_routes.get(workflow)
         if not url:

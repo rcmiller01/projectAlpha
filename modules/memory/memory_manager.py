@@ -587,9 +587,11 @@ class EnhancedMemoryManager(DevotionMemoryManager):
             },
             "symbolic_resonance": len(self.symbol_preferences),
             "intimate_scenes_count": len(self.intimate_scenes),
-            "last_closeness_hours_ago": (time.time() - self.last_closeness_event) / 3600
-            if self.last_closeness_event
-            else None,
+            "last_closeness_hours_ago": (
+                (time.time() - self.last_closeness_event) / 3600
+                if self.last_closeness_event
+                else None
+            ),
         }
 
     def create_intimate_scene_with_lust(

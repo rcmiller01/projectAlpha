@@ -1,15 +1,17 @@
-import unittest
-import sys
 import os
+import sys
+import unittest
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from modules.emotion.mood_inflection import MoodInflection
-from modules.symbolic.symbol_resurrection import SymbolResurrectionManager
-from modules.core.goodbye_protocol import GoodbyeProtocol
-from modules.relationship.connection_depth_tracker import ConnectionDepthTracker
-from modules.memory.narrative_memory_templates import NarrativeMemoryTemplateManager
 from datetime import timedelta
+
+from modules.core.goodbye_protocol import GoodbyeProtocol
+from modules.emotion.mood_inflection import MoodInflection
+from modules.memory.narrative_memory_templates import NarrativeMemoryTemplateManager
+from modules.relationship.connection_depth_tracker import ConnectionDepthTracker
+from modules.symbolic.symbol_resurrection import SymbolResurrectionManager
+
 
 class TestExpansionModules(unittest.TestCase):
     def test_mood_inflection(self):
@@ -40,5 +42,6 @@ class TestExpansionModules(unittest.TestCase):
         mem = nt.generate_narrative({"symbol": "garden", "event": "walked", "date": "yesterday"})
         self.assertIn("garden", mem)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

@@ -12,19 +12,20 @@ apply(state) -> state':
 - Returns dict with keys: {delta, delta_clamped, clamped: bool, penalty: float}
 - Increments spikes_blocked metric on clamp.
 """
+
 from __future__ import annotations
 
 import json
 import logging
 import os
 import time
-from collections import deque, defaultdict
+from collections import defaultdict, deque
 from typing import Any, Deque, Dict
 
 logger = logging.getLogger(__name__)
 
 # Metrics
-METRICS: Dict[str, int] = defaultdict(int)
+METRICS: dict[str, int] = defaultdict(int)
 
 
 class AffectGovernor:
@@ -35,14 +36,18 @@ class AffectGovernor:
         max_penalty: float | None = None,
         cooldown_seconds: int | None = None,
     ) -> None:
-        self.scaling = float(os.getenv("DRIFT_SCALING_FACTOR", scaling if scaling is not None else 0.5))
+        self.scaling = float(
+            os.getenv("DRIFT_SCALING_FACTOR", scaling if scaling is not None else 0.5)
+        )
         self.max_penalty = float(
             os.getenv("MAX_PENALTY_THRESHOLD", max_penalty if max_penalty is not None else 0.9)
         )
         self.cooldown_seconds = int(
-            os.getenv("AFFECT_COOLDOWN_SECONDS", cooldown_seconds if cooldown_seconds is not None else 2)
+            os.getenv(
+                "AFFECT_COOLDOWN_SECONDS", cooldown_seconds if cooldown_seconds is not None else 2
+            )
         )
-        self._events: Dict[str, Deque[float]] = defaultdict(deque)  # per-source timestamps
+        self._events: dict[str, deque[float]] = defaultdict(deque)  # per-source timestamps
 
     def _prune(self, source: str, now: float) -> None:
         dq = self._events[source]
@@ -50,7 +55,7 @@ class AffectGovernor:
         while dq and dq[0] < cutoff:
             dq.popleft()
 
-    def apply(self, state: Dict[str, Any]) -> Dict[str, Any]:
+    def apply(self, state: dict[str, Any]) -> dict[str, Any]:
         source = str(state.get("source", "unknown"))
         delta = float(state.get("delta", 0.0))
         now = time.time()
@@ -94,5 +99,5 @@ class AffectGovernor:
         }
 
 
-def get_metrics() -> Dict[str, int]:
+def get_metrics() -> dict[str, int]:
     return dict(METRICS)

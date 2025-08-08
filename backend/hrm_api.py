@@ -37,7 +37,7 @@ try:
     import sys
     from pathlib import Path
 
-    from backend.anchor_system import ActionType, AnchorSystem, AnchorResponse
+    from backend.anchor_system import ActionType, AnchorResponse, AnchorSystem
     from hrm.policy_dsl import PolicyEngine, evaluate_read, evaluate_write
 
     project_root = Path(__file__).parent.parent
@@ -53,6 +53,7 @@ except ImportError as e:
 
 # Safe fallbacks for dry-run utilities if not available
 if not DRY_RUN_AVAILABLE:
+
     def is_dry_run() -> bool:  # type: ignore[misc]
         return False
 
@@ -64,6 +65,7 @@ if not DRY_RUN_AVAILABLE:
         if status_code is not None:
             out["status_code"] = status_code
         return out
+
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -90,6 +92,7 @@ anchor_system = None
 # RBAC/Beliefs confidence threshold
 BELIEF_CONFIDENCE_THRESHOLD = float(os.getenv("BELIEF_CONFIDENCE_THRESHOLD", "0.6"))
 
+
 def _current_role() -> str:
     try:
         sec = getattr(g, "security_context", {})
@@ -97,6 +100,7 @@ def _current_role() -> str:
         return ttype if isinstance(ttype, str) else "user"
     except Exception:
         return "user"
+
 
 if POLICY_ENGINE_AVAILABLE:
     try:
@@ -205,6 +209,7 @@ def _safe_evaluate_write(
     try:
         return evaluate_write(engine, layer=layer, admin_token_ok=admin_token_ok, evidence=evidence)
     except Exception:
+
         class _Decision:
             allowed = True
             status = "ok"
@@ -231,8 +236,8 @@ BELIEFS_UPDATE_SCHEMA: dict[str, Any] = {
         "beliefs": {"type": "object"},
         "preferences": {"type": "object"},
         "learned_patterns": {"type": "object"},
-    "associations": {"type": "array", "items": {"type": "object"}},
-    "evidence": {"type": "object"},
+        "associations": {"type": "array", "items": {"type": "object"}},
+        "evidence": {"type": "object"},
     },
 }
 
@@ -362,15 +367,15 @@ def update_identity() -> Response:
             anchor_result_value = getattr(_resp, "value", getattr(_resp, "name", str(_resp)))
             anchor_approved = anchor_result_value == "APPROVED"
         if not anchor_approved:
-            audit_action(
-                "identity_anchor_denied", success=False, anchor_result=anchor_result_value
-            )
+            audit_action("identity_anchor_denied", success=False, anchor_result=anchor_result_value)
             return (
-                jsonify({
-                    "error": "Anchor denied",
-                    "anchor_result": anchor_result_value,
-                    "rationale": f"Anchor system returned {anchor_result_value}",
-                }),
+                jsonify(
+                    {
+                        "error": "Anchor denied",
+                        "anchor_result": anchor_result_value,
+                        "rationale": f"Anchor system returned {anchor_result_value}",
+                    }
+                ),
                 403,
             )
 
@@ -439,7 +444,9 @@ def update_beliefs() -> Response:
 
         # Phase 3: Enforce confidence threshold for beliefs writes
         try:
-            confidence_val = float(evidence.get("confidence")) if isinstance(evidence, dict) else None
+            confidence_val = (
+                float(evidence.get("confidence")) if isinstance(evidence, dict) else None
+            )
         except Exception:
             confidence_val = None
         if confidence_val is None or confidence_val < BELIEF_CONFIDENCE_THRESHOLD:
@@ -449,10 +456,15 @@ def update_beliefs() -> Response:
                 provided=confidence_val,
                 threshold=BELIEF_CONFIDENCE_THRESHOLD,
             )
-            return jsonify({
-                "error": "Forbidden: insufficient confidence",
-                "threshold": BELIEF_CONFIDENCE_THRESHOLD,
-            }), 403
+            return (
+                jsonify(
+                    {
+                        "error": "Forbidden: insufficient confidence",
+                        "threshold": BELIEF_CONFIDENCE_THRESHOLD,
+                    }
+                ),
+                403,
+            )
 
         decision = _safe_evaluate_write(
             policy_engine,
@@ -469,11 +481,17 @@ def update_beliefs() -> Response:
                 reason=decision.reason,
             )
             return (
-                jsonify({
-                    "error": "Evidence required" if decision.status == "needs_evidence" else "Forbidden",
-                    "policy_status": decision.status,
-                    "reason": decision.reason,
-                }),
+                jsonify(
+                    {
+                        "error": (
+                            "Evidence required"
+                            if decision.status == "needs_evidence"
+                            else "Forbidden"
+                        ),
+                        "policy_status": decision.status,
+                        "reason": decision.reason,
+                    }
+                ),
                 status_code,
             )
 
@@ -489,15 +507,15 @@ def update_beliefs() -> Response:
             anchor_result_value = getattr(_resp, "value", getattr(_resp, "name", str(_resp)))
             anchor_approved = anchor_result_value == "APPROVED"
         if not anchor_approved:
-            audit_action(
-                "beliefs_anchor_denied", success=False, anchor_result=anchor_result_value
-            )
+            audit_action("beliefs_anchor_denied", success=False, anchor_result=anchor_result_value)
             return (
-                jsonify({
-                    "error": "Anchor denied",
-                    "anchor_result": anchor_result_value,
-                    "rationale": f"Anchor system returned {anchor_result_value}",
-                }),
+                jsonify(
+                    {
+                        "error": "Anchor denied",
+                        "anchor_result": anchor_result_value,
+                        "rationale": f"Anchor system returned {anchor_result_value}",
+                    }
+                ),
                 403,
             )
 
@@ -598,11 +616,13 @@ def update_ephemeral() -> Response:
                 "ephemeral_anchor_denied", success=False, anchor_result=anchor_result_value
             )
             return (
-                jsonify({
-                    "error": "Anchor denied",
-                    "anchor_result": anchor_result_value,
-                    "rationale": f"Anchor system returned {anchor_result_value}",
-                }),
+                jsonify(
+                    {
+                        "error": "Anchor denied",
+                        "anchor_result": anchor_result_value,
+                        "rationale": f"Anchor system returned {anchor_result_value}",
+                    }
+                ),
                 403,
             )
 
@@ -674,11 +694,13 @@ def purge_ephemeral() -> Response:
                 "ephemeral_purge_anchor_denied", success=False, anchor_result=anchor_result_value
             )
             return (
-                jsonify({
-                    "error": "Anchor denied",
-                    "anchor_result": anchor_result_value,
-                    "rationale": f"Anchor system returned {anchor_result_value}",
-                }),
+                jsonify(
+                    {
+                        "error": "Anchor denied",
+                        "anchor_result": anchor_result_value,
+                        "rationale": f"Anchor system returned {anchor_result_value}",
+                    }
+                ),
                 403,
             )
 
@@ -804,9 +826,7 @@ def erase_data() -> Response:
         anchor_action = {
             "action_type": "memory_delete",
             "description": f"Erase data for user {user_id}",
-            "target_layer": (
-                "identity" if erase_identity else "beliefs/ephemeral"
-            ),
+            "target_layer": ("identity" if erase_identity else "beliefs/ephemeral"),
         }
         if not anchor_system:
             anchor_approved = True
@@ -816,15 +836,15 @@ def erase_data() -> Response:
             anchor_result_value = getattr(_resp, "value", getattr(_resp, "name", str(_resp)))
             anchor_approved = anchor_result_value == "APPROVED"
         if not anchor_approved:
-            audit_action(
-                "erase_anchor_denied", success=False, anchor_result=anchor_result_value
-            )
+            audit_action("erase_anchor_denied", success=False, anchor_result=anchor_result_value)
             return (
-                jsonify({
-                    "error": "Anchor denied",
-                    "anchor_result": anchor_result_value,
-                    "rationale": f"Anchor system returned {anchor_result_value}",
-                }),
+                jsonify(
+                    {
+                        "error": "Anchor denied",
+                        "anchor_result": anchor_result_value,
+                        "rationale": f"Anchor system returned {anchor_result_value}",
+                    }
+                ),
                 403,
             )
 

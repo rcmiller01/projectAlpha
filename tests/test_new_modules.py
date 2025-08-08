@@ -1,4 +1,6 @@
-import os, sys
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import asyncio
 import unittest
@@ -18,7 +20,9 @@ class TestNewModules(unittest.TestCase):
 
     def test_deep_memory_framework(self):
         framework = DeepMemoryFramework()
-        fragment = MemoryFragment(user_id="u1", content="test", tags=["flame"], emotional_state={"joy": 0.8})
+        fragment = MemoryFragment(
+            user_id="u1", content="test", tags=["flame"], emotional_state={"joy": 0.8}
+        )
         framework.store_memory(fragment)
         self.assertEqual(framework.latest_fragment("u1"), fragment)
         self.assertIn(fragment, framework.recall_by_tag("flame"))

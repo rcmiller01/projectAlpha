@@ -16,7 +16,11 @@ from modules.expression.expression_dial_agent import ExpressionDialAgent
 class AnchorSafetyAgent:
     """Monitor expression levels and enforce safety limits."""
 
-    def __init__(self, dial_agent: ExpressionDialAgent, thresholds: Dict[str, Tuple[float, float]] | None = None):
+    def __init__(
+        self,
+        dial_agent: ExpressionDialAgent,
+        thresholds: dict[str, tuple[float, float]] | None = None,
+    ):
         self.dial_agent = dial_agent
         self.thresholds = thresholds or {
             "vulnerability": (0.0, 1.0),

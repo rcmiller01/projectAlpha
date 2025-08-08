@@ -1,6 +1,7 @@
 import random
 from datetime import datetime, timedelta
 
+
 class GoodbyeProtocol:
     """Generate closing lines with emotional resonance."""
 

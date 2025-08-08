@@ -1,11 +1,12 @@
 import asyncio
 import math
 import time
+
 import pytest
 
+from backend.subagent_router import SubAgentRouter
 from modules.autonomy.affect_governor import AffectGovernor, get_metrics
 from modules.autonomy.drift_watchdog import DriftWatchdog
-from backend.subagent_router import SubAgentRouter
 
 
 def test_governor_and_watchdog_stress(monkeypatch):

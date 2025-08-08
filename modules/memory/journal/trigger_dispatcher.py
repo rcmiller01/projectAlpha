@@ -1,10 +1,10 @@
-
 # modules/journal/trigger_dispatcher.py
 
-from datetime import datetime, timedelta
-from modules.journal.journal_engine import JournalEngine
-from modules.journal.journal_utils import load_prompts, infer_mood
 import random
+from datetime import datetime, timedelta
+
+from modules.journal.journal_engine import JournalEngine
+from modules.journal.journal_utils import infer_mood, load_prompts
 
 # Hardcoded symbolic to mood mappings
 SYMBOLIC_EVENT_MAP = {
@@ -27,8 +27,9 @@ MOOD_PERSISTENCE_THRESHOLDS = {
 # Mock persona mood state tracker
 persona_mood_state = {
     "mia": {"mood": "serene", "since": datetime.utcnow()},
-    "solene": {"mood": "fiery", "since": datetime.utcnow()}
+    "solene": {"mood": "fiery", "since": datetime.utcnow()},
 }
+
 
 def dispatch_trigger(event, value=None, persona="mia"):
     persona = persona.lower()
@@ -39,12 +40,7 @@ def dispatch_trigger(event, value=None, persona="mia"):
         mapping = SYMBOLIC_EVENT_MAP[event]
         prompt = random.choice(load_prompts(persona))
         mood = mapping["mood"]
-        journal.add_entry(
-            mood=mood,
-            trigger=mapping["trigger"],
-            visibility="private",
-            text=prompt
-        )
+        journal.add_entry(mood=mood, trigger=mapping["trigger"], visibility="private", text=prompt)
         print(f"[{persona}] Journaled symbolic trigger: {event}")
 
     # Handle mood persistence (drift-based journaling)
@@ -60,12 +56,7 @@ def dispatch_trigger(event, value=None, persona="mia"):
 
         if threshold and (datetime.utcnow() - since) >= timedelta(hours=threshold):
             prompt = random.choice(load_prompts(persona))
-            journal.add_entry(
-                mood=mood,
-                trigger="mood_drift",
-                visibility="private",
-                text=prompt
-            )
+            journal.add_entry(mood=mood, trigger="mood_drift", visibility="private", text=prompt)
             print(f"[{persona}] Journaled mood drift for '{mood}'")
         else:
             print(f"[{persona}] Mood '{mood}' not yet persisted long enough.")

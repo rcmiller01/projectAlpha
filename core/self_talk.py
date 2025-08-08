@@ -257,9 +257,9 @@ class SelfTalkSystem:
             "should_vocalize": False,  # Default to text for probing questions
             "context": {
                 "current_intimacy": relationship.intimacy,
-                "conversation_depth": "deep"
-                if category in ["emotional", "therapeutic"]
-                else "casual",
+                "conversation_depth": (
+                    "deep" if category in ["emotional", "therapeutic"] else "casual"
+                ),
                 "expect_emotional_response": category in ["emotional", "therapeutic"],
             },
         }

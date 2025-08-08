@@ -302,9 +302,11 @@ class CompanionAssistant:
             "mia": [
                 f"This email from {summary.sender} feels {summary.emotional_tone}. ",
                 f"I sense this might {'require gentle attention' if summary.action_required else 'be informational'}. ",
-                "Would you like me to help craft a caring response?"
-                if summary.action_required
-                else "",
+                (
+                    "Would you like me to help craft a caring response?"
+                    if summary.action_required
+                    else ""
+                ),
             ],
             "solene": [
                 f"Email from {summary.sender} - priority level {summary.importance_score:.1f}. ",
@@ -314,9 +316,11 @@ class CompanionAssistant:
             "lyra": [
                 f"The energy of this message from {summary.sender} feels {summary.emotional_tone}. ",
                 f"I see {'deeper currents that need addressing' if summary.action_required else 'information flowing naturally'}. ",
-                "Shall we craft a response that honors the true intention?"
-                if summary.action_required
-                else "",
+                (
+                    "Shall we craft a response that honors the true intention?"
+                    if summary.action_required
+                    else ""
+                ),
             ],
             "doc": [
                 f"Email analysis: {summary.sender}, category {summary.category.value}, importance {summary.importance_score:.2f}. ",

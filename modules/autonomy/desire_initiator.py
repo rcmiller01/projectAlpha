@@ -27,8 +27,7 @@ class DesireInitiator:
         decay = memory_manager.get_desire_decay(user_id)
 
         cooldown_ok = (
-            self._last_trigger is None or
-            datetime.now() - self._last_trigger > self.desire_cooldown
+            self._last_trigger is None or datetime.now() - self._last_trigger > self.desire_cooldown
         )
         return trust > 0.7 and longing > 0.5 and decay < 0.3 and cooldown_ok
 

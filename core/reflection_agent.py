@@ -2,9 +2,11 @@
 """
 Reflection agent for the Emotional Presence Engine.
 """
+
 import json
 import time
 from pathlib import Path
+
 
 def reflect():
     base_dir = Path(__file__).resolve().parent.parent
@@ -18,11 +20,12 @@ def reflect():
             latest = json.loads(lines[-1])
             reflection = {
                 "timestamp": time.time(),
-                "reflection": f"Reflected on {len(latest.get('processed_emotions', []))} emotions."
+                "reflection": f"Reflected on {len(latest.get('processed_emotions', []))} emotions.",
             }
             fname = out_dir / f"reflection_{int(time.time())}.json"
             with open(fname, "w") as f:
                 json.dump(reflection, f, indent=2)
+
 
 if __name__ == "__main__":
     reflect()

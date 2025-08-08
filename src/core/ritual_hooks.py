@@ -380,9 +380,9 @@ class RitualHooks:
         return {
             "total_rituals": len(self.ritual_history),
             "recent_rituals": len(recent_rituals),
-            "most_used_type": max(type_counts.keys(), key=lambda k: type_counts[k])
-            if type_counts
-            else None,
+            "most_used_type": (
+                max(type_counts.keys(), key=lambda k: type_counts[k]) if type_counts else None
+            ),
             "type_distribution": type_counts,
         }
 

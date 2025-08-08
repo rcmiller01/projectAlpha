@@ -759,9 +759,10 @@ def annotate_drift():
         annotation = data.get("annotation")
 
         if not drift_id or not annotation:
-            return jsonify(
-                {"error": "drift_id and annotation are required", "status": "error"}
-            ), 400
+            return (
+                jsonify({"error": "drift_id and annotation are required", "status": "error"}),
+                400,
+            )
 
         # Create annotation entry
         annotation_entry = {

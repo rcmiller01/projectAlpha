@@ -225,7 +225,7 @@ def generate_comprehensive_drift_data():
 
         # Select moods (ensuring they're different)
         mood_before = random.choice(list(mood_states.keys()))
-        mood_after = random.choice([m for m in mood_states.keys() if m != mood_before])
+        mood_after = random.choice([m for m in mood_states if m != mood_before])
 
         # Generate drift magnitude with realistic distribution
         # Most drifts are moderate (0.3-0.7), some are high (0.7-0.9)

@@ -40,10 +40,10 @@ class Agent(SLiMAgent):
     def process(self, input_text):
         # Pre-processing: GraphRAG memory context
         context = self.hrm_router.process_agent_input(input_text, self.agent_type)
-        
+
         # Core processing with CoreConductor
         response = self.conductor.generate(self.role, enhanced_prompt)
-        
+
         # Post-processing: Memory storage + tool suggestions
         self.hrm_router.process_agent_output(response, context, self.agent_type)
         return response
@@ -94,7 +94,7 @@ python src/core/init_models.py     # Model loading test
 
 ### 📁 File Organization
 - `src/core/` - Core orchestration (HRM, Conductor, Arbiter)
-- `src/agents/` - Specialized SLiM agent implementations  
+- `src/agents/` - Specialized SLiM agent implementations
 - `src/api/` - FastAPI endpoints and routing
 - `webapp/frontend/src/` - React app (pages, components, hooks, store)
 - `memory/` - GraphRAG semantic memory system
@@ -113,7 +113,7 @@ logic_high → phi4-mini-reasoning:3.8b    # Advanced reasoning
 logic_code → qwen2.5-coder:3b           # Code generation
 logic_proof → deepseek-r1:1.5b          # Mathematical proofs
 
-# Right Brain (Emotion/Creativity Hemisphere)  
+# Right Brain (Emotion/Creativity Hemisphere)
 emotion_valence → gemma3:1b              # Emotional analysis
 creative_metaphor → Custom model        # Metaphorical expression
 ```

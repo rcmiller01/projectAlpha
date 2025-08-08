@@ -8,11 +8,12 @@ and user feedback to create adaptive feedback loops.
 
 from __future__ import annotations
 
-from typing import Dict, Any, List
 from datetime import datetime
+from typing import Any, Dict, List
+
+from mirror_log import MirrorLog
 
 from modules.expression.expression_dial_agent import ExpressionDialAgent
-from mirror_log import MirrorLog
 
 
 class MirrorReflectionCore:
@@ -22,7 +23,7 @@ class MirrorReflectionCore:
         self.dial_agent = dial_agent
         self.log = log or MirrorLog()
 
-    def observe_interaction(self, user_id: str, feedback: Dict[str, Any]) -> None:
+    def observe_interaction(self, user_id: str, feedback: dict[str, Any]) -> None:
         """Process user feedback and update dial agent."""
         adjustments = feedback.get("dial_adjustments", {})
         if adjustments:
@@ -35,6 +36,6 @@ class MirrorReflectionCore:
         }
         self.log.append(entry)
 
-    def adaptive_update(self, user_id: str) -> Dict[str, float]:
+    def adaptive_update(self, user_id: str) -> dict[str, float]:
         """Return current dial state for the user after reflection."""
         return self.dial_agent.get_state(user_id)

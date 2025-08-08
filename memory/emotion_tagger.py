@@ -752,9 +752,9 @@ class EmotionTagger:
                     "total_emotions": len(all_emotions),
                     "unique_emotions": len(emotion_frequency),
                     "average_valence": round(sum(valences) / len(valences), 3) if valences else 0,
-                    "average_intensity": round(sum(intensities) / len(intensities), 3)
-                    if intensities
-                    else 0,
+                    "average_intensity": (
+                        round(sum(intensities) / len(intensities), 3) if intensities else 0
+                    ),
                     "emotional_range": round(max(valences) - min(valences), 3) if valences else 0,
                 },
             }

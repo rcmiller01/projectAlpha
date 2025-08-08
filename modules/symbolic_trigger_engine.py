@@ -10,7 +10,7 @@ class SymbolicTriggerEngine:
     """Detects symbolic triggers in input text and memory."""
 
     def __init__(self):
-        self.triggers: Dict[str, Dict[str, float]] = {}
+        self.triggers: dict[str, dict[str, float]] = {}
 
     def add_trigger(self, word: str, strength: float = 0.1):
         data = self.triggers.setdefault(word.lower(), {"strength": 0.0, "count": 0})

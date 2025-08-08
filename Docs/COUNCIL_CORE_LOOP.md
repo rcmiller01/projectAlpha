@@ -73,4 +73,3 @@ Next Steps:
 •Create CouncilEvaluationMatrix.md
 •Write Codex automation scaffold to orchestrate growth logic
 •Implement passive runtime monitoring for council/core evaluation
-

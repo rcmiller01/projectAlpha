@@ -537,9 +537,9 @@ class TrueRecallEngine:
                 "system_info": {
                     "total_events": total_events,
                     "storage_stats": storage_stats,
-                    "last_reflection": self.last_reflection_date.isoformat()
-                    if self.last_reflection_date
-                    else None,
+                    "last_reflection": (
+                        self.last_reflection_date.isoformat() if self.last_reflection_date else None
+                    ),
                 },
                 "recent_activity": self._analyze_event_patterns(recent_events),
                 "memory_graph_stats": await self.memory_graph.get_graph_stats(),

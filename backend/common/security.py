@@ -230,13 +230,16 @@ def require_scope(required_scopes: list[str]):
                 audit_entry["error"] = "insufficient_scope"
                 audit_entry["token_scopes"] = list(token_scopes)
                 log_audit_entry(audit_entry)
-                return jsonify(
-                    {
-                        "error": "Insufficient permissions",
-                        "required_scopes": required_scopes,
-                        "request_id": request_id,
-                    }
-                ), 403
+                return (
+                    jsonify(
+                        {
+                            "error": "Insufficient permissions",
+                            "required_scopes": required_scopes,
+                            "request_id": request_id,
+                        }
+                    ),
+                    403,
+                )
 
             # Success
             audit_entry["success"] = True
@@ -297,13 +300,16 @@ def require_layer_access(layer: str):
                 audit_entry["error"] = "layer_access_denied"
                 audit_entry["token_type"] = get_token_type(token)
                 log_audit_entry(audit_entry)
-                return jsonify(
-                    {
-                        "error": f"Access denied to {layer} layer",
-                        "required_permission": LAYER_PERMISSIONS.get(layer, []),
-                        "request_id": request_id,
-                    }
-                ), 403
+                return (
+                    jsonify(
+                        {
+                            "error": f"Access denied to {layer} layer",
+                            "required_permission": LAYER_PERMISSIONS.get(layer, []),
+                            "request_id": request_id,
+                        }
+                    ),
+                    403,
+                )
 
             # Success
             audit_entry["success"] = True
@@ -353,9 +359,12 @@ def validate_json_schema(schema: dict[str, Any], allow_unknown: bool = False):
                     "success": False,
                 }
                 log_audit_entry(audit_entry)
-                return jsonify(
-                    {"error": "Content-Type must be application/json", "request_id": request_id}
-                ), 400
+                return (
+                    jsonify(
+                        {"error": "Content-Type must be application/json", "request_id": request_id}
+                    ),
+                    400,
+                )
 
             try:
                 data = request.get_json()
@@ -387,13 +396,16 @@ def validate_json_schema(schema: dict[str, Any], allow_unknown: bool = False):
                     "success": False,
                 }
                 log_audit_entry(audit_entry)
-                return jsonify(
-                    {
-                        "error": "Validation failed",
-                        "validation_errors": validation_errors,
-                        "request_id": request_id,
-                    }
-                ), 400
+                return (
+                    jsonify(
+                        {
+                            "error": "Validation failed",
+                            "validation_errors": validation_errors,
+                            "request_id": request_id,
+                        }
+                    ),
+                    400,
+                )
 
             # Add validated data to request context
             g.validated_data = data

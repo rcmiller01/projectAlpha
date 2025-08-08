@@ -23,7 +23,7 @@ email_summaries = await assistant.process_emails(email_config)
 
 # Task creation with persona guidance
 task = await assistant.create_task_with_persona_guidance(
-    "Prepare presentation for Friday meeting", 
+    "Prepare presentation for Friday meeting",
     context={'stress_level': 0.6}
 )
 
@@ -84,18 +84,18 @@ The unified persona automatically adjusts its communication style and approach b
 ```python
 async def morning_assistant_routine(user_id: str):
     assistant = create_companion_assistant(user_id, 'adaptive')
-    
+
     # Process overnight emails with context-aware approach
     emails = await assistant.process_emails(email_config)
     important_emails = [e for e in emails if e.importance_score > 0.7]
-    
+
     # Optimize today's calendar with work-life balance awareness
     schedule_result = await assistant.manage_schedule(calendar_data, user_prefs)
-    
+
     # Generate morning insights with adaptive intelligence
     context = {'time_of_day': 'morning', 'energy_level': 0.8}
     suggestions = assistant.get_proactive_suggestions(context)
-    
+
     return {
         'email_summary': f"{len(important_emails)} important emails need attention",
         'schedule_optimization': schedule_result['suggestions'],
@@ -108,10 +108,10 @@ async def morning_assistant_routine(user_id: str):
 ```python
 async def unified_voice_task_automation(user_id: str, audio_data: bytes):
     assistant = create_companion_assistant(user_id, 'adaptive')
-    
+
     # Process voice note with context detection
     voice_note = await assistant.process_voice_dictation(audio_data, context)
-    
+
     # Detect if it's development work or personal tasks
     if assistant.detect_development_context(voice_note.transcription):
         # Handle as development task with technical precision
@@ -119,7 +119,7 @@ async def unified_voice_task_automation(user_id: str, audio_data: bytes):
     else:
         # Handle as personal/companion task with emotional awareness
         tasks = await assistant.create_personal_tasks(voice_note, context)
-    
+
     return {
         'transcription': voice_note.transcription,
         'context_detected': voice_note.context_type,
@@ -137,7 +137,7 @@ async def setup_adaptive_automation(user_id: str, n8n_credentials: dict):
         n8n_credentials['api_key'],
         user_id
     )
-    
+
     # Define adaptive automation workflow
     workflow_config = {
         'name': 'unified_intelligent_assistant',
@@ -154,10 +154,10 @@ async def setup_adaptive_automation(user_id: str, n8n_credentials: dict):
             {'type': 'provide_assistance', 'parameters': {'unified_intelligence': True}}
         ]
     }
-    
+
     # Create with unified intelligence
     result = await n8n_manager.create_workflow(workflow_config, 'adaptive')
-    
+
     return result
 ```
 
@@ -298,7 +298,7 @@ assistant_config = {
 3. **Initialize Unified Assistant**:
    ```python
    from modules.utility.companion_assistant import create_companion_assistant
-   
+
    assistant = create_companion_assistant("user123", "adaptive")
    ```
 
@@ -311,7 +311,7 @@ assistant_config = {
    )
    print(f"Dev task: {dev_task.title}")
    print(f"Technical guidance: {dev_task.technical_guidance}")
-   
+
    # Test personal task creation
    personal_task = await assistant.create_personal_task(
        "Plan weekend hiking trip",
@@ -332,7 +332,7 @@ assistant_config = {
 2. **Configure Integration**:
    ```python
    from modules.automation.n8n_integration import create_n8n_manager
-   
+
    n8n_manager = create_n8n_manager(
        "http://localhost:5678",
        "your_api_key",
@@ -355,7 +355,7 @@ assistant_config = {
            {'type': 'provide_adaptive_assistance'}
        ]
    }
-   
+
    result = await n8n_manager.create_workflow(workflow_config, "adaptive")
    ```
 

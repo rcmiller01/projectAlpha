@@ -319,9 +319,9 @@ class UnifiedCompanionDemo:
                 {"mood": "hopeful", "intensity": 0.8, "duration": "1m"},
             ],
             "dream_integration": {
-                "narrative": dream.symbolic_phrases[0]
-                if dream.symbolic_phrases
-                else "No narrative",
+                "narrative": (
+                    dream.symbolic_phrases[0] if dream.symbolic_phrases else "No narrative"
+                ),
                 "symbolic_density": len(dream.symbol_sources or []),
                 "lucidity_score": dream.lucidity_level,
             },

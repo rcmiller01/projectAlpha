@@ -78,7 +78,7 @@ def call_hrm_service():
     # Automatically retries on network/service errors
     pass
 
-@retry_arbiter_call  
+@retry_arbiter_call
 def call_arbiter_service():
     # Configured for arbiter-specific retry patterns
     pass
@@ -108,7 +108,7 @@ def custom_service_call():
 ```python
 quotas = {
     'identity': {'max_items': 100, 'importance_threshold': 0.7},
-    'beliefs': {'max_items': 500, 'importance_threshold': 0.5}, 
+    'beliefs': {'max_items': 500, 'importance_threshold': 0.5},
     'ephemeral': {'max_items': 1000, 'importance_threshold': 0.3}
 }
 ```
@@ -137,7 +137,7 @@ results = memory_system.prune_all_layers(force=True)
 # Safe mode control
 SAFE_MODE_FORCE=true                    # Force safe mode activation
 
-# Retry configuration  
+# Retry configuration
 RETRY_MAX_ATTEMPTS=3                    # Maximum retry attempts
 RETRY_BASE_DELAY=1.0                    # Base delay in seconds
 RETRY_MAX_DELAY=60.0                    # Maximum delay cap
@@ -147,7 +147,7 @@ IDEMPOTENCY_CACHE_TTL=3600             # Cache TTL in seconds
 
 # Memory quotas
 MEMORY_QUOTA_IDENTITY=100              # Max identity layer items
-MEMORY_QUOTA_BELIEFS=500               # Max beliefs layer items  
+MEMORY_QUOTA_BELIEFS=500               # Max beliefs layer items
 MEMORY_QUOTA_EPHEMERAL=1000            # Max ephemeral layer items
 
 # Health checks
@@ -163,7 +163,7 @@ ANCHOR_HEALTH_CHECK_ENABLED=true      # Enable anchor checks
 - **Health endpoint** ➜ Exposes safe mode status ✅
 - **System health checks** ➜ Controls safe mode exit ✅
 
-### ✅ Idempotency Protection  
+### ✅ Idempotency Protection
 - **Duplicate Idempotency-Key** ➜ Second request is no-op ✅
 - **Cache management** ➜ Automatic TTL cleanup ✅
 - **Audit logging** ➜ Tracks all duplicate attempts ✅
@@ -233,12 +233,12 @@ curl -X POST http://localhost:5000/api/arbiter/strategy \
 ```python
 # Add memory with quota awareness
 memory_system.add_layered_memory(
-    'beliefs', 
+    'beliefs',
     'User prefers evening conversations',
     importance=0.7
 )
 
-# Monitor quota status  
+# Monitor quota status
 for layer, status in memory_system.get_memory_quota_status().items():
     print(f"{layer}: {status['usage_percentage']:.1f}% used")
 ```
@@ -268,7 +268,7 @@ for layer, status in memory_system.get_memory_quota_status().items():
 ProjectAlpha now features comprehensive graceful degradation and bounded growth:
 
 - **🔒 Safe Mode**: Complete system protection with emotion loop pausing and write locking
-- **🔄 Idempotency**: Duplicate request protection for all mutating operations  
+- **🔄 Idempotency**: Duplicate request protection for all mutating operations
 - **📡 Retry Logic**: Intelligent backoff for offline dependency handling
 - **💾 Memory Quotas**: Automatic pruning with importance-based retention
 - **⚙️ Configuration**: Centralized control via environment variables

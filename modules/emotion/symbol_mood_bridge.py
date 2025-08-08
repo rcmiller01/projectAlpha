@@ -1,7 +1,13 @@
-from modules.symbolic.symbol_engine import trigger_symbol, load_symbol_definitions, is_symbol_active, clear_symbol
 from modules.emotion.mood_engine import update_mood
+from modules.symbolic.symbol_engine import (
+    clear_symbol,
+    is_symbol_active,
+    load_symbol_definitions,
+    trigger_symbol,
+)
 from modules.thought.thought_engine import generate_thought
 from modules.voice.voice_output import speak
+
 
 def process_symbol(symbol_name):
     if not trigger_symbol(symbol_name):

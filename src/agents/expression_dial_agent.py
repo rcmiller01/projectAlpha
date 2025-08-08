@@ -3,7 +3,7 @@
 from typing import Dict
 
 # SECTION 1: Initialization & Configuration
-expression_axes: Dict[str, float] = {
+expression_axes: dict[str, float] = {
     "vulnerability": 0.5,
     "passion": 0.5,
     "playfulness": 0.5,
@@ -26,9 +26,7 @@ def set_expression_level(axis: str, value: float) -> None:
 def adjust_expression_by_context(context_signal: str) -> None:
     """Modulate expression dials in response to context signals."""
     if context_signal == "user_softened":
-        set_expression_level(
-            "vulnerability", min(expression_axes["vulnerability"] + 0.1, 1.0)
-        )
+        set_expression_level("vulnerability", min(expression_axes["vulnerability"] + 0.1, 1.0))
     elif context_signal == "boundary_crossing":
         set_expression_level("restraint", min(expression_axes["restraint"] + 0.2, 1.0))
     elif context_signal == "heightened_connection":
@@ -41,23 +39,17 @@ def modulate_output_template(template: str) -> str:
     modified_template = template
 
     if expression_axes["intimacy"] > 0.7:
-        modified_template = modified_template.replace(
-            "[tone]", "gentle and emotionally warm"
-        )
+        modified_template = modified_template.replace("[tone]", "gentle and emotionally warm")
     elif expression_axes["playfulness"] > 0.7:
-        modified_template = modified_template.replace(
-            "[tone]", "teasing and lighthearted"
-        )
+        modified_template = modified_template.replace("[tone]", "teasing and lighthearted")
     elif expression_axes["restraint"] > 0.7:
-        modified_template = modified_template.replace(
-            "[tone]", "reserved and thoughtful"
-        )
+        modified_template = modified_template.replace("[tone]", "reserved and thoughtful")
 
     return modified_template
 
 
 # SECTION 4: Optional External Input Handling
-def receive_external_adjustments(signal_dict: Dict[str, float]) -> None:
+def receive_external_adjustments(signal_dict: dict[str, float]) -> None:
     for axis, value in signal_dict.items():
         try:
             set_expression_level(axis, float(value))
@@ -76,4 +68,3 @@ def log_error(message: str) -> None:
     """Log errors related to expression dial operations."""
     with open("logs/expression_dial.log", "a", encoding="utf-8") as log:
         log.write(f"ERROR: {message}\n")
-

@@ -12,7 +12,7 @@ Successfully implemented a comprehensive AI Council system with round-robin sche
 {
   "council": {
     "coordinator_node": "core2",
-    "orchestrated_by": "eyla_core", 
+    "orchestrated_by": "eyla_core",
     "load_strategy": "contextual_priority",
     "members": [
       {
@@ -47,7 +47,7 @@ Successfully implemented a comprehensive AI Council system with round-robin sche
   "creativity": ["The Dreamer", "The Painter"],
   "analysis": ["The Analyst"],
   "reflection": ["The Mirror"],
-  
+
   # Pattern-based routing
   "dream": ["The Dreamer"],
   "analyze|logic": ["The Analyst"],
@@ -114,7 +114,7 @@ Successfully implemented a comprehensive AI Council system with round-robin sche
 - **Background Task**: Dream sequences and narrative exploration
 - **Routing**: Creativity requests, joy emotions, explicit "dreamer" mentions
 
-### 2. The Analyst  
+### 2. The Analyst
 - **Specialty**: Logic analysis, pattern extraction, inference validation
 - **Emotional Signature**: ColdClarity-01
 - **Model**: analyst-13b.Q4_K_M.gguf

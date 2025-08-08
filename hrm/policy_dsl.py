@@ -1,6 +1,8 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Literal
+from typing import Any, Dict, List, Literal, Optional
+
 import yaml
 
 Layer = Literal["identity", "beliefs", "ephemeral"]
@@ -31,14 +33,14 @@ class PolicyEngine:
     Evaluate HRM access decisions using a tiny declarative policy DSL loaded from YAML.
     """
 
-    def __init__(self, rules: List[PolicyRule]):
+    def __init__(self, rules: list[PolicyRule]):
         self._rules = rules
 
     @classmethod
-    def from_yaml(cls, path: str) -> "PolicyEngine":
-        with open(path, "r", encoding="utf-8") as f:
+    def from_yaml(cls, path: str) -> PolicyEngine:
+        with open(path, encoding="utf-8") as f:
             data = yaml.safe_load(f) or {}
-        rules: List[PolicyRule] = []
+        rules: list[PolicyRule] = []
         for item in data.get("rules", []):
             rules.append(
                 PolicyRule(
@@ -76,15 +78,20 @@ class PolicyEngine:
 
 # --- Convenience helpers for HRM APIs ---------------------------------------
 
+
 def evaluate_write(
     engine: PolicyEngine,
     *,
     layer: Layer,
     admin_token_ok: bool,
-    evidence: Optional[Dict[str, Any]] = None,
+    evidence: Optional[dict[str, Any]] = None,
 ) -> PolicyDecision:
-    has_evidence = bool(evidence and evidence.get("source") and evidence.get("confidence") is not None)
-    return engine.decide(layer=layer, action="write", is_admin=admin_token_ok, has_evidence=has_evidence)
+    has_evidence = bool(
+        evidence and evidence.get("source") and evidence.get("confidence") is not None
+    )
+    return engine.decide(
+        layer=layer, action="write", is_admin=admin_token_ok, has_evidence=has_evidence
+    )
 
 
 def evaluate_read(

@@ -193,11 +193,13 @@ class MirrorLoop:
             "truth_indicators": truth_count,
             "doubt_indicators": doubt_count,
             "truth_ratio": round(truth_ratio, 3),
-            "assessment": "high_truth"
-            if truth_ratio > 0.7
-            else "mixed"
-            if truth_ratio > 0.3
-            else "high_doubt",
+            "assessment": (
+                "high_truth"
+                if truth_ratio > 0.7
+                else "mixed"
+                if truth_ratio > 0.3
+                else "high_doubt"
+            ),
         }
 
     def _generate_insights(self, entries: list[dict], contradictions: list[dict]) -> list[str]:

@@ -1,4 +1,3 @@
-
 # modules/projection/consent_manager.py
 
 import json
@@ -6,12 +5,14 @@ import os
 
 CONFIG_PATH = "persona_configs"
 
+
 def load_config(persona):
     config_file = os.path.join(CONFIG_PATH, f"{persona}_config.json")
     if not os.path.exists(config_file):
         return {}
-    with open(config_file, "r", encoding="utf-8") as f:
+    with open(config_file, encoding="utf-8") as f:
         return json.load(f)
+
 
 def is_render_allowed(persona, mood, allow_nsfw, user="robert"):
     config = load_config(persona)
@@ -29,6 +30,7 @@ def is_render_allowed(persona, mood, allow_nsfw, user="robert"):
     if allow_nsfw and not nsfw_enabled:
         return False
     return True if mood_threshold in ["open", "selective"] else False
+
 
 def is_selective(persona, mood):
     config = load_config(persona)

@@ -10,7 +10,7 @@ and can be adjusted in real time.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 @dataclass
@@ -24,7 +24,7 @@ class DialState:
     intimacy: float = 0.5
     responsiveness: float = 0.5
 
-    def as_dict(self) -> Dict[str, float]:
+    def as_dict(self) -> dict[str, float]:
         return {
             "vulnerability": self.vulnerability,
             "passion": self.passion,
@@ -39,7 +39,7 @@ class ExpressionDialAgent:
     """Manage per-user expression dial state with realtime adjustments."""
 
     def __init__(self):
-        self.user_states: Dict[str, DialState] = {}
+        self.user_states: dict[str, DialState] = {}
 
     def _get_state(self, user_id: str) -> DialState:
         return self.user_states.setdefault(user_id, DialState())
@@ -50,15 +50,15 @@ class ExpressionDialAgent:
         if hasattr(state, axis):
             setattr(state, axis, max(0.0, min(1.0, value)))
 
-    def get_state(self, user_id: str) -> Dict[str, float]:
+    def get_state(self, user_id: str) -> dict[str, float]:
         """Return the current dial settings for a user."""
         return self._get_state(user_id).as_dict()
 
-    def apply_adjustments(self, user_id: str, adjustments: Dict[str, float]) -> None:
+    def apply_adjustments(self, user_id: str, adjustments: dict[str, float]) -> None:
         """Apply multiple axis adjustments at once."""
         for axis, val in adjustments.items():
             self.update_level(user_id, axis, val)
 
-    def store_preferences(self, user_id: str) -> Dict[str, Any]:
+    def store_preferences(self, user_id: str) -> dict[str, Any]:
         """Return a serializable preference snapshot."""
         return self.get_state(user_id)

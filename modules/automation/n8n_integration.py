@@ -373,11 +373,9 @@ class N8NWorkflowManager:
         return {
             "risk_factors": risk_factors,
             "overall_risk": overall_risk,
-            "risk_level": "low"
-            if overall_risk < 0.3
-            else "medium"
-            if overall_risk < 0.7
-            else "high",
+            "risk_level": (
+                "low" if overall_risk < 0.3 else "medium" if overall_risk < 0.7 else "high"
+            ),
         }
 
     def _evaluate_with_persona_values(
@@ -1167,9 +1165,9 @@ class N8NWorkflowManager:
                     k: {
                         **v,
                         "created_at": v["created_at"].isoformat(),
-                        "last_execution": v["last_execution"].isoformat()
-                        if v["last_execution"]
-                        else None,
+                        "last_execution": (
+                            v["last_execution"].isoformat() if v["last_execution"] else None
+                        ),
                     }
                     for k, v in self.active_workflows.items()
                 },

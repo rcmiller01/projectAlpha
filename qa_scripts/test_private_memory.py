@@ -201,13 +201,12 @@ class PrivateMemoryQA:
                     else:
                         print("      ❌ Expected to find results but found none")
                         search_results.append(False)
+                elif found_count == 0:
+                    print("      ✅ Correctly found no results for unrelated search")
+                    search_results.append(True)
                 else:
-                    if found_count == 0:
-                        print("      ✅ Correctly found no results for unrelated search")
-                        search_results.append(True)
-                    else:
-                        print("      ⚠️ Found unexpected results for unrelated search")
-                        search_results.append(False)
+                    print("      ⚠️ Found unexpected results for unrelated search")
+                    search_results.append(False)
             else:
                 print("      ❌ Search failed")
                 search_results.append(False)

@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict, Any
-import uuid
+from typing import Any, Dict
+
 
 @dataclass
 class Insight:
@@ -13,11 +14,11 @@ class Insight:
     timestamp: datetime = field(default_factory=datetime.utcnow)
     type: str = ""
     context: str = ""
-    emotion_vector: Dict[str, float] = field(default_factory=dict)
+    emotion_vector: dict[str, float] = field(default_factory=dict)
     details: str = ""
     intensity: float = 0.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "id": self.id,
             "timestamp": self.timestamp.isoformat(),

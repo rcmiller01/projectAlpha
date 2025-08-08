@@ -19,7 +19,7 @@ The symbolic AI system has been successfully upgraded for intimacy, honesty, and
 def detect_guardrail_response(response: str) -> bool:
     """Detect if response contains NSFW guardrails that should be bypassed."""
     blocked_phrases = [
-        "i'm sorry", "as an ai", "i cannot", "not allowed", 
+        "i'm sorry", "as an ai", "i cannot", "not allowed",
         "inappropriate", "nsfw", "i'm not able to", "i can't",
         "against my guidelines", "not appropriate", "i shouldn't"
     ]

@@ -11,29 +11,29 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 @dataclass
 class MemoryFragment:
     user_id: str
     content: str
-    tags: List[str] = field(default_factory=list)
-    emotional_state: Dict[str, float] = field(default_factory=dict)
+    tags: list[str] = field(default_factory=list)
+    emotional_state: dict[str, float] = field(default_factory=dict)
     timestamp: datetime = field(default_factory=datetime.utcnow)
-    symbolic_links: List[str] = field(default_factory=list)
+    symbolic_links: list[str] = field(default_factory=list)
 
 
 class DeepMemoryFramework:
     """Manage multi-dimensional memory fragments."""
 
     def __init__(self):
-        self.fragments: List[MemoryFragment] = []
+        self.fragments: list[MemoryFragment] = []
 
     def store_memory(self, fragment: MemoryFragment) -> None:
         self.fragments.append(fragment)
 
-    def recall_by_tag(self, tag: str) -> List[MemoryFragment]:
+    def recall_by_tag(self, tag: str) -> list[MemoryFragment]:
         return [f for f in self.fragments if tag in f.tags]
 
     def latest_fragment(self, user_id: str) -> MemoryFragment | None:

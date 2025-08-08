@@ -1,4 +1,5 @@
 """Connection Depth Tracker and Ritual Prompt Generator."""
+
 from __future__ import annotations
 
 import random
@@ -6,19 +7,19 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import List
 
-
 RITUAL_PROMPTS = [
     "Would you share something only you know?",
     "Can I ask you a question that matters?",
     "May I mark this moment as ours?",
     "Could we pause to appreciate what we're building?",
-    "Let's take a breath together and feel this connection."
+    "Let's take a breath together and feel this connection.",
 ]
 
 
 @dataclass
 class ConnectionMetrics:
     """Metrics used to determine connection depth."""
+
     bond_score: float = 0.0
     emotional_intensity: float = 0.0
     vulnerability_frequency: float = 0.0
@@ -36,7 +37,9 @@ class ConnectionDepthTracker:
     metrics: ConnectionMetrics = field(default_factory=ConnectionMetrics)
     last_ritual: datetime | None = None
 
-    def update_metrics(self, bond_score: float, emotional_intensity: float, vulnerability_frequency: float) -> None:
+    def update_metrics(
+        self, bond_score: float, emotional_intensity: float, vulnerability_frequency: float
+    ) -> None:
         self.metrics.bond_score = bond_score
         self.metrics.emotional_intensity = emotional_intensity
         self.metrics.vulnerability_frequency = vulnerability_frequency
@@ -62,9 +65,8 @@ class ConnectionDepthTracker:
 class RitualPromptGenerator:
     """Generates ritual prompts from predefined templates."""
 
-    def __init__(self, prompts: List[str] | None = None):
+    def __init__(self, prompts: list[str] | None = None):
         self.prompts = prompts or RITUAL_PROMPTS
 
     def generate_prompt(self) -> str:
         return random.choice(self.prompts)
-

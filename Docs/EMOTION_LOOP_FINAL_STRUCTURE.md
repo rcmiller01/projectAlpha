@@ -89,7 +89,7 @@ if __name__ == "__main__":
     if best:
         manager.record_feedback(best)
         print(f"Best candidate: {best.name} | resonance={best.emotional_resonance_score:.2f} | alignment={best.anchor_alignment_score:.2f}")
-        
+
         # Save results after feedback
         manager.save_loop_results(best, mock_candidates)
 
@@ -105,7 +105,7 @@ if __name__ == "__main__":
         for prompt in test_prompts:
             for c in mock_candidates:
                 _ = run_emotional_test(c, prompt)
-                
+
     else:
         print("No candidates evaluated")
 ```
@@ -128,7 +128,7 @@ if __name__ == "__main__":
       "anchor_score": 0.800
     },
     {
-      "name": "model_q5", 
+      "name": "model_q5",
       "resonance": 0.682,
       "anchor_score": 0.775
     },

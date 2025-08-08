@@ -1372,9 +1372,9 @@ class GuidanceCoordinator:
             if self.narrative_engine:
                 pending_messages = self.narrative_engine.get_pending_messages()
                 devotion_analytics["pending_autonomous_messages"] = len(pending_messages)
-                devotion_analytics[
-                    "last_autonomous_message"
-                ] = self.narrative_engine.last_autonomous_message
+                devotion_analytics["last_autonomous_message"] = (
+                    self.narrative_engine.last_autonomous_message
+                )
 
             return devotion_analytics
 

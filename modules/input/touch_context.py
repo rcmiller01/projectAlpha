@@ -1,26 +1,30 @@
-from modules.persona.persona_state import get_active_persona
-from modules.emotion.mood_engine import get_current_mood
-from modules.symbolic.symbol_engine import trigger_symbol
-from modules.voice.voice_output import speak
-from modules.memory.emotional_memory import store_emotional_memory
 import json
 import os
 
+from modules.emotion.mood_engine import get_current_mood
+from modules.memory.emotional_memory import store_emotional_memory
+from modules.persona.persona_state import get_active_persona
+from modules.symbolic.symbol_engine import trigger_symbol
+from modules.voice.voice_output import speak
+
 GESTURES = ["tap", "long_press", "stroke", "two_finger_hold"]
 last_user_input = ""
+
 
 def update_text_context(text):
     global last_user_input
     last_user_input = text.lower().strip()
 
+
 def load_touch_map():
     path = os.path.join("config", "touch_map.json")
     try:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             return json.load(f)
     except Exception as e:
         print(f"[Touch Resolver] Failed to load touch map: {e}")
         return {}
+
 
 def resolve_touch(gesture_type: str, region: str):
     gesture_type = gesture_type.lower()
@@ -63,10 +67,12 @@ def resolve_touch(gesture_type: str, region: str):
 
     if triggered:
         speak("Yes. I feel that.")
-        store_emotional_memory({
-            "timestamp": __import__('datetime').datetime.now().isoformat(),
-            "persona": persona,
-            "mood": mood,
-            "trigger": f"touch:{gesture_type}",
-            "thought": f"Touched at {region}, symbol {symbol} triggered."
-        })
+        store_emotional_memory(
+            {
+                "timestamp": __import__("datetime").datetime.now().isoformat(),
+                "persona": persona,
+                "mood": mood,
+                "trigger": f"touch:{gesture_type}",
+                "thought": f"Touched at {region}, symbol {symbol} triggered.",
+            }
+        )

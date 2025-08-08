@@ -222,9 +222,9 @@ class EventLogger:
             "event_types": type_counts,
             "severity_distribution": severity_counts,
             "module_activity": module_counts,
-            "most_active_module": max(module_counts.keys(), key=lambda k: module_counts[k])
-            if module_counts
-            else None,
+            "most_active_module": (
+                max(module_counts.keys(), key=lambda k: module_counts[k]) if module_counts else None
+            ),
         }
 
     def detect_emotional_patterns(self, hours: int = 24) -> list[str]:

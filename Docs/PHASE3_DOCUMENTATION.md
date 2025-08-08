@@ -20,7 +20,7 @@ The central orchestration system that synthesizes all psychological modules:
 ```python
 class GuidanceCoordinator:
     """Master coordinator that synthesizes all module guidance for MythoMax"""
-    
+
     async def analyze_and_guide(self, user_input: str, context: Dict) -> MasterGuidance:
         """
         Analyzes context across all psychological modules and synthesizes
@@ -305,19 +305,19 @@ user_profiles: {
     bonding_stage: Number,
     emotional_patterns: Array,
     therapeutic_history: Array,
-    
+
     // Development assistant data
     technical_skills: Array,
     project_contexts: Array,
     stress_patterns: Object,
     coding_preferences: Object,
-    
+
     // Creative collaboration data
     artistic_interests: Array,
     creative_blocks: Array,
     collaboration_history: Array,
     artistic_evolution: Array,
-    
+
     // Integrated data
     life_balance_metrics: Object,
     cross_domain_patterns: Array,
@@ -369,12 +369,12 @@ psychological_modules: {
   import AdaptiveModeIndicator from './AdaptiveModeIndicator.svelte';
   import PsychologicalGuidanceDisplay from './PsychologicalGuidanceDisplay.svelte';
   import ContextDetectionIndicator from './ContextDetectionIndicator.svelte';
-  
+
   let currentMode = 'hybrid';
   let activeGuidance = {};
   let userInput = '';
   let companionResponse = '';
-  
+
   async function sendMessage() {
     const response = await fetch('/api/companion/unified/interact', {
       method: 'POST',
@@ -385,7 +385,7 @@ psychological_modules: {
         context: detectContext()
       })
     });
-    
+
     const data = await response.json();
     companionResponse = data.companion_response;
     activeGuidance = data.active_guidance;
@@ -396,12 +396,12 @@ psychological_modules: {
 <div class="unified-companion">
   <AdaptiveModeIndicator bind:currentMode />
   <ContextDetectionIndicator />
-  
+
   <div class="conversation-area">
     <div class="companion-response">{companionResponse}</div>
     <PsychologicalGuidanceDisplay guidance={activeGuidance} />
   </div>
-  
+
   <div class="input-area">
     <input bind:value={userInput} placeholder="Talk to your companion..." />
     <button on:click={sendMessage}>Send</button>
@@ -514,7 +514,7 @@ services:
 
   redis:
     image: redis:alpine
-    
+
 volumes:
   mongodb_data:
 ```
@@ -556,31 +556,31 @@ from modules.core.guidance_coordinator import GuidanceCoordinator
 class TestUnifiedCompanion:
     async def test_personal_mode_detection(self):
         coordinator = GuidanceCoordinator("test_user")
-        
+
         result = await coordinator.analyze_and_guide(
             "I'm feeling sad and need someone to talk to",
             {"emotional_state": {"sadness": 0.8}}
         )
-        
+
         assert result.primary_mode == "personal"
         assert result.therapeutic_guidance is not None
         assert result.attachment_guidance is not None
-    
+
     async def test_development_mode_detection(self):
         coordinator = GuidanceCoordinator("test_user")
-        
+
         result = await coordinator.analyze_and_guide(
             "This JavaScript function isn't working properly",
             {"technical_context": {"language": "javascript"}}
         )
-        
+
         assert result.primary_mode == "development"
         assert result.utility_guidance is not None
         assert result.stress_management is not None
-    
+
     async def test_hybrid_mode_integration(self):
         coordinator = GuidanceCoordinator("test_user")
-        
+
         result = await coordinator.analyze_and_guide(
             "I'm stressed about this coding project and it's affecting my relationship",
             {
@@ -589,7 +589,7 @@ class TestUnifiedCompanion:
                 "relationship_context": {"conflict": True}
             }
         )
-        
+
         assert result.primary_mode == "hybrid"
         assert result.therapeutic_guidance is not None
         assert result.utility_guidance is not None

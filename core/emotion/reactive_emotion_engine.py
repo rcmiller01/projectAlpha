@@ -1,6 +1,7 @@
 # === reactive_emotion_engine.py ===
 import random
 
+
 class ReactiveEmotionEngine:
     def __init__(self):
         self.base_state = "neutral"

@@ -163,9 +163,9 @@ class IdleWatchdog:
         status = {
             "emotion_loop_paused": self.emotion_loop_paused,
             "pause_enabled": self.pause_emotion_on_idle,
-            "pause_time": self.emotion_loop_pause_time.isoformat()
-            if self.emotion_loop_pause_time
-            else None,
+            "pause_time": (
+                self.emotion_loop_pause_time.isoformat() if self.emotion_loop_pause_time else None
+            ),
             "pause_duration_seconds": None,
             "has_emotion_loop_instance": self.emotion_loop_instance is not None,
         }

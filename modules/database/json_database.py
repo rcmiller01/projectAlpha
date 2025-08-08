@@ -6,16 +6,16 @@ Provides simple persistent storage using a JSON file.
 
 import json
 import logging
-from typing import Dict, List, Any, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 from .database_interface import (
     DatabaseInterface,
-    UserProfile,
     InteractionRecord,
-    SessionRecord,
-    PsychologicalState,
     MemoryFragment,
+    PsychologicalState,
+    SessionRecord,
+    UserProfile,
 )
 
 
@@ -25,7 +25,7 @@ class JSONDatabase:
     def __init__(self, path: str):
         self.path = path
         self.logger = logging.getLogger(__name__)
-        self._data: Dict[str, Any] = {
+        self._data: dict[str, Any] = {
             "users": {},
             "interactions": [],
             "sessions": {},
@@ -35,7 +35,7 @@ class JSONDatabase:
 
     async def initialize(self) -> None:
         try:
-            with open(self.path, "r", encoding="utf-8") as f:
+            with open(self.path, encoding="utf-8") as f:
                 self._data = json.load(f)
             self.logger.info("JSON database loaded")
         except FileNotFoundError:
@@ -61,7 +61,7 @@ class JSONDatabase:
         data = self._data["users"].get(user_id)
         return UserProfile.from_dict(data) if data else None
 
-    async def update_user_profile(self, user_id: str, updates: Dict[str, Any]) -> bool:
+    async def update_user_profile(self, user_id: str, updates: dict[str, Any]) -> bool:
         if user_id not in self._data["users"]:
             return False
         self._data["users"][user_id].update(updates)
@@ -74,7 +74,9 @@ class JSONDatabase:
         self._save()
         return True
 
-    async def get_recent_interactions(self, user_id: str, limit: int = 20) -> List[InteractionRecord]:
+    async def get_recent_interactions(
+        self, user_id: str, limit: int = 20
+    ) -> list[InteractionRecord]:
         records = [r for r in self._data["interactions"] if r["user_id"] == user_id]
         records.sort(key=lambda x: x["timestamp"], reverse=True)
         return [InteractionRecord.from_dict(r) for r in records[:limit]]
@@ -96,8 +98,13 @@ class JSONDatabase:
         self._save()
         return True
 
-    async def get_relevant_memories(self, user_id: str, memory_type: Optional[str] = None,
-                                    tags: Optional[List[str]] = None, limit: int = 10) -> List[MemoryFragment]:
+    async def get_relevant_memories(
+        self,
+        user_id: str,
+        memory_type: Optional[str] = None,
+        tags: Optional[list[str]] = None,
+        limit: int = 10,
+    ) -> list[MemoryFragment]:
         memories = [m for m in self._data["memory_fragments"] if m["user_id"] == user_id]
         if memory_type:
             memories = [m for m in memories if m["memory_type"] == memory_type]

@@ -450,9 +450,11 @@ class CoreArbiter:
             "weighting_strategy": self.weighting_strategy.value,
             "resolution_strategy": response.resolution_strategy,
             "final_response": {
-                "output": response.final_output[:200] + "..."
-                if len(response.final_output) > 200
-                else response.final_output,
+                "output": (
+                    response.final_output[:200] + "..."
+                    if len(response.final_output) > 200
+                    else response.final_output
+                ),
                 "tone": response.tone,
                 "priority": response.priority,
                 "confidence": response.confidence,
@@ -854,9 +856,11 @@ class CoreArbiter:
             },
             "health_status": self._calculate_health_status(),
             "decision_count": len(self.decision_history),
-            "last_regulation": self.drift_state.last_regulation.isoformat()
-            if self.drift_state.last_regulation
-            else None,
+            "last_regulation": (
+                self.drift_state.last_regulation.isoformat()
+                if self.drift_state.last_regulation
+                else None
+            ),
         }
 
     def _calculate_health_status(self) -> str:

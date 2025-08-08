@@ -1,11 +1,12 @@
-import os
 import json
+import os
+import sys
 import unittest
 
-import sys
 sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 
 import personalization_signature as ps
+
 
 class TestPersonalizationSignature(unittest.TestCase):
     def setUp(self):
@@ -30,6 +31,7 @@ class TestPersonalizationSignature(unittest.TestCase):
     def tearDown(self):
         if os.path.exists(ps.USER_SIGNATURE_FILE):
             os.remove(ps.USER_SIGNATURE_FILE)
+
 
 if __name__ == "__main__":
     unittest.main()

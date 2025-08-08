@@ -239,10 +239,12 @@ async def save_interaction_data(
             timestamp=datetime.now(),
             user_input=request.user_input,
             companion_response=response_data["companion_response"],
-            interaction_type=InteractionType(response_data["context_analysis"]["primary_focus"])
-            if response_data["context_analysis"]["primary_focus"]
-            in [t.value for t in InteractionType]
-            else InteractionType.GENERAL_CONVERSATION,
+            interaction_type=(
+                InteractionType(response_data["context_analysis"]["primary_focus"])
+                if response_data["context_analysis"]["primary_focus"]
+                in [t.value for t in InteractionType]
+                else InteractionType.GENERAL_CONVERSATION
+            ),
             context_analysis=response_data["context_analysis"],
             emotional_state={},  # Will be populated by psychological modules
             technical_context={},
@@ -423,9 +425,11 @@ async def get_system_status():
         components = {
             "companion_system": "operational" if companion_system else "not_initialized",
             "database": "operational" if database else "not_initialized",
-            "mythomax_interface": "operational"
-            if companion_system and companion_system.mythomax
-            else "not_initialized",
+            "mythomax_interface": (
+                "operational"
+                if companion_system and companion_system.mythomax
+                else "not_initialized"
+            ),
         }
 
         overall_status = (

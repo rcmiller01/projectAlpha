@@ -13,6 +13,7 @@ Enhanced with security features:
 - Comprehensive loop execution logging
 - Input validation and sanitization
 """
+
 import json
 import logging
 import math
@@ -142,9 +143,9 @@ def log_loop_execution(
             "duration_ms": round(duration * 1000, 2),
             "emotions_processed": emotions_processed,
             "max_affective_delta": max(affective_deltas) if affective_deltas else 0,
-            "avg_affective_delta": sum(affective_deltas) / len(affective_deltas)
-            if affective_deltas
-            else 0,
+            "avg_affective_delta": (
+                sum(affective_deltas) / len(affective_deltas) if affective_deltas else 0
+            ),
             "status": status,
             "thread_id": threading.get_ident(),
         }

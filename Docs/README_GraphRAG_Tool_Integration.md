@@ -104,7 +104,7 @@ hrm = HRMRouter(
 
 # Process agent input with memory context
 result = hrm.process_agent_input(
-    "User wants personalized recommendations", 
+    "User wants personalized recommendations",
     agent_type="conductor"
 )
 
@@ -282,18 +282,18 @@ class EnhancedHRMCore(ExistingHRMCore):
     def __init__(self):
         super().__init__()
         self.graphrag_router = HRMRouter()
-    
+
     def process_input(self, input_text, context):
         # Use existing HRM processing
         base_result = super().process_input(input_text, context)
-        
+
         # Enhance with GraphRAG memory
         enhanced_context = self.graphrag_router.process_agent_input(
-            input_text, 
+            input_text,
             agent_type="hrm_core",
             context=context
         )
-        
+
         # Combine results
         base_result['memory_enhanced'] = enhanced_context
         return base_result
@@ -339,19 +339,19 @@ class SLiMAgent:
     def __init__(self, agent_id):
         self.agent_id = agent_id
         self.hrm_router = HRMRouter()
-    
+
     def autonomous_reasoning(self, input_text):
         # Get memory context
         context = self.hrm_router.process_agent_input(
-            input_text, 
+            input_text,
             agent_type="slim_agent"
         )
-        
+
         # Use tools autonomously
         for tool in context['suggested_tools']:
             result = self.hrm_router.execute_tool(tool, {})
             # Use tool results for reasoning
-        
+
         return self.generate_response(context)
 ```
 

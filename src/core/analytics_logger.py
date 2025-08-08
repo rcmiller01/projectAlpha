@@ -253,9 +253,11 @@ class AnalyticsLogger:
                 handler: {
                     "requests": stats["count"],
                     "avg_latency": round(stats["avg_latency"], 3),
-                    "success_rate": round(stats["success_count"] / stats["count"], 3)
-                    if stats["count"] > 0
-                    else 0.0,
+                    "success_rate": (
+                        round(stats["success_count"] / stats["count"], 3)
+                        if stats["count"] > 0
+                        else 0.0
+                    ),
                     "total_tokens": stats["total_tokens"],
                 }
                 for handler, stats in self.handler_stats.items()
@@ -299,11 +301,11 @@ class AnalyticsLogger:
                     "total_requests": daily_data["requests"],
                     "handlers_used": dict(daily_data["handlers_used"]),
                     "error_rate": round(daily_data["error_rate"], 3),
-                    "most_used_handler": max(
-                        daily_data["handlers_used"].items(), key=lambda x: x[1]
-                    )[0]
-                    if daily_data["handlers_used"]
-                    else "none",
+                    "most_used_handler": (
+                        max(daily_data["handlers_used"].items(), key=lambda x: x[1])[0]
+                        if daily_data["handlers_used"]
+                        else "none"
+                    ),
                 }
             else:
                 analytics["daily_breakdown"][date] = {

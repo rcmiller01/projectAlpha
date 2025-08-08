@@ -246,7 +246,7 @@ class CollaborativeGoalEngine:
         """Generate AI ideas for collaborative investment strategy"""
 
         target_amount = goal_data.get("target_amount", 0)
-        time_horizon = goal_data.get("target_date", None)
+        time_horizon = goal_data.get("target_date")
         risk_tolerance = partnership.user_motivation_profile.get("risk_tolerance", "moderate")
         goal_type = goal_data.get("type", "general")
 
@@ -632,9 +632,9 @@ class CollaborativeGoalEngine:
             "ai_commitment_level": partnership.ai_commitment_level,
             "collaboration_sessions": len(partnership.collaboration_history),
             "partnership_quality": self._assess_partnership_quality(partnership),
-            "growth_trajectory": "strengthening"
-            if partnership.partnership_strength > 0.6
-            else "developing",
+            "growth_trajectory": (
+                "strengthening" if partnership.partnership_strength > 0.6 else "developing"
+            ),
         }
 
     def _assess_partnership_quality(self, partnership: GoalPartnership) -> str:
@@ -746,9 +746,9 @@ class CollaborativeGoalEngine:
         elif len(partnership.collaboration_history) >= 5:
             celebration["has_celebration"] = True
             celebration["celebration_type"] = "consistency"
-            celebration[
-                "message"
-            ] = "🔥 Look at that consistency! You're building amazing financial habits!"
+            celebration["message"] = (
+                "🔥 Look at that consistency! You're building amazing financial habits!"
+            )
 
         return celebration if celebration["has_celebration"] else None
 

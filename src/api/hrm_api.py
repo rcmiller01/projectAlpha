@@ -31,16 +31,17 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
 
 from backend.ai_reformulator import PersonalityFormatter, PersonalityProfile
-from config.settings import get_settings
 
 # Import HRM components
 from backend.hrm_router import HRMMode, HRMResponse, HRMRouter, RequestType
 from backend.subagent_router import AgentType, SubAgentRouter
+from config.settings import get_settings
 from core.core_arbiter import CoreArbiter
 
 # Anchor system and dry-run utilities (with safe fallbacks)
 try:
-    from backend.anchor_system import AnchorSystem, AnchorResponse  # type: ignore
+    from backend.anchor_system import AnchorResponse, AnchorSystem  # type: ignore
+
     anchor_system = AnchorSystem()  # type: ignore[call-arg]
 except Exception:
     AnchorSystem = None  # type: ignore
@@ -48,8 +49,9 @@ except Exception:
     anchor_system = None
 
 try:
-    from common.dryrun import is_dry_run, format_dry_run_response  # type: ignore
+    from common.dryrun import format_dry_run_response, is_dry_run  # type: ignore
 except Exception:
+
     def is_dry_run() -> bool:  # type: ignore[misc]
         return False
 
@@ -61,6 +63,7 @@ except Exception:
         if status_code is not None:
             out["status_code"] = status_code
         return out
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -201,7 +204,7 @@ def check_layer_protection(component: str, config: dict[str, Any]) -> bool:
     """Check if configuration affects protected layers"""
     if component in ["hrm_router", "core_arbiter"]:
         # Check if any protected layers are being modified
-        for key in config.keys():
+        for key in config:
             if any(layer in key.lower() for layer in PROTECTED_LAYERS):
                 return True
     return False
@@ -223,6 +226,7 @@ system_metrics = {
 
 # Simple in-memory idempotency cache: key -> {"ts": epoch_seconds, "response": dict}
 _IDEMPOTENCY_CACHE: dict[str, dict[str, Any]] = {}
+
 
 def _purge_expired_idempotency(now_ts: float, ttl: int) -> None:
     """Lazily purge expired idempotency entries to bound memory usage."""
@@ -257,7 +261,9 @@ async def startup_event() -> None:
 
 
 @app.post("/hrm/process", response_model=HRMProcessResponse)
-async def process_message(request: HRMProcessRequest, background_tasks: BackgroundTasks) -> HRMProcessResponse:
+async def process_message(
+    request: HRMProcessRequest, background_tasks: BackgroundTasks
+) -> HRMProcessResponse:
     """
     Process a message through the complete HRM pipeline
 
@@ -630,9 +636,11 @@ async def get_analytics() -> HRMAnalyticsResponse:
 async def health_check() -> dict[str, Any]:
     """Simple health check endpoint"""
     return {
-        "status": "healthy"
-        if all([hrm_router, subagent_router, personality_formatter, core_arbiter])
-        else "unhealthy",
+        "status": (
+            "healthy"
+            if all([hrm_router, subagent_router, personality_formatter, core_arbiter])
+            else "unhealthy"
+        ),
         "timestamp": datetime.now().isoformat(),
         "components": {
             "hrm_router": hrm_router is not None,

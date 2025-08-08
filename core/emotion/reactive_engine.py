@@ -2,6 +2,7 @@
 
 from datetime import datetime
 
+
 class ReactiveStateEngine:
     def __init__(self):
         self.current_state = "baseline"
@@ -19,18 +20,20 @@ class ReactiveStateEngine:
             "surprise": "receptive",
             "love": "open",
             "shame": "quiet",
-            "pride": "radiant"
+            "pride": "radiant",
         }
 
         # Determine reactivity based on emotion
         new_state = modifiers.get(emotion_input, "baseline")
         self.current_state = new_state
-        self.state_history.append({
-            "timestamp": datetime.now().isoformat(),
-            "input": emotion_input,
-            "resulting_state": new_state,
-            "context": context_factors
-        })
+        self.state_history.append(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "input": emotion_input,
+                "resulting_state": new_state,
+                "context": context_factors,
+            }
+        )
         return new_state
 
     def get_current_state(self):

@@ -546,11 +546,9 @@ class RelationshipAI:
 
                     trends[metric] = {
                         "change": change,
-                        "direction": "improving"
-                        if change > 0
-                        else "declining"
-                        if change < 0
-                        else "stable",
+                        "direction": (
+                            "improving" if change > 0 else "declining" if change < 0 else "stable"
+                        ),
                         "magnitude": abs(change),
                     }
 

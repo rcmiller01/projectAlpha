@@ -10,11 +10,12 @@ Also exposes simple stubs for required services:
 - vector_retrieve(task, hrm_view)
 - reflector_call(draft, reason, affect)
 """
+
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass
 from typing import Any, List
-import time
 
 
 @dataclass(frozen=True)
@@ -26,7 +27,7 @@ class Step:
 
 @dataclass(frozen=True)
 class ChainPlan:
-    steps: List[Step]
+    steps: list[Step]
     budget_ms: int
     cost_cap: float
 
@@ -78,6 +79,7 @@ async def vector_retrieve(task: str, hrm_view: dict[str, Any] | None) -> dict[st
     In real integration, this should call the vector service client.
     """
     import asyncio
+
     t0 = time.perf_counter()
     # Simulate small network delay
     await asyncio.sleep(0.01)
@@ -91,13 +93,16 @@ async def vector_retrieve(task: str, hrm_view: dict[str, Any] | None) -> dict[st
     }
 
 
-async def reflector_call(draft_text: str, reason_notes: str, affect: dict[str, Any] | None) -> dict[str, Any]:
+async def reflector_call(
+    draft_text: str, reason_notes: str, affect: dict[str, Any] | None
+) -> dict[str, Any]:
     """Minimal reflector SLiM stub.
 
     Returns decision "accept" unless affect['force_revise'] is truthy.
     After first revise, the caller should not ask to revise again.
     """
     import asyncio
+
     t0 = time.perf_counter()
     await asyncio.sleep(0.005)
     decision = "revise" if (affect or {}).get("force_revise") else "accept"

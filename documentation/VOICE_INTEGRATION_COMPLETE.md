@@ -116,7 +116,7 @@ cd webapp/backend
 npm install
 npm run dev
 
-# Frontend (Terminal 2)  
+# Frontend (Terminal 2)
 cd webapp/frontend
 npm install
 npm start

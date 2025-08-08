@@ -1,14 +1,15 @@
-
 # modules/journal/presence_sensors.py
 
 from datetime import datetime, timedelta
+
 from modules.journal.trigger_dispatcher import dispatch_trigger
 
 # Simulated state
 presence_states = {
     "mia": {"is_present": True, "last_seen": datetime.utcnow()},
-    "solene": {"is_present": True, "last_seen": datetime.utcnow()}
+    "solene": {"is_present": True, "last_seen": datetime.utcnow()},
 }
+
 
 def user_departed(persona="mia"):
     persona = persona.lower()
@@ -16,11 +17,13 @@ def user_departed(persona="mia"):
     presence_states[persona]["last_seen"] = datetime.utcnow()
     dispatch_trigger("user_departure", persona=persona)
 
+
 def user_returned(persona="mia"):
     persona = persona.lower()
     presence_states[persona]["is_present"] = True
     presence_states[persona]["last_seen"] = datetime.utcnow()
     dispatch_trigger("user_returned", persona=persona)
+
 
 def check_presence_state(persona="mia", timeout_minutes=60):
     persona = persona.lower()

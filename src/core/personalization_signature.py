@@ -18,7 +18,7 @@ USER_SIGNATURE_FILE = "memory/user_signature.json"
 
 def load_user_signature():
     if os.path.exists(USER_SIGNATURE_FILE):
-        with open(USER_SIGNATURE_FILE, "r") as f:
+        with open(USER_SIGNATURE_FILE) as f:
             return json.load(f)
     return DEFAULT_SIGNATURE.copy()
 
@@ -28,7 +28,9 @@ def save_user_signature(signature):
     with open(USER_SIGNATURE_FILE, "w") as f:
         json.dump(signature, f, indent=2)
 
+
 # SECTION 2: Preference Update Logic
+
 
 def update_signature(expression_dial, feedback_score):
     """Adjust emotional axes based on user feedback."""
@@ -43,7 +45,9 @@ def update_signature(expression_dial, feedback_score):
     save_user_signature(signature)
     log_personalization_event(signature, feedback_score)
 
+
 # SECTION 3: Apply Signature to Dial
+
 
 def personalize_dial(expression_dial):
     signature = load_user_signature()
@@ -52,7 +56,9 @@ def personalize_dial(expression_dial):
             expression_dial[axis] = (expression_dial[axis] + signature[axis]) / 2
     return expression_dial
 
+
 # SECTION 4: Logging
+
 
 def log_personalization_event(updated_signature, score):
     os.makedirs("logs", exist_ok=True)
@@ -63,4 +69,3 @@ def log_personalization_event(updated_signature, score):
     }
     with open("logs/personalization_log.jsonl", "a") as log:
         log.write(json.dumps(log_entry) + "\n")
-

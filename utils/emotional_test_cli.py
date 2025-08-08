@@ -40,7 +40,7 @@ def create_test_candidates(names: Optional[list[str]] = None) -> list[Quantizati
     for name in names:
         # Extract quantization level
         q_level = None
-        for q in base_sizes.keys():
+        for q in base_sizes:
             if q in name.lower():
                 q_level = q
                 break

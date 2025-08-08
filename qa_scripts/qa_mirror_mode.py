@@ -94,9 +94,9 @@ class MirrorModeQA:
         # Configure mirror mode with moderate intensity and multiple types
         config_data = {
             "intensity": 0.6,
-            "enabled_types": reflection_types[:4]
-            if len(reflection_types) >= 4
-            else reflection_types,
+            "enabled_types": (
+                reflection_types[:4] if len(reflection_types) >= 4 else reflection_types
+            ),
             "include_confidence": True,
             "transparency_level": "medium",
         }

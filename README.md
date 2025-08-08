@@ -198,7 +198,7 @@ For complete automated emotional quantization with evaluation and tracking:
 # Run complete quantization loop
 python pass1_quantization_loop.py --loop --force
 
-# Test single quantization level  
+# Test single quantization level
 python pass1_quantization_loop.py --run-once q4_K_M --force
 
 # Review last run results

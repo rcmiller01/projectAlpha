@@ -623,9 +623,9 @@ class MemoryGraph:
                 "average_degree": round(avg_degree, 2),
                 "max_degree": max_degree,
                 "connected_components": len(components),
-                "largest_component_size": max(len(comp) for comp in components)
-                if components
-                else 0,
+                "largest_component_size": (
+                    max(len(comp) for comp in components) if components else 0
+                ),
                 "average_clustering_coefficient": round(avg_clustering, 3),
                 "density": round(
                     edge_count / (node_count * (node_count - 1)) if node_count > 1 else 0, 4

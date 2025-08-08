@@ -110,7 +110,7 @@ User Input → CoreArbiter → [HRM_R + HRM_E] → Decision Engine → Response
 ## 🔗 API Endpoints
 
 - `POST /api/arbiter/process` - Process input through CoreArbiter
-- `GET /api/arbiter/status` - System health and statistics  
+- `GET /api/arbiter/status` - System health and statistics
 - `GET /api/emotional_state` - Current emotional state
 - `POST /api/chat` - Main chat endpoint for UI
 - `GET /api/arbiter/trace` - Decision trace history
@@ -131,7 +131,7 @@ The mood ring displays 8 distinct emotional states:
 
 ### Weighting Strategies
 - **logic_dominant**: 80% reasoning, 20% emotional
-- **emotional_priority**: 30% reasoning, 70% emotional  
+- **emotional_priority**: 30% reasoning, 70% emotional
 - **harmonic**: 50% reasoning, 50% emotional
 - **adaptive**: Dynamic weighting based on context
 
@@ -173,7 +173,7 @@ The system is production-ready with comprehensive documentation, demos, and inte
 ## 🔄 Next Steps
 
 1. **Deploy UI Component** - Integrate React component into your application
-2. **Connect Real Models** - Replace mock HRM_R/HRM_E with actual implementations  
+2. **Connect Real Models** - Replace mock HRM_R/HRM_E with actual implementations
 3. **Monitor System** - Use trace logs and drift detection for optimization
 4. **Extend Features** - Add biometric integration, memory interfaces, ritual responses
 

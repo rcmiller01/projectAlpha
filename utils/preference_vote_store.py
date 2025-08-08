@@ -95,5 +95,3 @@ class PreferenceVoteStore:
         }
         with open(self.jsonl_path, "a", encoding="utf-8") as f:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
-
-
