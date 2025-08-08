@@ -5,9 +5,10 @@ Provides RBAC-protected endpoints for managing identity, beliefs, and ephemeral 
 
 import json
 import logging
+import os
 import sys
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
@@ -29,6 +30,8 @@ from common.security import (
     validate_json_schema,
 )
 from backend.data_portability import erase_user_data, export_user_data
+from backend.anchor_system import anchor, AnchorResponse
+from hrm.policy_dsl import PolicyEngine, evaluate_write
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -48,6 +51,21 @@ EPHEMERAL_PATH = Path("data/ephemeral_layer.json")
 # Ensure data directory exists
 IDENTITY_PATH.parent.mkdir(parents=True, exist_ok=True)
 
+# Initialize PolicyEngine from env or default example policy
+try:
+    default_policy_path = project_root / "hrm" / "policies" / "example.yaml"
+    policy_path_env = os.getenv("HRM_POLICY_PATH")
+    policy_path = Path(policy_path_env) if policy_path_env else default_policy_path
+    policy_engine = PolicyEngine.from_yaml(str(policy_path))
+    logger.info(f"PolicyEngine loaded from {policy_path}")
+except Exception as e:
+    logger.warning(f"Failed to load policy file: {e}; falling back to default example policy")
+    try:
+        policy_engine = PolicyEngine.from_yaml(str(default_policy_path))
+    except Exception as e2:
+        logger.error(f"Failed to load default policy as well: {e2}; using empty ruleset")
+        policy_engine = PolicyEngine([])
+
 # JSON Schemas
 IDENTITY_UPDATE_SCHEMA = {
     "type": "object",
@@ -65,7 +83,8 @@ BELIEFS_UPDATE_SCHEMA = {
         "beliefs": {"type": "object"},
         "preferences": {"type": "object"},
         "learned_patterns": {"type": "object"},
-        "associations": {"type": "array", "items": {"type": "object"}},
+    "associations": {"type": "array", "items": {"type": "object"}},
+    "evidence": {"type": "object"},
     },
 }
 
@@ -144,6 +163,35 @@ def get_identity() -> Response:
 def update_identity() -> Response:
     """Update identity layer data (admin only)."""
     try:
+        # Policy enforcement and anchor confirmation
+        sec = getattr(g, "security_context", {})
+        token_type = sec.get("token_type")
+        decision = evaluate_write(
+            policy_engine,
+            layer="identity",
+            admin_token_ok=(token_type == "admin"),
+            evidence=None,
+        )
+        if not decision.allowed:
+            audit_action(
+                "identity_policy_denied",
+                success=False,
+                policy_status=decision.status,
+                reason=decision.reason,
+            )
+            return jsonify({"error": "Forbidden", "policy_status": decision.status}), 403
+
+        anchor_action = {
+            "action_type": "memory_write",
+            "description": f"HRM identity write by {token_type or 'unknown'}",
+        }
+        anchor_resp = anchor.confirm(anchor_action, requester_id=token_type or "unknown")
+        if anchor_resp != AnchorResponse.APPROVED:
+            audit_action(
+                "identity_anchor_denied", success=False, anchor_result=anchor_resp.value
+            )
+            return jsonify({"error": "Anchor denied", "anchor_result": anchor_resp.value}), 403
+
         current_data = load_layer_data(IDENTITY_PATH)
         update_data = g.validated_data
 
@@ -153,7 +201,13 @@ def update_identity() -> Response:
 
         save_layer_data(IDENTITY_PATH, current_data)
 
-        audit_action("identity_updated", updated_fields=list(update_data.keys()), success=True)
+        audit_action(
+            "identity_updated",
+            updated_fields=list(update_data.keys()),
+            success=True,
+            policy_status=decision.status,
+            anchor_result=anchor_resp.value,
+        )
 
         return jsonify({"success": True, "message": "Identity layer updated"})
     except Exception as e:
@@ -181,16 +235,63 @@ def get_beliefs() -> Response:
 def update_beliefs() -> Response:
     """Update beliefs layer data (admin/system only)."""
     try:
+        sec = getattr(g, "security_context", {})
+        token_type = sec.get("token_type")
         current_data = load_layer_data(BELIEFS_PATH)
         update_data = g.validated_data
 
+        evidence = update_data.get("evidence") if isinstance(update_data, dict) else None
+        update_core = {k: v for k, v in update_data.items() if k != "evidence"}
+
+        decision = evaluate_write(
+            policy_engine,
+            layer="beliefs",
+            admin_token_ok=(token_type == "admin"),
+            evidence=evidence if isinstance(evidence, dict) else None,
+        )
+        if not decision.allowed:
+            status_code = 400 if decision.status == "needs_evidence" else 403
+            audit_action(
+                "beliefs_policy_denied",
+                success=False,
+                policy_status=decision.status,
+                reason=decision.reason,
+            )
+            return (
+                jsonify({
+                    "error": "Evidence required" if decision.status == "needs_evidence" else "Forbidden",
+                    "policy_status": decision.status,
+                    "reason": decision.reason,
+                }),
+                status_code,
+            )
+
+        anchor_action = {
+            "action_type": "memory_write",
+            "description": f"HRM beliefs write by {token_type or 'unknown'}",
+        }
+        anchor_resp = anchor.confirm(anchor_action, requester_id=token_type or "unknown")
+        if anchor_resp != AnchorResponse.APPROVED:
+            audit_action(
+                "beliefs_anchor_denied", success=False, anchor_result=anchor_resp.value
+            )
+            return jsonify({"error": "Anchor denied", "anchor_result": anchor_resp.value}), 403
+
         # Merge update with current data
-        current_data["data"].update(update_data)
+        current_data["data"].update(update_core)
+        if evidence:
+            current_data["last_evidence"] = evidence
         current_data["updated_by"] = getattr(g, "security_context", {}).get("request_id")
 
         save_layer_data(BELIEFS_PATH, current_data)
 
-        audit_action("beliefs_updated", updated_fields=list(update_data.keys()), success=True)
+        audit_action(
+            "beliefs_updated",
+            updated_fields=list(update_core.keys()),
+            success=True,
+            policy_status=decision.status,
+            anchor_result=anchor_resp.value,
+        )
 
         return jsonify({"success": True, "message": "Beliefs layer updated"})
     except Exception as e:
@@ -218,16 +319,57 @@ def get_ephemeral() -> Response:
 def update_ephemeral() -> Response:
     """Update ephemeral layer data (all authenticated users)."""
     try:
+        sec = getattr(g, "security_context", {})
+        token_type = sec.get("token_type")
         current_data = load_layer_data(EPHEMERAL_PATH)
         update_data = g.validated_data
+
+        decision = evaluate_write(
+            policy_engine,
+            layer="ephemeral",
+            admin_token_ok=(token_type == "admin"),
+            evidence=None,
+        )
+        if not decision.allowed:
+            audit_action(
+                "ephemeral_policy_denied",
+                success=False,
+                policy_status=decision.status,
+                reason=decision.reason,
+            )
+            return jsonify({"error": "Forbidden", "policy_status": decision.status}), 403
+
+        anchor_action = {
+            "action_type": "memory_write",
+            "description": f"HRM ephemeral write by {token_type or 'unknown'}",
+        }
+        anchor_resp = anchor.confirm(anchor_action, requester_id=token_type or "unknown")
+        if anchor_resp != AnchorResponse.APPROVED:
+            audit_action(
+                "ephemeral_anchor_denied", success=False, anchor_result=anchor_resp.value
+            )
+            return jsonify({"error": "Anchor denied", "anchor_result": anchor_resp.value}), 403
 
         # Merge update with current data
         current_data["data"].update(update_data)
         current_data["updated_by"] = getattr(g, "security_context", {}).get("request_id")
 
+        # Attach expiry metadata if policy specifies TTL
+        if decision.ttl_seconds:
+            expires_at = (datetime.utcnow() + timedelta(seconds=int(decision.ttl_seconds))).isoformat()
+            current_data["ttl_seconds"] = int(decision.ttl_seconds)
+            current_data["expires_at"] = expires_at
+
         save_layer_data(EPHEMERAL_PATH, current_data)
 
-        audit_action("ephemeral_updated", updated_fields=list(update_data.keys()), success=True)
+        audit_action(
+            "ephemeral_updated",
+            updated_fields=list(update_data.keys()),
+            success=True,
+            policy_status=decision.status,
+            ttl_seconds=decision.ttl_seconds,
+            anchor_result=anchor_resp.value,
+        )
 
         return jsonify({"success": True, "message": "Ephemeral layer updated"})
     except Exception as e:

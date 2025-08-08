@@ -22,6 +22,15 @@ from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
+import sys
+
+# Ensure project root on sys.path for local imports when run as a script
+PROJECT_ROOT = Path(__file__).parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Arbitration imports
+from router.arbitration import Candidate, AffectContext, HRMStateView, arbitrate
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -445,20 +454,88 @@ class SubAgentRouter:
         start_time = time.time()
 
         try:
-            # Step 1: Analyze intent and select agent
-            routing_decision = self._make_routing_decision(message, context)
-            selected_agent = self.agents[routing_decision.selected_agent]
+            # Step 1: Run a small cohort (2-3) of candidate agents in parallel and arbitrate
+            intent_based = self._make_routing_decision(message, context)
+            cohort = [intent_based.selected_agent]
+            # Add a contrasting candidate to enable disagreement resolution
+            if intent_based.selected_agent != AgentType.REASONING:
+                cohort.append(AgentType.REASONING)
+            if intent_based.selected_agent != AgentType.ANALYTICAL and len(cohort) < 3:
+                cohort.append(AgentType.ANALYTICAL)
 
-            logger.info(
-                f"🎯 Routing to {routing_decision.selected_agent.value} agent "
-                f"(confidence: {routing_decision.confidence:.2f})"
+            # Execute cohort
+            start = time.time()
+            results: List[tuple[AgentType, AgentResponse, float]] = []
+            async def run_agent(at: AgentType):
+                a = self.agents[at]
+                t0 = time.time()
+                r = await a.process(message, context)
+                return at, r, (time.time() - t0) * 1000.0
+
+            tasks = [run_agent(at) for at in cohort]
+            for coro in asyncio.as_completed(tasks):
+                at, r, latency_ms = await coro
+                results.append((at, r, latency_ms))
+
+            # Build candidates
+            candidates: List[Candidate] = []
+            for at, r, latency_ms in results:
+                # Heuristic cost_weight: lower cost (0.2) for Reasoning/Analytical, higher (0.6) for Creative/Emotional; default 0.4
+                if at in (AgentType.REASONING, AgentType.ANALYTICAL):
+                    cost_w = 0.2
+                elif at in (AgentType.CREATIVE, AgentType.EMOTIONAL):
+                    cost_w = 0.6
+                else:
+                    cost_w = 0.4
+                candidates.append(
+                    Candidate(
+                        slim_name=at.value,
+                        output=r.content,
+                        confidence=float(max(0.0, min(1.0, r.confidence))),
+                        cost_weight=cost_w,
+                        latency_ms=float(latency_ms),
+                    )
+                )
+
+            # Affect snapshot
+            affect = AffectContext(
+                arousal=float(context.get("affect_arousal", 0.0)),
+                valence=float(context.get("affect_valence", 0.0)),
+                drift=float(context.get("affect_drift", 0.0)),
+                risk_mode=str(context.get("risk_mode", "normal")),
             )
 
-            # Step 2: Process with selected agent
-            response = await selected_agent.process(message, context)
+            # HRM view (minimal)
+            belief_vectors = context.get("belief_vectors") or {}
+            if not isinstance(belief_vectors, dict):
+                belief_vectors = {}
+            hrm_view = HRMStateView(
+                identity_fingerprint=str(context.get("identity_fingerprint", "anon")),
+                belief_vectors={str(k): float(v) for k, v in belief_vectors.items() if isinstance(v, (int, float))},
+            )
+
+            result = arbitrate(candidates, hrm_view, affect)
+            # Pick the agent matching the winner
+            winner_agent_type = next((at for at, r, _ in results if at.value == result.winner.slim_name), intent_based.selected_agent)
+            selected_agent = self.agents[winner_agent_type]
+
+            logger.info(
+                "🧭 Arbitration result: %s | score=%.3f | affect=%s",
+                result.winner.slim_name,
+                result.rationale.get("best_score"),
+                json.dumps(result.rationale.get("affect", {})),
+            )
+            logger.debug("Arbitration rationale: %s", json.dumps(result.rationale))
+
+            # Step 2: Forward only the winner's response (reuse computed response)
+            winner_resp = next((r for at, r, _ in results if at.value == result.winner.slim_name), None)
+            if winner_resp is None:
+                # Fallback to running selected agent if not in cohort for any reason
+                winner_resp = await selected_agent.process(message, context)
+            response = winner_resp
 
             # Step 3: Update metrics
-            self._update_routing_metrics(routing_decision.selected_agent, True)
+            self._update_routing_metrics(winner_agent_type, True)
 
             return response
 
