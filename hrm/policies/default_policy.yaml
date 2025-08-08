@@ -1,0 +1,93 @@
+# HRM Policy Configuration
+# Defines access control policies for Human Relationship Management layers
+
+version: "1.0"
+description: "Default HRM policy configuration for ProjectAlpha"
+
+# Policy rules for HRM layer access
+policies:
+  # Identity layer policies (most restrictive)
+  identity_read:
+    description: "Read access to identity layer"
+    conditions:
+      - token_type: "admin"
+    decision: "allow"
+
+  identity_write:
+    description: "Write access to identity layer"
+    conditions:
+      - token_type: "admin"
+      - anchor_confirmation: true
+    decision: "allow"
+
+  identity_delete:
+    description: "Delete access to identity layer"
+    conditions:
+      - token_type: "admin"
+      - anchor_confirmation: true
+      - explicit_confirmation: true
+    decision: "deny"  # Identity deletion disabled by default
+
+  # Beliefs layer policies (moderate restrictions)
+  beliefs_read:
+    description: "Read access to beliefs layer"
+    conditions:
+      - token_type: ["admin", "system"]
+    decision: "allow"
+
+  beliefs_write:
+    description: "Write access to beliefs layer"
+    conditions:
+      - token_type: ["admin", "system"]
+      - evidence_required: true
+      - confidence_score: ">= 0.1"
+    decision: "allow"
+
+  beliefs_delete:
+    description: "Delete access to beliefs layer"
+    conditions:
+      - token_type: "admin"
+      - anchor_confirmation: true
+    decision: "allow"
+
+  # Ephemeral layer policies (least restrictive)
+  ephemeral_read:
+    description: "Read access to ephemeral layer"
+    conditions:
+      - token_type: ["admin", "system", "user"]
+    decision: "allow"
+
+  ephemeral_write:
+    description: "Write access to ephemeral layer"
+    conditions:
+      - token_type: ["admin", "system", "user"]
+      - session_valid: true
+    decision: "allow"
+
+  ephemeral_delete:
+    description: "Delete access to ephemeral layer"
+    conditions:
+      - token_type: ["admin", "system", "user"]
+    decision: "allow"
+
+# Default policy settings
+defaults:
+  anchor_timeout: 30  # seconds
+  require_evidence_for_beliefs: true
+  max_confidence_score: 1.0
+  min_confidence_score: 0.0
+  session_timeout: 3600  # seconds
+
+# Emergency overrides (use with caution)
+emergency:
+  enabled: false
+  bypass_anchor: false
+  emergency_token_required: true
+  log_all_emergency_access: true
+
+# Audit settings
+audit:
+  log_all_policy_decisions: true
+  log_denied_access: true
+  log_emergency_overrides: true
+  retention_days: 90

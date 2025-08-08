@@ -1,14 +1,15 @@
 """
 HRM Router for managing routing between different HRM subsystems.
-Provides centralized routing with security enforcement.
+Provides centralized routing with security enforcement and dry-run capabilities.
 """
 
 import json
 import logging
+import os
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent
@@ -23,6 +24,36 @@ from common.security import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Dry-run mode configuration
+DRY_RUN_MODE = os.getenv("DRY_RUN_MODE", "false").lower() == "true"
+
+# Idempotency cache for HRM operations
+hrm_idempotency_cache = {}
+HRM_CACHE_TTL = 1800  # 30 minutes
+
+
+def require_anchor_helper(operation: str, layer: str, data: dict[str, Any]) -> tuple[bool, str]:
+    """
+    Helper function to enforce anchor system requirements.
+    Returns (allowed, reason) tuple.
+    """
+    if DRY_RUN_MODE:
+        logger.info(f"[HRM_ROUTER] DRY-RUN - Would require anchor for {operation} on {layer}")
+        return True, "Dry-run mode - anchor skipped"
+
+    try:
+        # Import here to avoid circular imports
+        from backend.hrm_api import require_anchor_confirmation
+
+        return require_anchor_confirmation(layer, data, operation)
+    except ImportError:
+        logger.warning("[HRM_ROUTER] Anchor system not available")
+        return True, "Anchor system unavailable"
+    except Exception as e:
+        logger.error(f"[HRM_ROUTER] Anchor confirmation error: {e}")
+        return False, f"Anchor error: {e!s}"
+
 
 # Idempotency cache for HRM operations
 hrm_idempotency_cache = {}
