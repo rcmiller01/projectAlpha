@@ -29,9 +29,9 @@ def test_latency_timeout_enforced():
     import slim.agents  # noqa: F401
     from slim import agents
 
-    # simulate delay beyond contract limit (logic_high max ~1500ms)
+    # simulate delay beyond contract limit (logic_high max 5000ms)
     with pytest.raises(TimeoutError):
-        agents.logic_high("heavy task", {"n": 1}, simulate_ms=2000)
+        agents.logic_high("heavy task", {"n": 1}, simulate_ms=6000)
 
 
 def test_registry_metrics_populated_after_call():
@@ -39,10 +39,11 @@ def test_registry_metrics_populated_after_call():
     from slim import agents
     from slim.sdk import get_slim_status
 
-    # quick call within budget
-    agents.creative_metaphor("trust", "engineers")
+    # quick call within budget with all required parameters
+    agents.creative_metaphor("trust", "engineers", "formal", "simple")
     status = get_slim_status()
     m = status["metrics"]["creative_metaphor"]
     assert m["total_calls"] >= 1
-    # last_latency_ms may be None on very fast runs; allow either
-    assert "last_ok" in m
+    # Check successful calls metric
+    assert m["successful_calls"] >= 1
+    assert "avg_latency_ms" in m
