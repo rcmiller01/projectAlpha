@@ -21,7 +21,7 @@ import asyncio
 import json
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
@@ -31,11 +31,36 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
 
 from backend.ai_reformulator import PersonalityFormatter, PersonalityProfile
+from config.settings import get_settings
 
 # Import HRM components
 from backend.hrm_router import HRMMode, HRMResponse, HRMRouter, RequestType
 from backend.subagent_router import AgentType, SubAgentRouter
 from core.core_arbiter import CoreArbiter
+
+# Anchor system and dry-run utilities (with safe fallbacks)
+try:
+    from backend.anchor_system import AnchorSystem, AnchorResponse  # type: ignore
+    anchor_system = AnchorSystem()  # type: ignore[call-arg]
+except Exception:
+    AnchorSystem = None  # type: ignore
+    AnchorResponse = None  # type: ignore
+    anchor_system = None
+
+try:
+    from common.dryrun import is_dry_run, format_dry_run_response  # type: ignore
+except Exception:
+    def is_dry_run() -> bool:  # type: ignore[misc]
+        return False
+
+    def format_dry_run_response(
+        data: dict[str, Any], dry_run: bool, status_code: int | None = None
+    ) -> dict[str, Any]:  # type: ignore[misc]
+        out: dict[str, Any] = {"dry_run": dry_run}
+        out.update(data)
+        if status_code is not None:
+            out["status_code"] = status_code
+        return out
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -86,6 +111,19 @@ class HRMProcessResponse(BaseModel):
     agents_involved: list[str] = Field(..., description="List of agents involved in processing")
     personality_applied: str = Field(..., description="Personality profile applied")
     success: bool = Field(..., description="Whether processing was successful")
+
+
+class EvidenceWriteRequest(BaseModel):
+    """Evidence write payload with strict field validation (reject unknowns)."""
+
+    source: str = Field(..., min_length=1, max_length=512, description="Evidence source identifier")
+    confidence: float = Field(..., ge=0.0, le=1.0, description="Confidence score [0..1]")
+    timestamp: Optional[datetime] = Field(
+        default=None, description="When the evidence was gathered (ISO-8601)"
+    )
+
+    class Config:
+        extra = "forbid"
 
 
 class HRMStatusResponse(BaseModel):
@@ -182,6 +220,15 @@ system_metrics = {
     "failed_requests": 0,
     "total_processing_time": 0.0,
 }
+
+# Simple in-memory idempotency cache: key -> {"ts": epoch_seconds, "response": dict}
+_IDEMPOTENCY_CACHE: dict[str, dict[str, Any]] = {}
+
+def _purge_expired_idempotency(now_ts: float, ttl: int) -> None:
+    """Lazily purge expired idempotency entries to bound memory usage."""
+    expired = [k for k, v in _IDEMPOTENCY_CACHE.items() if (now_ts - float(v.get("ts", 0))) > ttl]
+    for k in expired:
+        _IDEMPOTENCY_CACHE.pop(k, None)
 
 
 @app.on_event("startup")
@@ -382,6 +429,87 @@ async def get_system_status() -> HRMStatusResponse:
     except Exception as e:
         logger.error(f"❌ Error getting system status: {e!s}")
         raise HTTPException(status_code=500, detail=f"Failed to get system status: {e!s}")
+
+
+@app.post("/hrm/evidence")
+async def write_evidence(
+    payload: EvidenceWriteRequest,
+    idempotency_key: Optional[str] = Header(None, alias="Idempotency-Key"),
+) -> dict[str, Any]:
+    """Validate and accept an evidence write payload with strict field hygiene.
+
+    - Rejects unknown fields via Pydantic extra='forbid'
+    - Supports optional Idempotency-Key header to avoid reprocessing
+    - Uses a simple in-memory TTL cache backed by IDEMPOTENCY_CACHE_TTL
+    """
+    try:
+        settings = get_settings()
+        ttl = int(getattr(settings, "IDEMPOTENCY_CACHE_TTL", 3600))
+    except Exception:
+        ttl = 3600
+
+    # Anchor confirmation gating
+    anchor_result_value = "APPROVED"
+    if anchor_system is not None and AnchorResponse is not None:
+        try:
+            _resp = anchor_system.confirm(
+                {
+                    "action_type": "memory_write",
+                    "description": "HRM evidence write",
+                    "target_layer": "beliefs.evidence",
+                    "payload_size": len(payload.model_dump_json()),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                },
+                requester_id="fastapi_hrm",
+            )
+            anchor_result_value = getattr(_resp, "value", getattr(_resp, "name", str(_resp)))
+            if anchor_result_value != "approved" and anchor_result_value != "APPROVED":
+                raise HTTPException(
+                    status_code=403,
+                    detail={
+                        "error": "Anchor denied",
+                        "anchor_result": anchor_result_value,
+                        "rationale": f"Anchor system returned {anchor_result_value}",
+                    },
+                )
+        except HTTPException:
+            raise
+        except Exception as e:
+            # If anchor system errors, deny by default for safety
+            raise HTTPException(status_code=403, detail=f"Anchor error: {e!s}")
+
+    # Dry-run: simulate acceptance and skip persistence
+    if is_dry_run():
+        sim: dict[str, Any] = {
+            "message": "Simulated evidence write (dry-run)",
+            "layer": "beliefs",
+            "anchor_result": anchor_result_value,
+        }
+        return format_dry_run_response(sim, dry_run=True)
+
+    now_ts = datetime.now().timestamp()
+    if idempotency_key:
+        _purge_expired_idempotency(now_ts, ttl)
+        cached = _IDEMPOTENCY_CACHE.get(idempotency_key)
+        if cached and (now_ts - float(cached.get("ts", 0))) <= ttl:
+            return cached["response"]
+
+    evidence: dict[str, Any] = {
+        "source": payload.source,
+        "confidence": payload.confidence,
+        "timestamp": payload.timestamp.isoformat() if payload.timestamp else None,
+    }
+    response: dict[str, Any] = {
+        "status": "accepted",
+        "evidence": evidence,
+        "idempotent": bool(idempotency_key),
+        "received_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+    if idempotency_key:
+        _IDEMPOTENCY_CACHE[idempotency_key] = {"ts": now_ts, "response": response}
+
+    return response
 
 
 @app.post("/hrm/config")

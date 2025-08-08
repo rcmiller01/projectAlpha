@@ -23,6 +23,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 import sys
+from flask import Flask, request, jsonify
 
 # Ensure project root on sys.path for local imports when run as a script
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -31,10 +32,21 @@ if str(PROJECT_ROOT) not in sys.path:
 
 # Arbitration imports
 from router.arbitration import Candidate, AffectContext, HRMStateView, arbitrate
+from router.chaining import Step, ChainPlan, plan_for, vector_retrieve, reflector_call
+from modules.autonomy.affect_governor import AffectGovernor
+from modules.autonomy.drift_watchdog import DriftWatchdog
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Optional Flask endpoint exposure
+app: Flask | None = None
+try:
+    # Create a lightweight app only if imported as part of Flask context elsewhere
+    app = Flask(__name__)
+except Exception:
+    app = None
 
 
 class AgentType(Enum):
@@ -435,7 +447,9 @@ class SubAgentRouter:
             "agent_utilization": {agent_type.value: 0 for agent_type in AgentType},
         }
 
-        logger.info(f"🤖 SubAgent Router initialized with {len(self.agents)} agents")
+    self.governor = AffectGovernor()
+    self.watchdog = DriftWatchdog()
+    logger.info(f"🤖 SubAgent Router initialized with {len(self.agents)} agents")
 
     async def route(self, message: str, context: Optional[dict[str, Any]] = None) -> AgentResponse:
         """
@@ -454,6 +468,19 @@ class SubAgentRouter:
         start_time = time.time()
 
         try:
+            # Apply affect governor and check watchdog before routing
+            drift_delta = float(context.get("affect_drift", 0.0))
+            gov = self.governor.apply({"source": context.get("source", "chat"), "delta": drift_delta})
+            wd = self.watchdog.update(drift_delta)
+            # If watchdog breach and risk_mode, prefer safe agent or early exit
+            risk_mode = str(context.get("risk_mode", "normal"))
+            if wd.get("breach") and risk_mode in ("cautious", "high"):
+                # Prefer reasoning agent (safer) or refuse long draft
+                if len(message) > 300:
+                    # refuse long form
+                    logger.warning(json.dumps({"event": "router.calm_down", "reason": "breach_long_form"}))
+                    safe_agent = self.agents[AgentType.REASONING]
+                    return await safe_agent.process("Let's take a breath and simplify the request.", context)
             # Step 1: Run a small cohort (2-3) of candidate agents in parallel and arbitrate
             intent_based = self._make_routing_decision(message, context)
             cohort = [intent_based.selected_agent]
@@ -546,6 +573,169 @@ class SubAgentRouter:
             # Fallback to conversational agent
             fallback_agent = self.agents[AgentType.CONVERSATIONAL]
             return await fallback_agent.process(message, context)
+
+    async def route_chain(
+        self,
+        task: str,
+        context: Optional[dict[str, Any]] = None,
+    ) -> dict[str, Any]:
+        """Execute MoE chaining plan with timeboxing and single reflect-revise.
+
+        Returns a JSON-serializable dict with logs, outputs, and timing.
+        """
+        if context is None:
+            context = {}
+
+        budget_ms = int(context.get("budget_ms", 2000))
+        cost_cap = float(context.get("cost_cap", 1.0))
+        t0 = time.perf_counter()
+        logs: list[dict[str, Any]] = []
+        cost_used = 0.0
+        elapsed_total_ms = 0
+
+        # Construct minimal hrm_view/affect for planner
+        hrm_view = {
+            "identity_fingerprint": str(context.get("identity_fingerprint", "anon")),
+            "belief_vectors": context.get("belief_vectors", {}),
+        }
+        affect = {
+            "arousal": float(context.get("affect_arousal", 0.0)),
+            "valence": float(context.get("affect_valence", 0.0)),
+            "drift": float(context.get("affect_drift", 0.0)),
+        }
+        # test control: allow a one-off forced revise
+        if context.get("force_revise"):
+            affect["force_revise"] = True
+
+        plan: ChainPlan = plan_for(task, hrm_view, affect, budget_ms=budget_ms, cost_cap=cost_cap)
+
+        # Breach check upfront for chaining: refuse long chain in risk mode
+        wd_pre = self.watchdog.update(float(context.get("affect_drift", 0.0)))
+        if wd_pre.get("breach") and str(context.get("risk_mode", "normal")) in ("cautious", "high"):
+            logger.warning(json.dumps({"event": "chain.calm_down", "reason": "watchdog_breach"}))
+            return {"status": 503, "error": "calm_down", "plan": [s.type for s in plan.steps]}
+
+        # Enforce total budget before starting
+        if plan.budget_ms <= 0:
+            over = 0
+            logger.info(json.dumps({"event": "chain.budget.invalid", "plan": [s.type for s in plan.steps]}))
+            return {"status": 429, "error": "invalid_budget", "overage_ms": over, "plan": [s.type for s in plan.steps]}
+
+        outputs: dict[str, Any] = {}
+        revision_used = False
+
+        for idx, step in enumerate(plan.steps):
+            now_ms = int((time.perf_counter() - t0) * 1000)
+            remaining_ms = plan.budget_ms - now_ms
+            if remaining_ms < 0:
+                # Budget exceeded
+                over = -remaining_ms
+                logger.warning(json.dumps({
+                    "event": "chain.budget.exceeded",
+                    "plan": [s.type for s in plan.steps],
+                    "budget_ms": plan.budget_ms,
+                    "overage_ms": over,
+                }))
+                return {
+                    "status": 429,
+                    "error": "budget_exceeded",
+                    "plan": [s.type for s in plan.steps],
+                    "budget_ms": plan.budget_ms,
+                    "overage_ms": over,
+                }
+
+            # Timebox per step
+            per_cap = min(step.max_ms, max(10, remaining_ms))
+
+            # Execute step
+            s_t0 = time.perf_counter()
+            step_log: dict[str, Any] = {"step": step.type, "target": step.target}
+            try:
+                if step.type == "retrieve":
+                    # timebox vector call
+                    resp = await asyncio.wait_for(
+                        vector_retrieve(task, hrm_view), timeout=max(0.01, per_cap / 1000.0)
+                    )
+                    outputs["retrieve"] = resp
+                    step_log.update({"_elapsed_ms": resp.get("_elapsed_ms", int((time.perf_counter() - s_t0) * 1000))})
+                elif step.type in ("reason", "draft"):
+                    # Map target to local AgentType if possible
+                    # Fallback to Reasoning for unknown
+                    at = AgentType.REASONING
+                    if step.target == "logic_code":
+                        at = AgentType.TECHNICAL
+                    elif step.target == "creative_metaphor":
+                        at = AgentType.CREATIVE
+                    elif step.target == "logic_high":
+                        at = AgentType.REASONING
+
+                    agent = self.agents.get(at, self.agents[AgentType.REASONING])
+                    a_t0 = time.perf_counter()
+                    resp = await asyncio.wait_for(
+                        agent.process(task, {**context, "affect": affect, "hrm_view": hrm_view}),
+                        timeout=max(0.05, per_cap / 1000.0),
+                    )
+                    elapsed_ms = int((time.perf_counter() - a_t0) * 1000)
+                    out_key = step.type
+                    outputs[out_key] = {"text": resp.content, "_elapsed_ms": elapsed_ms}
+                    step_log.update({"_elapsed_ms": elapsed_ms})
+                elif step.type == "reflect":
+                    draft_txt = (outputs.get("draft") or {}).get("text", "")
+                    reason_txt = (outputs.get("reason") or {}).get("text", "")
+                    resp = await asyncio.wait_for(
+                        reflector_call(draft_txt, reason_txt, affect),
+                        timeout=max(0.02, per_cap / 1000.0),
+                    )
+                    outputs["reflect"] = resp
+                    step_log.update({"_elapsed_ms": resp.get("_elapsed_ms", int((time.perf_counter() - s_t0) * 1000))})
+                    # If reflect requests revise and we haven't revised yet, insert one extra draft pass
+                    if resp.get("decision") == "revise" and not revision_used:
+                        revision_used = True
+                        # Add one more draft with smaller slice of remaining time
+                        rev_cap = max(50, int(0.2 * remaining_ms))
+                        a_t0 = time.perf_counter()
+                        agent = self.agents.get(AgentType.CREATIVE)
+                        if agent is None:
+                            agent = self.agents[AgentType.REASONING]
+                        resp2 = await asyncio.wait_for(
+                            agent.process(task, {**context, "affect": affect, "hrm_view": hrm_view, "revise": True}),
+                            timeout=max(0.05, rev_cap / 1000.0),
+                        )
+                        outputs["draft"] = {"text": resp2.content, "_elapsed_ms": int((time.perf_counter() - a_t0) * 1000), "revision": True}
+                        logs.append({"step": "draft", "target": agent.agent_type.value, "_elapsed_ms": outputs["draft"]["_elapsed_ms"], "revision": True})
+                else:
+                    step_log.update({"warning": "unknown_step"})
+            except Exception as e:
+                step_log.update({"error": str(e)})
+            finally:
+                logs.append(step_log)
+
+            # Post-step budget check
+            now_ms = int((time.perf_counter() - t0) * 1000)
+            if now_ms > plan.budget_ms:
+                over = now_ms - plan.budget_ms
+                logger.warning(json.dumps({
+                    "event": "chain.budget.exceeded",
+                    "plan": [s.type for s in plan.steps],
+                    "budget_ms": plan.budget_ms,
+                    "overage_ms": over,
+                }))
+                return {
+                    "status": 429,
+                    "error": "budget_exceeded",
+                    "plan": [s.type for s in plan.steps],
+                    "budget_ms": plan.budget_ms,
+                    "overage_ms": over,
+                }
+
+        elapsed_total_ms = int((time.perf_counter() - t0) * 1000)
+        return {
+            "status": 200,
+            "plan": [s.type for s in plan.steps],
+            "logs": logs,
+            "outputs": outputs,
+            "_elapsed_ms": elapsed_total_ms,
+        }
 
     def _make_routing_decision(self, message: str, context: dict[str, Any]) -> RoutingDecision:
         """Make intelligent routing decision based on message analysis"""
@@ -849,3 +1039,23 @@ if __name__ == "__main__":
 
     # Run demo
     asyncio.run(demo())
+
+# Flask route for chaining (if app is available)
+if app is not None:
+    router_instance = SubAgentRouter()
+
+    @app.route("/route/chain", methods=["POST"])
+    def chain_route_handler():
+        body = request.json or {}
+        task = body.get("task", "")
+        context = body.get("context", {})
+        # Propagate force_revise flag for testability
+        if body.get("force_revise"):
+            context["force_revise"] = True
+        loop = asyncio.new_event_loop()
+        try:
+            res = loop.run_until_complete(router_instance.route_chain(task, context))
+        finally:
+            loop.close()
+        status = int(res.get("status", 200))
+        return jsonify(res), status

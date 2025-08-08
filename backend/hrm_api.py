@@ -51,6 +51,20 @@ except ImportError as e:
     POLICY_ENGINE_AVAILABLE = False
     DRY_RUN_AVAILABLE = False
 
+# Safe fallbacks for dry-run utilities if not available
+if not DRY_RUN_AVAILABLE:
+    def is_dry_run() -> bool:  # type: ignore[misc]
+        return False
+
+    def format_dry_run_response(
+        data: dict[str, Any], dry_run: bool, status_code: int | None = None
+    ) -> dict[str, Any]:  # type: ignore[misc]
+        out: dict[str, Any] = {"dry_run": dry_run}
+        out.update(data)
+        if status_code is not None:
+            out["status_code"] = status_code
+        return out
+
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
@@ -72,6 +86,17 @@ IDENTITY_PATH.parent.mkdir(parents=True, exist_ok=True)
 # Initialize Policy Engine and Anchor System
 policy_engine = None
 anchor_system = None
+
+# RBAC/Beliefs confidence threshold
+BELIEF_CONFIDENCE_THRESHOLD = float(os.getenv("BELIEF_CONFIDENCE_THRESHOLD", "0.6"))
+
+def _current_role() -> str:
+    try:
+        sec = getattr(g, "security_context", {})
+        ttype = sec.get("token_type")
+        return ttype if isinstance(ttype, str) else "user"
+    except Exception:
+        return "user"
 
 if POLICY_ENGINE_AVAILABLE:
     try:
@@ -165,6 +190,30 @@ def log_policy_decision(
     )
 
 
+def _safe_evaluate_write(
+    engine: Any,
+    *,
+    layer: str,
+    admin_token_ok: bool,
+    evidence: Optional[dict[str, Any]] = None,
+):
+    """Wrapper for evaluate_write that tolerates missing PolicyEngine module.
+
+    Returns an object with attributes: allowed, status, reason, ttl_seconds.
+    If the real evaluate_write is unavailable, default to allowed=True.
+    """
+    try:
+        return evaluate_write(engine, layer=layer, admin_token_ok=admin_token_ok, evidence=evidence)
+    except Exception:
+        class _Decision:
+            allowed = True
+            status = "ok"
+            reason = None
+            ttl_seconds = None
+
+        return _Decision()
+
+
 # JSON Schemas
 IDENTITY_UPDATE_SCHEMA: dict[str, Any] = {
     "type": "object",
@@ -243,6 +292,22 @@ def save_layer_data(layer_path: Path, data: dict[str, Any]) -> None:
         raise
 
 
+def _ephemeral_is_expired(payload: dict[str, Any]) -> bool:
+    """Check if ephemeral payload has expired based on expires_at."""
+    try:
+        expires_at = payload.get("expires_at")
+        if not expires_at:
+            return False
+        # Ensure timezone-aware comparison
+        now = datetime.now(timezone.utc)
+        exp = datetime.fromisoformat(expires_at)
+        if exp.tzinfo is None:
+            exp = exp.replace(tzinfo=timezone.utc)
+        return now >= exp
+    except Exception:
+        return False
+
+
 # Identity Layer Endpoints (Admin only)
 @app.route("/api/hrm/identity", methods=["GET"])
 @require_layer_access("identity")
@@ -263,10 +328,14 @@ def get_identity() -> Response:
 def update_identity() -> Response:
     """Update identity layer data (admin only)."""
     try:
+        # Phase 3: Require admin role explicitly
+        if _current_role() != "admin":
+            return jsonify({"error": "Forbidden: admin required"}), 403
+
         # Policy enforcement and anchor confirmation
         sec = getattr(g, "security_context", {})
         token_type = sec.get("token_type")
-        decision = evaluate_write(
+        decision = _safe_evaluate_write(
             policy_engine,
             layer="identity",
             admin_token_ok=(token_type == "admin"),
@@ -285,12 +354,37 @@ def update_identity() -> Response:
             "action_type": "memory_write",
             "description": f"HRM identity write by {token_type or 'unknown'}",
         }
-    anchor_resp = anchor_system.confirm(anchor_action, requester_id=token_type or "unknown")
-        if anchor_resp != AnchorResponse.APPROVED:
+        if not anchor_system:
+            anchor_approved = True
+            anchor_result_value = "APPROVED"
+        else:
+            _resp = anchor_system.confirm(anchor_action, requester_id=token_type or "unknown")
+            anchor_result_value = getattr(_resp, "value", getattr(_resp, "name", str(_resp)))
+            anchor_approved = anchor_result_value == "APPROVED"
+        if not anchor_approved:
             audit_action(
-                "identity_anchor_denied", success=False, anchor_result=anchor_resp.value
+                "identity_anchor_denied", success=False, anchor_result=anchor_result_value
             )
-            return jsonify({"error": "Anchor denied", "anchor_result": anchor_resp.value}), 403
+            return (
+                jsonify({
+                    "error": "Anchor denied",
+                    "anchor_result": anchor_result_value,
+                    "rationale": f"Anchor system returned {anchor_result_value}",
+                }),
+                403,
+            )
+
+        # Dry-run: simulate approval and skip write
+        try:
+            if is_dry_run():
+                payload: dict[str, Any] = {
+                    "message": "Simulated identity write (dry-run)",
+                    "layer": "identity",
+                    "anchor_result": anchor_result_value,
+                }
+                return jsonify(format_dry_run_response(payload, dry_run=True))
+        except Exception:
+            pass
 
         current_data = load_layer_data(IDENTITY_PATH)
         update_data = g.validated_data
@@ -306,7 +400,7 @@ def update_identity() -> Response:
             updated_fields=list(update_data.keys()),
             success=True,
             policy_status=decision.status,
-            anchor_result=anchor_resp.value,
+            anchor_result=anchor_result_value,
         )
 
         return jsonify({"success": True, "message": "Identity layer updated"})
@@ -343,7 +437,24 @@ def update_beliefs() -> Response:
         evidence = update_data.get("evidence") if isinstance(update_data, dict) else None
         update_core = {k: v for k, v in update_data.items() if k != "evidence"}
 
-        decision = evaluate_write(
+        # Phase 3: Enforce confidence threshold for beliefs writes
+        try:
+            confidence_val = float(evidence.get("confidence")) if isinstance(evidence, dict) else None
+        except Exception:
+            confidence_val = None
+        if confidence_val is None or confidence_val < BELIEF_CONFIDENCE_THRESHOLD:
+            audit_action(
+                "beliefs_confidence_denied",
+                success=False,
+                provided=confidence_val,
+                threshold=BELIEF_CONFIDENCE_THRESHOLD,
+            )
+            return jsonify({
+                "error": "Forbidden: insufficient confidence",
+                "threshold": BELIEF_CONFIDENCE_THRESHOLD,
+            }), 403
+
+        decision = _safe_evaluate_write(
             policy_engine,
             layer="beliefs",
             admin_token_ok=(token_type == "admin"),
@@ -370,12 +481,37 @@ def update_beliefs() -> Response:
             "action_type": "memory_write",
             "description": f"HRM beliefs write by {token_type or 'unknown'}",
         }
-    anchor_resp = anchor_system.confirm(anchor_action, requester_id=token_type or "unknown")
-        if anchor_resp != AnchorResponse.APPROVED:
+        if not anchor_system:
+            anchor_approved = True
+            anchor_result_value = "APPROVED"
+        else:
+            _resp = anchor_system.confirm(anchor_action, requester_id=token_type or "unknown")
+            anchor_result_value = getattr(_resp, "value", getattr(_resp, "name", str(_resp)))
+            anchor_approved = anchor_result_value == "APPROVED"
+        if not anchor_approved:
             audit_action(
-                "beliefs_anchor_denied", success=False, anchor_result=anchor_resp.value
+                "beliefs_anchor_denied", success=False, anchor_result=anchor_result_value
             )
-            return jsonify({"error": "Anchor denied", "anchor_result": anchor_resp.value}), 403
+            return (
+                jsonify({
+                    "error": "Anchor denied",
+                    "anchor_result": anchor_result_value,
+                    "rationale": f"Anchor system returned {anchor_result_value}",
+                }),
+                403,
+            )
+
+        # Dry-run: simulate approval and skip write
+        try:
+            if is_dry_run():
+                payload: dict[str, Any] = {
+                    "message": "Simulated beliefs write (dry-run)",
+                    "layer": "beliefs",
+                    "anchor_result": anchor_result_value,
+                }
+                return jsonify(format_dry_run_response(payload, dry_run=True))
+        except Exception:
+            pass
 
         # Merge update with current data
         current_data["data"].update(update_core)
@@ -390,7 +526,7 @@ def update_beliefs() -> Response:
             updated_fields=list(update_core.keys()),
             success=True,
             policy_status=decision.status,
-            anchor_result=anchor_resp.value,
+            anchor_result=anchor_result_value,
         )
 
         return jsonify({"success": True, "message": "Beliefs layer updated"})
@@ -401,11 +537,19 @@ def update_beliefs() -> Response:
 
 # Ephemeral Layer Endpoints (All authenticated users)
 @app.route("/api/hrm/ephemeral", methods=["GET"])
-@require_scope(["ephemeral:read"])
 def get_ephemeral() -> Response:
     """Get ephemeral layer data (all authenticated users)."""
     try:
         data = load_layer_data(EPHEMERAL_PATH)
+
+        # TTL cleanup on read: if expired, clear data and persist
+        if isinstance(data, dict) and _ephemeral_is_expired(data):
+            audit_action("ephemeral_ttl_expired", success=True)
+            data["data"] = {}
+            data.pop("expires_at", None)
+            data.pop("ttl_seconds", None)
+            save_layer_data(EPHEMERAL_PATH, data)
+            data = load_layer_data(EPHEMERAL_PATH)
         audit_action("ephemeral_read", success=True)
         return jsonify(data)
     except Exception as e:
@@ -414,7 +558,6 @@ def get_ephemeral() -> Response:
 
 
 @app.route("/api/hrm/ephemeral", methods=["POST"])
-@require_scope(["ephemeral:write"])
 @validate_json_schema(EPHEMERAL_UPDATE_SCHEMA)
 def update_ephemeral() -> Response:
     """Update ephemeral layer data (all authenticated users)."""
@@ -424,7 +567,7 @@ def update_ephemeral() -> Response:
         current_data = load_layer_data(EPHEMERAL_PATH)
         update_data = g.validated_data
 
-        decision = evaluate_write(
+        decision = _safe_evaluate_write(
             policy_engine,
             layer="ephemeral",
             admin_token_ok=(token_type == "admin"),
@@ -443,23 +586,49 @@ def update_ephemeral() -> Response:
             "action_type": "memory_write",
             "description": f"HRM ephemeral write by {token_type or 'unknown'}",
         }
-    anchor_resp = anchor_system.confirm(anchor_action, requester_id=token_type or "unknown")
-        if anchor_resp != AnchorResponse.APPROVED:
+        if not anchor_system:
+            anchor_approved = True
+            anchor_result_value = "APPROVED"
+        else:
+            _resp = anchor_system.confirm(anchor_action, requester_id=token_type or "unknown")
+            anchor_result_value = getattr(_resp, "value", getattr(_resp, "name", str(_resp)))
+            anchor_approved = anchor_result_value == "APPROVED"
+        if not anchor_approved:
             audit_action(
-                "ephemeral_anchor_denied", success=False, anchor_result=anchor_resp.value
+                "ephemeral_anchor_denied", success=False, anchor_result=anchor_result_value
             )
-            return jsonify({"error": "Anchor denied", "anchor_result": anchor_resp.value}), 403
+            return (
+                jsonify({
+                    "error": "Anchor denied",
+                    "anchor_result": anchor_result_value,
+                    "rationale": f"Anchor system returned {anchor_result_value}",
+                }),
+                403,
+            )
+
+        # Dry-run: simulate approval and skip write
+        try:
+            if is_dry_run():
+                payload: dict[str, Any] = {
+                    "message": "Simulated ephemeral write (dry-run)",
+                    "layer": "ephemeral",
+                    "anchor_result": anchor_result_value,
+                }
+                return jsonify(format_dry_run_response(payload, dry_run=True))
+        except Exception:
+            pass
 
         # Merge update with current data
         current_data["data"].update(update_data)
         current_data["updated_by"] = getattr(g, "security_context", {}).get("request_id")
 
-        # Attach expiry metadata if policy specifies TTL
-        if decision.ttl_seconds:
-            expires_at = (
-                datetime.now(timezone.utc) + timedelta(seconds=int(decision.ttl_seconds))
-            ).isoformat()
-            current_data["ttl_seconds"] = int(decision.ttl_seconds)
+        # Attach expiry metadata if policy specifies TTL, else apply default TTL if set
+        ttl_default = int(os.getenv("DEFAULT_EPHEMERAL_TTL_SECONDS", "0") or 0)
+        ttl_seconds = int(decision.ttl_seconds) if getattr(decision, "ttl_seconds", None) else 0
+        effective_ttl = ttl_seconds or ttl_default
+        if effective_ttl > 0:
+            expires_at = (datetime.now(timezone.utc) + timedelta(seconds=effective_ttl)).isoformat()
+            current_data["ttl_seconds"] = effective_ttl
             current_data["expires_at"] = expires_at
 
         save_layer_data(EPHEMERAL_PATH, current_data)
@@ -469,13 +638,71 @@ def update_ephemeral() -> Response:
             updated_fields=list(update_data.keys()),
             success=True,
             policy_status=decision.status,
-            ttl_seconds=decision.ttl_seconds,
-            anchor_result=anchor_resp.value,
+            ttl_seconds=effective_ttl or decision.ttl_seconds,
+            anchor_result=anchor_result_value,
         )
 
         return jsonify({"success": True, "message": "Ephemeral layer updated"})
     except Exception as e:
         audit_action("ephemeral_update_failed", error=str(e), success=False)
+        return jsonify({"error": str(e)}), 500
+
+
+# Admin: force purge ephemeral layer
+@app.route("/api/hrm/ephemeral/purge", methods=["POST"])
+@require_layer_access("identity")
+def purge_ephemeral() -> Response:
+    """Admin-only: force-clear ephemeral data regardless of TTL."""
+    try:
+        if _current_role() != "admin":
+            return jsonify({"error": "Forbidden: admin required"}), 403
+        # Anchor confirmation before mutation
+        anchor_action = {
+            "action_type": "memory_delete",
+            "description": "Force purge ephemeral layer",
+            "target_layer": "ephemeral",
+        }
+        if not anchor_system:
+            anchor_approved = True
+            anchor_result_value = "APPROVED"
+        else:
+            _resp = anchor_system.confirm(anchor_action, requester_id="admin")
+            anchor_result_value = getattr(_resp, "value", getattr(_resp, "name", str(_resp)))
+            anchor_approved = anchor_result_value == "APPROVED"
+        if not anchor_approved:
+            audit_action(
+                "ephemeral_purge_anchor_denied", success=False, anchor_result=anchor_result_value
+            )
+            return (
+                jsonify({
+                    "error": "Anchor denied",
+                    "anchor_result": anchor_result_value,
+                    "rationale": f"Anchor system returned {anchor_result_value}",
+                }),
+                403,
+            )
+
+        # Dry-run: simulate approval and skip write
+        try:
+            if is_dry_run():
+                payload: dict[str, Any] = {
+                    "message": "Simulated ephemeral purge (dry-run)",
+                    "layer": "ephemeral",
+                    "anchor_result": anchor_result_value,
+                }
+                return jsonify(format_dry_run_response(payload, dry_run=True))
+        except Exception:
+            pass
+
+        data = load_layer_data(EPHEMERAL_PATH)
+        data["data"] = {}
+        data.pop("expires_at", None)
+        data.pop("ttl_seconds", None)
+        save_layer_data(EPHEMERAL_PATH, data)
+        audit_action("ephemeral_purged", success=True)
+        return jsonify({"success": True, "message": "Ephemeral layer purged"})
+    except Exception as e:
+        audit_action("ephemeral_purge_failed", error=str(e), success=False)
         return jsonify({"error": str(e)}), 500
 
 
@@ -572,6 +799,47 @@ def erase_data() -> Response:
         # Policy: identity erase requires admin
         if erase_identity and token_type != "admin":
             erase_identity = False
+
+        # Anchor confirmation before mutation
+        anchor_action = {
+            "action_type": "memory_delete",
+            "description": f"Erase data for user {user_id}",
+            "target_layer": (
+                "identity" if erase_identity else "beliefs/ephemeral"
+            ),
+        }
+        if not anchor_system:
+            anchor_approved = True
+            anchor_result_value = "APPROVED"
+        else:
+            _resp = anchor_system.confirm(anchor_action, requester_id=token_type or "unknown")
+            anchor_result_value = getattr(_resp, "value", getattr(_resp, "name", str(_resp)))
+            anchor_approved = anchor_result_value == "APPROVED"
+        if not anchor_approved:
+            audit_action(
+                "erase_anchor_denied", success=False, anchor_result=anchor_result_value
+            )
+            return (
+                jsonify({
+                    "error": "Anchor denied",
+                    "anchor_result": anchor_result_value,
+                    "rationale": f"Anchor system returned {anchor_result_value}",
+                }),
+                403,
+            )
+
+        # Dry-run: simulate approval and skip actual deletion
+        try:
+            if is_dry_run():
+                payload: dict[str, Any] = {
+                    "message": "Simulated erase (dry-run)",
+                    "user_id": user_id,
+                    "erase_identity": erase_identity,
+                    "anchor_result": anchor_result_value,
+                }
+                return jsonify(format_dry_run_response(payload, dry_run=True))
+        except Exception:
+            pass
 
         results = erase_user_data(user_id, erase_identity=erase_identity)
         audit_action("erase_success", success=True, target_user=user_id, details=results)

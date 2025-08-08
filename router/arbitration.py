@@ -19,6 +19,8 @@ from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Any, Optional, cast
+from time import perf_counter
+from collections import deque
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent
@@ -53,6 +55,67 @@ except Exception as e:
 
 
 logger = logging.getLogger(__name__)
+
+# Optional standardized logging hook
+try:
+    from common.logging_config import log_moe_arbitration as _log_moe  # type: ignore
+except Exception:
+    def _log_moe(
+        experts: list,
+        selected_expert: str,
+        confidence: float,
+        context: Optional[dict[str, Any]] = None,
+        dry_run: bool = False,
+    ) -> None:
+        # Fallback: no-op
+        return None
+
+
+# Lightweight in-process metrics store
+_LATENCY_SAMPLES = deque(maxlen=1000)  # ms
+_METRICS: dict[str, Any] = {
+    "total": 0,
+    "errors": 0,
+    "by_strategy": {},  # dict[str,int]
+    "by_winner": {},    # dict[str,int]
+    "latency": {"count": 0, "total_ms": 0.0, "max_ms": 0.0},
+}
+
+
+def _record_latency(ms: float) -> None:
+    _LATENCY_SAMPLES.append(ms)
+    lat = _METRICS["latency"]
+    lat["count"] = int(lat.get("count", 0)) + 1
+    lat["total_ms"] = float(lat.get("total_ms", 0.0)) + ms
+    lat["max_ms"] = max(float(lat.get("max_ms", 0.0)), ms)
+
+
+def _pct(sorted_vals: list[float], p: float) -> float:
+    if not sorted_vals:
+        return 0.0
+    idx = max(0, min(len(sorted_vals) - 1, int(round((p / 100.0) * (len(sorted_vals) - 1)))))
+    return sorted_vals[idx]
+
+
+def get_moe_metrics() -> dict[str, Any]:
+    """Return a snapshot of arbitration metrics (Phase 5 observability)."""
+    samples = list(_LATENCY_SAMPLES)
+    samples.sort()
+    lat = _METRICS["latency"]
+    avg = (lat["total_ms"] / lat["count"]) if lat["count"] else 0.0
+    return {
+        "total": _METRICS["total"],
+        "errors": _METRICS["errors"],
+        "by_strategy": dict(_METRICS["by_strategy"]),
+        "by_winner": dict(_METRICS["by_winner"]),
+        "latency_ms": {
+            "count": lat["count"],
+            "avg": round(avg, 3),
+            "max": round(lat["max_ms"], 3),
+            "p50": round(_pct(samples, 50), 3) if samples else 0.0,
+            "p95": round(_pct(samples, 95), 3) if samples else 0.0,
+        },
+    }
 
 
 class RoutingStrategy(Enum):
@@ -179,8 +242,14 @@ class MoEArbitrator:
         if not logger:
             logger = globals()["logger"]
 
-        dry = is_dry_run()
-        effective_strategy = strategy or self.default_strategy
+    dry = is_dry_run()
+    effective_strategy = strategy or self.default_strategy
+
+    # Metrics: start timer and pre-increment totals/strategy
+    t0 = perf_counter()
+    _METRICS["total"] = int(_METRICS.get("total", 0)) + 1
+    strat_key = effective_strategy.value
+    _METRICS["by_strategy"][strat_key] = int(_METRICS["by_strategy"].get(strat_key, 0)) + 1
 
         # Filter candidates by availability and confidence
         viable_candidates = [
@@ -210,7 +279,7 @@ class MoEArbitrator:
             prefer_low_cost=prefer_low_cost,
         )
 
-        winner = ranked[0]
+    winner = ranked[0]
 
         # Generate rationale
         rationale = self._generate_rationale(winner, ranked, effective_strategy, affect)
@@ -225,8 +294,8 @@ class MoEArbitrator:
             dry_run=dry,
         )
 
-        # Log decision
-        if logger:
+    # Log decision
+    if logger:
             log_details: dict[str, Any] = {
                 "winner": winner.slim_name,
                 "confidence": winner.confidence,
@@ -242,10 +311,25 @@ class MoEArbitrator:
             if hrm:
                 log_details["hrm_context"] = {k: len(str(v)) for k, v in hrm.items()}
 
+            # Attach latency before logging
+            duration_ms = (perf_counter() - t0) * 1000.0
+            log_details["latency_ms"] = round(duration_ms, 3)
+
             if dry:
                 dry_log(logger, "moe.arbitrate", log_details)
             else:
                 logger.info({"event": "moe.arbitrate", "dry_run": dry, **log_details})
+            # Standardized arbitration log
+            try:
+                _log_moe(
+                    experts=[c.slim_name for c in candidates],
+                    selected_expert=winner.slim_name,
+                    confidence=winner.confidence,
+                    context={"strategy": effective_strategy.value, "viable": len(viable_candidates), "latency_ms": round(duration_ms, 3)},
+                    dry_run=dry,
+                )
+            except Exception:
+                pass
 
         # Update usage stats and history
         if not dry:
@@ -257,6 +341,16 @@ class MoEArbitrator:
             # Keep history bounded
             if len(self.arbitration_history) > 1000:
                 self.arbitration_history = self.arbitration_history[-500:]
+
+        # Metrics: record winner and latency
+        try:
+            _METRICS["by_winner"][winner.slim_name] = int(
+                _METRICS["by_winner"].get(winner.slim_name, 0)
+            ) + 1
+            duration_ms = (perf_counter() - t0) * 1000.0
+            _record_latency(duration_ms)
+        except Exception:
+            pass
 
         return result
 

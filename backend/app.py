@@ -64,6 +64,13 @@ async def startup_event() -> None:
     """Application startup event."""
     logger.info("🔧 ProjectAlpha Backend startup complete")
 
+    # Ensure SLiM agents are registered
+    try:
+        import slim.agents  # noqa: F401
+        logger.info("🧩 SLiM agents registered")
+    except Exception as e:
+        logger.warning(f"SLiM agents not available: {e}")
+
     if settings:
         # Log feature status
         features_status = {
@@ -99,6 +106,20 @@ async def root() -> Dict[str, Any]:
             "debug": settings.DEBUG if settings else False,
         },
     }
+
+
+@app.get("/slim/health")
+async def slim_health() -> Dict[str, Any]:
+    """SLiM registry status and ecosystem validation."""
+    try:
+        from slim.sdk import get_slim_status, validate_slim_ecosystem
+
+        status = get_slim_status()
+        validation = validate_slim_ecosystem()
+        return {"status": status, "validation": validation}
+    except Exception as e:
+        logger.error(f"/slim/health error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/health")
