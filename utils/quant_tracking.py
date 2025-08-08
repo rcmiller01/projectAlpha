@@ -2,22 +2,185 @@
 """
 Quantization Loop Quality Tracking System
 Monitors and evaluates emotional processing performance for each quantization pass
+
+Enhanced with security features:
+- Quantization security monitoring with integrity verification
+- Input validation for all tracking parameters
+- Comprehensive audit logging for quantization activities
+- Rate limiting and session management for tracking operations
 """
 
 import json
 import logging
 import os
 import hashlib
-from datetime import datetime, timezone
+import re
+import time
+import threading
+from datetime import datetime, timezone, timedelta
 from typing import List, Dict, Any, Optional
 from pathlib import Path
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
+from collections import deque, defaultdict
 import statistics
 
+# Enhanced logging configuration
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
+# Security configuration
+QUANT_SESSION_TOKEN_LENGTH = 32
+MAX_MODEL_NAME_LENGTH = 200
+TRACKING_RATE_LIMIT = 30  # tracking operations per hour
+MAX_CONCURRENT_TRACKING = 5
+ANOMALY_SCORE_THRESHOLD = 0.95
+
+# Thread safety
+quant_lock = threading.Lock()
+
+# Session management
+quant_sessions = {}
+session_expiry_hours = 12
+
+# Rate limiting
+tracking_requests = defaultdict(lambda: deque())
+
+# Tracking monitoring
+tracking_anomalies = deque(maxlen=100)
+active_tracking = {}
+
+def generate_quant_session() -> str:
+    """Generate a secure quantization tracking session token"""
+    timestamp = str(time.time())
+    random_data = str(hash(datetime.now()))
+    token_string = f"quant:{timestamp}:{random_data}"
+    return hashlib.sha256(token_string.encode()).hexdigest()[:QUANT_SESSION_TOKEN_LENGTH]
+
+def validate_quant_session(session_token: str) -> bool:
+    """Validate quantization tracking session token"""
+    if not session_token or len(session_token) != QUANT_SESSION_TOKEN_LENGTH:
+        return False
+    
+    if session_token not in quant_sessions:
+        return False
+    
+    # Check if session has expired
+    session_data = quant_sessions[session_token]
+    if datetime.now() > session_data['expires_at']:
+        del quant_sessions[session_token]
+        return False
+    
+    # Update last access time
+    session_data['last_access'] = datetime.now()
+    return True
+
+def check_tracking_rate_limit(session_token: str) -> bool:
+    """Check if tracking rate limit is exceeded"""
+    current_time = time.time()
+    
+    # Clean old requests
+    while (tracking_requests[session_token] and 
+           tracking_requests[session_token][0] < current_time - 3600):  # 1 hour window
+        tracking_requests[session_token].popleft()
+    
+    # Check limit
+    if len(tracking_requests[session_token]) >= TRACKING_RATE_LIMIT:
+        logger.warning(f"Quantization tracking rate limit exceeded for session: {session_token[:8]}...")
+        return False
+    
+    # Add current request
+    tracking_requests[session_token].append(current_time)
+    return True
+
+def validate_model_name(model_name: str) -> bool:
+    """Validate model name for security"""
+    if not model_name or not isinstance(model_name, str):
+        return False
+    
+    if len(model_name) > MAX_MODEL_NAME_LENGTH:
+        return False
+    
+    # Allow alphanumeric, hyphens, underscores, dots
+    if not re.match(r'^[a-zA-Z0-9\-_.]+$', model_name):
+        return False
+    
+    return True
+
+def validate_quant_format(quant_format: str) -> bool:
+    """Validate quantization format"""
+    if not quant_format or not isinstance(quant_format, str):
+        return False
+    
+    # Known quantization formats
+    valid_formats = {
+        'q4_K_M', 'q4_K_S', 'q5_K_M', 'q5_K_S', 'q6_K', 'q8_0',
+        'q2_K', 'q3_K_M', 'q3_K_S', 'q4_0', 'q4_1', 'q5_0', 'q5_1'
+    }
+    
+    return quant_format in valid_formats
+
+def detect_tracking_anomaly(result: 'QuantLoopResult') -> bool:
+    """Detect anomalies in quantization tracking results"""
+    try:
+        anomaly_detected = False
+        
+        # Check for suspiciously high scores
+        if (result.emotional_score > ANOMALY_SCORE_THRESHOLD or
+            result.token_quality > ANOMALY_SCORE_THRESHOLD):
+            logger.warning(f"Suspiciously high scores detected: emotional={result.emotional_score}, token={result.token_quality}")
+            anomaly_detected = True
+        
+        # Check for impossible combinations
+        if result.emotional_score > 0.9 and result.size_mb < 100:  # Very high quality with very small size
+            logger.warning(f"Impossible combination: high quality ({result.emotional_score}) with small size ({result.size_mb}MB)")
+            anomaly_detected = True
+        
+        # Check for excessive resource usage
+        if result.memory_peak_mb and result.memory_peak_mb > 16000:  # > 16GB
+            logger.warning(f"Excessive memory usage detected: {result.memory_peak_mb}MB")
+            anomaly_detected = True
+        
+        if anomaly_detected:
+            tracking_anomalies.append({
+                'timestamp': datetime.now().isoformat(),
+                'loop_id': result.loop_id,
+                'model_name': result.model_name,
+                'emotional_score': result.emotional_score,
+                'token_quality': result.token_quality,
+                'size_mb': result.size_mb
+            })
+        
+        return anomaly_detected
+    
+    except Exception as e:
+        logger.error(f"Error detecting tracking anomaly: {str(e)}")
+        return False
+
+def log_tracking_activity(activity_type: str, session_token: str, details: Dict[str, Any], status: str = "success"):
+    """Log quantization tracking activities"""
+    try:
+        log_entry = {
+            'timestamp': datetime.now().isoformat(),
+            'activity_type': activity_type,
+            'session': session_token[:8] + "..." if session_token else "none",
+            'details': details,
+            'status': status,
+            'thread_id': threading.get_ident()
+        }
+        
+        logger.info(f"Tracking activity logged: {activity_type} ({status})")
+        
+        if status != "success":
+            logger.warning(f"Tracking activity issue: {activity_type} failed with {status}")
+        
+    except Exception as e:
+        logger.error(f"Error logging tracking activity: {str(e)}")
+
 class QuantLoopResult(BaseModel):
-    """Represents the results and metrics of a single quantization loop"""
+    """Represents the results and metrics of a single quantization loop with security validation"""
     loop_id: str = Field(..., description="Unique identifier for this quantization loop")
     model_name: str = Field(..., description="Name/identifier of the model being quantized")
     quant_format: str = Field(..., description="Quantization format (e.g., q4_K_M, q8_0)")
@@ -37,6 +200,40 @@ class QuantLoopResult(BaseModel):
     sentiment_variance: Optional[float] = Field(None, description="Variance in emotional responses")
     coherence_score: Optional[float] = Field(None, description="Logical coherence of responses")
     creativity_index: Optional[float] = Field(None, description="Creativity/novelty of responses")
+    
+    # Security tracking
+    session_token: Optional[str] = Field(None, description="Session token for tracking")
+    anomaly_detected: bool = Field(False, description="Whether anomaly was detected")
+    
+    @validator('model_name')
+    def validate_model_name_field(cls, v):
+        if not validate_model_name(v):
+            raise ValueError('Invalid model name format')
+        return v
+    
+    @validator('quant_format')
+    def validate_quant_format_field(cls, v):
+        if not validate_quant_format(v):
+            raise ValueError('Invalid quantization format')
+        return v
+    
+    @validator('emotional_score', 'token_quality', 'sentiment_variance', 'coherence_score', 'creativity_index')
+    def validate_score_range(cls, v):
+        if v is not None and (v < 0.0 or v > 1.0):
+            raise ValueError('Score must be between 0.0 and 1.0')
+        return v
+    
+    @validator('size_mb', 'duration_seconds', 'memory_peak_mb', 'cpu_avg_percent')
+    def validate_positive_metrics(cls, v):
+        if v is not None and v < 0:
+            raise ValueError('Metric must be non-negative')
+        return v
+    
+    @validator('error_count')
+    def validate_error_count(cls, v):
+        if v < 0:
+            raise ValueError('Error count must be non-negative')
+        return v
     
     class Config:
         json_encoders = {

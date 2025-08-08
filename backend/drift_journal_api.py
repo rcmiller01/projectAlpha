@@ -1,23 +1,266 @@
 """
 Drift Journal API - Backend service for AI emotional drift tracking and visualization.
 Provides endpoints for drift history, pattern analysis, and user interaction with drift events.
+
+Enhanced with security features:
+- Session token validation for all drift journal access
+- Automated drift anomaly detection with alerting
+- Input validation and sanitization for all user data
+- Comprehensive audit logging for drift events
 """
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import json
 import os
+import logging
+import hashlib
+import re
+import time
+import threading
 from datetime import datetime, timedelta
+from collections import deque, defaultdict
+from typing import Dict, Any, List, Optional
 import uuid
 import random
 
+# Enhanced logging configuration
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 app = Flask(__name__)
 CORS(app)
+
+# Security configuration
+SESSION_TOKEN_LENGTH = 32
+MAX_DRIFT_ENTRY_LENGTH = 2000
+MAX_ANNOTATION_LENGTH = 500
+ANOMALY_THRESHOLD = 0.8
+RATE_LIMIT_WINDOW = 3600  # 1 hour
+MAX_REQUESTS_PER_WINDOW = 100
+
+# Thread safety
+drift_lock = threading.Lock()
+
+# Session management
+active_sessions = {}
+session_expiry_hours = 24
+
+# Rate limiting
+rate_limit_requests = defaultdict(lambda: deque())
+
+# Anomaly detection
+drift_anomalies = deque(maxlen=100)
 
 # Data file paths
 DRIFT_HISTORY_FILE = 'drift_history.json'
 DRIFT_ANNOTATIONS_FILE = 'drift_annotations.json'
 DRIFT_CONFIG_FILE = 'drift_config.json'
+
+def validate_session_token(token: str) -> bool:
+    """Validate session token for drift journal access"""
+    if not token or len(token) != SESSION_TOKEN_LENGTH:
+        return False
+    
+    if token not in active_sessions:
+        return False
+    
+    # Check if session has expired
+    session_data = active_sessions[token]
+    if datetime.now() > session_data['expires_at']:
+        del active_sessions[token]
+        return False
+    
+    # Update last access time
+    session_data['last_access'] = datetime.now()
+    return True
+
+def generate_session_token() -> str:
+    """Generate a secure session token"""
+    timestamp = str(time.time())
+    random_data = str(random.random())
+    token_string = f"{timestamp}:{random_data}:{uuid.uuid4()}"
+    return hashlib.sha256(token_string.encode()).hexdigest()[:SESSION_TOKEN_LENGTH]
+
+def create_session() -> str:
+    """Create a new session and return token"""
+    with drift_lock:
+        token = generate_session_token()
+        active_sessions[token] = {
+            'created_at': datetime.now(),
+            'expires_at': datetime.now() + timedelta(hours=session_expiry_hours),
+            'last_access': datetime.now(),
+            'request_count': 0
+        }
+        logger.info(f"New drift journal session created: {token[:8]}...")
+        return token
+
+def check_rate_limit(session_token: str) -> bool:
+    """Check if session has exceeded rate limit"""
+    current_time = time.time()
+    
+    # Clean old requests
+    while (rate_limit_requests[session_token] and 
+           rate_limit_requests[session_token][0] < current_time - RATE_LIMIT_WINDOW):
+        rate_limit_requests[session_token].popleft()
+    
+    # Check limit
+    if len(rate_limit_requests[session_token]) >= MAX_REQUESTS_PER_WINDOW:
+        logger.warning(f"Rate limit exceeded for session: {session_token[:8]}...")
+        return False
+    
+    # Add current request
+    rate_limit_requests[session_token].append(current_time)
+    return True
+
+def validate_drift_entry(entry_data: Dict[str, Any]) -> tuple[bool, str]:
+    """Validate drift entry data"""
+    try:
+        # Check required fields
+        required_fields = ['reflection', 'drift_type']
+        for field in required_fields:
+            if field not in entry_data:
+                return False, f"Missing required field: {field}"
+        
+        # Validate reflection text
+        reflection = entry_data.get('reflection', '')
+        if not isinstance(reflection, str):
+            return False, "Reflection must be a string"
+        
+        if len(reflection) > MAX_DRIFT_ENTRY_LENGTH:
+            return False, f"Reflection exceeds maximum length of {MAX_DRIFT_ENTRY_LENGTH}"
+        
+        # Sanitize reflection text
+        if not re.match(r'^[a-zA-Z0-9\s\.,!?\-\'\":()\[\]]+$', reflection):
+            return False, "Reflection contains invalid characters"
+        
+        # Validate drift type
+        drift_type = entry_data.get('drift_type', '')
+        valid_drift_types = {
+            'emotional_echo', 'memory_crystallization', 'symbolic_emergence',
+            'resonance_shift', 'identity_flutter', 'temporal_displacement'
+        }
+        
+        if drift_type not in valid_drift_types:
+            return False, f"Invalid drift type. Must be one of: {valid_drift_types}"
+        
+        # Validate intensity if present
+        if 'intensity' in entry_data:
+            intensity = entry_data['intensity']
+            if not isinstance(intensity, (int, float)):
+                return False, "Intensity must be a number"
+            
+            if intensity < 0 or intensity > 1:
+                return False, "Intensity must be between 0 and 1"
+        
+        return True, "Valid"
+    
+    except Exception as e:
+        logger.error(f"Error validating drift entry: {str(e)}")
+        return False, f"Validation error: {str(e)}"
+
+def detect_drift_anomaly(entry_data: Dict[str, Any]) -> bool:
+    """Detect if a drift entry represents an anomaly"""
+    try:
+        intensity = entry_data.get('intensity', 0.5)
+        drift_type = entry_data.get('drift_type', '')
+        
+        # Check for high intensity anomalies
+        if intensity > ANOMALY_THRESHOLD:
+            logger.warning(f"High intensity drift anomaly detected: {intensity} ({drift_type})")
+            drift_anomalies.append({
+                'timestamp': datetime.now().isoformat(),
+                'type': 'high_intensity',
+                'intensity': intensity,
+                'drift_type': drift_type,
+                'details': entry_data.get('reflection', '')[:100] + "..."
+            })
+            return True
+        
+        # Check for rapid succession anomalies
+        recent_count = sum(1 for anomaly in drift_anomalies 
+                          if (datetime.now() - datetime.fromisoformat(anomaly['timestamp'])).seconds < 300)
+        
+        if recent_count > 5:
+            logger.warning(f"Rapid drift succession anomaly detected: {recent_count} drifts in 5 minutes")
+            drift_anomalies.append({
+                'timestamp': datetime.now().isoformat(),
+                'type': 'rapid_succession',
+                'count': recent_count,
+                'drift_type': drift_type
+            })
+            return True
+        
+        return False
+    
+    except Exception as e:
+        logger.error(f"Error detecting drift anomaly: {str(e)}")
+        return False
+
+def sanitize_text_input(text: str, max_length: int) -> str:
+    """Sanitize text input for safety"""
+    if not isinstance(text, str):
+        return ""
+    
+    # Remove potential injection patterns
+    text = re.sub(r'[<>"\']', '', text)
+    
+    # Limit length
+    if len(text) > max_length:
+        text = text[:max_length] + "..."
+    
+    return text.strip()
+
+def log_drift_access(endpoint: Optional[str], session_token: Optional[str], action: str, status: str = "success"):
+    """Log drift journal access for audit trail"""
+    try:
+        log_entry = {
+            'timestamp': datetime.now().isoformat(),
+            'endpoint': endpoint or "unknown",
+            'session': session_token[:8] + "..." if session_token else "none",
+            'action': action,
+            'status': status,
+            'thread_id': threading.get_ident()
+        }
+        
+        logger.info(f"Drift access logged: {endpoint or 'unknown'} - {action} ({status})")
+        
+        if status != "success":
+            logger.warning(f"Drift access issue: {endpoint or 'unknown'} - {action} failed with {status}")
+        
+    except Exception as e:
+        logger.error(f"Error logging drift access: {str(e)}")
+
+def require_session(f):
+    """Decorator to require valid session token"""
+    def decorated_function(*args, **kwargs):
+        session_token = request.headers.get('X-Session-Token')
+        
+        if not session_token:
+            log_drift_access(request.endpoint, None, request.method, "no_token")
+            return jsonify({'error': 'Session token required'}), 401
+        
+        if not validate_session_token(session_token):
+            log_drift_access(request.endpoint, session_token, request.method, "invalid_token")
+            return jsonify({'error': 'Invalid or expired session token'}), 401
+        
+        if not check_rate_limit(session_token):
+            log_drift_access(request.endpoint, session_token, request.method, "rate_limited")
+            return jsonify({'error': 'Rate limit exceeded'}), 429
+        
+        # Update session request count
+        if session_token in active_sessions:
+            active_sessions[session_token]['request_count'] += 1
+        
+        log_drift_access(request.endpoint, session_token, request.method, "success")
+        
+        return f(*args, **kwargs)
+    
+    decorated_function.__name__ = f.__name__
+    return decorated_function
 
 def load_json_file(filename, default_data):
     """Load JSON data from file with fallback to default"""

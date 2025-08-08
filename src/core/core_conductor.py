@@ -1,6 +1,12 @@
 """
 Core Conductor - Enhanced with GraphRAG Memory and Tool Routing
 
+Enhanced with security features:
+- Conductor security orchestration with authentication
+- Strategic decision validation and integrity verification
+- Session management and audit trails for conductor operations
+- Rate limiting and monitoring for model operations
+
 This module demonstrates integration of the Core Conductor with the new
 GraphRAG memory system and tool router for enhanced reasoning capabilities.
 
@@ -17,9 +23,13 @@ Compatible with: HRM stack, GraphRAG memory, Tool router
 import threading
 import uuid
 import logging
-from datetime import datetime
+import hashlib
+import re
+import time
+from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
+from collections import deque, defaultdict
 
 # Import the HRM Router integration
 try:
@@ -29,13 +39,184 @@ except ImportError:
     from backend.hrm_router import HRMRouter
     from init_models import load_conductor_models, ModelInterface
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+# Enhanced logging configuration
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+)
 logger = logging.getLogger(__name__)
+
+# Security configuration
+CONDUCTOR_SESSION_LENGTH = 32
+MAX_SITUATION_LENGTH = 2000
+MAX_OBJECTIVES_COUNT = 20
+MAX_CONSTRAINTS_COUNT = 15
+CONDUCTOR_RATE_LIMIT = 30  # conductor operations per hour per session
+MAX_MODELS_PER_CONDUCTOR = 20
+
+# Thread safety
+conductor_lock = threading.Lock()
+
+# Session management
+conductor_sessions = {}
+session_expiry_hours = 24
+
+# Rate limiting
+conductor_requests = defaultdict(lambda: deque())
+
+# Access monitoring
+conductor_access_history = deque(maxlen=1000)
+
+def generate_conductor_session() -> str:
+    """Generate a secure conductor session token"""
+    timestamp = str(time.time())
+    random_data = str(hash(datetime.now()))
+    token_string = f"conductor:{timestamp}:{random_data}"
+    return hashlib.sha256(token_string.encode()).hexdigest()[:CONDUCTOR_SESSION_LENGTH]
+
+def validate_conductor_session(session_token: str) -> bool:
+    """Validate conductor session token"""
+    if not session_token or len(session_token) != CONDUCTOR_SESSION_LENGTH:
+        return False
+    
+    if session_token not in conductor_sessions:
+        return False
+    
+    # Check if session has expired
+    session_data = conductor_sessions[session_token]
+    if datetime.now() > session_data['expires_at']:
+        del conductor_sessions[session_token]
+        return False
+    
+    # Update last access time
+    session_data['last_access'] = datetime.now()
+    return True
+
+def check_conductor_rate_limit(session_token: str) -> bool:
+    """Check if conductor operation rate limit is exceeded"""
+    current_time = time.time()
+    
+    # Clean old requests
+    while (conductor_requests[session_token] and 
+           conductor_requests[session_token][0] < current_time - 3600):  # 1 hour window
+        conductor_requests[session_token].popleft()
+    
+    # Check limit
+    if len(conductor_requests[session_token]) >= CONDUCTOR_RATE_LIMIT:
+        logger.warning(f"Conductor rate limit exceeded for session: {session_token[:8]}...")
+        return False
+    
+    # Add current request
+    conductor_requests[session_token].append(current_time)
+    return True
+
+def validate_strategic_input(situation: str, objectives: Optional[List[str]], constraints: Optional[List[str]]) -> tuple[bool, str]:
+    """Validate strategic decision input"""
+    try:
+        # Validate situation
+        if not isinstance(situation, str):
+            return False, "Situation must be a string"
+        
+        if len(situation) > MAX_SITUATION_LENGTH:
+            return False, f"Situation too long (max {MAX_SITUATION_LENGTH} characters)"
+        
+        # Check for dangerous content
+        dangerous_patterns = [
+            r'<script[^>]*>.*?</script>',  # XSS
+            r'javascript:',               # JavaScript protocol
+            r'on\w+\s*=',                # Event handlers
+        ]
+        
+        for pattern in dangerous_patterns:
+            if re.search(pattern, situation, re.IGNORECASE):
+                return False, "Situation contains potentially dangerous content"
+        
+        # Validate objectives
+        if objectives is not None:
+            if not isinstance(objectives, list):
+                return False, "Objectives must be a list"
+            
+            if len(objectives) > MAX_OBJECTIVES_COUNT:
+                return False, f"Too many objectives (max {MAX_OBJECTIVES_COUNT})"
+            
+            for obj in objectives:
+                if not isinstance(obj, str):
+                    return False, "All objectives must be strings"
+                if len(obj) > 500:
+                    return False, "Objective too long (max 500 characters)"
+        
+        # Validate constraints
+        if constraints is not None:
+            if not isinstance(constraints, list):
+                return False, "Constraints must be a list"
+            
+            if len(constraints) > MAX_CONSTRAINTS_COUNT:
+                return False, f"Too many constraints (max {MAX_CONSTRAINTS_COUNT})"
+            
+            for constraint in constraints:
+                if not isinstance(constraint, str):
+                    return False, "All constraints must be strings"
+                if len(constraint) > 500:
+                    return False, "Constraint too long (max 500 characters)"
+        
+        return True, "Valid"
+    
+    except Exception as e:
+        logger.error(f"Error validating strategic input: {str(e)}")
+        return False, f"Validation error: {str(e)}"
+
+def sanitize_strategic_input(situation: str, objectives: Optional[List[str]], constraints: Optional[List[str]]) -> tuple[str, List[str], List[str]]:
+    """Sanitize strategic decision input"""
+    # Sanitize situation
+    clean_situation = re.sub(r'[<>"\']', '', situation)
+    if len(clean_situation) > MAX_SITUATION_LENGTH:
+        clean_situation = clean_situation[:MAX_SITUATION_LENGTH] + "..."
+    
+    # Sanitize objectives
+    clean_objectives = []
+    if objectives:
+        for obj in objectives[:MAX_OBJECTIVES_COUNT]:
+            clean_obj = re.sub(r'[<>"\']', '', str(obj))
+            if len(clean_obj) > 500:
+                clean_obj = clean_obj[:500] + "..."
+            clean_objectives.append(clean_obj)
+    
+    # Sanitize constraints
+    clean_constraints = []
+    if constraints:
+        for constraint in constraints[:MAX_CONSTRAINTS_COUNT]:
+            clean_constraint = re.sub(r'[<>"\']', '', str(constraint))
+            if len(clean_constraint) > 500:
+                clean_constraint = clean_constraint[:500] + "..."
+            clean_constraints.append(clean_constraint)
+    
+    return clean_situation, clean_objectives, clean_constraints
+
+def log_conductor_activity(activity_type: str, session_token: str, details: Dict[str, Any], status: str = "success"):
+    """Log conductor access activities"""
+    try:
+        log_entry = {
+            'timestamp': datetime.now().isoformat(),
+            'activity_type': activity_type,
+            'session': session_token[:8] + "..." if session_token else "none",
+            'details': details,
+            'status': status,
+            'thread_id': threading.get_ident()
+        }
+        
+        conductor_access_history.append(log_entry)
+        
+        logger.info(f"Conductor access logged: {activity_type} ({status})")
+        
+        if status != "success":
+            logger.warning(f"Conductor access issue: {activity_type} failed with {status}")
+        
+    except Exception as e:
+        logger.error(f"Error logging conductor access: {str(e)}")
 
 @dataclass
 class ConductorDecision:
-    """Structured decision output from conductor"""
+    """Structured decision output from conductor with security metadata"""
     decision_id: str
     strategic_context: str
     action_plan: List[str]
@@ -44,13 +225,15 @@ class ConductorDecision:
     confidence: float
     reasoning_path: List[str]
     timestamp: str
+    session_token: str
+    security_metadata: Dict[str, Any]
 
 class CoreConductor:
     """
-    Enhanced Core Conductor with GraphRAG Memory and Tool Routing
+    Enhanced Core Conductor with GraphRAG Memory, Tool Routing, and Security
     
     The conductor provides strategic, high-level reasoning and planning
-    enhanced with semantic memory and autonomous tool capabilities.
+    enhanced with semantic memory, autonomous tool capabilities, and comprehensive security.
     
     Features:
     - Strategic decision making with memory context
@@ -58,25 +241,32 @@ class CoreConductor:
     - Integration with GraphRAG semantic memory
     - Preparation for multi-agent orchestration
     - Thread-safe concurrent operation
+    - Session-based authentication and authorization
+    - Rate limiting and input validation
+    - Comprehensive audit logging
     """
     
     def __init__(self, 
                  memory_file: Optional[str] = None,
                  tool_log_file: Optional[str] = None,
                  conductor_id: Optional[str] = None,
-                 load_models: bool = True):
+                 load_models: bool = True,
+                 session_token: Optional[str] = None):
         """
-        Initialize Enhanced Core Conductor.
+        Initialize Enhanced Core Conductor with Security.
         
         Args:
             memory_file: Path to GraphRAG memory file
             tool_log_file: Path to tool request log
             conductor_id: Unique identifier for this conductor instance
             load_models: Whether to load AI models on initialization
+            session_token: Session token for authentication
         """
         self.conductor_id = conductor_id or f"conductor_{str(uuid.uuid4())[:8]}"
+        self.session_token = session_token or self.create_session()
         self.hrm_router = HRMRouter(memory_file, tool_log_file)
         self._lock = threading.Lock()
+        self.creation_time = datetime.now()
         
         # Strategic context
         self.current_objectives: List[str] = []
@@ -87,14 +277,47 @@ class CoreConductor:
         if load_models:
             self.init_models()
         
+        # Security tracking
+        self.operation_count = 0
+        self.last_validation = datetime.now()
+        
         # Register conductor-specific tools
         self._register_conductor_tools()
         
-        logger.info(f"Core Conductor {self.conductor_id} initialized with GraphRAG integration")
-    
+        log_conductor_activity("initialization", self.session_token, {
+            "conductor_id": self.conductor_id,
+            "models_loaded": load_models,
+            "models_count": len(self.models)
+        })
+        
+        logger.info(f"Core Conductor {self.conductor_id} initialized with security and GraphRAG integration")
+
+    def create_session(self) -> str:
+        """Create a new conductor session"""
+        with conductor_lock:
+            session_token = generate_conductor_session()
+            conductor_sessions[session_token] = {
+                'created_at': datetime.now(),
+                'expires_at': datetime.now() + timedelta(hours=session_expiry_hours),
+                'last_access': datetime.now(),
+                'conductor_id': self.conductor_id if hasattr(self, 'conductor_id') else 'unknown',
+                'conductor_operations': 0
+            }
+            return session_token
+
+    def validate_session(self, session_token: Optional[str] = None) -> bool:
+        """Validate session for conductor operations"""
+        token_to_validate = session_token or self.session_token
+        
+        if not token_to_validate:
+            logger.warning("No session token provided for conductor validation")
+            return False
+        
+        return validate_conductor_session(token_to_validate)
+
     def init_models(self) -> None:
         """
-        Initialize and load all AI models for the conductor.
+        Initialize and load all AI models for the conductor with security validation.
         
         Automatically detects and loads either:
         - Standard conductor models (conductor, logic, emotion, creative)
@@ -104,9 +327,15 @@ class CoreConductor:
         Left Brain (Logic): logic_high, logic_code, logic_proof, logic_fallback
         Right Brain (Emotion): emotion_valence, emotion_narrative, emotion_uncensored, emotion_creative
         """
-        logger.info(f"Initializing models for Core Conductor {self.conductor_id}")
-        
         try:
+            # Validate session before loading models
+            if not self.validate_session():
+                log_conductor_activity("init_models", self.session_token, 
+                                      {"status": "session_invalid"}, "failed")
+                raise ValueError("Invalid session for model initialization")
+            
+            logger.info(f"Initializing models for Core Conductor {self.conductor_id}")
+            
             # Check if SLiM environment variables are configured
             import os
             has_slim_config = any(os.getenv(var) for var in [
@@ -122,32 +351,49 @@ class CoreConductor:
                 self.models = load_conductor_models()
                 logger.info("Loaded standard conductor model suite")
             
-            # Log loaded models
+            # Validate model count
+            if len(self.models) > MAX_MODELS_PER_CONDUCTOR:
+                logger.warning(f"Model count ({len(self.models)}) exceeds recommended maximum ({MAX_MODELS_PER_CONDUCTOR})")
+            
+            # Log loaded models with security metadata
             for role, model in self.models.items():
                 model_type = type(model).__name__
                 model_name = getattr(model, 'model_name', 'unknown')
                 logger.info(f"  {role}: {model_type} ({model_name})")
             
+            log_conductor_activity("init_models", self.session_token, {
+                "models_loaded": len(self.models),
+                "model_types": list(self.models.keys()),
+                "slim_config": has_slim_config
+            })
+            
             logger.info(f"Successfully loaded {len(self.models)} models")
             
         except Exception as e:
             logger.error(f"Error initializing models: {e}")
+            log_conductor_activity("init_models", self.session_token, 
+                                  {"error": str(e)}, "error")
+            
             # Fallback to empty dict to prevent crashes
             self.models = {}
-            raise
+            
             # Ensure we have at least mock models
-            from .init_models import MockModel
-            self.models = {
-                "conductor": MockModel("fallback-conductor"),
-                "logic": MockModel("fallback-logic"),
-                "emotion": MockModel("fallback-emotion"),
-                "creative": MockModel("fallback-creative")
-            }
-            logger.warning("Loaded fallback mock models due to initialization error")
-    
-    def generate(self, role: str, prompt: str, context: Optional[str] = None, **kwargs) -> str:
+            try:
+                from .init_models import MockModel
+                self.models = {
+                    "conductor": MockModel("fallback-conductor"),
+                    "logic": MockModel("fallback-logic"),
+                    "emotion": MockModel("fallback-emotion"),
+                    "creative": MockModel("fallback-creative")
+                }
+                logger.warning("Loaded fallback mock models due to initialization error")
+            except ImportError:
+                logger.error("Unable to load fallback models")
+                raise
+
+    def generate(self, role: str, prompt: str, context: Optional[str] = None, session_token: Optional[str] = None, **kwargs) -> str:
         """
-        Generate a response using the specified model role.
+        Generate a response using the specified model role with security validation.
         
         Args:
             role: Model role to use. Standard roles: "conductor", "logic", "emotion", "creative"
@@ -155,24 +401,65 @@ class CoreConductor:
                                    "emotion_valence", "emotion_narrative", "emotion_uncensored", "emotion_creative"
             prompt: The prompt to send to the model
             context: Optional context to include with the prompt
+            session_token: Session token for authentication
             **kwargs: Additional arguments to pass to the model
             
         Returns:
             Generated response string
             
         Raises:
-            ValueError: If the specified role is not available
+            ValueError: If the specified role is not available or session is invalid
         """
-        if role not in self.models:
-            available_roles = list(self.models.keys())
-            raise ValueError(f"Role '{role}' not available. Available roles: {available_roles}")
-        
         try:
+            # Validate session
+            if not self.validate_session(session_token):
+                log_conductor_activity("generate", session_token or self.session_token, 
+                                      {"role": role, "status": "session_invalid"}, "failed")
+                raise ValueError("Invalid session for model generation")
+            
+            # Check rate limit
+            current_token = session_token or self.session_token
+            if not check_conductor_rate_limit(current_token):
+                log_conductor_activity("generate", current_token, 
+                                      {"role": role, "status": "rate_limited"}, "failed")
+                raise ValueError("Rate limit exceeded for conductor operations")
+            
+            # Validate role
+            if role not in self.models:
+                available_roles = list(self.models.keys())
+                log_conductor_activity("generate", current_token, 
+                                      {"role": role, "available_roles": available_roles}, "role_not_found")
+                raise ValueError(f"Role '{role}' not available. Available roles: {available_roles}")
+            
+            # Validate prompt
+            if not isinstance(prompt, str):
+                raise ValueError("Prompt must be a string")
+            
+            if len(prompt) > 5000:  # Reasonable prompt size limit
+                prompt = prompt[:5000] + "..."
+                logger.warning("Prompt truncated due to length")
+            
+            # Sanitize prompt
+            clean_prompt = re.sub(r'[<>"\']', '', prompt)
+            
             # Get the model for this role
             model = self.models[role]
             
             # Generate response
-            response = model.generate(prompt, context=context, **kwargs)
+            response = model.generate(clean_prompt, context=context, **kwargs)
+            
+            # Track operation
+            with self._lock:
+                self.operation_count += 1
+                if current_token in conductor_sessions:
+                    conductor_sessions[current_token]['conductor_operations'] += 1
+            
+            log_conductor_activity("generate", current_token, {
+                "role": role,
+                "prompt_length": len(prompt),
+                "response_length": len(response),
+                "operation_count": self.operation_count
+            })
             
             logger.debug(f"Generated response using {role} model: {len(response)} characters")
             
@@ -180,6 +467,8 @@ class CoreConductor:
             
         except Exception as e:
             logger.error(f"Error generating response with {role} model: {e}")
+            log_conductor_activity("generate", session_token or self.session_token, 
+                                  {"role": role, "error": str(e)}, "error")
             # Fallback response
             return f"[ERROR: Failed to generate response with {role} model: {str(e)}]"
     

@@ -2,6 +2,12 @@
 """
 Meta-Watcher - Monitor Mirror Responsiveness
 
+Enhanced with security features:
+- Meta watcher security with monitoring validation
+- Session management and access control for watcher operations
+- Rate limiting and monitoring for system health checks
+- Comprehensive audit logging for meta-monitoring activities
+
 This module implements a meta-watcher that monitors Mirror's responsiveness
 and triggers Anchor intervention if Mirror becomes unresponsive.
 """
@@ -9,9 +15,18 @@ and triggers Anchor intervention if Mirror becomes unresponsive.
 import logging
 import time
 import threading
-from typing import Dict, Any, Optional, Callable
+import hashlib
+import re
+from datetime import datetime, timedelta
+from typing import Dict, Any, Optional, Callable, Tuple
+from collections import deque, defaultdict
 from enum import Enum
 
+# Enhanced logging configuration
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 class MirrorState(Enum):
@@ -21,9 +36,131 @@ class MirrorState(Enum):
     UNRESPONSIVE = "unresponsive"
     UNKNOWN = "unknown"
 
+# Security configuration
+META_SESSION_LENGTH = 32
+MAX_RESPONSE_TIMEOUT = 300  # 5 minutes max
+MAX_CHECK_INTERVAL = 3600   # 1 hour max
+META_RATE_LIMIT = 50        # meta operations per hour per session
+MAX_RESPONSE_HISTORY = 1000
+
+# Thread safety
+meta_lock = threading.Lock()
+
+# Session management
+meta_sessions = {}
+session_expiry_hours = 24
+
+# Rate limiting
+meta_requests = defaultdict(lambda: deque())
+
+# Access monitoring
+meta_access_history = deque(maxlen=1000)
+
+def generate_meta_session() -> str:
+    """Generate a secure meta watcher session token"""
+    timestamp = str(time.time())
+    random_data = str(hash(datetime.now()))
+    token_string = f"meta:{timestamp}:{random_data}"
+    return hashlib.sha256(token_string.encode()).hexdigest()[:META_SESSION_LENGTH]
+
+def validate_meta_session(session_token: str) -> bool:
+    """Validate meta watcher session token"""
+    if not session_token or len(session_token) != META_SESSION_LENGTH:
+        return False
+    
+    if session_token not in meta_sessions:
+        return False
+    
+    # Check if session has expired
+    session_data = meta_sessions[session_token]
+    if datetime.now() > session_data['expires_at']:
+        del meta_sessions[session_token]
+        return False
+    
+    # Update last access time
+    session_data['last_access'] = datetime.now()
+    return True
+
+def check_meta_rate_limit(session_token: str) -> bool:
+    """Check if meta operation rate limit is exceeded"""
+    current_time = time.time()
+    
+    # Clean old requests
+    while (meta_requests[session_token] and 
+           meta_requests[session_token][0] < current_time - 3600):  # 1 hour window
+        meta_requests[session_token].popleft()
+    
+    # Check limit
+    if len(meta_requests[session_token]) >= META_RATE_LIMIT:
+        logger.warning(f"Meta rate limit exceeded for session: {session_token[:8]}...")
+        return False
+    
+    # Add current request
+    meta_requests[session_token].append(current_time)
+    return True
+
+def validate_watcher_config(response_timeout: int, unresponsive_cycles: int, check_interval: int) -> Tuple[bool, str]:
+    """Validate meta watcher configuration"""
+    try:
+        # Validate response timeout
+        if not isinstance(response_timeout, int) or response_timeout <= 0:
+            return False, "Response timeout must be a positive integer"
+        
+        if response_timeout > MAX_RESPONSE_TIMEOUT:
+            return False, f"Response timeout too large (max {MAX_RESPONSE_TIMEOUT} seconds)"
+        
+        # Validate unresponsive cycles
+        if not isinstance(unresponsive_cycles, int) or unresponsive_cycles <= 0:
+            return False, "Unresponsive cycles must be a positive integer"
+        
+        if unresponsive_cycles > 100:
+            return False, "Unresponsive cycles too large (max 100)"
+        
+        # Validate check interval
+        if not isinstance(check_interval, int) or check_interval <= 0:
+            return False, "Check interval must be a positive integer"
+        
+        if check_interval > MAX_CHECK_INTERVAL:
+            return False, f"Check interval too large (max {MAX_CHECK_INTERVAL} seconds)"
+        
+        return True, "Valid"
+    
+    except Exception as e:
+        logger.error(f"Error validating watcher config: {str(e)}")
+        return False, f"Validation error: {str(e)}"
+
+def log_meta_activity(activity_type: str, session_token: str, details: Dict[str, Any], status: str = "success"):
+    """Log meta watcher access activities"""
+    try:
+        log_entry = {
+            'timestamp': datetime.now().isoformat(),
+            'activity_type': activity_type,
+            'session': session_token[:8] + "..." if session_token else "none",
+            'details': details,
+            'status': status,
+            'thread_id': threading.get_ident()
+        }
+        
+        meta_access_history.append(log_entry)
+        
+        logger.info(f"Meta access logged: {activity_type} ({status})")
+        
+        if status != "success":
+            logger.warning(f"Meta access issue: {activity_type} failed with {status}")
+        
+    except Exception as e:
+        logger.error(f"Error logging meta access: {str(e)}")
+
 class MetaWatcher:
     """
-    Meta-watcher system to monitor Mirror responsiveness.
+    Meta-watcher system to monitor Mirror responsiveness with enhanced security.
+    
+    Features:
+    - Mirror response monitoring with validation
+    - Session-based authentication and authorization
+    - Rate limiting and access monitoring
+    - Comprehensive audit logging
+    - Thread-safe concurrent monitoring
     
     Tracks Mirror's response times and health status,
     triggering Anchor intervention when necessary.
@@ -32,32 +169,99 @@ class MetaWatcher:
     def __init__(self, 
                  response_timeout: int = 30,
                  unresponsive_cycles: int = 3,
-                 check_interval: int = 10):
+                 check_interval: int = 10,
+                 session_token: Optional[str] = None):
         """
-        Initialize the MetaWatcher.
+        Initialize the MetaWatcher with security features.
         
         Args:
             response_timeout (int): Seconds to wait for Mirror response
             unresponsive_cycles (int): Cycles before considering Mirror unresponsive
             check_interval (int): Seconds between health checks
+            session_token (str): Session token for authentication
         """
-        self.response_timeout = response_timeout
-        self.unresponsive_cycles = unresponsive_cycles
-        self.check_interval = check_interval
+        # Validate configuration
+        is_valid, validation_message = validate_watcher_config(response_timeout, unresponsive_cycles, check_interval)
+        if not is_valid:
+            raise ValueError(f"Invalid watcher configuration: {validation_message}")
+        
+        self.session_token = session_token or self.create_session()
+        self.creation_time = datetime.now()
+        
+        # Clamp values to safe ranges
+        self.response_timeout = min(response_timeout, MAX_RESPONSE_TIMEOUT)
+        self.unresponsive_cycles = min(unresponsive_cycles, 100)
+        self.check_interval = min(check_interval, MAX_CHECK_INTERVAL)
         
         self.mirror_state = MirrorState.UNKNOWN
         self.last_response_time = None
         self.failed_cycles = 0
-        self.response_history = []
+        self.response_history = deque(maxlen=MAX_RESPONSE_HISTORY)
         self.is_monitoring = False
         self.monitor_thread = None
+        self.monitoring_count = 0
         
         # Callback for when Anchor needs to be fired
         self.anchor_callback: Optional[Callable] = None
         
-    def start_monitoring(self):
-        """Start the monitoring thread."""
-        if not self.is_monitoring:
+        log_meta_activity("initialization", self.session_token, {
+            "response_timeout": self.response_timeout,
+            "unresponsive_cycles": self.unresponsive_cycles,
+            "check_interval": self.check_interval,
+            "creation_time": self.creation_time.isoformat()
+        })
+        
+        logger.info(f"MetaWatcher initialized with security features")
+
+    def create_session(self) -> str:
+        """Create a new meta watcher session"""
+        with meta_lock:
+            session_token = generate_meta_session()
+            meta_sessions[session_token] = {
+                'created_at': datetime.now(),
+                'expires_at': datetime.now() + timedelta(hours=session_expiry_hours),
+                'last_access': datetime.now(),
+                'meta_operations': 0
+            }
+            return session_token
+
+    def validate_session(self, session_token: Optional[str] = None) -> bool:
+        """Validate session for meta watcher operations"""
+        token_to_validate = session_token or self.session_token
+        
+        if not token_to_validate:
+            logger.warning("No session token provided for meta validation")
+            return False
+        
+        return validate_meta_session(token_to_validate)
+
+    def start_monitoring(self, session_token: Optional[str] = None) -> bool:
+        """
+        Start the monitoring thread with security validation.
+        
+        Args:
+            session_token: Session token for authentication
+            
+        Returns:
+            Success status
+        """
+        try:
+            # Validate session
+            if not self.validate_session(session_token):
+                log_meta_activity("start_monitoring", session_token or self.session_token, 
+                                 {"status": "session_invalid"}, "failed")
+                return False
+            
+            current_token = session_token or self.session_token
+            
+            # Check rate limit
+            if not check_meta_rate_limit(current_token):
+                log_meta_activity("start_monitoring", current_token, 
+                                 {"status": "rate_limited"}, "failed")
+                return False
+            
+            with meta_lock:
+                if not self.is_monitoring:
             self.is_monitoring = True
             self.monitor_thread = threading.Thread(target=self._monitor_loop, daemon=True)
             self.monitor_thread.start()

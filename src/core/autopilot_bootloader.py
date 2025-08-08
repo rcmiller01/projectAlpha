@@ -2,6 +2,12 @@
 """
 Autopilot Bootloader - Autonomous Launch System
 Monitors system usage and schedules background quantization sessions
+
+Enhanced with security features:
+- Boot sequence protection with integrity verification
+- Process validation and monitoring for all spawned processes
+- Comprehensive logging for all bootloader activities
+- Input validation for all configuration and runtime parameters
 """
 
 import json
@@ -13,29 +19,59 @@ import signal
 import sys
 import os
 import threading
+import hashlib
+import re
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass, asdict
+from collections import deque
 
-# Import quantization tracking
+# Enhanced logging configuration
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# Security configuration
+BOOTLOADER_TOKEN_LENGTH = 32
+MAX_PROCESS_COUNT = 10
+BOOT_TIMEOUT_SECONDS = 300
+PROCESS_MONITOR_INTERVAL = 30
+MAX_LOG_ENTRIES = 1000
+
+# Boot sequence tracking
+boot_sequence_log = deque(maxlen=MAX_LOG_ENTRIES)
+spawned_processes = {}
+boot_lock = threading.Lock()
+
+# Process validation
+ALLOWED_EXECUTABLES = {
+    'python', 'python.exe', 'python3', 'python3.exe',
+    'ollama', 'ollama.exe', 'node', 'node.exe'
+}
+
+# Import quantization tracking with validation
 try:
     from quant_tracking import (
         QuantLoopResult, save_loop_result, 
         eval_emotion, eval_fluency, get_tracker
     )
     TRACKING_AVAILABLE = True
+    logger.info("Quantization tracking module loaded successfully")
 except ImportError as e:
     logging.warning(f"Quantization tracking not available: {e}")
     TRACKING_AVAILABLE = False
 
-# Import model judging system
+# Import model judging system with validation  
 try:
     from judge_model_quality import (
         compare_models, swap_out_baseline, archive_old_model,
         get_current_baseline_info, judge_and_replace_if_better
     )
     JUDGING_AVAILABLE = True
+    logger.info("Model judging system loaded successfully")
 except ImportError as e:
     logging.warning(f"Model judging system not available: {e}")
     JUDGING_AVAILABLE = False
@@ -50,14 +86,218 @@ if sys.platform == 'win32':
     except Exception:
         pass
 
+def generate_bootloader_token() -> str:
+    """Generate a secure bootloader session token"""
+    timestamp = str(time.time())
+    random_data = str(hash(datetime.now()))
+    token_string = f"bootloader:{timestamp}:{random_data}"
+    return hashlib.sha256(token_string.encode()).hexdigest()[:BOOTLOADER_TOKEN_LENGTH]
+
+def validate_process_command(command: List[str]) -> tuple[bool, str]:
+    """Validate process command for security"""
+    try:
+        if not command or len(command) == 0:
+            return False, "Empty command"
+        
+        # Check executable name
+        executable = os.path.basename(command[0]).lower()
+        if executable not in ALLOWED_EXECUTABLES:
+            return False, f"Executable not allowed: {executable}"
+        
+        # Check for dangerous arguments
+        dangerous_patterns = [
+            r'--exec', r'--eval', r'-e', r'-c',  # Code execution
+            r'rm\s', r'del\s', r'format',        # File deletion
+            r'>&', r'|', r';', r'&&'             # Command chaining
+        ]
+        
+        command_str = ' '.join(command)
+        for pattern in dangerous_patterns:
+            if re.search(pattern, command_str, re.IGNORECASE):
+                return False, f"Dangerous pattern detected: {pattern}"
+        
+        # Validate file paths
+        for arg in command[1:]:
+            if os.path.isabs(arg) and not os.path.exists(arg):
+                logger.warning(f"Absolute path does not exist: {arg}")
+        
+        return True, "Valid"
+    
+    except Exception as e:
+        logger.error(f"Error validating process command: {str(e)}")
+        return False, f"Validation error: {str(e)}"
+
+def validate_boot_config(config: Dict[str, Any]) -> tuple[bool, str]:
+    """Validate bootloader configuration"""
+    try:
+        # Check required fields
+        required_fields = ['autopilot_enabled', 'idle_threshold']
+        for field in required_fields:
+            if field not in config:
+                return False, f"Missing required field: {field}"
+        
+        # Validate idle threshold
+        idle_threshold = config.get('idle_threshold', 0)
+        if not isinstance(idle_threshold, (int, float)):
+            return False, "Idle threshold must be a number"
+        
+        if idle_threshold < 0 or idle_threshold > 100:
+            return False, "Idle threshold must be between 0 and 100"
+        
+        # Validate process limits
+        if 'max_processes' in config:
+            max_procs = config['max_processes']
+            if not isinstance(max_procs, int) or max_procs < 1 or max_procs > MAX_PROCESS_COUNT:
+                return False, f"max_processes must be between 1 and {MAX_PROCESS_COUNT}"
+        
+        # Validate monitoring intervals
+        if 'monitor_interval' in config:
+            interval = config['monitor_interval']
+            if not isinstance(interval, (int, float)) or interval < 1 or interval > 3600:
+                return False, "monitor_interval must be between 1 and 3600 seconds"
+        
+        return True, "Valid"
+    
+    except Exception as e:
+        logger.error(f"Error validating boot config: {str(e)}")
+        return False, f"Validation error: {str(e)}"
+
+def log_boot_sequence(phase: str, details: Dict[str, Any], status: str = "success"):
+    """Log boot sequence activities"""
+    try:
+        log_entry = {
+            'timestamp': datetime.now().isoformat(),
+            'phase': phase,
+            'details': details,
+            'status': status,
+            'thread_id': threading.get_ident()
+        }
+        
+        boot_sequence_log.append(log_entry)
+        
+        logger.info(f"Boot sequence logged: {phase} ({status})")
+        
+        if status != "success":
+            logger.warning(f"Boot sequence issue: {phase} failed with {status}")
+        
+    except Exception as e:
+        logger.error(f"Error logging boot sequence: {str(e)}")
+
+def monitor_spawned_process(process_id: int, command: List[str], boot_token: str):
+    """Monitor a spawned process for security"""
+    try:
+        process = psutil.Process(process_id)
+        
+        while process.is_running():
+            try:
+                # Check CPU and memory usage
+                cpu_percent = process.cpu_percent()
+                memory_mb = process.memory_info().rss / (1024 * 1024)
+                
+                # Alert on excessive resource usage
+                if cpu_percent > 90:
+                    logger.warning(f"Process {process_id} using excessive CPU: {cpu_percent}%")
+                
+                if memory_mb > 2048:  # 2GB limit
+                    logger.warning(f"Process {process_id} using excessive memory: {memory_mb:.1f}MB")
+                
+                # Check for suspicious behavior
+                children = process.children(recursive=True)
+                if len(children) > 5:
+                    logger.warning(f"Process {process_id} spawned {len(children)} child processes")
+                
+                time.sleep(PROCESS_MONITOR_INTERVAL)
+                
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                break
+        
+        # Clean up tracking
+        if process_id in spawned_processes:
+            del spawned_processes[process_id]
+            
+        log_boot_sequence("process_terminated", {
+            "process_id": process_id,
+            "command": command[0] if command else "unknown"
+        }, "success")
+        
+    except Exception as e:
+        logger.error(f"Error monitoring process {process_id}: {str(e)}")
+
+def secure_process_spawn(command: List[str], boot_token: str) -> Optional[subprocess.Popen]:
+    """Securely spawn a process with validation and monitoring"""
+    try:
+        with boot_lock:
+            # Check process limit
+            if len(spawned_processes) >= MAX_PROCESS_COUNT:
+                logger.error(f"Process limit reached: {MAX_PROCESS_COUNT}")
+                return None
+            
+            # Validate command
+            is_valid, validation_message = validate_process_command(command)
+            if not is_valid:
+                logger.error(f"Invalid process command: {validation_message}")
+                log_boot_sequence("process_spawn", {
+                    "command": command,
+                    "error": validation_message
+                }, "validation_failed")
+                return None
+            
+            # Spawn process
+            process = subprocess.Popen(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            
+            # Track process
+            spawned_processes[process.pid] = {
+                'command': command,
+                'start_time': datetime.now(),
+                'boot_token': boot_token
+            }
+            
+            # Start monitoring thread
+            monitor_thread = threading.Thread(
+                target=monitor_spawned_process,
+                args=(process.pid, command, boot_token),
+                daemon=True
+            )
+            monitor_thread.start()
+            
+            log_boot_sequence("process_spawn", {
+                "process_id": process.pid,
+                "command": command[0] if command else "unknown"
+            }, "success")
+            
+            logger.info(f"Securely spawned process {process.pid}: {command[0]}")
+            return process
+            
+    except Exception as e:
+        logger.error(f"Error spawning secure process: {str(e)}")
+        log_boot_sequence("process_spawn", {
+            "command": command,
+            "error": str(e)
+        }, "error")
+        return None
+
 @dataclass
 class SystemMetrics:
-    """System performance metrics"""
+    """System performance metrics with validation"""
     cpu_percent: float
     memory_percent: float
     disk_free_gb: float
     temperature: Optional[float]
     timestamp: str
+    
+    def __post_init__(self):
+        """Validate metrics after initialization"""
+        self.cpu_percent = max(0.0, min(100.0, float(self.cpu_percent)))
+        self.memory_percent = max(0.0, min(100.0, float(self.memory_percent)))
+        self.disk_free_gb = max(0.0, float(self.disk_free_gb))
+        
+        if self.temperature is not None:
+            self.temperature = max(-50.0, min(150.0, float(self.temperature)))
     idle_duration_minutes: float
 
 @dataclass

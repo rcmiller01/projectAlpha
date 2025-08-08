@@ -6,26 +6,231 @@ Symbolic Drift System - Intimacy & Emotional Evolution Tracker
 Tracks symbolic drift over time and manages unlocking of intimacy modes
 when appropriate emotional thresholds are reached with stability.
 
+Enhanced with security features:
+- Symbolic change monitoring with anomaly alerts
+- Input validation for all drift measurements
+- Comprehensive logging for symbolic changes
+- Rate limiting and session management for symbolic access
+
 Author: AI Development Team
-Version: 1.0.0
+Version: 1.1.0 (Security Enhanced)
 """
 
 import json
 import time
 import logging
+import hashlib
+import re
+import threading
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, asdict
+from collections import deque, defaultdict
 import math
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+# Enhanced logging configuration
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+)
 logger = logging.getLogger(__name__)
+
+# Security configuration
+SYMBOLIC_SESSION_TOKEN_LENGTH = 32
+MAX_DRIFT_MEASUREMENTS = 1000
+DRIFT_ANOMALY_THRESHOLD = 0.9
+SYMBOLIC_RATE_LIMIT = 20  # measurements per hour
+MAX_CONTEXT_LENGTH = 500
+MAX_TAGS_PER_MEASUREMENT = 10
+
+# Thread safety
+drift_lock = threading.Lock()
+
+# Session management
+symbolic_sessions = {}
+session_expiry_hours = 24
+
+# Rate limiting
+drift_requests = defaultdict(lambda: deque())
+
+# Anomaly detection
+symbolic_anomalies = deque(maxlen=50)
+
+def validate_symbolic_session(session_token: str) -> bool:
+    """Validate symbolic drift session token"""
+    if not session_token or len(session_token) != SYMBOLIC_SESSION_TOKEN_LENGTH:
+        return False
+    
+    if session_token not in symbolic_sessions:
+        return False
+    
+    # Check if session has expired
+    session_data = symbolic_sessions[session_token]
+    if datetime.now() > session_data['expires_at']:
+        del symbolic_sessions[session_token]
+        return False
+    
+    # Update last access time
+    session_data['last_access'] = datetime.now()
+    return True
+
+def generate_symbolic_session() -> str:
+    """Generate a secure symbolic session token"""
+    timestamp = str(time.time())
+    random_data = str(hash(datetime.now()))
+    token_string = f"symbolic:{timestamp}:{random_data}"
+    return hashlib.sha256(token_string.encode()).hexdigest()[:SYMBOLIC_SESSION_TOKEN_LENGTH]
+
+def check_drift_rate_limit(session_token: str) -> bool:
+    """Check if drift measurement rate limit is exceeded"""
+    current_time = time.time()
+    
+    # Clean old requests
+    while (drift_requests[session_token] and 
+           drift_requests[session_token][0] < current_time - 3600):  # 1 hour window
+        drift_requests[session_token].popleft()
+    
+    # Check limit
+    if len(drift_requests[session_token]) >= SYMBOLIC_RATE_LIMIT:
+        logger.warning(f"Symbolic drift rate limit exceeded for session: {session_token[:8]}...")
+        return False
+    
+    # Add current request
+    drift_requests[session_token].append(current_time)
+    return True
+
+def validate_drift_measurement(measurement_data: Dict[str, Any]) -> tuple[bool, str]:
+    """Validate drift measurement data"""
+    try:
+        # Check required fields
+        required_fields = ['intimacy_score', 'vulnerability_score', 'trust_score']
+        for field in required_fields:
+            if field not in measurement_data:
+                return False, f"Missing required field: {field}"
+        
+        # Validate score ranges (0-1)
+        score_fields = ['intimacy_score', 'vulnerability_score', 'trust_score', 
+                       'symbolic_resonance', 'stability_index']
+        
+        for field in score_fields:
+            if field in measurement_data:
+                score = measurement_data[field]
+                if not isinstance(score, (int, float)):
+                    return False, f"{field} must be a number"
+                
+                if score < 0 or score > 1:
+                    return False, f"{field} must be between 0 and 1"
+        
+        # Validate tags
+        if 'tags' in measurement_data:
+            tags = measurement_data['tags']
+            if not isinstance(tags, list):
+                return False, "Tags must be a list"
+            
+            if len(tags) > MAX_TAGS_PER_MEASUREMENT:
+                return False, f"Too many tags (max {MAX_TAGS_PER_MEASUREMENT})"
+            
+            # Validate tag content
+            for tag in tags:
+                if not isinstance(tag, str):
+                    return False, "All tags must be strings"
+                
+                if not re.match(r'^[a-zA-Z0-9_-]+$', tag):
+                    return False, f"Invalid tag format: {tag}"
+        
+        # Validate context
+        if 'context' in measurement_data:
+            context = measurement_data['context']
+            if not isinstance(context, str):
+                return False, "Context must be a string"
+            
+            if len(context) > MAX_CONTEXT_LENGTH:
+                return False, f"Context exceeds maximum length of {MAX_CONTEXT_LENGTH}"
+        
+        return True, "Valid"
+    
+    except Exception as e:
+        logger.error(f"Error validating drift measurement: {str(e)}")
+        return False, f"Validation error: {str(e)}"
+
+def detect_symbolic_anomaly(measurement: 'DriftMeasurement') -> bool:
+    """Detect if a drift measurement represents an anomaly"""
+    try:
+        # Check for extreme values
+        extreme_threshold = 0.95
+        if (measurement.intimacy_score > extreme_threshold or
+            measurement.vulnerability_score > extreme_threshold or
+            measurement.trust_score > extreme_threshold):
+            
+            logger.warning(f"Extreme symbolic drift detected: intimacy={measurement.intimacy_score}")
+            symbolic_anomalies.append({
+                'timestamp': datetime.now().isoformat(),
+                'type': 'extreme_values',
+                'intimacy_score': measurement.intimacy_score,
+                'vulnerability_score': measurement.vulnerability_score,
+                'trust_score': measurement.trust_score
+            })
+            return True
+        
+        # Check for rapid changes
+        if hasattr(measurement, 'previous_measurement') and measurement.previous_measurement:
+            prev = measurement.previous_measurement
+            intimacy_change = abs(measurement.intimacy_score - prev.intimacy_score)
+            
+            if intimacy_change > 0.5:  # 50% change
+                logger.warning(f"Rapid symbolic change detected: {intimacy_change}")
+                symbolic_anomalies.append({
+                    'timestamp': datetime.now().isoformat(),
+                    'type': 'rapid_change',
+                    'change_amount': intimacy_change,
+                    'context': measurement.context[:100] if measurement.context else ""
+                })
+                return True
+        
+        return False
+    
+    except Exception as e:
+        logger.error(f"Error detecting symbolic anomaly: {str(e)}")
+        return False
+
+def sanitize_symbolic_input(text: str, max_length: int) -> str:
+    """Sanitize symbolic text input"""
+    if not isinstance(text, str):
+        return ""
+    
+    # Remove potential injection patterns
+    text = re.sub(r'[<>"\']', '', text)
+    
+    # Limit length
+    if len(text) > max_length:
+        text = text[:max_length] + "..."
+    
+    return text.strip()
+
+def log_symbolic_activity(activity_type: str, session_token: str, details: Dict[str, Any], status: str = "success"):
+    """Log symbolic drift activities"""
+    try:
+        log_entry = {
+            'timestamp': datetime.now().isoformat(),
+            'activity_type': activity_type,
+            'session': session_token[:8] + "..." if session_token else "none",
+            'details': details,
+            'status': status,
+            'thread_id': threading.get_ident()
+        }
+        
+        logger.info(f"Symbolic activity logged: {activity_type} ({status})")
+        
+        if status != "success":
+            logger.warning(f"Symbolic activity issue: {activity_type} failed with {status}")
+        
+    except Exception as e:
+        logger.error(f"Error logging symbolic activity: {str(e)}")
 
 @dataclass
 class DriftMeasurement:
-    """Single drift measurement point"""
+    """Single drift measurement point with security enhancements"""
     timestamp: float
     intimacy_score: float
     vulnerability_score: float
@@ -34,15 +239,49 @@ class DriftMeasurement:
     stability_index: float
     tags: List[str]
     context: str
+    session_token: Optional[str] = None
+    anomaly_detected: bool = False
+    sanitized: bool = False
+    
+    def __post_init__(self):
+        """Validate and sanitize measurement after initialization"""
+        # Clamp scores to valid range
+        self.intimacy_score = max(0.0, min(1.0, float(self.intimacy_score)))
+        self.vulnerability_score = max(0.0, min(1.0, float(self.vulnerability_score)))
+        self.trust_score = max(0.0, min(1.0, float(self.trust_score)))
+        self.symbolic_resonance = max(0.0, min(1.0, float(self.symbolic_resonance)))
+        self.stability_index = max(0.0, min(1.0, float(self.stability_index)))
+        
+        # Sanitize tags
+        if self.tags:
+            self.tags = [sanitize_symbolic_input(tag, 50) for tag in self.tags[:MAX_TAGS_PER_MEASUREMENT]]
+        
+        # Sanitize context
+        if self.context:
+            self.context = sanitize_symbolic_input(self.context, MAX_CONTEXT_LENGTH)
+            self.sanitized = True
 
-@dataclass
+@dataclass  
 class RitualThreshold:
-    """Tracks ritual crossing events"""
+    """Tracks ritual crossing events with validation"""
     ritual_type: str
     crossed_at: float
     intensity: float
     shared_vulnerability: bool
     memory_tags: List[str]
+    session_token: Optional[str] = None
+    
+    def __post_init__(self):
+        """Validate ritual threshold after initialization"""
+        self.intensity = max(0.0, min(1.0, float(self.intensity)))
+        
+        # Sanitize ritual type
+        if self.ritual_type:
+            self.ritual_type = sanitize_symbolic_input(self.ritual_type, 100)
+        
+        # Sanitize memory tags
+        if self.memory_tags:
+            self.memory_tags = [sanitize_symbolic_input(tag, 50) for tag in self.memory_tags[:MAX_TAGS_PER_MEASUREMENT]]
 
 class SymbolicDriftManager:
     """Manages symbolic drift tracking and intimacy unlocking"""

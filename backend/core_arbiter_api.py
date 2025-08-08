@@ -3,7 +3,7 @@
 CoreArbiter API Integration
 
 Flask API endpoints for integrating CoreArbiter with the existing system.
-Provides REST API access to the CoreArbiter functionality.
+Provides REST API access to the CoreArbiter functionality with authentication and logging.
 """
 
 from flask import Flask, request, jsonify
@@ -14,11 +14,14 @@ import logging
 from datetime import datetime
 from pathlib import Path
 import traceback
+import hashlib
+import os
+from functools import wraps
 
 from core.core_arbiter import CoreArbiter, WeightingStrategy
 
 # Setup logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 # Initialize Flask app
@@ -28,6 +31,29 @@ CORS(app)  # Enable CORS for frontend access
 # Global CoreArbiter instance
 core_arbiter = None
 
+# API key for authentication
+API_KEY = os.getenv('CORE_ARBITER_API_KEY', 'default_key_change_in_production')
+
+def require_auth(f):
+    """Decorator to require API key authentication"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        auth_header = request.headers.get('Authorization')
+        api_key = request.headers.get('X-API-Key')
+        
+        # Check for API key in header or query param
+        if not api_key:
+            api_key = request.args.get('api_key')
+        
+        if not api_key or api_key != API_KEY:
+            logger.warning(f"Unauthorized access attempt from {request.remote_addr} to {request.endpoint}")
+            return jsonify({'error': 'Unauthorized - Valid API key required'}), 401
+        
+        # Log authorized request
+        logger.info(f"Authorized request from {request.remote_addr} to {request.endpoint} at {datetime.now()}")
+        return f(*args, **kwargs)
+    return decorated_function
+
 def get_arbiter():
     """Get or create CoreArbiter instance"""
     global core_arbiter
@@ -36,15 +62,29 @@ def get_arbiter():
     return core_arbiter
 
 @app.route('/api/arbiter/process', methods=['POST'])
+@require_auth
 def process_input():
     """Process user input through CoreArbiter"""
     try:
+        # Log incoming request details
+        source_ip = request.remote_addr
+        timestamp = datetime.now().isoformat()
+        logger.info(f"CoreArbiter process request from {source_ip} at {timestamp}")
+        
         data = request.json
+        if not data:
+            logger.warning(f"No JSON data in request from {source_ip}")
+            return jsonify({'error': 'JSON data required'}), 400
+            
         user_input = data.get('message', '')
         state = data.get('state', {})
         
         if not user_input:
+            logger.warning(f"Empty message in request from {source_ip}")
             return jsonify({'error': 'Message is required'}), 400
+        
+        # Log request details
+        logger.info(f"Processing input: '{user_input[:100]}...' from {source_ip}")
         
         # Run async function in new event loop
         loop = asyncio.new_event_loop()
@@ -82,9 +122,13 @@ def process_input():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/arbiter/status', methods=['GET'])
+@require_auth
 def get_status():
     """Get current arbiter system status"""
     try:
+        source_ip = request.remote_addr
+        logger.info(f"Status request from {source_ip} at {datetime.now().isoformat()}")
+        
         arbiter = get_arbiter()
         status = arbiter.get_system_status()
         return jsonify(status)
@@ -93,10 +137,18 @@ def get_status():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/arbiter/strategy', methods=['POST'])
+@require_auth
 def set_strategy():
     """Change weighting strategy"""
     try:
+        source_ip = request.remote_addr
+        logger.info(f"Strategy change request from {source_ip} at {datetime.now().isoformat()}")
+        
         data = request.json
+        if not data:
+            logger.warning(f"No JSON data in strategy request from {source_ip}")
+            return jsonify({'error': 'JSON data required'}), 400
+            
         strategy_name = data.get('strategy', 'harmonic')
         
         # Validate strategy

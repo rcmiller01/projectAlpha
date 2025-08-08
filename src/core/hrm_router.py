@@ -4,6 +4,13 @@ HRM Router Integration - GraphRAG Memory and Tool Router Integration
 This module provides integration between the High-Resolution Memory (HRM) system
 and the new GraphRAG memory + tool router architecture.
 
+Enhanced with comprehensive security features:
+- Request routing validation with integrity verification  
+- Authentication and session management for all HRM operations
+- Comprehensive audit logging for memory and tool activities
+- Rate limiting and concurrent request management
+- Input validation and sanitization for all router data
+
 Key Features:
 - Seamless integration with existing HRM stack
 - GraphRAG memory hooks for pre/post-response processing
@@ -11,31 +18,220 @@ Key Features:
 - Thread-safe concurrent operation support
 - Compatible with conductor/supervisor/SLiM agent hierarchy
 
-Author: ProjectAlpha Team
+Author: ProjectAlpha Team  
 Integration: HRM stack, GraphRAG memory, Tool router
+Version: 2.0.0 (Security Enhanced)
 """
 
 import threading
 import uuid
 import logging
-from datetime import datetime
+import hashlib
+import re
+import time
+from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, List, Union
 from pathlib import Path
+from collections import deque, defaultdict
 
-# Import the new GraphRAG and tool systems
+# Enhanced logging configuration
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# Security configuration
+HRM_SESSION_TOKEN_LENGTH = 32
+MAX_CONCURRENT_REQUESTS = 20
+REQUEST_TIMEOUT_SECONDS = 300
+ROUTING_RATE_LIMIT = 50  # requests per hour
+MAX_MEMORY_QUERY_LENGTH = 1000
+MAX_TOOL_REQUESTS_PER_SESSION = 100
+
+# Thread safety
+hrm_lock = threading.Lock()
+
+# Session management
+hrm_sessions = {}
+session_expiry_hours = 24
+
+# Rate limiting
+routing_requests = defaultdict(lambda: deque())
+
+# Request tracking
+active_requests = {}
+request_history = deque(maxlen=1000)
+
+# Import the new GraphRAG and tool systems with validation
 try:
     from ...memory.graphrag_memory import GraphRAGMemory, QueryResult
     from ..tools.tool_request_router import ToolRequestRouter, ToolResponse
+    MEMORY_AVAILABLE = True
+    TOOLS_AVAILABLE = True
+    logger.info("GraphRAG memory and tool router modules loaded successfully")
 except ImportError:
     # Fallback imports for different module structures
-    import sys
-    sys.path.append(str(Path(__file__).parent.parent.parent))
-    from memory.graphrag_memory import GraphRAGMemory, QueryResult
-    from src.tools.tool_request_router import ToolRequestRouter, ToolResponse
+    try:
+        import sys
+        sys.path.append(str(Path(__file__).parent.parent.parent))
+        from memory.graphrag_memory import GraphRAGMemory, QueryResult
+        from src.tools.tool_request_router import ToolRequestRouter, ToolResponse
+        MEMORY_AVAILABLE = True
+        TOOLS_AVAILABLE = True
+        logger.info("GraphRAG memory and tool router modules loaded via fallback")
+    except ImportError as e:
+        logger.warning(f"GraphRAG/tool systems not available: {e}")
+        MEMORY_AVAILABLE = False
+        TOOLS_AVAILABLE = False
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+def generate_hrm_session() -> str:
+    """Generate a secure HRM session token"""
+    timestamp = str(time.time())
+    random_data = str(hash(datetime.now()))
+    token_string = f"hrm:{timestamp}:{random_data}"
+    return hashlib.sha256(token_string.encode()).hexdigest()[:HRM_SESSION_TOKEN_LENGTH]
+
+def validate_hrm_session(session_token: str) -> bool:
+    """Validate HRM session token"""
+    if not session_token or len(session_token) != HRM_SESSION_TOKEN_LENGTH:
+        return False
+    
+    if session_token not in hrm_sessions:
+        return False
+    
+    # Check if session has expired
+    session_data = hrm_sessions[session_token]
+    if datetime.now() > session_data['expires_at']:
+        del hrm_sessions[session_token]
+        return False
+    
+    # Update last access time
+    session_data['last_access'] = datetime.now()
+    return True
+
+def check_routing_rate_limit(session_token: str) -> bool:
+    """Check if routing request rate limit is exceeded"""
+    current_time = time.time()
+    
+    # Clean old requests
+    while (routing_requests[session_token] and 
+           routing_requests[session_token][0] < current_time - 3600):  # 1 hour window
+        routing_requests[session_token].popleft()
+    
+    # Check limit
+    if len(routing_requests[session_token]) >= ROUTING_RATE_LIMIT:
+        logger.warning(f"HRM routing rate limit exceeded for session: {session_token[:8]}...")
+        return False
+    
+    # Add current request
+    routing_requests[session_token].append(current_time)
+    return True
+
+def validate_memory_query(query_data: Dict[str, Any]) -> tuple[bool, str]:
+    """Validate memory query data"""
+    try:
+        # Check required fields
+        if 'query' not in query_data:
+            return False, "Missing required field: query"
+        
+        # Validate query text
+        query = query_data['query']
+        if not isinstance(query, str):
+            return False, "Query must be a string"
+        
+        if len(query) > MAX_MEMORY_QUERY_LENGTH:
+            return False, f"Query exceeds maximum length of {MAX_MEMORY_QUERY_LENGTH}"
+        
+        # Sanitize query text
+        if not re.match(r'^[a-zA-Z0-9\s\.,!?\-\'\":()\[\]]+$', query):
+            return False, "Query contains invalid characters"
+        
+        # Validate limit if present
+        if 'limit' in query_data:
+            limit = query_data['limit']
+            if not isinstance(limit, int) or limit < 1 or limit > 50:
+                return False, "Limit must be between 1 and 50"
+        
+        return True, "Valid"
+    
+    except Exception as e:
+        logger.error(f"Error validating memory query: {str(e)}")
+        return False, f"Validation error: {str(e)}"
+
+def validate_tool_request(tool_data: Dict[str, Any]) -> tuple[bool, str]:
+    """Validate tool request data"""
+    try:
+        # Check required fields
+        required_fields = ['tool_name', 'action']
+        for field in required_fields:
+            if field not in tool_data:
+                return False, f"Missing required field: {field}"
+        
+        # Validate tool name
+        tool_name = tool_data['tool_name']
+        if not isinstance(tool_name, str) or len(tool_name.strip()) == 0:
+            return False, "Tool name must be a non-empty string"
+        
+        # Validate action
+        action = tool_data['action']
+        if not isinstance(action, str) or len(action.strip()) == 0:
+            return False, "Action must be a non-empty string"
+        
+        # Validate allowed tools (basic whitelist)
+        allowed_tools = {
+            'web_search', 'file_manager', 'calculator', 'code_executor',
+            'memory_manager', 'task_scheduler', 'data_analyzer'
+        }
+        
+        if tool_name not in allowed_tools:
+            return False, f"Tool not allowed: {tool_name}. Must be one of: {allowed_tools}"
+        
+        return True, "Valid"
+    
+    except Exception as e:
+        logger.error(f"Error validating tool request: {str(e)}")
+        return False, f"Validation error: {str(e)}"
+
+def sanitize_input_text(text: str, max_length: int) -> str:
+    """Sanitize input text for safety"""
+    if not isinstance(text, str):
+        return ""
+    
+    # Remove potential injection patterns
+    text = re.sub(r'[<>"\']', '', text)
+    
+    # Limit length
+    if len(text) > max_length:
+        text = text[:max_length] + "..."
+    
+    return text.strip()
+
+def log_hrm_activity(activity_type: str, session_token: str, details: Dict[str, Any], status: str = "success"):
+    """Log HRM router activities"""
+    try:
+        log_entry = {
+            'timestamp': datetime.now().isoformat(),
+            'activity_type': activity_type,
+            'session': session_token[:8] + "..." if session_token else "none",
+            'details': details,
+            'status': status,
+            'thread_id': threading.get_ident()
+        }
+        
+        request_history.append(log_entry)
+        
+        logger.info(f"HRM activity logged: {activity_type} ({status})")
+        
+        if status != "success":
+            logger.warning(f"HRM activity issue: {activity_type} failed with {status}")
+        
+    except Exception as e:
+        logger.error(f"Error logging HRM activity: {str(e)}")
+
+def generate_request_id() -> str:
+    """Generate unique request ID"""
+    return f"req_{uuid.uuid4().hex[:12]}"
 
 class HRMRouter:
     """

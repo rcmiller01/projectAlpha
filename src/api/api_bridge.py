@@ -3,42 +3,191 @@ House of Minds API Bridge - FastAPI backend for Core1 Gateway
 
 This module creates a FastAPI bridge that connects the Core1 React frontend
 with the House of Minds Python backend, providing a unified API interface.
+
+Enhanced with security features:
+- API bridge security hardening with authentication
+- Input validation and sanitization for all API endpoints
+- Rate limiting and session management for API access
+- Comprehensive audit logging for all bridge activities
 """
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends, Request, Header
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import aiosqlite
 import os
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import Dict, List, Optional, Any
+import hashlib
+import re
+import time
 import asyncio
 import logging
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Any
+from collections import defaultdict, deque
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, validator
 
-# Import House of Minds components
-from house_of_minds.main import HouseOfMinds
-from house_of_minds.model_router import ModelRouter
-from house_of_minds.intent_classifier import IntentClassifier
-from house_of_minds.config_manager import ConfigManager
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+# Enhanced logging configuration
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
+# Security configuration
+API_BRIDGE_TOKEN_LENGTH = 32
+MAX_REQUEST_SIZE = 10000  # characters
+BRIDGE_RATE_LIMIT = 100  # requests per hour per IP
+MAX_CONCURRENT_REQUESTS = 20
+VALID_ORIGINS = {
+    "http://192.168.50.234:3000", "http://192.168.50.234:5173", 
+    "http://localhost:3000", "http://localhost:5173"
+}
+
+# Rate limiting storage
+request_counts = defaultdict(lambda: deque())
+active_requests = set()
+
+# Security headers
+security = HTTPBearer()
+
+# Import House of Minds components with validation
+try:
+    from house_of_minds.main import HouseOfMinds
+    from house_of_minds.model_router import ModelRouter
+    from house_of_minds.intent_classifier import IntentClassifier
+    from house_of_minds.config_manager import ConfigManager
+    HOM_AVAILABLE = True
+    logger.info("House of Minds components loaded successfully")
+except ImportError as e:
+    logger.warning(f"House of Minds components not available: {e}")
+    HOM_AVAILABLE = False
+
+def check_rate_limit(client_ip: str) -> bool:
+    """Check if client IP has exceeded rate limit"""
+    current_time = time.time()
+    
+    # Clean old requests
+    while (request_counts[client_ip] and 
+           request_counts[client_ip][0] < current_time - 3600):  # 1 hour window
+        request_counts[client_ip].popleft()
+    
+    # Check limit
+    if len(request_counts[client_ip]) >= BRIDGE_RATE_LIMIT:
+        logger.warning(f"Rate limit exceeded for IP: {client_ip}")
+        return False
+    
+    # Add current request
+    request_counts[client_ip].append(current_time)
+    return True
+
+def validate_origin(origin: str) -> bool:
+    """Validate request origin"""
+    return origin in VALID_ORIGINS
+
+def validate_input_text(text: str, max_length: int = MAX_REQUEST_SIZE) -> tuple[bool, str]:
+    """Validate and sanitize input text"""
+    try:
+        if not text or not isinstance(text, str):
+            return False, "Input must be a non-empty string"
+        
+        if len(text) > max_length:
+            return False, f"Input exceeds maximum length of {max_length}"
+        
+        # Check for potential injection patterns
+        dangerous_patterns = [
+            r'<script[^>]*>.*?</script>',  # XSS
+            r'javascript:',               # JavaScript protocol
+            r'on\w+\s*=',                # Event handlers
+            r'expression\s*\(',          # CSS expressions
+        ]
+        
+        for pattern in dangerous_patterns:
+            if re.search(pattern, text, re.IGNORECASE):
+                return False, f"Input contains potentially dangerous content"
+        
+        return True, "Valid"
+    
+    except Exception as e:
+        logger.error(f"Error validating input text: {str(e)}")
+        return False, f"Validation error: {str(e)}"
+
+def sanitize_text_input(text: str) -> str:
+    """Sanitize text input for safety"""
+    if not isinstance(text, str):
+        return ""
+    
+    # Remove potentially dangerous characters
+    text = re.sub(r'[<>"\']', '', text)
+    
+    # Limit length
+    if len(text) > MAX_REQUEST_SIZE:
+        text = text[:MAX_REQUEST_SIZE] + "..."
+    
+    return text.strip()
+
+def log_bridge_activity(activity_type: str, client_ip: str, details: Dict[str, Any], status: str = "success"):
+    """Log API bridge activities"""
+    try:
+        log_entry = {
+            'timestamp': datetime.now().isoformat(),
+            'activity_type': activity_type,
+            'client_ip': client_ip,
+            'details': details,
+            'status': status
+        }
+        
+        logger.info(f"Bridge activity logged: {activity_type} from {client_ip} ({status})")
+        
+        if status != "success":
+            logger.warning(f"Bridge activity issue: {activity_type} from {client_ip} failed with {status}")
+        
+    except Exception as e:
+        logger.error(f"Error logging bridge activity: {str(e)}")
+
+async def validate_request(request: Request) -> bool:
+    """Validate incoming request"""
+    client_ip = request.client.host
+    
+    # Check rate limit
+    if not check_rate_limit(client_ip):
+        raise HTTPException(status_code=429, detail="Rate limit exceeded")
+    
+    # Check concurrent requests
+    if len(active_requests) >= MAX_CONCURRENT_REQUESTS:
+        logger.warning(f"Concurrent request limit reached: {len(active_requests)}")
+        raise HTTPException(status_code=503, detail="Server too busy")
+    
+    # Validate origin if present
+    origin = request.headers.get("origin")
+    if origin and not validate_origin(origin):
+        logger.warning(f"Invalid origin: {origin} from {client_ip}")
+        raise HTTPException(status_code=403, detail="Invalid origin")
+    
+    return True
+
+class SecureBaseModel(BaseModel):
+    """Base model with input validation"""
+    
+    @validator('*', pre=True)
+    def sanitize_string_fields(cls, v):
+        if isinstance(v, str):
+            return sanitize_text_input(v)
+        return v
+
 app = FastAPI(
-    title="House of Minds API Bridge",
-    description="Unified API bridge connecting Core1 frontend with House of Minds backend",
-    version="1.0.0"
+    title="House of Minds API Bridge (Secured)",
+    description="Unified API bridge connecting Core1 frontend with House of Minds backend - Security Enhanced",
+    version="1.1.0"
 )
 
-# Configure CORS for Core1 frontend
+# Configure CORS with security restrictions
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://192.168.50.234:3000", "http://192.168.50.234:5173", "http://localhost:3000", "http://localhost:5173"],  # React dev servers
+    allow_origins=list(VALID_ORIGINS),
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST"],  # Only allow necessary methods
+    allow_headers=["Content-Type", "Authorization"],  # Restrict headers
 )
 
 # Global House of Minds instance
@@ -46,18 +195,25 @@ house_of_minds = None
 PREFERENCE_DB_PATH = os.getenv("PREFERENCE_DB_PATH", "data/preference_votes.db")
 
 async def init_preference_db():
-    async with aiosqlite.connect(PREFERENCE_DB_PATH) as db:
-        await db.execute(
-            """
-            CREATE TABLE IF NOT EXISTS preference_votes (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                input TEXT NOT NULL,
-                response_a TEXT NOT NULL,
-                response_b TEXT NOT NULL,
-                winner TEXT NOT NULL,
-                timestamp TEXT NOT NULL
-            )
-            """
+    """Initialize preference database with security checks"""
+    try:
+        # Ensure data directory exists
+        os.makedirs(os.path.dirname(PREFERENCE_DB_PATH), exist_ok=True)
+        
+        async with aiosqlite.connect(PREFERENCE_DB_PATH) as db:
+            await db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS preference_votes (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    input TEXT NOT NULL,
+                    response_a TEXT NOT NULL,
+                    response_b TEXT NOT NULL,
+                    winner TEXT NOT NULL,
+                    timestamp TEXT NOT NULL,
+                    client_ip TEXT,
+                    session_id TEXT
+                )
+                """
         )
         await db.commit()
 

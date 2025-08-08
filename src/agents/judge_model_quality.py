@@ -2,27 +2,211 @@
 """
 Judge Model Quality - Comprehensive Model Comparison and Replacement Logic
 Evaluates quantized candidate models against emotional baselines for automated replacement decisions.
+
+Enhanced with security features:
+- Model assessment security with integrity verification
+- Input validation for all model paths and parameters
+- Comprehensive logging for all model evaluation activities
+- Rate limiting and session management for model operations
 """
 
 import os
 import json
 import logging
 import shutil
-from pathlib import Path
-from datetime import datetime, timezone
-from typing import Dict, List, Optional, Tuple, Any
 import hashlib
-import subprocess
+import re
+import threading
 import time
+from pathlib import Path
+from datetime import datetime, timezone, timedelta
+from typing import Dict, List, Optional, Tuple, Any
+from collections import deque, defaultdict
+import subprocess
 
-# Try to import quantization tracking
+# Enhanced logging configuration
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# Security configuration
+JUDGE_SESSION_TOKEN_LENGTH = 32
+MAX_MODEL_PATH_LENGTH = 500
+MODEL_ASSESSMENT_RATE_LIMIT = 5  # assessments per hour
+MAX_CONCURRENT_ASSESSMENTS = 3
+ALLOWED_MODEL_EXTENSIONS = {'.bin', '.gguf', '.safetensors', '.pt', '.pth'}
+
+# Thread safety
+judge_lock = threading.Lock()
+
+# Session management
+judge_sessions = {}
+session_expiry_hours = 12
+
+# Rate limiting
+assessment_requests = defaultdict(lambda: deque())
+
+# Assessment tracking
+active_assessments = {}
+assessment_history = deque(maxlen=100)
+
+# Try to import quantization tracking with validation
 try:
     from quant_tracking import QuantLoopResult, QuantTracker
     TRACKING_AVAILABLE = True
+    logger.info("Quantization tracking module loaded for model judging")
 except ImportError:
     TRACKING_AVAILABLE = False
+    logger.warning("Quantization tracking not available for model judging")
 
-logger = logging.getLogger(__name__)
+def generate_judge_session() -> str:
+    """Generate a secure judge session token"""
+    timestamp = str(time.time())
+    random_data = str(hash(datetime.now()))
+    token_string = f"judge:{timestamp}:{random_data}"
+    return hashlib.sha256(token_string.encode()).hexdigest()[:JUDGE_SESSION_TOKEN_LENGTH]
+
+def validate_judge_session(session_token: str) -> bool:
+    """Validate judge session token"""
+    if not session_token or len(session_token) != JUDGE_SESSION_TOKEN_LENGTH:
+        return False
+    
+    if session_token not in judge_sessions:
+        return False
+    
+    # Check if session has expired
+    session_data = judge_sessions[session_token]
+    if datetime.now() > session_data['expires_at']:
+        del judge_sessions[session_token]
+        return False
+    
+    # Update last access time
+    session_data['last_access'] = datetime.now()
+    return True
+
+def check_assessment_rate_limit(session_token: str) -> bool:
+    """Check if model assessment rate limit is exceeded"""
+    current_time = time.time()
+    
+    # Clean old requests
+    while (assessment_requests[session_token] and 
+           assessment_requests[session_token][0] < current_time - 3600):  # 1 hour window
+        assessment_requests[session_token].popleft()
+    
+    # Check limit
+    if len(assessment_requests[session_token]) >= MODEL_ASSESSMENT_RATE_LIMIT:
+        logger.warning(f"Model assessment rate limit exceeded for session: {session_token[:8]}...")
+        return False
+    
+    # Add current request
+    assessment_requests[session_token].append(current_time)
+    return True
+
+def validate_model_path(model_path: str) -> tuple[bool, str]:
+    """Validate model file path for security"""
+    try:
+        # Basic validation
+        if not model_path or not isinstance(model_path, str):
+            return False, "Model path must be a non-empty string"
+        
+        if len(model_path) > MAX_MODEL_PATH_LENGTH:
+            return False, f"Model path exceeds maximum length of {MAX_MODEL_PATH_LENGTH}"
+        
+        # Path traversal protection
+        if '..' in model_path or '~' in model_path:
+            return False, "Model path contains potentially unsafe patterns"
+        
+        # Extension validation
+        path_obj = Path(model_path)
+        if path_obj.suffix.lower() not in ALLOWED_MODEL_EXTENSIONS:
+            return False, f"Model file extension not allowed. Must be one of: {ALLOWED_MODEL_EXTENSIONS}"
+        
+        # Check if file exists and is readable
+        if not path_obj.exists():
+            return False, f"Model file does not exist: {model_path}"
+        
+        if not path_obj.is_file():
+            return False, f"Model path is not a file: {model_path}"
+        
+        # Check file size (reasonable limits)
+        file_size_gb = path_obj.stat().st_size / (1024**3)
+        if file_size_gb > 50:  # 50GB limit
+            return False, f"Model file too large: {file_size_gb:.1f}GB (max 50GB)"
+        
+        return True, "Valid"
+    
+    except Exception as e:
+        logger.error(f"Error validating model path: {str(e)}")
+        return False, f"Validation error: {str(e)}"
+
+def validate_comparison_params(params: Dict[str, Any]) -> tuple[bool, str]:
+    """Validate model comparison parameters"""
+    try:
+        # Validate thresholds
+        if 'emotion_threshold' in params:
+            threshold = params['emotion_threshold']
+            if not isinstance(threshold, (int, float)) or threshold < 0 or threshold > 1:
+                return False, "Emotion threshold must be between 0 and 1"
+        
+        if 'fluency_threshold' in params:
+            threshold = params['fluency_threshold']
+            if not isinstance(threshold, (int, float)) or threshold < 0 or threshold > 1:
+                return False, "Fluency threshold must be between 0 and 1"
+        
+        # Validate confidence requirements
+        if 'confidence_requirement' in params:
+            confidence = params['confidence_requirement']
+            if not isinstance(confidence, (int, float)) or confidence < 0 or confidence > 1:
+                return False, "Confidence requirement must be between 0 and 1"
+        
+        # Validate test parameters
+        if 'test_iterations' in params:
+            iterations = params['test_iterations']
+            if not isinstance(iterations, int) or iterations < 1 or iterations > 100:
+                return False, "Test iterations must be between 1 and 100"
+        
+        return True, "Valid"
+    
+    except Exception as e:
+        logger.error(f"Error validating comparison params: {str(e)}")
+        return False, f"Validation error: {str(e)}"
+
+def calculate_model_hash(model_path: str) -> str:
+    """Calculate hash of model file for integrity verification"""
+    try:
+        hash_md5 = hashlib.md5()
+        with open(model_path, "rb") as f:
+            # Read in chunks to handle large files
+            for chunk in iter(lambda: f.read(4096), b""):
+                hash_md5.update(chunk)
+        return hash_md5.hexdigest()
+    except Exception as e:
+        logger.error(f"Error calculating model hash: {str(e)}")
+        return ""
+
+def log_assessment_activity(activity_type: str, session_token: str, details: Dict[str, Any], status: str = "success"):
+    """Log model assessment activities"""
+    try:
+        log_entry = {
+            'timestamp': datetime.now().isoformat(),
+            'activity_type': activity_type,
+            'session': session_token[:8] + "..." if session_token else "none",
+            'details': details,
+            'status': status,
+            'thread_id': threading.get_ident()
+        }
+        
+        assessment_history.append(log_entry)
+        
+        logger.info(f"Assessment activity logged: {activity_type} ({status})")
+        
+        if status != "success":
+            logger.warning(f"Assessment activity issue: {activity_type} failed with {status}")
+        
+    except Exception as e:
+        logger.error(f"Error logging assessment activity: {str(e)}")
 
 class ModelComparisonResult:
     """Results of comparing two models"""

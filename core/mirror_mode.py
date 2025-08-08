@@ -2,16 +2,56 @@
 🪩 Mirror Mode - Reflective AI System
 Provides self-aware meta-commentary and transparency about AI decision-making
 for the Dolphin AI Orchestrator v2.0
+
+Enhanced with security features:
+- Mirror session validation and authentication
+- Reflection monitoring with anomaly detection
+- Comprehensive logging for all mirror activities
+- Input validation and sanitization for all mirror data
 """
 
 import json
-from datetime import datetime
+import hashlib
+import re
+import time
+import threading
+import logging
+from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any, Union
 from dataclasses import dataclass
 from enum import Enum
+from collections import deque, defaultdict
 
 from mirror_log import MirrorLog
 from self_report import create_self_report, SelfReport
+
+# Enhanced logging configuration
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# Security configuration
+MIRROR_SESSION_TOKEN_LENGTH = 32
+MAX_REFLECTION_LENGTH = 2000
+MAX_REASONING_CHAIN_LENGTH = 10
+REFLECTION_ANOMALY_THRESHOLD = 0.9
+RATE_LIMIT_WINDOW = 3600  # 1 hour
+MAX_REFLECTIONS_PER_WINDOW = 50
+
+# Thread safety
+mirror_lock = threading.Lock()
+
+# Session management
+mirror_sessions = {}
+session_expiry_hours = 12
+
+# Rate limiting
+reflection_requests = defaultdict(lambda: deque())
+
+# Anomaly detection
+reflection_anomalies = deque(maxlen=100)
 
 class MirrorType(Enum):
     REASONING = "reasoning"      # Why I chose this approach
@@ -22,9 +62,173 @@ class MirrorType(Enum):
     ANALYTICAL = "analytical"   # My analysis methodology
     SAFETY_TETHER = "safety_tether"  # Emotional safety override
 
+def validate_mirror_session(session_token: str) -> bool:
+    """Validate mirror session token"""
+    if not session_token or len(session_token) != MIRROR_SESSION_TOKEN_LENGTH:
+        return False
+    
+    if session_token not in mirror_sessions:
+        return False
+    
+    # Check if session has expired
+    session_data = mirror_sessions[session_token]
+    if datetime.now() > session_data['expires_at']:
+        del mirror_sessions[session_token]
+        return False
+    
+    # Update last access time
+    session_data['last_access'] = datetime.now()
+    return True
+
+def generate_mirror_session() -> str:
+    """Generate a secure mirror session token"""
+    timestamp = str(time.time())
+    random_data = str(hash(datetime.now()))
+    token_string = f"mirror:{timestamp}:{random_data}"
+    return hashlib.sha256(token_string.encode()).hexdigest()[:MIRROR_SESSION_TOKEN_LENGTH]
+
+def check_reflection_rate_limit(session_token: str) -> bool:
+    """Check if reflection rate limit is exceeded"""
+    current_time = time.time()
+    
+    # Clean old requests
+    while (reflection_requests[session_token] and 
+           reflection_requests[session_token][0] < current_time - RATE_LIMIT_WINDOW):
+        reflection_requests[session_token].popleft()
+    
+    # Check limit
+    if len(reflection_requests[session_token]) >= MAX_REFLECTIONS_PER_WINDOW:
+        logger.warning(f"Reflection rate limit exceeded for session: {session_token[:8]}...")
+        return False
+    
+    # Add current request
+    reflection_requests[session_token].append(current_time)
+    return True
+
+def validate_reflection_input(reflection_data: Dict[str, Any]) -> tuple[bool, str]:
+    """Validate reflection input data"""
+    try:
+        # Check required fields
+        required_fields = ['mirror_type', 'reflection_content']
+        for field in required_fields:
+            if field not in reflection_data:
+                return False, f"Missing required field: {field}"
+        
+        # Validate mirror type
+        mirror_type = reflection_data.get('mirror_type', '')
+        valid_types = {e.value for e in MirrorType}
+        if mirror_type not in valid_types:
+            return False, f"Invalid mirror type. Must be one of: {valid_types}"
+        
+        # Validate reflection content
+        content = reflection_data.get('reflection_content', '')
+        if not isinstance(content, str):
+            return False, "Reflection content must be a string"
+        
+        if len(content) > MAX_REFLECTION_LENGTH:
+            return False, f"Reflection content exceeds maximum length of {MAX_REFLECTION_LENGTH}"
+        
+        # Sanitize content
+        if not re.match(r'^[a-zA-Z0-9\s\.,!?\-\'\":()\[\]]+$', content):
+            return False, "Reflection content contains invalid characters"
+        
+        # Validate confidence level if present
+        if 'confidence_level' in reflection_data:
+            confidence = reflection_data['confidence_level']
+            if not isinstance(confidence, (int, float)):
+                return False, "Confidence level must be a number"
+            
+            if confidence < 0 or confidence > 1:
+                return False, "Confidence level must be between 0 and 1"
+        
+        # Validate reasoning chain if present
+        if 'reasoning_chain' in reflection_data:
+            reasoning_chain = reflection_data['reasoning_chain']
+            if not isinstance(reasoning_chain, list):
+                return False, "Reasoning chain must be a list"
+            
+            if len(reasoning_chain) > MAX_REASONING_CHAIN_LENGTH:
+                return False, f"Reasoning chain exceeds maximum length of {MAX_REASONING_CHAIN_LENGTH}"
+        
+        return True, "Valid"
+    
+    except Exception as e:
+        logger.error(f"Error validating reflection input: {str(e)}")
+        return False, f"Validation error: {str(e)}"
+
+def detect_reflection_anomaly(reflection_data: Dict[str, Any]) -> bool:
+    """Detect if a reflection represents an anomaly"""
+    try:
+        confidence = reflection_data.get('confidence_level', 0.5)
+        mirror_type = reflection_data.get('mirror_type', '')
+        content_length = len(reflection_data.get('reflection_content', ''))
+        
+        # Check for high confidence anomalies
+        if confidence > REFLECTION_ANOMALY_THRESHOLD:
+            logger.warning(f"High confidence reflection anomaly detected: {confidence} ({mirror_type})")
+            reflection_anomalies.append({
+                'timestamp': datetime.now().isoformat(),
+                'type': 'high_confidence',
+                'confidence': confidence,
+                'mirror_type': mirror_type,
+                'content_length': content_length
+            })
+            return True
+        
+        # Check for unusually long reflections
+        if content_length > MAX_REFLECTION_LENGTH * 0.8:
+            logger.warning(f"Long reflection anomaly detected: {content_length} chars ({mirror_type})")
+            reflection_anomalies.append({
+                'timestamp': datetime.now().isoformat(),
+                'type': 'excessive_length',
+                'content_length': content_length,
+                'mirror_type': mirror_type
+            })
+            return True
+        
+        return False
+    
+    except Exception as e:
+        logger.error(f"Error detecting reflection anomaly: {str(e)}")
+        return False
+
+def sanitize_reflection_text(text: str) -> str:
+    """Sanitize reflection text for safety"""
+    if not isinstance(text, str):
+        return ""
+    
+    # Remove potential injection patterns
+    text = re.sub(r'[<>"\']', '', text)
+    
+    # Limit length
+    if len(text) > MAX_REFLECTION_LENGTH:
+        text = text[:MAX_REFLECTION_LENGTH] + "..."
+    
+    return text.strip()
+
+def log_mirror_activity(activity_type: str, session_token: str, details: Dict[str, Any], status: str = "success"):
+    """Log mirror mode activities for audit trail"""
+    try:
+        log_entry = {
+            'timestamp': datetime.now().isoformat(),
+            'activity_type': activity_type,
+            'session': session_token[:8] + "..." if session_token else "none",
+            'details': details,
+            'status': status,
+            'thread_id': threading.get_ident()
+        }
+        
+        logger.info(f"Mirror activity logged: {activity_type} ({status})")
+        
+        if status != "success":
+            logger.warning(f"Mirror activity issue: {activity_type} failed with {status}")
+        
+    except Exception as e:
+        logger.error(f"Error logging mirror activity: {str(e)}")
+
 @dataclass
 class MirrorReflection:
-    """A single mirror mode reflection"""
+    """A single mirror mode reflection with security enhancements"""
     timestamp: datetime
     mirror_type: MirrorType
     original_response: str
@@ -32,11 +236,16 @@ class MirrorReflection:
     confidence_level: float
     reasoning_chain: List[str]
     metadata: Dict[str, Any]
+    session_token: Optional[str] = None
+    anomaly_detected: bool = False
+    sanitized: bool = False
 
 class MirrorModeManager:
     """
+    Enhanced Mirror Mode Manager with security features.
+    
     Manages mirror mode functionality - adding self-awareness and transparency
-    to AI responses through meta-commentary
+    to AI responses through meta-commentary with comprehensive security monitoring.
     """
     
     def __init__(self, analytics_logger=None,
@@ -44,7 +253,8 @@ class MirrorModeManager:
                  sentiment_analysis=None,
                  persona_manager=None,
                  reflection_engine=None,
-                 response_context=None):
+                 response_context=None,
+                 require_session_validation=True):
         self.analytics_logger = analytics_logger
         self.memory_system = memory_system
         self.sentiment_analysis = sentiment_analysis
@@ -54,6 +264,13 @@ class MirrorModeManager:
         self.mirror_log = MirrorLog()
         self.last_report: Optional[SelfReport] = None
         self.badge_triggered = False
+        
+        # Security configuration
+        self.require_session_validation = require_session_validation
+        self.session_token = None
+        self.reflection_count = 0
+        self.anomaly_count = 0
+        self.creation_time = datetime.now()
         
         # Configuration
         self.is_enabled = False
@@ -68,12 +285,155 @@ class MirrorModeManager:
             MirrorType.SAFETY_TETHER: True  # Always enabled for safety
         }
         
-        # State tracking
-        self.reflection_history = []
+        # Enhanced state tracking with security
+        self.reflection_history = deque(maxlen=1000)  # Limit memory usage
         self.session_reflections = {}
+        self.failed_reflections = deque(maxlen=100)
         
         # Templates for mirror responses
         self.mirror_templates = self._initialize_templates()
+        
+        logger.info(f"MirrorModeManager initialized - session validation: {require_session_validation}")
+    
+    def create_session(self) -> str:
+        """Create a new mirror session"""
+        with mirror_lock:
+            session_token = generate_mirror_session()
+            mirror_sessions[session_token] = {
+                'created_at': datetime.now(),
+                'expires_at': datetime.now() + timedelta(hours=session_expiry_hours),
+                'last_access': datetime.now(),
+                'reflection_count': 0,
+                'anomaly_count': 0
+            }
+            
+            self.session_token = session_token
+            log_mirror_activity("session_create", session_token, {}, "success")
+            
+            logger.info(f"New mirror session created: {session_token[:8]}...")
+            return session_token
+    
+    def validate_session(self, session_token: Optional[str] = None) -> bool:
+        """Validate mirror session"""
+        if not self.require_session_validation:
+            return True
+        
+        token_to_validate = session_token or self.session_token
+        
+        if not token_to_validate:
+            logger.warning("No session token provided for validation")
+            return False
+        
+        is_valid = validate_mirror_session(token_to_validate)
+        
+        if not is_valid:
+            log_mirror_activity("session_validation", token_to_validate or "none", {}, "failed")
+        
+        return is_valid
+    
+    def add_reflection(self, mirror_type: MirrorType, original_response: str, 
+                      reflection_content: str, confidence_level: float = 0.5,
+                      reasoning_chain: Optional[List[str]] = None,
+                      metadata: Optional[Dict[str, Any]] = None,
+                      session_token: Optional[str] = None) -> bool:
+        """Add a reflection with security validation"""
+        
+        try:
+            with mirror_lock:
+                # Validate session if required
+                if not self.validate_session(session_token):
+                    log_mirror_activity("reflection_add", session_token or "none", 
+                                      {"mirror_type": mirror_type.value}, "session_invalid")
+                    return False
+                
+                # Check rate limit
+                current_token = session_token or self.session_token
+                if current_token and not check_reflection_rate_limit(current_token):
+                    log_mirror_activity("reflection_add", current_token, 
+                                      {"mirror_type": mirror_type.value}, "rate_limited")
+                    return False
+                
+                # Validate input data
+                reflection_data = {
+                    'mirror_type': mirror_type.value,
+                    'reflection_content': reflection_content,
+                    'confidence_level': confidence_level,
+                    'reasoning_chain': reasoning_chain or []
+                }
+                
+                is_valid, validation_message = validate_reflection_input(reflection_data)
+                if not is_valid:
+                    logger.error(f"Invalid reflection data: {validation_message}")
+                    log_mirror_activity("reflection_add", current_token or "none", 
+                                      {"error": validation_message}, "validation_failed")
+                    self.failed_reflections.append({
+                        'timestamp': datetime.now().isoformat(),
+                        'error': validation_message,
+                        'mirror_type': mirror_type.value
+                    })
+                    return False
+                
+                # Sanitize content
+                sanitized_content = sanitize_reflection_text(reflection_content)
+                sanitized_response = sanitize_reflection_text(original_response)
+                
+                # Detect anomalies
+                anomaly_detected = detect_reflection_anomaly(reflection_data)
+                if anomaly_detected:
+                    self.anomaly_count += 1
+                    if current_token and current_token in mirror_sessions:
+                        mirror_sessions[current_token]['anomaly_count'] += 1
+                
+                # Create reflection object
+                reflection = MirrorReflection(
+                    timestamp=datetime.now(),
+                    mirror_type=mirror_type,
+                    original_response=sanitized_response,
+                    reflection_content=sanitized_content,
+                    confidence_level=max(0.0, min(1.0, confidence_level)),
+                    reasoning_chain=reasoning_chain or [],
+                    metadata=metadata or {},
+                    session_token=current_token,
+                    anomaly_detected=anomaly_detected,
+                    sanitized=True
+                )
+                
+                # Add to history
+                self.reflection_history.append(reflection)
+                self.reflection_count += 1
+                
+                # Update session tracking
+                if current_token and current_token in mirror_sessions:
+                    mirror_sessions[current_token]['reflection_count'] += 1
+                
+                # Log successful addition
+                log_mirror_activity("reflection_add", current_token or "none", {
+                    "mirror_type": mirror_type.value,
+                    "confidence": confidence_level,
+                    "anomaly_detected": anomaly_detected
+                }, "success")
+                
+                logger.info(f"Reflection added: {mirror_type.value} (confidence: {confidence_level})")
+                return True
+                
+        except Exception as e:
+            logger.error(f"Error adding reflection: {str(e)}")
+            log_mirror_activity("reflection_add", session_token or "none", 
+                              {"error": str(e)}, "error")
+            return False
+    
+    def get_stats(self) -> Dict[str, Any]:
+        """Get mirror mode statistics"""
+        return {
+            'is_enabled': self.is_enabled,
+            'reflection_count': self.reflection_count,
+            'anomaly_count': self.anomaly_count,
+            'failed_reflections': len(self.failed_reflections),
+            'active_session': self.session_token[:8] + "..." if self.session_token else None,
+            'uptime_seconds': (datetime.now() - self.creation_time).total_seconds(),
+            'mirror_intensity': self.mirror_intensity,
+            'enabled_types': [t.value for t, enabled in self.enabled_types.items() if enabled]
+        }
     
     def _initialize_templates(self) -> Dict[MirrorType, Dict[str, List[str]]]:
         """Initialize templates for different types of mirror reflections"""

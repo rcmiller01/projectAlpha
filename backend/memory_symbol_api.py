@@ -2,6 +2,7 @@
 """
 Memory and Symbol API endpoints for MemoryAndSymbolViewer component.
 Extends the existing CoreArbiter API with memory and symbolic tracking.
+Enhanced with rate limiting, validation, and comprehensive logging.
 """
 
 from flask import Flask, request, jsonify
@@ -14,17 +15,25 @@ from typing import Dict, Any, List
 import random
 import uuid
 import logging
+import re
+from functools import wraps
+from collections import defaultdict, deque
 
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 # Token for authentication
 API_TOKEN = "secure_token_12345"
+
+# Rate limiting configuration
+RATE_LIMIT_REQUESTS = 100  # requests per window
+RATE_LIMIT_WINDOW = 3600  # 1 hour in seconds
+request_counts = defaultdict(lambda: deque())
 
 # Data storage paths
 MEMORY_TRACE_PATH = Path("data/emotional_memory_trace.json")
@@ -33,6 +42,92 @@ ANCHOR_STATE_PATH = Path("data/anchor_state.json")
 
 # Ensure data directory exists
 MEMORY_TRACE_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+def rate_limit(f):
+    """Decorator to implement rate limiting per source IP"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        source_ip = request.remote_addr
+        current_time = time.time()
+        
+        # Clean old requests outside the window
+        while request_counts[source_ip] and request_counts[source_ip][0] < current_time - RATE_LIMIT_WINDOW:
+            request_counts[source_ip].popleft()
+        
+        # Check if rate limit exceeded
+        if len(request_counts[source_ip]) >= RATE_LIMIT_REQUESTS:
+            logger.warning(f"Rate limit exceeded for {source_ip}")
+            return jsonify({'error': 'Rate limit exceeded. Too many requests.'}), 429
+        
+        # Add current request
+        request_counts[source_ip].append(current_time)
+        
+        # Log the request
+        logger.info(f"Request from {source_ip} to {request.endpoint} at {datetime.now().isoformat()}")
+        
+        return f(*args, **kwargs)
+    return decorated_function
+
+def validate_symbol_input(symbol_data):
+    """Validate symbol/emotion input data"""
+    if not isinstance(symbol_data, dict):
+        return False, "Symbol data must be a dictionary"
+    
+    required_fields = ['name']
+    for field in required_fields:
+        if field not in symbol_data:
+            return False, f"Missing required field: {field}"
+    
+    # Validate name
+    name = symbol_data.get('name', '')
+    if not isinstance(name, str) or len(name.strip()) == 0:
+        return False, "Symbol name must be a non-empty string"
+    
+    # Sanitize name - only alphanumeric, spaces, hyphens, underscores
+    if not re.match(r'^[a-zA-Z0-9\s\-_]+$', name):
+        return False, "Symbol name contains invalid characters"
+    
+    # Validate optional fields
+    if 'affective_color' in symbol_data:
+        valid_colors = ['tender', 'contemplative', 'vibrant', 'serene', 'passionate', 'mystical']
+        if symbol_data['affective_color'] not in valid_colors:
+            return False, f"Invalid affective color. Must be one of: {valid_colors}"
+    
+    if 'frequency' in symbol_data:
+        try:
+            freq = int(symbol_data['frequency'])
+            if freq < 0 or freq > 1000:
+                return False, "Frequency must be between 0 and 1000"
+        except (ValueError, TypeError):
+            return False, "Frequency must be a valid integer"
+    
+    return True, "Valid"
+
+def validate_emotion_input(emotion_data):
+    """Validate emotion input data"""
+    if not isinstance(emotion_data, dict):
+        return False, "Emotion data must be a dictionary"
+    
+    required_fields = ['dominant_mood']
+    for field in required_fields:
+        if field not in emotion_data:
+            return False, f"Missing required field: {field}"
+    
+    # Validate mood
+    mood = emotion_data.get('dominant_mood', '')
+    if not isinstance(mood, str) or len(mood.strip()) == 0:
+        return False, "Dominant mood must be a non-empty string"
+    
+    # Validate intensity if provided
+    if 'intensity' in emotion_data:
+        try:
+            intensity = float(emotion_data['intensity'])
+            if intensity < 0 or intensity > 1:
+                return False, "Intensity must be between 0 and 1"
+        except (ValueError, TypeError):
+            return False, "Intensity must be a valid number"
+    
+    return True, "Valid"
 
 class MemorySymbolAPI:
     """API for memory and symbolic tracking"""
@@ -314,6 +409,16 @@ def invoke_symbol():
 
     try:
         symbol_data = request.json
+        
+        # Validate input data exists
+        if not symbol_data:
+            return jsonify({'error': 'Request must contain JSON data'}), 400
+        
+        # Validate symbol data structure
+        symbol_valid, symbol_message = validate_symbol_input(symbol_data)
+        if not symbol_valid:
+            return jsonify({'error': f'Invalid symbol data: {symbol_message}'}), 400
+        
         symbol_name = symbol_data.get('name')
         
         if not symbol_name:
@@ -379,11 +484,31 @@ def adjust_anchor_baseline():
 
     try:
         adjustment_data = request.json
+        
+        # Validate input data exists
+        if not adjustment_data:
+            return jsonify({'error': 'Request must contain JSON data'}), 400
+        
+        # Validate required fields
+        required_fields = ['vector', 'value']
+        for field in required_fields:
+            if field not in adjustment_data:
+                return jsonify({'error': f'Missing required field: {field}'}), 400
+        
         vector_name = adjustment_data.get('vector')
         new_value = adjustment_data.get('value')
         
-        if not vector_name or new_value is None:
-            return jsonify({'error': 'Vector name and value required'}), 400
+        # Validate vector name
+        if not isinstance(vector_name, str) or len(vector_name.strip()) == 0:
+            return jsonify({'error': 'Vector name must be a non-empty string'}), 400
+        
+        # Validate value
+        try:
+            new_value = float(new_value)
+            if new_value < 0 or new_value > 1:
+                return jsonify({'error': 'Value must be between 0 and 1'}), 400
+        except (ValueError, TypeError):
+            return jsonify({'error': 'Value must be a valid number'}), 400
         
         # Load current state
         data = memory_api.load_json_file(ANCHOR_STATE_PATH)
