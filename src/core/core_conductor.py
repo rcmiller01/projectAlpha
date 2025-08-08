@@ -26,6 +26,7 @@ import logging
 import hashlib
 import re
 import time
+import os
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
@@ -53,6 +54,9 @@ MAX_OBJECTIVES_COUNT = 20
 MAX_CONSTRAINTS_COUNT = 15
 CONDUCTOR_RATE_LIMIT = 30  # conductor operations per hour per session
 MAX_MODELS_PER_CONDUCTOR = 20
+
+# Safe mode configuration
+SAFE_MODE_FORCE = os.getenv("SAFE_MODE_FORCE", "false").lower() == "true"
 
 # Thread safety
 conductor_lock = threading.Lock()
@@ -282,15 +286,24 @@ class CoreConductor:
         self.last_validation = datetime.now()
         
         # Safe-mode configuration for meta-watchdog failures
-        self.safe_mode_enabled = False
-        self.safe_mode_reason = None
-        self.safe_mode_timestamp = None
+        self.safe_mode_enabled = SAFE_MODE_FORCE or False
+        self.safe_mode_reason = "Forced safe mode via environment" if SAFE_MODE_FORCE else None
+        self.safe_mode_timestamp = datetime.now() if SAFE_MODE_FORCE else None
         self.watchdog_failure_count = 0
         self.max_watchdog_failures = 3
         self.safe_mode_operations = set([
             "get_status", "basic_generate", "emergency_shutdown", 
-            "validate_session", "check_safety"
+            "validate_session", "check_safety", "enter_safe_mode", 
+            "exit_safe_mode", "get_safe_mode_status"
         ])
+        
+        # Emotion loop control
+        self.emotion_loop_paused = SAFE_MODE_FORCE
+        self.writes_locked = SAFE_MODE_FORCE
+        
+        if SAFE_MODE_FORCE:
+            logger.warning("CoreConductor initialized in FORCED SAFE MODE")
+            self.enter_safe_mode("Environment variable SAFE_MODE_FORCE=true")
         
         # Register conductor-specific tools
         self._register_conductor_tools()
@@ -847,7 +860,183 @@ class CoreConductor:
         """Save conductor state and memory"""
         return self.hrm_router.save_all()
     
-    def handle_meta_watchdog_failure(self, failure_reason: str, failure_context: Dict[str, Any] = None) -> bool:
+    def enter_safe_mode(self, reason: str, additional_context: Optional[Dict[str, Any]] = None) -> bool:
+        """
+        Enter safe mode: pause emotion loop, lock writes, log alert.
+        
+        Args:
+            reason: Reason for entering safe mode
+            additional_context: Additional context information
+            
+        Returns:
+            True if safe mode was entered successfully
+        """
+        try:
+            with self._lock:
+                self.safe_mode_enabled = True
+                self.safe_mode_reason = reason
+                self.safe_mode_timestamp = datetime.now()
+                
+                # Pause emotion loop and lock writes
+                self.emotion_loop_paused = True
+                self.writes_locked = True
+                
+                # Log the event
+                logger.critical(f"SAFE MODE ACTIVATED: {reason}")
+                
+                log_conductor_activity("enter_safe_mode", self.session_token, {
+                    "reason": reason,
+                    "timestamp": self.safe_mode_timestamp.isoformat(),
+                    "context": additional_context or {},
+                    "emotion_loop_paused": True,
+                    "writes_locked": True
+                })
+                
+                return True
+                
+        except Exception as e:
+            logger.error(f"Error entering safe mode: {e}")
+            return False
+    
+    def exit_safe_mode(self, force: bool = False) -> tuple[bool, str]:
+        """
+        Exit safe mode: resume if Mirror & Anchor healthy.
+        
+        Args:
+            force: Force exit regardless of health checks
+            
+        Returns:
+            Tuple of (success, message)
+        """
+        if not self.safe_mode_enabled:
+            return True, "Not in safe mode"
+        
+        try:
+            with self._lock:
+                if force:
+                    # Force exit
+                    success = self._perform_safe_mode_exit("Administrative force override")
+                    return success, "Safe mode forcibly exited" if success else "Failed to force exit"
+                
+                # Check system health before allowing exit
+                mirror_healthy = self._check_mirror_health()
+                anchor_healthy = self._check_anchor_health()
+                
+                if mirror_healthy and anchor_healthy:
+                    success = self._perform_safe_mode_exit("System health restored")
+                    return success, "Safe mode exited - systems healthy" if success else "Failed to exit despite healthy systems"
+                else:
+                    health_issues = []
+                    if not mirror_healthy:
+                        health_issues.append("Mirror system unhealthy")
+                    if not anchor_healthy:
+                        health_issues.append("Anchor system unhealthy")
+                    
+                    message = f"Cannot exit safe mode: {', '.join(health_issues)}"
+                    logger.warning(message)
+                    return False, message
+                    
+        except Exception as e:
+            logger.error(f"Error exiting safe mode: {e}")
+            return False, f"Error during safe mode exit: {str(e)}"
+    
+    def _perform_safe_mode_exit(self, reason: str) -> bool:
+        """Perform the actual safe mode exit operations."""
+        try:
+            self.safe_mode_enabled = False
+            self.safe_mode_reason = None
+            self.safe_mode_timestamp = None
+            
+            # Resume emotion loop and unlock writes
+            self.emotion_loop_paused = False
+            self.writes_locked = False
+            
+            # Reset failure count
+            self.watchdog_failure_count = 0
+            
+            logger.info(f"SAFE MODE DEACTIVATED: {reason}")
+            
+            log_conductor_activity("exit_safe_mode", self.session_token, {
+                "reason": reason,
+                "timestamp": datetime.now().isoformat(),
+                "emotion_loop_resumed": True,
+                "writes_unlocked": True
+            })
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error performing safe mode exit: {e}")
+            return False
+    
+    def _check_mirror_health(self) -> bool:
+        """Check if Mirror system is healthy."""
+        try:
+            # Check if mirror mode manager is available and healthy
+            if hasattr(self, 'hrm_router') and hasattr(self.hrm_router, 'check_mirror_health'):
+                return self.hrm_router.check_mirror_health()
+            
+            # Fallback: check for mirror mode files/processes
+            mirror_files = [
+                "memory/mirror_state.json",
+                "logs/mirror_mode.log"
+            ]
+            
+            for file_path in mirror_files:
+                if not os.path.exists(file_path):
+                    logger.warning(f"Mirror health check failed: {file_path} not found")
+                    return False
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error checking mirror health: {e}")
+            return False
+    
+    def _check_anchor_health(self) -> bool:
+        """Check if Anchor system is healthy."""
+        try:
+            # Check anchor system files/configuration
+            anchor_files = [
+                "config/anchor_settings.json",
+                "config/anchor_vows.json"
+            ]
+            
+            for file_path in anchor_files:
+                if not os.path.exists(file_path):
+                    logger.warning(f"Anchor health check failed: {file_path} not found")
+                    return False
+            
+            # Additional anchor health checks could include:
+            # - Checking anchor vow integrity
+            # - Validating anchor configuration
+            # - Testing anchor response capabilities
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error checking anchor health: {e}")
+            return False
+    
+    def get_safe_mode_status(self) -> Dict[str, Any]:
+        """Get current safe-mode status and configuration for /health endpoint."""
+        return {
+            "safe_mode_enabled": self.safe_mode_enabled,
+            "safe_mode_reason": self.safe_mode_reason,
+            "safe_mode_timestamp": self.safe_mode_timestamp.isoformat() if self.safe_mode_timestamp else None,
+            "emotion_loop_paused": getattr(self, 'emotion_loop_paused', False),
+            "writes_locked": getattr(self, 'writes_locked', False),
+            "watchdog_failure_count": self.watchdog_failure_count,
+            "max_watchdog_failures": self.max_watchdog_failures,
+            "allowed_operations": list(self.safe_mode_operations),
+            "can_exit_safe_mode": self.watchdog_failure_count < self.max_watchdog_failures,
+            "system_health": {
+                "mirror_healthy": self._check_mirror_health(),
+                "anchor_healthy": self._check_anchor_health()
+            }
+        }
+    
+    def handle_meta_watchdog_failure(self, failure_reason: str, failure_context: Optional[Dict[str, Any]] = None) -> bool:
         """
         Handle meta-watchdog failure by enabling safe-mode behavior.
         
@@ -907,18 +1096,6 @@ class CoreConductor:
             return True, ""
         
         return False, f"Operation '{operation}' blocked by safe-mode (reason: {self.safe_mode_reason})"
-    
-    def get_safe_mode_status(self) -> Dict[str, Any]:
-        """Get current safe-mode status and configuration."""
-        return {
-            "safe_mode_enabled": self.safe_mode_enabled,
-            "safe_mode_reason": self.safe_mode_reason,
-            "safe_mode_timestamp": self.safe_mode_timestamp.isoformat() if self.safe_mode_timestamp else None,
-            "watchdog_failure_count": self.watchdog_failure_count,
-            "max_watchdog_failures": self.max_watchdog_failures,
-            "allowed_operations": list(self.safe_mode_operations),
-            "can_exit_safe_mode": self.watchdog_failure_count < self.max_watchdog_failures
-        }
     
     def try_exit_safe_mode(self, admin_override: bool = False) -> tuple[bool, str]:
         """

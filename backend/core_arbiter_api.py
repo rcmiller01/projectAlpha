@@ -3,20 +3,33 @@
 CoreArbiter API Integration
 
 Flask API endpoints for integrating CoreArbiter with the existing system.
-Provides REST API access to the CoreArbiter functionality with authentication and logging.
+Enhanced with RBAC, token masking, and comprehensive audit logging.
 """
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, g
 from flask_cors import CORS
 import asyncio
 import json
 import logging
+import sys
 from datetime import datetime
 from pathlib import Path
 import traceback
 import hashlib
 import os
 from functools import wraps
+from typing import Dict, Any, Optional
+
+# Add project root to path for imports
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+# Import security utilities
+from backend.common.security import (
+    require_scope, validate_json_schema, audit_action,
+    mask_token, extract_token, get_token_type, create_request_context
+)
+from backend.common.retry import retry_arbiter_call, NetworkError, ServiceUnavailableError
 
 from core.core_arbiter import CoreArbiter, WeightingStrategy
 
@@ -31,28 +44,127 @@ CORS(app)  # Enable CORS for frontend access
 # Global CoreArbiter instance
 core_arbiter = None
 
-# API key for authentication
-API_KEY = os.getenv('CORE_ARBITER_API_KEY', 'default_key_change_in_production')
+# Idempotency cache for mutating operations
+idempotency_cache = {}
+IDEMPOTENCY_CACHE_TTL = 3600  # 1 hour
 
-def require_auth(f):
-    """Decorator to require API key authentication"""
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        auth_header = request.headers.get('Authorization')
-        api_key = request.headers.get('X-API-Key')
+def cleanup_idempotency_cache():
+    """Clean up expired idempotency cache entries."""
+    import time
+    current_time = time.time()
+    expired_keys = [
+        key for key, (_, timestamp) in idempotency_cache.items()
+        if current_time - timestamp > IDEMPOTENCY_CACHE_TTL
+    ]
+    for key in expired_keys:
+        del idempotency_cache[key]
+
+def check_idempotency(idempotency_key: str) -> tuple[bool, Optional[Dict[str, Any]]]:
+    """
+    Check if request is idempotent and return cached response if available.
+    
+    Args:
+        idempotency_key: Unique key for this operation
         
-        # Check for API key in header or query param
-        if not api_key:
-            api_key = request.args.get('api_key')
+    Returns:
+        Tuple of (is_duplicate, cached_response)
+    """
+    if not idempotency_key:
+        return False, None
+    
+    cleanup_idempotency_cache()
+    
+    if idempotency_key in idempotency_cache:
+        cached_response, timestamp = idempotency_cache[idempotency_key]
+        logger.info(f"Returning cached response for idempotency key: {mask_token(idempotency_key)}")
+        return True, cached_response
+    
+    return False, None
+
+def store_idempotency_response(idempotency_key: str, response: Dict[str, Any]):
+    """Store response in idempotency cache."""
+    if idempotency_key:
+        import time
+        idempotency_cache[idempotency_key] = (response, time.time())
+
+def require_idempotency(func):
+    """Decorator to handle idempotency for mutating operations."""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        # Get idempotency key from header
+        idempotency_key = request.headers.get('Idempotency-Key')
         
-        if not api_key or api_key != API_KEY:
-            logger.warning(f"Unauthorized access attempt from {request.remote_addr} to {request.endpoint}")
-            return jsonify({'error': 'Unauthorized - Valid API key required'}), 401
+        if idempotency_key:
+            # Check if this is a duplicate request
+            is_duplicate, cached_response = check_idempotency(idempotency_key)
+            if is_duplicate:
+                audit_action(
+                    route=request.endpoint or request.path,
+                    action="idempotent_duplicate",
+                    success=True,
+                    details={"idempotency_key": mask_token(idempotency_key)}
+                )
+                return jsonify(cached_response)
         
-        # Log authorized request
-        logger.info(f"Authorized request from {request.remote_addr} to {request.endpoint} at {datetime.now()}")
-        return f(*args, **kwargs)
-    return decorated_function
+        # Execute the original function
+        response = func(*args, **kwargs)
+        
+        # Store response in cache if idempotency key provided
+        if idempotency_key and hasattr(response, 'get_json'):
+            response_data = response.get_json()
+            if response_data and response.status_code == 200:
+                store_idempotency_response(idempotency_key, response_data)
+        
+        return response
+    return wrapper
+
+# JSON Schemas for validation
+PROCESS_INPUT_SCHEMA = {
+    "type": "object",
+    "required": ["message"],
+    "properties": {
+        "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 5000
+        },
+        "state": {
+            "type": "object"
+        },
+        "context": {
+            "type": "object"
+        },
+        "options": {
+            "type": "object",
+            "properties": {
+                "strategy": {
+                    "type": "string",
+                    "enum": ["balanced", "emotional", "logical", "creative"]
+                },
+                "timeout": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 300
+                }
+            }
+        }
+    }
+}
+
+@app.before_request
+def log_request_with_masked_tokens():
+    """Log requests with properly masked tokens."""
+    token = extract_token()
+    masked_token = mask_token(token)
+    
+    logger.info(f"API Request: {request.method} {request.endpoint} - "
+               f"IP: {request.remote_addr} - Token: {masked_token}")
+    
+    # Create audit context
+    audit_action('api_request',
+                endpoint=request.endpoint,
+                method=request.method,
+                token_type=get_token_type(token) if token else None)
 
 def get_arbiter():
     """Get or create CoreArbiter instance"""
@@ -62,29 +174,25 @@ def get_arbiter():
     return core_arbiter
 
 @app.route('/api/arbiter/process', methods=['POST'])
-@require_auth
+@require_scope(['system:operate', 'user:basic'])
+@validate_json_schema(PROCESS_INPUT_SCHEMA)
 def process_input():
-    """Process user input through CoreArbiter"""
+    """Process user input through CoreArbiter with RBAC"""
     try:
-        # Log incoming request details
-        source_ip = request.remote_addr
-        timestamp = datetime.now().isoformat()
-        logger.info(f"CoreArbiter process request from {source_ip} at {timestamp}")
+        # Get validated data
+        data = g.validated_data
         
-        data = request.json
-        if not data:
-            logger.warning(f"No JSON data in request from {source_ip}")
-            return jsonify({'error': 'JSON data required'}), 400
-            
         user_input = data.get('message', '')
         state = data.get('state', {})
+        context = data.get('context', {})
+        options = data.get('options', {})
         
-        if not user_input:
-            logger.warning(f"Empty message in request from {source_ip}")
-            return jsonify({'error': 'Message is required'}), 400
-        
-        # Log request details
-        logger.info(f"Processing input: '{user_input[:100]}...' from {source_ip}")
+        # Audit log the processing request
+        audit_action('arbiter_process_input',
+                    input_length=len(user_input),
+                    has_state=bool(state),
+                    has_context=bool(context),
+                    success=True)
         
         # Run async function in new event loop
         loop = asyncio.new_event_loop()
@@ -122,30 +230,69 @@ def process_input():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/arbiter/status', methods=['GET'])
-@require_auth
+@require_scope(['system:operate', 'user:basic'])
 def get_status():
-    """Get current arbiter system status"""
+    """Get current arbiter system status with RBAC"""
     try:
-        source_ip = request.remote_addr
-        logger.info(f"Status request from {source_ip} at {datetime.now().isoformat()}")
-        
         arbiter = get_arbiter()
         status = arbiter.get_system_status()
+        
+        audit_action('arbiter_status_request', success=True)
         return jsonify(status)
     except Exception as e:
+        audit_action('arbiter_status_failed', error=str(e), success=False)
         logger.error(f"Error getting status: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/arbiter/strategy', methods=['POST'])
-@require_auth
+@require_scope(['system:operate'])
+@require_idempotency
+@validate_json_schema({
+    "type": "object",
+    "required": ["strategy"],
+    "properties": {
+        "strategy": {
+            "type": "string",
+            "enum": ["balanced", "emotional", "logical", "creative"]
+        }
+    }
+})
 def set_strategy():
-    """Change weighting strategy"""
+    """Change weighting strategy (system access required)"""
     try:
-        source_ip = request.remote_addr
-        logger.info(f"Strategy change request from {source_ip} at {datetime.now().isoformat()}")
+        data = g.validated_data
+        strategy_name = data.get('strategy')
         
-        data = request.json
-        if not data:
+        # Map strategy names to enum values (simplified for now)
+        strategy_map = {
+            'balanced': 'balanced',
+            'emotional': 'emotional',
+            'logical': 'logical',
+            'creative': 'creative'
+        }
+        
+        if strategy_name not in strategy_map:
+            audit_action('arbiter_strategy_invalid', strategy=strategy_name, success=False)
+            return jsonify({'error': f'Invalid strategy: {strategy_name}'}), 400
+        
+        arbiter = get_arbiter()
+        strategy = strategy_map[strategy_name]
+        arbiter.set_weighting_strategy(strategy)
+        
+        audit_action('arbiter_strategy_changed', 
+                    old_strategy='unknown',
+                    new_strategy=strategy_name,
+                    success=True)
+        
+        return jsonify({
+            'success': True, 
+            'strategy': strategy_name,
+            'message': f'Strategy changed to {strategy_name}'
+        })
+    except Exception as e:
+        audit_action('arbiter_strategy_failed', error=str(e), success=False)
+        logger.error(f"Error setting strategy: {e}")
+        return jsonify({'error': str(e)}), 500
             logger.warning(f"No JSON data in strategy request from {source_ip}")
             return jsonify({'error': 'JSON data required'}), 400
             

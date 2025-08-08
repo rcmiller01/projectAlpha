@@ -2,13 +2,14 @@
 """
 Memory and Symbol API endpoints for MemoryAndSymbolViewer component.
 Extends the existing CoreArbiter API with memory and symbolic tracking.
-Enhanced with rate limiting, validation, and comprehensive logging.
+Enhanced with RBAC, JSON schema validation, and comprehensive audit logging.
 """
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, g
 from flask_cors import CORS
 import json
 import time
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, Any, List
@@ -19,6 +20,16 @@ import re
 from functools import wraps
 from collections import defaultdict, deque
 
+# Add project root to path for imports
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+# Import security utilities
+from common.security import (
+    require_scope, require_layer_access, validate_json_schema,
+    audit_action, mask_token, extract_token, get_token_type
+)
+
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
@@ -27,12 +38,17 @@ CORS(app)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Token for authentication
-API_TOKEN = "secure_token_12345"
+# Rate limiting configuration (now using centralized config)
+try:
+    from config.settings import get_settings
+    settings = get_settings()
+    RATE_LIMIT_REQUESTS = settings.RATE_LIMIT_MAX
+    RATE_LIMIT_WINDOW = settings.RATE_LIMIT_WINDOW
+except Exception:
+    # Fallback values
+    RATE_LIMIT_REQUESTS = 120
+    RATE_LIMIT_WINDOW = 60
 
-# Rate limiting configuration
-RATE_LIMIT_REQUESTS = 100  # requests per window
-RATE_LIMIT_WINDOW = 3600  # 1 hour in seconds
 request_counts = defaultdict(lambda: deque())
 
 # Data storage paths
@@ -42,6 +58,103 @@ ANCHOR_STATE_PATH = Path("data/anchor_state.json")
 
 # Ensure data directory exists
 MEMORY_TRACE_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+# JSON Schemas for validation
+SYMBOL_CREATE_SCHEMA = {
+    "type": "object",
+    "required": ["name", "layer"],
+    "properties": {
+        "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": r"^[a-zA-Z0-9\s\-_]+$"
+        },
+        "layer": {
+            "type": "string",
+            "enum": ["identity", "beliefs", "ephemeral"]
+        },
+        "affective_color": {
+            "type": "string",
+            "enum": ["tender", "contemplative", "vibrant", "serene", "passionate", "mystical"]
+        },
+        "frequency": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000
+        },
+        "strength": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0
+        },
+        "category": {
+            "type": "string",
+            "maxLength": 50
+        },
+        "description": {
+            "type": "string",
+            "maxLength": 500
+        }
+    }
+}
+
+SYMBOL_UPDATE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "affective_color": {
+            "type": "string",
+            "enum": ["tender", "contemplative", "vibrant", "serene", "passionate", "mystical"]
+        },
+        "frequency": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000
+        },
+        "strength": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0
+        },
+        "category": {
+            "type": "string",
+            "maxLength": 50
+        },
+        "description": {
+            "type": "string",
+            "maxLength": 500
+        }
+    }
+}
+
+MEMORY_CREATE_SCHEMA = {
+    "type": "object",
+    "required": ["content", "layer"],
+    "properties": {
+        "content": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+        },
+        "layer": {
+            "type": "string",
+            "enum": ["identity", "beliefs", "ephemeral"]
+        },
+        "emotional_weight": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0
+        },
+        "tags": {
+            "type": "array",
+            "items": {"type": "string"},
+            "maxItems": 10
+        },
+        "metadata": {
+            "type": "object"
+        }
+    }
+}
 
 def rate_limit(f):
     """Decorator to implement rate limiting per source IP"""
@@ -301,28 +414,31 @@ class MemorySymbolAPI:
 # Initialize API instance
 memory_api = MemorySymbolAPI()
 
-def authenticate_request():
-    """Authenticate incoming API requests using a token."""
-    token = request.headers.get("Authorization")
-    if not token or token != f"Bearer {API_TOKEN}":
-        logger.warning("Unauthorized access attempt.")
-        return jsonify({"error": "Unauthorized"}), 401
-
 @app.before_request
 def log_request_info():
     """Log details of incoming requests."""
-    logger.info(f"Incoming request: {request.method} {request.url} - Headers: {dict(request.headers)}")
+    logger.info(f"Incoming request: {request.method} {request.url} - IP: {request.remote_addr}")
 
 @app.route('/api/memory/emotional_trace', methods=['GET'])
-@rate_limit
+@require_scope(['ephemeral:read', 'beliefs:read', 'identity:read'])
 def get_emotional_trace():
-    """Get emotional memory trace"""
-    auth_response = authenticate_request()
-    if auth_response:
-        return auth_response
-
+    """Get emotional memory trace with RBAC"""
     try:
+        # Filter by layer based on permissions
+        token = extract_token()
+        token_type = get_token_type(token) if token else None
+        
         data = memory_api.load_json_file(MEMORY_TRACE_PATH)
+        trace = data.get('trace', [])
+        
+        # Filter trace by accessible layers
+        filtered_trace = []
+        for entry in trace:
+            entry_layer = entry.get('layer', 'ephemeral')
+            if (entry_layer == 'ephemeral' or
+                (entry_layer == 'beliefs' and token_type in ['admin', 'system']) or
+                (entry_layer == 'identity' and token_type == 'admin')):
+                filtered_trace.append(entry)
         
         # Sort by timestamp (most recent first)
         trace = data.get('trace', [])
@@ -337,15 +453,25 @@ def get_emotional_trace():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/memory/add_entry', methods=['POST'])
-@rate_limit
+@require_layer_access('ephemeral')  # Default to ephemeral layer
+@validate_json_schema(MEMORY_CREATE_SCHEMA)
 def add_memory_entry():
-    """Add new emotional memory entry"""
-    auth_response = authenticate_request()
-    if auth_response:
-        return auth_response
-
+    """Add new emotional memory entry with RBAC and validation"""
     try:
-        entry_data = request.json
+        entry_data = g.validated_data
+        layer = entry_data.get('layer', 'ephemeral')
+        
+        # Additional layer access check for identity/beliefs
+        token = extract_token()
+        token_type = get_token_type(token) if token else None
+        
+        if layer == 'identity' and token_type != 'admin':
+            audit_action('layer_access_denied', layer='identity', reason='admin_required')
+            return jsonify({'error': 'Admin access required for identity layer'}), 403
+        
+        if layer == 'beliefs' and token_type not in ['admin', 'system']:
+            audit_action('layer_access_denied', layer='beliefs', reason='admin_or_system_required')
+            return jsonify({'error': 'Admin or system access required for beliefs layer'}), 403
         
         # Load current trace
         data = memory_api.load_json_file(MEMORY_TRACE_PATH)
@@ -355,29 +481,38 @@ def add_memory_entry():
         new_entry = {
             'id': str(uuid.uuid4()),
             'timestamp': datetime.now().isoformat(),
-            'dominant_mood': entry_data.get('dominant_mood', 'contemplative') if entry_data else 'contemplative',
-            'memory_phrase': entry_data.get('memory_phrase', '') if entry_data else '',
-            'tags': entry_data.get('tags', []) if entry_data else [],
-            'drift_score': entry_data.get('drift_score', 0.0) if entry_data else 0.0,
-            'intensity': entry_data.get('intensity', 0.5) if entry_data else 0.5,
-            'context': entry_data.get('context', '') if entry_data else '',
-            'symbolic_connections': entry_data.get('symbolic_connections', []) if entry_data else []
+            'layer': layer,
+            'content': entry_data.get('content'),
+            'emotional_weight': entry_data.get('emotional_weight', 0.5),
+            'tags': entry_data.get('tags', []),
+            'metadata': entry_data.get('metadata', {}),
+            'created_by': token_type,
+            'request_id': getattr(g, 'security_context', {}).get('request_id')
         }
         
         # Add to trace
-        trace.insert(0, new_entry)  # Add at beginning (most recent)
+        trace.insert(0, new_entry)
         
-        # Keep only last 100 entries
-        if len(trace) > 100:
-            trace = trace[:100]
+        # Keep only last 100 entries per layer
+        layer_entries = [e for e in trace if e.get('layer') == layer]
+        if len(layer_entries) > 100:
+            # Remove oldest entries for this layer
+            trace = [e for e in trace if e.get('layer') != layer or e in layer_entries[:100]]
         
         # Update and save
         data['trace'] = trace
         data['last_updated'] = datetime.now().isoformat()
         memory_api.save_json_file(MEMORY_TRACE_PATH, data)
         
+        # Audit log the action
+        audit_action('memory_entry_created', 
+                    layer=layer, 
+                    entry_id=new_entry['id'],
+                    success=True)
+        
         return jsonify({'success': True, 'entry': new_entry})
     except Exception as e:
+        audit_action('memory_entry_creation_failed', error=str(e), success=False)
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/symbols/active', methods=['GET'])
@@ -404,29 +539,27 @@ def get_symbolic_map():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/symbols/invoke', methods=['POST'])
-@rate_limit
+@require_layer_access('ephemeral')  # Default to ephemeral layer
+@validate_json_schema(SYMBOL_CREATE_SCHEMA)
 def invoke_symbol():
-    """Record symbol invocation"""
-    auth_response = authenticate_request()
-    if auth_response:
-        return auth_response
-
+    """Record symbol invocation with RBAC and validation"""
     try:
-        symbol_data = request.json
+        symbol_data = g.validated_data
+        layer = symbol_data.get('layer', 'ephemeral')
         
-        # Validate input data exists
-        if not symbol_data:
-            return jsonify({'error': 'Request must contain JSON data'}), 400
+        # Additional layer access check
+        token = extract_token()
+        token_type = get_token_type(token) if token else None
         
-        # Validate symbol data structure
-        symbol_valid, symbol_message = validate_symbol_input(symbol_data)
-        if not symbol_valid:
-            return jsonify({'error': f'Invalid symbol data: {symbol_message}'}), 400
+        if layer == 'identity' and token_type != 'admin':
+            audit_action('layer_access_denied', layer='identity', reason='admin_required')
+            return jsonify({'error': 'Admin access required for identity layer symbols'}), 403
+        
+        if layer == 'beliefs' and token_type not in ['admin', 'system']:
+            audit_action('layer_access_denied', layer='beliefs', reason='admin_or_system_required')
+            return jsonify({'error': 'Admin or system access required for beliefs layer symbols'}), 403
         
         symbol_name = symbol_data.get('name')
-        
-        if not symbol_name:
-            return jsonify({'error': 'Symbol name required'}), 400
         
         # Load current map
         data = memory_api.load_json_file(SYMBOLIC_MAP_PATH)
@@ -435,35 +568,52 @@ def invoke_symbol():
         # Find and update symbol
         symbol_found = False
         for symbol in symbols:
-            if symbol['name'] == symbol_name:
-                symbol['frequency'] += 1
+            if symbol['name'] == symbol_name and symbol.get('layer') == layer:
+                symbol['frequency'] = symbol.get('frequency', 0) + 1
                 symbol['last_invoked'] = datetime.now().isoformat()
                 if 'affective_color' in symbol_data:
                     symbol['affective_color'] = symbol_data['affective_color']
+                if 'strength' in symbol_data:
+                    symbol['strength'] = symbol_data['strength']
                 symbol_found = True
+                audit_action('symbol_invoked', 
+                           symbol_name=symbol_name,
+                           layer=layer,
+                           frequency=symbol['frequency'],
+                           success=True)
                 break
         
         # If symbol doesn't exist, create it
         if not symbol_found:
             new_symbol = {
-                'id': f"sym_{symbol_name}",
+                'id': str(uuid.uuid4()),
                 'name': symbol_name,
-                'affective_color': symbol_data.get('affective_color', 'contemplative'),
+                'layer': layer,
                 'frequency': 1,
+                'strength': symbol_data.get('strength', 0.5),
+                'affective_color': symbol_data.get('affective_color', 'contemplative'),
+                'category': symbol_data.get('category', 'auto-generated'),
+                'description': symbol_data.get('description', ''),
+                'created': datetime.now().isoformat(),
                 'last_invoked': datetime.now().isoformat(),
-                'connections': symbol_data.get('connections', []),
-                'ritual_weight': symbol_data.get('ritual_weight', 0.5),
-                'dream_associations': symbol_data.get('dream_associations', [])
+                'created_by': token_type,
+                'request_id': getattr(g, 'security_context', {}).get('request_id')
             }
             symbols.append(new_symbol)
+            
+            audit_action('symbol_created', 
+                        symbol_name=symbol_name,
+                        layer=layer,
+                        success=True)
         
         # Update and save
         data['symbols'] = symbols
         data['last_updated'] = datetime.now().isoformat()
         memory_api.save_json_file(SYMBOLIC_MAP_PATH, data)
         
-        return jsonify({'success': True, 'symbol_name': symbol_name})
+        return jsonify({'success': True, 'symbol_name': symbol_name, 'layer': layer})
     except Exception as e:
+        audit_action('symbol_invoke_failed', error=str(e), success=False)
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/anchor/state', methods=['GET'])

@@ -41,6 +41,20 @@ class MemorySystem:
         self.authorized_personas = [p.strip().lower() for p in allowed.split(',') if p.strip()]
         self.persona_token = os.getenv("PERSONA_TOKEN", "")
         
+        # Memory quotas and management
+        self.quotas = {
+            'identity': {'max_items': 100, 'importance_threshold': 0.7},
+            'beliefs': {'max_items': 500, 'importance_threshold': 0.5},
+            'ephemeral': {'max_items': 1000, 'importance_threshold': 0.3},
+            'short_term': {'max_items': 200, 'importance_threshold': 0.2},
+            'long_term': {'max_items': 2000, 'importance_threshold': 0.6}
+        }
+        
+        # Initialize layer memories if not present
+        for layer in ['identity', 'beliefs', 'ephemeral']:
+            if layer not in self.long_term_memory:
+                self.long_term_memory[layer] = []
+        
         # Sentiment keywords for basic analysis
         self.positive_keywords = {
             'happy', 'joy', 'excited', 'love', 'amazing', 'wonderful', 'great',
@@ -506,3 +520,186 @@ class MemorySystem:
         """Return the most recent memory interactions."""
         interactions = self.short_term_memory.get("recent_interactions", [])
         return interactions[-limit:]
+
+    def add_layered_memory(self, layer: str, content: str, importance: float = 0.5, 
+                          metadata: Optional[Dict[str, Any]] = None) -> bool:
+        """
+        Add memory to a specific layer with quota enforcement.
+        
+        Args:
+            layer: Memory layer (identity, beliefs, ephemeral)
+            content: Memory content
+            importance: Importance score (0.0 to 1.0)
+            metadata: Additional metadata
+            
+        Returns:
+            True if memory was added successfully
+        """
+        if layer not in self.quotas:
+            logger.error(f"Unknown memory layer: {layer}")
+            return False
+        
+        # Check if layer memory exists
+        if layer not in self.long_term_memory:
+            self.long_term_memory[layer] = []
+        
+        # Enforce quota before adding
+        self._enforce_quota(layer)
+        
+        # Create memory entry
+        memory_entry = {
+            'content': content,
+            'importance': importance,
+            'timestamp': datetime.now().isoformat(),
+            'metadata': metadata or {},
+            'access_count': 0,
+            'last_accessed': datetime.now().isoformat()
+        }
+        
+        # Add to layer
+        self.long_term_memory[layer].append(memory_entry)
+        
+        # Log the addition
+        logger.info(f"Added memory to {layer} layer (importance: {importance:.2f})")
+        
+        # Save to disk
+        self._save_long_term()
+        
+        return True
+
+    def _enforce_quota(self, layer: str):
+        """
+        Enforce quotas for a memory layer by pruning old, low-importance items.
+        
+        Args:
+            layer: Memory layer to enforce quotas on
+        """
+        if layer not in self.quotas:
+            return
+        
+        quota_config = self.quotas[layer]
+        max_items = quota_config['max_items']
+        importance_threshold = quota_config['importance_threshold']
+        
+        # Get current layer memories
+        layer_memories = self.long_term_memory.get(layer, [])
+        
+        if len(layer_memories) <= max_items:
+            return  # Under quota
+        
+        # Sort by importance (desc) and timestamp (desc for ties)
+        sorted_memories = sorted(
+            layer_memories,
+            key=lambda x: (x.get('importance', 0), x.get('timestamp', '')),
+            reverse=True
+        )
+        
+        # Keep the most important items up to max_items
+        items_to_keep = sorted_memories[:max_items]
+        items_to_remove = sorted_memories[max_items:]
+        
+        # Log pruning event
+        pruned_count = len(items_to_remove)
+        if pruned_count > 0:
+            avg_importance_removed = sum(item.get('importance', 0) for item in items_to_remove) / pruned_count
+            logger.warning(
+                f"Memory quota enforcement: Pruned {pruned_count} items from {layer} layer "
+                f"(avg importance: {avg_importance_removed:.3f})"
+            )
+            
+            # Log detailed pruning event
+            self._log_pruning_event(layer, pruned_count, avg_importance_removed, items_to_remove)
+        
+        # Update layer with kept items
+        self.long_term_memory[layer] = items_to_keep
+
+    def _log_pruning_event(self, layer: str, pruned_count: int, avg_importance: float, 
+                          pruned_items: List[Dict[str, Any]]):
+        """Log detailed information about memory pruning."""
+        try:
+            pruning_log_path = Path("logs/memory_pruning.jsonl")
+            pruning_log_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            pruning_event = {
+                'timestamp': datetime.now().isoformat(),
+                'layer': layer,
+                'pruned_count': pruned_count,
+                'average_importance': avg_importance,
+                'quota_limit': self.quotas[layer]['max_items'],
+                'importance_threshold': self.quotas[layer]['importance_threshold'],
+                'pruned_items_summary': [
+                    {
+                        'content_preview': item.get('content', '')[:100],
+                        'importance': item.get('importance', 0),
+                        'timestamp': item.get('timestamp', ''),
+                        'access_count': item.get('access_count', 0)
+                    }
+                    for item in pruned_items[:5]  # Log first 5 items
+                ]
+            }
+            
+            with open(pruning_log_path, 'a') as f:
+                f.write(json.dumps(pruning_event) + '\n')
+                
+        except Exception as e:
+            logger.error(f"Failed to log pruning event: {e}")
+
+    def get_memory_quota_status(self) -> Dict[str, Any]:
+        """Get current memory usage and quota status for all layers."""
+        status = {}
+        
+        for layer, quota_config in self.quotas.items():
+            if layer in ['short_term', 'long_term']:
+                # Handle special memory types
+                if layer == 'short_term':
+                    current_count = len(self.short_term_memory.get('recent_interactions', []))
+                else:
+                    current_count = sum(len(v) if isinstance(v, list) else 1 
+                                      for v in self.long_term_memory.values() 
+                                      if isinstance(v, (list, dict)))
+            else:
+                # Handle layer memories
+                current_count = len(self.long_term_memory.get(layer, []))
+            
+            max_items = quota_config['max_items']
+            usage_percentage = (current_count / max_items) * 100 if max_items > 0 else 0
+            
+            status[layer] = {
+                'current_items': current_count,
+                'max_items': max_items,
+                'usage_percentage': round(usage_percentage, 2),
+                'is_over_quota': current_count > max_items,
+                'importance_threshold': quota_config['importance_threshold']
+            }
+        
+        return status
+
+    def prune_all_layers(self, force: bool = False) -> Dict[str, int]:
+        """
+        Manually prune all memory layers.
+        
+        Args:
+            force: Force pruning even if under quota
+            
+        Returns:
+            Dictionary of layer -> items_pruned
+        """
+        pruning_results = {}
+        
+        for layer in ['identity', 'beliefs', 'ephemeral']:
+            if layer not in self.long_term_memory:
+                continue
+                
+            before_count = len(self.long_term_memory[layer])
+            
+            if force or before_count > self.quotas[layer]['max_items']:
+                self._enforce_quota(layer)
+                after_count = len(self.long_term_memory[layer])
+                pruning_results[layer] = before_count - after_count
+            else:
+                pruning_results[layer] = 0
+        
+        # Save changes
+        self._save_long_term()
+        
+        return pruning_results

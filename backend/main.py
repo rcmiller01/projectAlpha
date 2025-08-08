@@ -1,20 +1,39 @@
 """
-FastAPI backend for Unified AI Companion with Anchor Settings integration.
+FastAPI backend for Unified AI Companion with centralized configuration.
 """
 
 import json
 import logging
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any
 
+# Add project root to path for imports
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from config.settings import settings, log_configuration_summary
 
+# Configure logging with centralized settings
+logging.basicConfig(
+    level=getattr(logging, settings.LOG_LEVEL),
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Unified AI Companion Backend", version="1.0.0")
+# Log configuration on startup
+logger.info("🚀 Starting Unified AI Companion Backend")
+log_configuration_summary(settings)
+
+app = FastAPI(
+    title="Unified AI Companion Backend", 
+    version="1.0.0",
+    debug=settings.DEBUG
+)
 
 # Add CORS middleware
 app.add_middleware(
@@ -33,7 +52,7 @@ class AnchorSettings(BaseModel):
     weights: Dict[str, float]
     signature: str = "Emberveil-01"
     locked: bool = False
-    last_updated: str = None
+    last_updated: str = ""
 
 def load_anchor_settings() -> Dict[str, Any]:
     """Load anchor settings from configuration file."""
