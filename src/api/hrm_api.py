@@ -17,13 +17,15 @@ Author: AI Development Team
 Version: 1.0.0
 """
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 from typing import Dict, Any, List, Optional, Union
 import asyncio
 import json
 import logging
+import os
 from datetime import datetime
 from pathlib import Path
 
@@ -99,7 +101,46 @@ class HRMAnalyticsResponse(BaseModel):
     personality_distribution: Dict[str, int] = Field(..., description="Personality profile usage")
     error_rate: float = Field(..., ge=0.0, le=1.0, description="Error rate")
 
-# Global HRM system components
+# Layer enforcement constants
+PROTECTED_LAYERS = {"identity", "beliefs", "ephemeral"}
+ADMIN_KEY_HEADER = "X-Admin-Key"
+ANCHOR_CONFIRM_HEADER = "X-Anchor-Confirm"
+
+# Security configuration
+security = HTTPBearer()
+
+def verify_anchor_confirmation(anchor_confirm: Optional[str] = Header(None, alias="X-Anchor-Confirm")):
+    """Verify anchor confirmation for mutating operations"""
+    if not anchor_confirm:
+        raise HTTPException(status_code=403, detail="Anchor confirmation required for this operation")
+    
+    # Verify anchor confirmation token
+    expected_confirm = os.getenv("ANCHOR_CONFIRM_TOKEN", "anchor_confirmed")
+    if anchor_confirm != expected_confirm:
+        raise HTTPException(status_code=403, detail="Invalid anchor confirmation")
+    
+    return anchor_confirm
+
+def verify_admin_access(admin_key: Optional[str] = Header(None, alias="X-Admin-Key")):
+    """Verify admin access for protected layer operations"""
+    if not admin_key:
+        raise HTTPException(status_code=403, detail="Admin key required for protected layer access")
+    
+    # Verify admin key
+    expected_key = os.getenv("HRM_ADMIN_KEY", "admin_key_not_set")
+    if admin_key != expected_key:
+        raise HTTPException(status_code=403, detail="Invalid admin key")
+    
+    return admin_key
+
+def check_layer_protection(component: str, config: Dict[str, Any]) -> bool:
+    """Check if configuration affects protected layers"""
+    if component in ["hrm_router", "core_arbiter"]:
+        # Check if any protected layers are being modified
+        for key in config.keys():
+            if any(layer in key.lower() for layer in PROTECTED_LAYERS):
+                return True
+    return False
 hrm_router = None
 subagent_router = None
 personality_formatter = None
@@ -307,13 +348,38 @@ async def get_system_status():
         raise HTTPException(status_code=500, detail=f"Failed to get system status: {str(e)}")
 
 @app.post("/hrm/config")
-async def update_configuration(request: HRMConfigRequest):
-    """Update HRM system configuration"""
+async def update_configuration(
+    request: HRMConfigRequest,
+    anchor_confirm: str = Depends(verify_anchor_confirmation),
+    admin_key: Optional[str] = Header(None, alias="X-Admin-Key")
+):
+    """Update HRM system configuration with layer protection enforcement"""
     
     try:
         component = request.component.lower()
         config = request.config
         
+        # Check if this operation affects protected layers
+        affects_protected_layers = check_layer_protection(component, config)
+        
+        if affects_protected_layers:
+            # Require admin access for protected layer modifications
+            if not admin_key:
+                logger.warning(f"Attempted protected layer modification without admin key: {component}")
+                raise HTTPException(
+                    status_code=403, 
+                    detail="Admin key required for protected layer modifications (identity/beliefs/ephemeral)"
+                )
+            
+            # Verify admin key
+            expected_key = os.getenv("HRM_ADMIN_KEY", "admin_key_not_set")
+            if admin_key != expected_key:
+                logger.warning(f"Invalid admin key provided for protected layer modification: {component}")
+                raise HTTPException(status_code=403, detail="Invalid admin key")
+            
+            logger.info(f"Protected layer modification authorized for {component} with admin key")
+        
+        # Apply configuration changes
         if component == "hrm_router" and hrm_router:
             hrm_router.update_config(config)
         elif component == "subagent_router" and subagent_router:
@@ -328,14 +394,19 @@ async def update_configuration(request: HRMConfigRequest):
         else:
             raise HTTPException(status_code=400, detail=f"Unknown component: {component}")
         
-        logger.info(f"✅ Configuration updated for {component}")
+        # Log the configuration update
+        logger.info(f"✅ Configuration updated for {component} (protected_layers: {affects_protected_layers})")
         
         return {
             "success": True,
             "message": f"Configuration updated for {component}",
+            "protected_layers_modified": affects_protected_layers,
+            "anchor_confirmed": True,
             "timestamp": datetime.now().isoformat()
         }
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"❌ Error updating configuration: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to update configuration: {str(e)}")

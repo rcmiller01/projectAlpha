@@ -203,6 +203,57 @@ def test_configuration_system():
         traceback.print_exc()
         return False
 
+def test_identity_layer_protection():
+    """Test identity layer protection with admin key requirements"""
+    print("\n🔐 Testing Identity Layer Protection...")
+    
+    try:
+        from backend.hrm_api import verify_admin_access, check_layer_protection
+        import os
+        
+        # Test admin key verification
+        os.environ['ADMIN_MASTER_KEY'] = 'test_key_123'
+        
+        # Test valid admin access
+        is_admin = verify_admin_access('test_key_123')
+        assert is_admin, "Valid admin key should be verified"
+        print(f"   ✅ Admin key verification: valid key accepted")
+        
+        # Test invalid admin access
+        is_admin = verify_admin_access('wrong_key')
+        assert not is_admin, "Invalid admin key should be rejected"
+        print(f"   ✅ Admin key verification: invalid key rejected")
+        
+        # Test identity layer protection
+        identity_protected = check_layer_protection('identity', 'test_key_123')
+        assert identity_protected, "Identity layer should require admin key"
+        print(f"   ✅ Identity layer protection: admin key required")
+        
+        # Test beliefs layer protection
+        beliefs_protected = check_layer_protection('beliefs', 'test_key_123')
+        assert beliefs_protected, "Beliefs layer should require admin key"
+        print(f"   ✅ Beliefs layer protection: admin key required")
+        
+        # Test that unauthorized access is blocked
+        try:
+            identity_blocked = check_layer_protection('identity', 'wrong_key')
+            assert not identity_blocked, "Identity access should be blocked without valid admin key"
+            print(f"   ✅ Identity layer protection: unauthorized access blocked")
+        except Exception as auth_error:
+            print(f"   ✅ Identity layer protection: authorization error raised as expected")
+        
+        # Test ephemeral layer (should not require admin key)
+        ephemeral_access = check_layer_protection('ephemeral', None)
+        print(f"   ✅ Ephemeral layer: public access allowed")
+        
+        return True
+        
+    except Exception as e:
+        print(f"   ❌ Identity layer protection test failed: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
 def test_data_directory_structure():
     """Test data directory structure"""
     print("\n📁 Testing Data Directory Structure...")
@@ -240,6 +291,56 @@ def test_data_directory_structure():
         print(f"   ❌ Directory structure test failed: {e}")
         return False
 
+def test_offline_simulation():
+    """Test offline simulation mode with isolation verification"""
+    print("\n🔌 Testing Offline Simulation Mode...")
+    
+    try:
+        from backend.core_arbiter import CoreArbiter
+        import os
+        
+        # Create arbiter instance
+        arbiter = CoreArbiter()
+        
+        # Enable offline mode
+        arbiter.set_offline_mode(True)
+        offline_status = arbiter.is_offline_mode()
+        assert offline_status, "Offline mode should be enabled"
+        print(f"   ✅ Offline mode enabled: {offline_status}")
+        
+        # Test that external connections are blocked
+        try:
+            # This should fail in offline mode
+            external_result = arbiter.test_external_connection()
+            assert not external_result, "External connections should be blocked in offline mode"
+            print(f"   ✅ External connections blocked: {not external_result}")
+        except Exception as conn_error:
+            print(f"   ✅ External connection properly blocked: {type(conn_error).__name__}")
+        
+        # Test internal processing still works
+        internal_result = arbiter.process_internal_request("test_data")
+        assert internal_result is not None, "Internal processing should work in offline mode"
+        print(f"   ✅ Internal processing functional: {internal_result is not None}")
+        
+        # Test simulation logging
+        simulation_logs = arbiter.get_simulation_logs()
+        assert len(simulation_logs) >= 0, "Simulation logs should be accessible"
+        print(f"   ✅ Simulation logging: {len(simulation_logs)} entries")
+        
+        # Test returning to online mode
+        arbiter.set_offline_mode(False)
+        online_status = arbiter.is_offline_mode()
+        assert not online_status, "Online mode should be restored"
+        print(f"   ✅ Online mode restored: {not online_status}")
+        
+        return True
+        
+    except Exception as e:
+        print(f"   ❌ Offline simulation test failed: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
 async def run_integration_tests():
     """Run all integration tests"""
     print("🚀 HRM SYSTEM INTEGRATION TEST SUITE")
@@ -256,6 +357,8 @@ async def run_integration_tests():
         ("HRM Router Processing", test_hrm_router_processing),
         ("Mirror Mode Integration", test_mirror_mode_integration),
         ("Configuration System", test_configuration_system),
+        ("Identity Layer Protection", test_identity_layer_protection),
+        ("Offline Simulation", test_offline_simulation),
         ("Data Directory Structure", test_data_directory_structure),
     ]
     

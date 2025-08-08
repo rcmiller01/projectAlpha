@@ -23,6 +23,8 @@ import sys
 import json
 import logging
 import asyncio
+import re
+import os
 from pathlib import Path
 
 # Add project root to path
@@ -51,13 +53,166 @@ logger = logging.getLogger(__name__)
 
 class AgentBridgeService:
     """
-    Python service for bridging Node.js requests to SLiM agents
+    Python service for bridging Node.js requests to SLiM agents with input validation and security
     """
     
     def __init__(self):
         self.hrm_router = None
         self.initialized = False
         self.agents_cache = {}
+        
+        # Security configuration
+        self.require_anchor_confirmation = True
+        self.anchor_confirm_token = os.getenv("ANCHOR_CONFIRM_TOKEN", "anchor_confirmed")
+        self.max_prompt_length = 2000
+        self.max_context_items = 50
+        
+    def validate_input(self, data: dict) -> tuple[bool, str]:
+        """
+        Validate and sanitize input data for security.
+        
+        Args:
+            data: Input data to validate
+            
+        Returns:
+            Tuple of (is_valid, error_message)
+        """
+        try:
+            # Check for required fields based on message type
+            msg_type = data.get('type')
+            
+            if not msg_type:
+                return False, "Missing message type"
+            
+            if msg_type not in ['init', 'invoke_agent', 'get_agents', 'shutdown']:
+                return False, f"Unknown message type: {msg_type}"
+            
+            # Validate payload if present
+            payload = data.get('payload', {})
+            
+            if msg_type == 'invoke_agent':
+                # Validate agent invocation parameters
+                agent_type = payload.get('agent_type')
+                prompt = payload.get('prompt')
+                
+                if not agent_type:
+                    return False, "Missing agent_type in payload"
+                
+                if not prompt:
+                    return False, "Missing prompt in payload"
+                
+                # Validate prompt length
+                if len(prompt) > self.max_prompt_length:
+                    return False, f"Prompt too long (max {self.max_prompt_length} characters)"
+                
+                # Check for dangerous patterns
+                dangerous_patterns = [
+                    r'<script[^>]*>.*?</script>',  # XSS
+                    r'javascript:',               # JavaScript protocol
+                    r'on\w+\s*=',                # Event handlers
+                    r'eval\s*\(',                # Code injection
+                    r'exec\s*\(',                # Code execution
+                ]
+                
+                for pattern in dangerous_patterns:
+                    if re.search(pattern, prompt, re.IGNORECASE):
+                        return False, f"Prompt contains potentially dangerous content"
+                
+                # Validate context if provided
+                context = payload.get('context', {})
+                if context and len(context) > self.max_context_items:
+                    return False, f"Too many context items (max {self.max_context_items})"
+                
+                # Validate depth parameter
+                depth = payload.get('depth', 1)
+                if not isinstance(depth, int) or depth < 1 or depth > 5:
+                    return False, "Depth must be an integer between 1 and 5"
+            
+            return True, ""
+            
+        except Exception as e:
+            return False, f"Validation error: {str(e)}"
+    
+    def sanitize_input(self, data: dict) -> dict:
+        """
+        Sanitize input data by removing/cleaning dangerous content.
+        
+        Args:
+            data: Input data to sanitize
+            
+        Returns:
+            Sanitized data dictionary
+        """
+        try:
+            sanitized = data.copy()
+            
+            if 'payload' in sanitized:
+                payload = sanitized['payload']
+                
+                # Sanitize prompt if present
+                if 'prompt' in payload:
+                    prompt = str(payload['prompt'])
+                    # Remove HTML tags and suspicious patterns
+                    prompt = re.sub(r'<[^>]+>', '', prompt)
+                    prompt = re.sub(r'javascript:', '', prompt, flags=re.IGNORECASE)
+                    prompt = re.sub(r'on\w+\s*=', '', prompt, flags=re.IGNORECASE)
+                    
+                    # Limit length
+                    if len(prompt) > self.max_prompt_length:
+                        prompt = prompt[:self.max_prompt_length] + "... [truncated]"
+                    
+                    payload['prompt'] = prompt
+                
+                # Sanitize context items
+                if 'context' in payload and isinstance(payload['context'], dict):
+                    context = payload['context']
+                    sanitized_context = {}
+                    
+                    for key, value in list(context.items())[:self.max_context_items]:
+                        # Clean key and value
+                        clean_key = re.sub(r'[<>"\']', '', str(key))
+                        clean_value = re.sub(r'[<>"\']', '', str(value))
+                        sanitized_context[clean_key] = clean_value
+                    
+                    payload['context'] = sanitized_context
+            
+            return sanitized
+            
+        except Exception as e:
+            logger.error(f"Error sanitizing input: {e}")
+            return data
+    
+    def check_anchor_confirmation(self, data: dict) -> tuple[bool, str]:
+        """
+        Check for anchor confirmation when required for sensitive operations.
+        
+        Args:
+            data: Input data to check
+            
+        Returns:
+            Tuple of (confirmed, error_message)
+        """
+        if not self.require_anchor_confirmation:
+            return True, ""
+        
+        msg_type = data.get('type')
+        
+        # Operations requiring anchor confirmation
+        sensitive_operations = ['invoke_agent']
+        
+        if msg_type in sensitive_operations:
+            anchor_confirm = data.get('anchor_confirm')
+            
+            if not anchor_confirm:
+                return False, "Anchor confirmation required for agent forwarding"
+            
+            if anchor_confirm != self.anchor_confirm_token:
+                logger.warning(f"Invalid anchor confirmation token provided: {anchor_confirm[:8]}...")
+                return False, "Invalid anchor confirmation token"
+            
+            logger.info(f"Anchor confirmation verified for {msg_type}")
+        
+        return True, ""
         
     async def initialize(self, project_root_path):
         """Initialize the SLiM agent system"""
@@ -158,11 +313,31 @@ class AgentBridgeService:
         print(json.dumps(message), flush=True)
     
     async def handle_message(self, message):
-        """Handle incoming message from Node.js"""
+        """Handle incoming message from Node.js with validation and security checks"""
         try:
-            msg_type = message.get('type')
-            request_id = message.get('request_id')
-            payload = message.get('payload', {})
+            # Validate input
+            is_valid, validation_error = self.validate_input(message)
+            if not is_valid:
+                logger.warning(f"Input validation failed: {validation_error}")
+                self.send_response('error', message.get('request_id'), None, f"Validation error: {validation_error}")
+                return
+            
+            # Check anchor confirmation for sensitive operations
+            confirmed, confirm_error = self.check_anchor_confirmation(message)
+            if not confirmed:
+                logger.warning(f"Anchor confirmation failed: {confirm_error}")
+                self.send_response('error', message.get('request_id'), None, f"Security error: {confirm_error}")
+                return
+            
+            # Sanitize input
+            sanitized_message = self.sanitize_input(message)
+            
+            # Process sanitized message
+            msg_type = sanitized_message.get('type')
+            request_id = sanitized_message.get('request_id')
+            payload = sanitized_message.get('payload', {})
+            
+            logger.info(f"Processing validated message: {msg_type}")
             
             if msg_type == 'init':
                 project_root = payload.get('project_root')
@@ -175,6 +350,7 @@ class AgentBridgeService:
                 depth = payload.get('depth', 1)
                 context = payload.get('context', {})
                 
+                logger.info(f"Forwarding validated request to agent {agent_type} (anchor confirmed)")
                 result = await self.invoke_agent(agent_type, prompt, depth, context)
                 self.send_response('agent_response', request_id, result)
                 
@@ -191,7 +367,7 @@ class AgentBridgeService:
                 
         except Exception as e:
             logger.error(f"Error handling message: {e}")
-            self.send_response('error', request_id, None, str(e))
+            self.send_response('error', message.get('request_id'), None, str(e))
 
 async def main():
     """Main event loop for the agent bridge service"""

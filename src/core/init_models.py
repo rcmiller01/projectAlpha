@@ -19,6 +19,9 @@ Compatible with: CoreConductor, SLiM agents, HRM stack, MoELoader
 
 import os
 import logging
+import hashlib
+import json
+from pathlib import Path
 from typing import Optional, Dict, Any, Protocol
 from abc import ABC, abstractmethod
 
@@ -125,6 +128,170 @@ MOE_EXPERT_REGISTRY = {
         "dependencies": []
     }
 }
+
+# Model verification and integrity checking
+MODEL_CHECKSUMS_FILE = "config/model_checksums.json"
+
+def calculate_file_hash(file_path: str, algorithm: str = "sha256") -> Optional[str]:
+    """
+    Calculate hash checksum for a model file.
+    
+    Args:
+        file_path: Path to the model file
+        algorithm: Hashing algorithm (sha256, md5, sha1)
+        
+    Returns:
+        Hex digest of the file hash, or None if error
+    """
+    try:
+        if not os.path.exists(file_path):
+            logger.warning(f"Model file not found for checksum: {file_path}")
+            return None
+        
+        hash_func = getattr(hashlib, algorithm.lower())()
+        
+        with open(file_path, 'rb') as f:
+            # Read in chunks to handle large model files
+            chunk_size = 64 * 1024  # 64KB chunks
+            while True:
+                chunk = f.read(chunk_size)
+                if not chunk:
+                    break
+                hash_func.update(chunk)
+        
+        return hash_func.hexdigest()
+    
+    except Exception as e:
+        logger.error(f"Error calculating hash for {file_path}: {e}")
+        return None
+
+def verify_model_integrity(model_path: str, expected_checksum: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Verify model file integrity using checksum verification.
+    
+    Args:
+        model_path: Path to the model file
+        expected_checksum: Expected checksum (loads from config if None)
+        
+    Returns:
+        Verification result dictionary
+    """
+    result = {
+        "file_path": model_path,
+        "exists": False,
+        "size_bytes": 0,
+        "size_mb": 0.0,
+        "checksum": None,
+        "verification_status": "unknown",
+        "expected_checksum": expected_checksum,
+        "timestamp": None
+    }
+    
+    try:
+        if not os.path.exists(model_path):
+            result["verification_status"] = "file_not_found"
+            return result
+        
+        # Get file stats
+        stat = os.stat(model_path)
+        result["exists"] = True
+        result["size_bytes"] = stat.st_size
+        result["size_mb"] = round(stat.st_size / (1024 * 1024), 2)
+        result["timestamp"] = stat.st_mtime
+        
+        # Calculate current checksum
+        current_checksum = calculate_file_hash(model_path)
+        result["checksum"] = current_checksum
+        
+        if not current_checksum:
+            result["verification_status"] = "checksum_error"
+            return result
+        
+        # Load expected checksum if not provided
+        if expected_checksum is None:
+            expected_checksum = load_expected_checksum(model_path)
+        
+        if expected_checksum:
+            result["expected_checksum"] = expected_checksum
+            if current_checksum == expected_checksum:
+                result["verification_status"] = "verified"
+            else:
+                result["verification_status"] = "checksum_mismatch"
+                logger.warning(f"Checksum mismatch for {model_path}: "
+                             f"expected {expected_checksum[:12]}..., got {current_checksum[:12]}...")
+        else:
+            result["verification_status"] = "no_expected_checksum"
+            logger.info(f"No expected checksum found for {model_path}, storing current: {current_checksum[:12]}...")
+            store_model_checksum(model_path, current_checksum)
+        
+        return result
+    
+    except Exception as e:
+        logger.error(f"Error verifying model integrity for {model_path}: {e}")
+        result["verification_status"] = "error"
+        result["error"] = str(e)
+        return result
+
+def load_expected_checksum(model_path: str) -> Optional[str]:
+    """Load expected checksum for a model from the checksums file."""
+    try:
+        if os.path.exists(MODEL_CHECKSUMS_FILE):
+            with open(MODEL_CHECKSUMS_FILE, 'r') as f:
+                checksums = json.load(f)
+            
+            # Normalize path for lookup
+            normalized_path = os.path.normpath(model_path)
+            return checksums.get(normalized_path)
+    
+    except Exception as e:
+        logger.error(f"Error loading expected checksum: {e}")
+    
+    return None
+
+def store_model_checksum(model_path: str, checksum: str) -> bool:
+    """Store model checksum in the checksums file."""
+    try:
+        # Load existing checksums
+        checksums = {}
+        if os.path.exists(MODEL_CHECKSUMS_FILE):
+            with open(MODEL_CHECKSUMS_FILE, 'r') as f:
+                checksums = json.load(f)
+        
+        # Normalize path and store
+        normalized_path = os.path.normpath(model_path)
+        checksums[normalized_path] = checksum
+        
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(MODEL_CHECKSUMS_FILE), exist_ok=True)
+        
+        # Save updated checksums
+        with open(MODEL_CHECKSUMS_FILE, 'w') as f:
+            json.dump(checksums, f, indent=2)
+        
+        logger.info(f"Stored checksum for {model_path}: {checksum[:12]}...")
+        return True
+    
+    except Exception as e:
+        logger.error(f"Error storing checksum: {e}")
+        return False
+
+def get_model_info(model: ModelInterface) -> Dict[str, Any]:
+    """Get comprehensive model information including verification status."""
+    info = {
+        "model_type": type(model).__name__,
+        "model_name": getattr(model, 'model_name', 'unknown'),
+        "available": getattr(model, 'available', True),
+        "verification": None
+    }
+    
+    # Add verification info if model has a file path
+    if hasattr(model, 'model_path') and model.model_path:
+        verification = verify_model_integrity(model.model_path)
+        info["verification"] = verification
+        info["file_size_mb"] = verification.get("size_mb", 0)
+        info["integrity_status"] = verification.get("verification_status", "unknown")
+    
+    return info
 
 class ModelInterface(Protocol):
     """Protocol defining the standard model interface"""

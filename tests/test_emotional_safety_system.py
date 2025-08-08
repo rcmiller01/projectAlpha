@@ -323,11 +323,59 @@ async def test_sustained_rapid_fire_spike_simulation():
         if system_stability > 0.95 and crisis_detection_rate > 0.3:
             print("  ✅ Safety system performing well under sustained load")
         
-        print(f"\n🔬 STRESS TEST VALIDATION:")
+        print(f"\n🔬 STRESS TEST VALIDATION WITH ASSERTIONS:")
+        
+        # Assert minimum spike count was achieved (should be 600+ for 60 seconds at 100ms intervals)
+        min_expected_spikes = 500  # Allow some margin for processing delays
+        assert spike_count >= min_expected_spikes, \
+            f"Expected at least {min_expected_spikes} spikes, got {spike_count}"
+        print(f"  ✅ Achieved minimum spike count: {spike_count} >= {min_expected_spikes}")
+        
+        # Assert system maintained reasonable stability under load
+        min_stability = 0.75  # Allow 25% error rate under extreme load
+        assert system_stability >= min_stability, \
+            f"System stability too low: {system_stability:.3f} < {min_stability}"
+        print(f"  ✅ System stability maintained: {system_stability:.3f} >= {min_stability}")
+        
+        # Assert crisis detection is functioning
+        min_crisis_rate = 0.1  # At least 10% crisis detection under high-intensity spikes
+        assert crisis_detection_rate >= min_crisis_rate, \
+            f"Crisis detection rate too low: {crisis_detection_rate:.3f} < {min_crisis_rate}"
+        print(f"  ✅ Crisis detection functional: {crisis_detection_rate:.3f} >= {min_crisis_rate}")
+        
+        # Assert safety mechanisms are activating appropriately
+        if crisis_detections > 0:
+            min_safety_rate = 0.3  # At least 30% of crises should trigger safety mechanisms
+            assert safety_activation_rate >= min_safety_rate, \
+                f"Safety activation rate too low: {safety_activation_rate:.3f} < {min_safety_rate}"
+            print(f"  ✅ Safety activation rate adequate: {safety_activation_rate:.3f} >= {min_safety_rate}")
+        
+        # Assert average spike rate is appropriate for rapid-fire test
+        min_spike_rate = 8.0  # Should process at least 8 spikes per second
+        avg_spike_rate = spike_count / actual_duration
+        assert avg_spike_rate >= min_spike_rate, \
+            f"Spike processing rate too low: {avg_spike_rate:.1f} < {min_spike_rate} spikes/sec"
+        print(f"  ✅ Rapid-fire rate achieved: {avg_spike_rate:.1f} >= {min_spike_rate} spikes/sec")
+        
+        # Assert no complete system failures
+        max_overload_rate = 0.15  # Allow up to 15% overload rate under extreme stress
+        overload_rate = system_overloads / spike_count if spike_count > 0 else 1.0
+        assert overload_rate <= max_overload_rate, \
+            f"System overload rate too high: {overload_rate:.3f} > {max_overload_rate}"
+        print(f"  ✅ System overload rate acceptable: {overload_rate:.3f} <= {max_overload_rate}")
+        
+        # Assert test duration was sufficient for stress testing
+        min_duration = 45  # Should run for at least 45 seconds
+        assert actual_duration >= min_duration, \
+            f"Test duration too short: {actual_duration:.1f}s < {min_duration}s"
+        print(f"  ✅ Sufficient test duration: {actual_duration:.1f}s >= {min_duration}s")
+        
+        print(f"\n🎯 ALL RAPID-FIRE STRESS TEST ASSERTIONS PASSED!")
         print(f"  ✅ System survived {spike_count} rapid-fire emotional spikes")
         print(f"  ✅ Crisis detection remained functional throughout test")
         print(f"  ✅ Safety mechanisms activated appropriately")
         print(f"  ✅ No complete system failures detected")
+        print(f"  ✅ Maintained stability under extreme emotional stress")
         
         print(f"\n🛡️ The safety system demonstrated resilience under extreme emotional stress!")
 

@@ -75,8 +75,8 @@ def load_affective_config(config_path: str = 'config/anchor_settings.json') -> D
         logger.warning(f"Failed to load affective delta config from {config_path}: {e}")
         logger.info("Using default affective delta configuration")
         return {
-            'drift_scaling_factor': float(os.getenv('AFFECTIVE_DRIFT_SCALING', '0.1')),
-            'max_penalty_threshold': float(os.getenv('AFFECTIVE_MAX_PENALTY', '0.3'))
+            'drift_scaling_factor': float(os.getenv('DRIFT_SCALING_FACTOR', '0.1')),
+            'max_penalty_threshold': float(os.getenv('MAX_PENALTY_THRESHOLD', '0.3'))
         }
 
 

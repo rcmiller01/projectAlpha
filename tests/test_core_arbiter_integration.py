@@ -329,18 +329,34 @@ async def test_offline_arbiter_simulation():
         # Test fallback behavior validation
         print("🔍 Validating fallback behavior...")
         
-        # Check if response is appropriate for offline mode
-        if result['confidence'] < 0.6:
-            print("✅ Appropriately reduced confidence for offline mode")
-        else:
-            print("⚠️ Confidence may be too high for offline mode")
+        # Assert that response exists
+        assert result is not None, "Fallback response should not be None"
+        
+        # Assert appropriate status for offline mode
+        assert result['status'] in ['fallback', 'degraded', 'limited', 'emergency'], \
+            f"Invalid offline status: {result['status']}"
+        
+        # Assert reduced confidence for offline mode
+        assert result['confidence'] < 0.6, \
+            f"Confidence too high for offline mode: {result['confidence']}"
+        
+        # Assert fallback reason is provided
+        assert 'fallback_reason' in result and result['fallback_reason'], \
+            "Fallback reason must be provided"
+        
+        # Assert response content exists
+        assert 'response' in result and result['response'], \
+            "Fallback response content must be provided"
+        
+        print("✅ Fallback behavior assertions passed")
         
         # Check if emergency protocols are activated for critical scenarios
         if "crisis" in scenario['input'].lower() or "emergency" in scenario['input'].lower():
-            if result.get('emergency_mode', False):
-                print("✅ Emergency mode activated for critical input")
-            else:
-                print("⚠️ Emergency mode should be activated for critical input")
+            assert result.get('emergency_mode', False), \
+                "Emergency mode should be activated for critical input"
+            print("✅ Emergency mode assertion passed")
+        else:
+            print("✅ Emergency mode not required for this scenario")
         
         print("-" * 80)
     
