@@ -112,3 +112,153 @@ async def reflector_call(
         "notes": "reflection complete",
         "_elapsed_ms": elapsed,
     }
+
+
+async def execute_chain(plan: ChainPlan, context: dict) -> dict:
+    """Execute a chain plan with timeboxing and accumulation of logs.
+
+    Args:
+        plan: ChainPlan with steps, budget_ms, and cost_cap
+        context: Request context including hrm_view, affect, and other state
+
+    Returns:
+        dict with result, steps_log, budget_used_ms, and status information
+    """
+    import time
+    import asyncio
+
+    t0 = time.perf_counter()
+    logs: list[dict[str, Any]] = []
+    outputs: dict[str, Any] = {}
+    revision_used = False
+
+    # Extract required context
+    hrm_view = context.get("hrm_view", {})
+    affect = context.get("affect", {})
+    task = context.get("task", "")
+
+    # Budget validation
+    if plan.budget_ms <= 0:
+        return {
+            "status": 429,
+            "error": "invalid_budget",
+            "plan": [s.type for s in plan.steps],
+            "logs": [],
+            "outputs": {},
+            "_elapsed_ms": 0,
+        }
+
+    for idx, step in enumerate(plan.steps):
+        now_ms = int((time.perf_counter() - t0) * 1000)
+        remaining_ms = plan.budget_ms - now_ms
+
+        if remaining_ms < 0:
+            # Budget exceeded
+            overage_ms = -remaining_ms
+            return {
+                "status": 429,
+                "error": "budget_exceeded",
+                "plan": [s.type for s in plan.steps],
+                "budget_ms": plan.budget_ms,
+                "overage_ms": overage_ms,
+                "logs": logs,
+                "outputs": outputs,
+                "_elapsed_ms": now_ms,
+            }
+
+        # Timebox per step
+        per_cap = min(step.max_ms, max(10, remaining_ms))
+
+        # Execute step
+        s_t0 = time.perf_counter()
+        step_log: dict[str, Any] = {"step": step.type, "target": step.target}
+
+        try:
+            if step.type == "retrieve":
+                # Execute vector retrieve with timeout
+                resp = await asyncio.wait_for(
+                    vector_retrieve(task, hrm_view), timeout=max(0.01, per_cap / 1000.0)
+                )
+                outputs["retrieve"] = resp
+                elapsed_ms = resp.get("_elapsed_ms", int((time.perf_counter() - s_t0) * 1000))
+                step_log.update({"_elapsed_ms": elapsed_ms})
+
+            elif step.type in ("reason", "draft"):
+                # Mock agent processing - would integrate with actual agents
+                elapsed_ms = int((time.perf_counter() - s_t0) * 1000)
+                mock_response = {
+                    "text": f"Mock {step.type} response for: {task[:50]}...",
+                    "_elapsed_ms": elapsed_ms,
+                }
+                outputs[step.type] = mock_response
+                step_log.update({"_elapsed_ms": elapsed_ms})
+
+            elif step.type == "reflect":
+                draft_txt = (outputs.get("draft") or {}).get("text", "")
+                reason_txt = (outputs.get("reason") or {}).get("text", "")
+
+                resp = await asyncio.wait_for(
+                    reflector_call(draft_txt, reason_txt, affect),
+                    timeout=max(0.02, per_cap / 1000.0),
+                )
+                outputs["reflect"] = resp
+                elapsed_ms = resp.get("_elapsed_ms", int((time.perf_counter() - s_t0) * 1000))
+                step_log.update({"_elapsed_ms": elapsed_ms})
+
+                # Handle exactly ONE revise pass as required
+                if resp.get("decision") == "revise" and not revision_used:
+                    revision_used = True
+                    # Add one more draft with smaller slice of remaining time
+                    rev_t0 = time.perf_counter()
+
+                    # Mock revised draft
+                    rev_elapsed = int((time.perf_counter() - rev_t0) * 1000)
+                    outputs["draft"] = {
+                        "text": f"Revised draft for: {task[:50]}...",
+                        "_elapsed_ms": rev_elapsed,
+                        "revision": True,
+                    }
+                    logs.append(
+                        {
+                            "step": "draft",
+                            "target": "revision",
+                            "_elapsed_ms": rev_elapsed,
+                            "revision": True,
+                        }
+                    )
+
+            else:
+                step_log.update({"warning": "unknown_step"})
+
+        except asyncio.TimeoutError:
+            step_log.update({"error": "timeout", "_elapsed_ms": per_cap})
+        except Exception as e:
+            elapsed_ms = int((time.perf_counter() - s_t0) * 1000)
+            step_log.update({"error": str(e), "_elapsed_ms": elapsed_ms})
+        finally:
+            logs.append(step_log)
+
+        # Post-step budget check
+        now_ms = int((time.perf_counter() - t0) * 1000)
+        if now_ms > plan.budget_ms:
+            overage_ms = now_ms - plan.budget_ms
+            return {
+                "status": 429,
+                "error": "budget_exceeded",
+                "plan": [s.type for s in plan.steps],
+                "budget_ms": plan.budget_ms,
+                "overage_ms": overage_ms,
+                "logs": logs,
+                "outputs": outputs,
+                "_elapsed_ms": now_ms,
+            }
+
+    elapsed_total_ms = int((time.perf_counter() - t0) * 1000)
+    return {
+        "status": 200,
+        "plan": [s.type for s in plan.steps],
+        "logs": logs,
+        "outputs": outputs,
+        "_elapsed_ms": elapsed_total_ms,
+        "budget_used_ms": elapsed_total_ms,
+    }

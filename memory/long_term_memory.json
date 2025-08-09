@@ -8,169 +8,6531 @@
   "emotional_patterns": {},
   "learned_behaviors": {},
   "created_at": "2025-08-08T17:02:38.555781",
-  "last_updated": "2025-08-08T17:02:38.562082",
-  "identity": [],
-  "beliefs": [],
-  "ephemeral": [
+  "last_updated": "2025-08-08T20:01:06.061197",
+  "identity": [
     {
-      "content": "Test data 0",
+      "content": "Very important data",
+      "importance": 0.9,
+      "timestamp": "2025-08-08T20:00:40.175695",
+      "metadata": {
+        "type": "critical"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:40.175698"
+    },
+    {
+      "content": "Low importance 103",
       "importance": 0.1,
-      "timestamp": "2025-08-08T17:02:38.556011",
+      "timestamp": "2025-08-08T20:00:48.459756",
       "metadata": {
-        "test_id": 0
+        "test_id": 103
       },
       "access_count": 0,
-      "last_accessed": "2025-08-08T17:02:38.556014"
+      "last_accessed": "2025-08-08T20:00:48.459760"
     },
     {
-      "content": "Test data 1",
-      "importance": 0.15000000000000002,
-      "timestamp": "2025-08-08T17:02:38.556646",
+      "content": "Low importance 102",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:48.378896",
       "metadata": {
-        "test_id": 1
+        "test_id": 102
       },
       "access_count": 0,
-      "last_accessed": "2025-08-08T17:02:38.556649"
+      "last_accessed": "2025-08-08T20:00:48.378900"
     },
     {
-      "content": "Test data 2",
-      "importance": 0.2,
-      "timestamp": "2025-08-08T17:02:38.556986",
+      "content": "Low importance 101",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:48.297318",
       "metadata": {
-        "test_id": 2
+        "test_id": 101
       },
       "access_count": 0,
-      "last_accessed": "2025-08-08T17:02:38.556989"
+      "last_accessed": "2025-08-08T20:00:48.297322"
     },
     {
-      "content": "Test data 3",
-      "importance": 0.25,
-      "timestamp": "2025-08-08T17:02:38.557266",
+      "content": "Low importance 100",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:48.214584",
       "metadata": {
-        "test_id": 3
+        "test_id": 100
       },
       "access_count": 0,
-      "last_accessed": "2025-08-08T17:02:38.557268"
+      "last_accessed": "2025-08-08T20:00:48.214588"
     },
     {
-      "content": "Test data 4",
-      "importance": 0.30000000000000004,
-      "timestamp": "2025-08-08T17:02:38.557554",
+      "content": "Low importance 99",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:48.133495",
       "metadata": {
-        "test_id": 4
+        "test_id": 99
       },
       "access_count": 0,
-      "last_accessed": "2025-08-08T17:02:38.557557"
+      "last_accessed": "2025-08-08T20:00:48.133503"
     },
     {
-      "content": "Test data 5",
-      "importance": 0.35,
-      "timestamp": "2025-08-08T17:02:38.557836",
+      "content": "Low importance 98",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:48.052095",
       "metadata": {
-        "test_id": 5
+        "test_id": 98
       },
       "access_count": 0,
-      "last_accessed": "2025-08-08T17:02:38.557838"
+      "last_accessed": "2025-08-08T20:00:48.052102"
     },
     {
-      "content": "Test data 6",
-      "importance": 0.4,
-      "timestamp": "2025-08-08T17:02:38.558205",
+      "content": "Low importance 97",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:47.970928",
       "metadata": {
-        "test_id": 6
+        "test_id": 97
       },
       "access_count": 0,
-      "last_accessed": "2025-08-08T17:02:38.558207"
+      "last_accessed": "2025-08-08T20:00:47.970935"
     },
     {
-      "content": "Test data 7",
-      "importance": 0.45000000000000007,
-      "timestamp": "2025-08-08T17:02:38.558566",
+      "content": "Low importance 96",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:47.890833",
       "metadata": {
-        "test_id": 7
+        "test_id": 96
       },
       "access_count": 0,
-      "last_accessed": "2025-08-08T17:02:38.558569"
+      "last_accessed": "2025-08-08T20:00:47.890841"
     },
     {
-      "content": "Test data 8",
-      "importance": 0.5,
-      "timestamp": "2025-08-08T17:02:38.558934",
+      "content": "Low importance 95",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:47.810124",
       "metadata": {
-        "test_id": 8
+        "test_id": 95
       },
       "access_count": 0,
-      "last_accessed": "2025-08-08T17:02:38.558936"
+      "last_accessed": "2025-08-08T20:00:47.810131"
     },
     {
-      "content": "Test data 9",
-      "importance": 0.55,
-      "timestamp": "2025-08-08T17:02:38.559348",
+      "content": "Low importance 94",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:47.729448",
       "metadata": {
-        "test_id": 9
+        "test_id": 94
       },
       "access_count": 0,
-      "last_accessed": "2025-08-08T17:02:38.559351"
+      "last_accessed": "2025-08-08T20:00:47.729456"
     },
     {
-      "content": "Test data 10",
-      "importance": 0.6,
-      "timestamp": "2025-08-08T17:02:38.559796",
+      "content": "Low importance 93",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:47.648767",
       "metadata": {
-        "test_id": 10
+        "test_id": 93
       },
       "access_count": 0,
-      "last_accessed": "2025-08-08T17:02:38.559799"
+      "last_accessed": "2025-08-08T20:00:47.648774"
     },
     {
-      "content": "Test data 11",
-      "importance": 0.65,
-      "timestamp": "2025-08-08T17:02:38.560196",
+      "content": "Low importance 92",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:47.568622",
       "metadata": {
-        "test_id": 11
+        "test_id": 92
       },
       "access_count": 0,
-      "last_accessed": "2025-08-08T17:02:38.560199"
+      "last_accessed": "2025-08-08T20:00:47.568630"
     },
     {
-      "content": "Test data 12",
-      "importance": 0.7000000000000001,
-      "timestamp": "2025-08-08T17:02:38.560680",
+      "content": "Low importance 91",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:47.487808",
       "metadata": {
-        "test_id": 12
+        "test_id": 91
       },
       "access_count": 0,
-      "last_accessed": "2025-08-08T17:02:38.560684"
+      "last_accessed": "2025-08-08T20:00:47.487814"
     },
     {
-      "content": "Test data 13",
-      "importance": 0.75,
-      "timestamp": "2025-08-08T17:02:38.561146",
+      "content": "Low importance 90",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:47.407584",
       "metadata": {
-        "test_id": 13
+        "test_id": 90
       },
       "access_count": 0,
-      "last_accessed": "2025-08-08T17:02:38.561148"
+      "last_accessed": "2025-08-08T20:00:47.407592"
     },
     {
-      "content": "Test data 14",
-      "importance": 0.8,
-      "timestamp": "2025-08-08T17:02:38.561571",
+      "content": "Low importance 89",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:47.325975",
+      "metadata": {
+        "test_id": 89
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:47.325983"
+    },
+    {
+      "content": "Low importance 88",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:47.244854",
+      "metadata": {
+        "test_id": 88
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:47.244862"
+    },
+    {
+      "content": "Low importance 87",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:47.163139",
+      "metadata": {
+        "test_id": 87
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:47.163147"
+    },
+    {
+      "content": "Low importance 86",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:47.076624",
+      "metadata": {
+        "test_id": 86
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:47.076632"
+    },
+    {
+      "content": "Low importance 85",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:46.978194",
+      "metadata": {
+        "test_id": 85
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:46.978202"
+    },
+    {
+      "content": "Low importance 84",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:46.894750",
+      "metadata": {
+        "test_id": 84
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:46.894757"
+    },
+    {
+      "content": "Low importance 83",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:46.814487",
+      "metadata": {
+        "test_id": 83
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:46.814494"
+    },
+    {
+      "content": "Low importance 82",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:46.734677",
+      "metadata": {
+        "test_id": 82
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:46.734686"
+    },
+    {
+      "content": "Low importance 81",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:46.654394",
+      "metadata": {
+        "test_id": 81
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:46.654402"
+    },
+    {
+      "content": "Low importance 80",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:46.573976",
+      "metadata": {
+        "test_id": 80
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:46.573984"
+    },
+    {
+      "content": "Low importance 79",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:46.494062",
+      "metadata": {
+        "test_id": 79
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:46.494070"
+    },
+    {
+      "content": "Low importance 78",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:46.397658",
+      "metadata": {
+        "test_id": 78
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:46.397669"
+    },
+    {
+      "content": "Low importance 77",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:46.294211",
+      "metadata": {
+        "test_id": 77
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:46.294218"
+    },
+    {
+      "content": "Low importance 76",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:46.215525",
+      "metadata": {
+        "test_id": 76
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:46.215532"
+    },
+    {
+      "content": "Low importance 75",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:46.133005",
+      "metadata": {
+        "test_id": 75
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:46.133013"
+    },
+    {
+      "content": "Low importance 74",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:46.053951",
+      "metadata": {
+        "test_id": 74
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:46.053959"
+    },
+    {
+      "content": "Low importance 73",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:45.973876",
+      "metadata": {
+        "test_id": 73
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:45.973882"
+    },
+    {
+      "content": "Low importance 72",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:45.895806",
+      "metadata": {
+        "test_id": 72
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:45.895813"
+    },
+    {
+      "content": "Low importance 71",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:45.817398",
+      "metadata": {
+        "test_id": 71
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:45.817405"
+    },
+    {
+      "content": "Low importance 70",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:45.738701",
+      "metadata": {
+        "test_id": 70
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:45.738708"
+    },
+    {
+      "content": "Low importance 69",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:45.658679",
+      "metadata": {
+        "test_id": 69
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:45.658686"
+    },
+    {
+      "content": "Low importance 68",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:45.579381",
+      "metadata": {
+        "test_id": 68
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:45.579389"
+    },
+    {
+      "content": "Low importance 67",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:45.500044",
+      "metadata": {
+        "test_id": 67
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:45.500051"
+    },
+    {
+      "content": "Low importance 66",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:45.421385",
+      "metadata": {
+        "test_id": 66
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:45.421392"
+    },
+    {
+      "content": "Low importance 65",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:45.342905",
+      "metadata": {
+        "test_id": 65
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:45.342911"
+    },
+    {
+      "content": "Low importance 64",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:45.264768",
+      "metadata": {
+        "test_id": 64
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:45.264775"
+    },
+    {
+      "content": "Low importance 63",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:45.186522",
+      "metadata": {
+        "test_id": 63
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:45.186530"
+    },
+    {
+      "content": "Low importance 62",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:45.105258",
+      "metadata": {
+        "test_id": 62
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:45.105267"
+    },
+    {
+      "content": "Low importance 61",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:45.025691",
+      "metadata": {
+        "test_id": 61
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:45.025698"
+    },
+    {
+      "content": "Low importance 60",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:44.947641",
+      "metadata": {
+        "test_id": 60
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:44.947649"
+    },
+    {
+      "content": "Low importance 59",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:44.868994",
+      "metadata": {
+        "test_id": 59
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:44.869002"
+    },
+    {
+      "content": "Low importance 58",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:44.789853",
+      "metadata": {
+        "test_id": 58
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:44.789861"
+    },
+    {
+      "content": "Low importance 57",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:44.705199",
+      "metadata": {
+        "test_id": 57
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:44.705207"
+    },
+    {
+      "content": "Low importance 56",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:44.622955",
+      "metadata": {
+        "test_id": 56
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:44.622963"
+    },
+    {
+      "content": "Low importance 55",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:44.544272",
+      "metadata": {
+        "test_id": 55
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:44.544280"
+    },
+    {
+      "content": "Low importance 54",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:44.464917",
+      "metadata": {
+        "test_id": 54
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:44.464924"
+    },
+    {
+      "content": "Low importance 53",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:44.385390",
+      "metadata": {
+        "test_id": 53
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:44.385398"
+    },
+    {
+      "content": "Low importance 52",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:44.307132",
+      "metadata": {
+        "test_id": 52
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:44.307140"
+    },
+    {
+      "content": "Low importance 51",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:44.229246",
+      "metadata": {
+        "test_id": 51
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:44.229253"
+    },
+    {
+      "content": "Low importance 50",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:44.150580",
+      "metadata": {
+        "test_id": 50
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:44.150588"
+    },
+    {
+      "content": "Low importance 49",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:44.070510",
+      "metadata": {
+        "test_id": 49
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:44.070519"
+    },
+    {
+      "content": "Low importance 48",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:43.991270",
+      "metadata": {
+        "test_id": 48
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:43.991278"
+    },
+    {
+      "content": "Low importance 47",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:43.911023",
+      "metadata": {
+        "test_id": 47
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:43.911030"
+    },
+    {
+      "content": "Low importance 46",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:43.832409",
+      "metadata": {
+        "test_id": 46
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:43.832418"
+    },
+    {
+      "content": "Low importance 45",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:43.754927",
+      "metadata": {
+        "test_id": 45
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:43.754934"
+    },
+    {
+      "content": "Low importance 44",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:43.677303",
+      "metadata": {
+        "test_id": 44
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:43.677311"
+    },
+    {
+      "content": "Low importance 43",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:43.599394",
+      "metadata": {
+        "test_id": 43
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:43.599401"
+    },
+    {
+      "content": "Low importance 42",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:43.522243",
+      "metadata": {
+        "test_id": 42
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:43.522252"
+    },
+    {
+      "content": "Low importance 41",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:43.444235",
+      "metadata": {
+        "test_id": 41
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:43.444242"
+    },
+    {
+      "content": "Low importance 40",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:43.366875",
+      "metadata": {
+        "test_id": 40
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:43.366883"
+    },
+    {
+      "content": "Low importance 39",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:43.289120",
+      "metadata": {
+        "test_id": 39
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:43.289126"
+    },
+    {
+      "content": "Low importance 38",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:43.209105",
+      "metadata": {
+        "test_id": 38
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:43.209113"
+    },
+    {
+      "content": "Low importance 37",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:43.130656",
+      "metadata": {
+        "test_id": 37
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:43.130662"
+    },
+    {
+      "content": "Low importance 36",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:43.051854",
+      "metadata": {
+        "test_id": 36
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:43.051861"
+    },
+    {
+      "content": "Low importance 35",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:42.973194",
+      "metadata": {
+        "test_id": 35
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:42.973201"
+    },
+    {
+      "content": "Low importance 34",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:42.894603",
+      "metadata": {
+        "test_id": 34
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:42.894612"
+    },
+    {
+      "content": "Low importance 33",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:42.815194",
+      "metadata": {
+        "test_id": 33
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:42.815202"
+    },
+    {
+      "content": "Low importance 32",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:42.735968",
+      "metadata": {
+        "test_id": 32
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:42.735976"
+    },
+    {
+      "content": "Low importance 31",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:42.655934",
+      "metadata": {
+        "test_id": 31
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:42.655942"
+    },
+    {
+      "content": "Low importance 30",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:42.572746",
+      "metadata": {
+        "test_id": 30
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:42.572753"
+    },
+    {
+      "content": "Low importance 29",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:42.494969",
+      "metadata": {
+        "test_id": 29
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:42.494976"
+    },
+    {
+      "content": "Low importance 28",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:42.417464",
+      "metadata": {
+        "test_id": 28
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:42.417472"
+    },
+    {
+      "content": "Low importance 27",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:42.339923",
+      "metadata": {
+        "test_id": 27
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:42.339931"
+    },
+    {
+      "content": "Low importance 26",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:42.262132",
+      "metadata": {
+        "test_id": 26
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:42.262140"
+    },
+    {
+      "content": "Low importance 25",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:42.184652",
+      "metadata": {
+        "test_id": 25
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:42.184660"
+    },
+    {
+      "content": "Low importance 24",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:42.106924",
+      "metadata": {
+        "test_id": 24
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:42.106933"
+    },
+    {
+      "content": "Low importance 23",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:42.029661",
+      "metadata": {
+        "test_id": 23
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:42.029670"
+    },
+    {
+      "content": "Low importance 22",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:41.952532",
+      "metadata": {
+        "test_id": 22
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:41.952538"
+    },
+    {
+      "content": "Low importance 21",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:41.875728",
+      "metadata": {
+        "test_id": 21
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:41.875734"
+    },
+    {
+      "content": "Low importance 20",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:41.798694",
+      "metadata": {
+        "test_id": 20
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:41.798701"
+    },
+    {
+      "content": "Low importance 19",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:41.722046",
+      "metadata": {
+        "test_id": 19
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:41.722053"
+    },
+    {
+      "content": "Low importance 18",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:41.644555",
+      "metadata": {
+        "test_id": 18
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:41.644563"
+    },
+    {
+      "content": "Low importance 17",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:41.562261",
+      "metadata": {
+        "test_id": 17
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:41.562268"
+    },
+    {
+      "content": "Low importance 16",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:41.485406",
+      "metadata": {
+        "test_id": 16
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:41.485414"
+    },
+    {
+      "content": "Low importance 15",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:41.407551",
+      "metadata": {
+        "test_id": 15
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:41.407559"
+    },
+    {
+      "content": "Low importance 14",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:41.329760",
       "metadata": {
         "test_id": 14
       },
       "access_count": 0,
-      "last_accessed": "2025-08-08T17:02:38.561573"
+      "last_accessed": "2025-08-08T20:00:41.329771"
     },
     {
-      "content": "Important data",
-      "importance": 0.9,
-      "timestamp": "2025-08-08T17:02:38.562068",
+      "content": "Low importance 13",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:41.252953",
       "metadata": {
-        "type": "important"
+        "test_id": 13
       },
       "access_count": 0,
-      "last_accessed": "2025-08-08T17:02:38.562071"
+      "last_accessed": "2025-08-08T20:00:41.252960"
+    },
+    {
+      "content": "Low importance 12",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:41.175326",
+      "metadata": {
+        "test_id": 12
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:41.175334"
+    },
+    {
+      "content": "Low importance 11",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:41.097114",
+      "metadata": {
+        "test_id": 11
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:41.097121"
+    },
+    {
+      "content": "Low importance 10",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:41.020587",
+      "metadata": {
+        "test_id": 10
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:41.020593"
+    },
+    {
+      "content": "Low importance 9",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:40.943661",
+      "metadata": {
+        "test_id": 9
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:40.943668"
+    },
+    {
+      "content": "Low importance 8",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:40.868001",
+      "metadata": {
+        "test_id": 8
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:40.868011"
+    },
+    {
+      "content": "Low importance 7",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:40.792189",
+      "metadata": {
+        "test_id": 7
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:40.792196"
+    },
+    {
+      "content": "Low importance 6",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:40.711153",
+      "metadata": {
+        "test_id": 6
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:40.711160"
+    },
+    {
+      "content": "Low importance 5",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:40.634544",
+      "metadata": {
+        "test_id": 5
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:40.634550"
+    },
+    {
+      "content": "Low importance 104",
+      "importance": 0.1,
+      "timestamp": "2025-08-08T20:00:48.541124",
+      "metadata": {
+        "test_id": 104
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:48.541129"
     }
-  ]
+  ],
+  "beliefs": [
+    {
+      "content": "Belief 519: Test belief statement",
+      "importance": 5.390000000000001,
+      "timestamp": "2025-08-08T19:57:58.091741",
+      "metadata": {
+        "belief_id": 519,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:58.091744"
+    },
+    {
+      "content": "Belief 518: Test belief statement",
+      "importance": 5.38,
+      "timestamp": "2025-08-08T20:01:06.028170",
+      "metadata": {
+        "belief_id": 518,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:06.028174"
+    },
+    {
+      "content": "Belief 518: Test belief statement",
+      "importance": 5.38,
+      "timestamp": "2025-08-08T19:57:58.058602",
+      "metadata": {
+        "belief_id": 518,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:58.058605"
+    },
+    {
+      "content": "Belief 517: Test belief statement",
+      "importance": 5.37,
+      "timestamp": "2025-08-08T20:01:05.994898",
+      "metadata": {
+        "belief_id": 517,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.994902"
+    },
+    {
+      "content": "Belief 517: Test belief statement",
+      "importance": 5.37,
+      "timestamp": "2025-08-08T19:57:58.025473",
+      "metadata": {
+        "belief_id": 517,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:58.025477"
+    },
+    {
+      "content": "Belief 516: Test belief statement",
+      "importance": 5.36,
+      "timestamp": "2025-08-08T20:01:05.962330",
+      "metadata": {
+        "belief_id": 516,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.962334"
+    },
+    {
+      "content": "Belief 516: Test belief statement",
+      "importance": 5.36,
+      "timestamp": "2025-08-08T19:57:57.991913",
+      "metadata": {
+        "belief_id": 516,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.991916"
+    },
+    {
+      "content": "Belief 515: Test belief statement",
+      "importance": 5.3500000000000005,
+      "timestamp": "2025-08-08T20:01:05.928920",
+      "metadata": {
+        "belief_id": 515,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.928924"
+    },
+    {
+      "content": "Belief 515: Test belief statement",
+      "importance": 5.3500000000000005,
+      "timestamp": "2025-08-08T19:57:57.958561",
+      "metadata": {
+        "belief_id": 515,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.958564"
+    },
+    {
+      "content": "Belief 514: Test belief statement",
+      "importance": 5.34,
+      "timestamp": "2025-08-08T20:01:05.895459",
+      "metadata": {
+        "belief_id": 514,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.895463"
+    },
+    {
+      "content": "Belief 514: Test belief statement",
+      "importance": 5.34,
+      "timestamp": "2025-08-08T19:57:57.924940",
+      "metadata": {
+        "belief_id": 514,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.924944"
+    },
+    {
+      "content": "Belief 513: Test belief statement",
+      "importance": 5.33,
+      "timestamp": "2025-08-08T20:01:05.862610",
+      "metadata": {
+        "belief_id": 513,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.862614"
+    },
+    {
+      "content": "Belief 513: Test belief statement",
+      "importance": 5.33,
+      "timestamp": "2025-08-08T19:57:57.891581",
+      "metadata": {
+        "belief_id": 513,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.891585"
+    },
+    {
+      "content": "Belief 512: Test belief statement",
+      "importance": 5.32,
+      "timestamp": "2025-08-08T20:01:05.829621",
+      "metadata": {
+        "belief_id": 512,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.829624"
+    },
+    {
+      "content": "Belief 512: Test belief statement",
+      "importance": 5.32,
+      "timestamp": "2025-08-08T19:57:57.858458",
+      "metadata": {
+        "belief_id": 512,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.858461"
+    },
+    {
+      "content": "Belief 511: Test belief statement",
+      "importance": 5.3100000000000005,
+      "timestamp": "2025-08-08T20:01:05.796960",
+      "metadata": {
+        "belief_id": 511,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.796963"
+    },
+    {
+      "content": "Belief 511: Test belief statement",
+      "importance": 5.3100000000000005,
+      "timestamp": "2025-08-08T19:57:57.824977",
+      "metadata": {
+        "belief_id": 511,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.824980"
+    },
+    {
+      "content": "Belief 510: Test belief statement",
+      "importance": 5.300000000000001,
+      "timestamp": "2025-08-08T20:01:05.763651",
+      "metadata": {
+        "belief_id": 510,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.763655"
+    },
+    {
+      "content": "Belief 510: Test belief statement",
+      "importance": 5.300000000000001,
+      "timestamp": "2025-08-08T19:57:57.791290",
+      "metadata": {
+        "belief_id": 510,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.791293"
+    },
+    {
+      "content": "Belief 509: Test belief statement",
+      "importance": 5.29,
+      "timestamp": "2025-08-08T20:01:05.730171",
+      "metadata": {
+        "belief_id": 509,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.730174"
+    },
+    {
+      "content": "Belief 509: Test belief statement",
+      "importance": 5.29,
+      "timestamp": "2025-08-08T19:57:57.757597",
+      "metadata": {
+        "belief_id": 509,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.757601"
+    },
+    {
+      "content": "Belief 508: Test belief statement",
+      "importance": 5.28,
+      "timestamp": "2025-08-08T20:01:05.696437",
+      "metadata": {
+        "belief_id": 508,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.696441"
+    },
+    {
+      "content": "Belief 508: Test belief statement",
+      "importance": 5.28,
+      "timestamp": "2025-08-08T19:57:57.723672",
+      "metadata": {
+        "belief_id": 508,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.723675"
+    },
+    {
+      "content": "Belief 507: Test belief statement",
+      "importance": 5.2700000000000005,
+      "timestamp": "2025-08-08T20:01:05.662669",
+      "metadata": {
+        "belief_id": 507,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.662672"
+    },
+    {
+      "content": "Belief 507: Test belief statement",
+      "importance": 5.2700000000000005,
+      "timestamp": "2025-08-08T19:57:57.689991",
+      "metadata": {
+        "belief_id": 507,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.689995"
+    },
+    {
+      "content": "Belief 506: Test belief statement",
+      "importance": 5.260000000000001,
+      "timestamp": "2025-08-08T20:01:05.629556",
+      "metadata": {
+        "belief_id": 506,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.629559"
+    },
+    {
+      "content": "Belief 506: Test belief statement",
+      "importance": 5.260000000000001,
+      "timestamp": "2025-08-08T19:57:57.656533",
+      "metadata": {
+        "belief_id": 506,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.656537"
+    },
+    {
+      "content": "Belief 505: Test belief statement",
+      "importance": 5.25,
+      "timestamp": "2025-08-08T20:01:05.596800",
+      "metadata": {
+        "belief_id": 505,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.596804"
+    },
+    {
+      "content": "Belief 505: Test belief statement",
+      "importance": 5.25,
+      "timestamp": "2025-08-08T19:57:57.621389",
+      "metadata": {
+        "belief_id": 505,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.621393"
+    },
+    {
+      "content": "Belief 504: Test belief statement",
+      "importance": 5.24,
+      "timestamp": "2025-08-08T20:01:05.563707",
+      "metadata": {
+        "belief_id": 504,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.563710"
+    },
+    {
+      "content": "Belief 504: Test belief statement",
+      "importance": 5.24,
+      "timestamp": "2025-08-08T19:57:57.587538",
+      "metadata": {
+        "belief_id": 504,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.587542"
+    },
+    {
+      "content": "Belief 503: Test belief statement",
+      "importance": 5.23,
+      "timestamp": "2025-08-08T20:01:05.530853",
+      "metadata": {
+        "belief_id": 503,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.530856"
+    },
+    {
+      "content": "Belief 503: Test belief statement",
+      "importance": 5.23,
+      "timestamp": "2025-08-08T19:57:57.554074",
+      "metadata": {
+        "belief_id": 503,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.554077"
+    },
+    {
+      "content": "Belief 502: Test belief statement",
+      "importance": 5.220000000000001,
+      "timestamp": "2025-08-08T20:01:05.497869",
+      "metadata": {
+        "belief_id": 502,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.497872"
+    },
+    {
+      "content": "Belief 502: Test belief statement",
+      "importance": 5.220000000000001,
+      "timestamp": "2025-08-08T19:57:57.520194",
+      "metadata": {
+        "belief_id": 502,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.520198"
+    },
+    {
+      "content": "Belief 501: Test belief statement",
+      "importance": 5.21,
+      "timestamp": "2025-08-08T20:01:05.464966",
+      "metadata": {
+        "belief_id": 501,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.464970"
+    },
+    {
+      "content": "Belief 501: Test belief statement",
+      "importance": 5.21,
+      "timestamp": "2025-08-08T19:57:57.486245",
+      "metadata": {
+        "belief_id": 501,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.486248"
+    },
+    {
+      "content": "Belief 500: Test belief statement",
+      "importance": 5.2,
+      "timestamp": "2025-08-08T20:01:05.432079",
+      "metadata": {
+        "belief_id": 500,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.432083"
+    },
+    {
+      "content": "Belief 500: Test belief statement",
+      "importance": 5.2,
+      "timestamp": "2025-08-08T19:57:57.452039",
+      "metadata": {
+        "belief_id": 500,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.452044"
+    },
+    {
+      "content": "Belief 499: Test belief statement",
+      "importance": 5.19,
+      "timestamp": "2025-08-08T20:01:05.398832",
+      "metadata": {
+        "belief_id": 499,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.398836"
+    },
+    {
+      "content": "Belief 499: Test belief statement",
+      "importance": 5.19,
+      "timestamp": "2025-08-08T19:57:57.419472",
+      "metadata": {
+        "belief_id": 499,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.419477"
+    },
+    {
+      "content": "Belief 498: Test belief statement",
+      "importance": 5.180000000000001,
+      "timestamp": "2025-08-08T20:01:05.365184",
+      "metadata": {
+        "belief_id": 498,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.365187"
+    },
+    {
+      "content": "Belief 498: Test belief statement",
+      "importance": 5.180000000000001,
+      "timestamp": "2025-08-08T19:57:57.387021",
+      "metadata": {
+        "belief_id": 498,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.387026"
+    },
+    {
+      "content": "Belief 497: Test belief statement",
+      "importance": 5.17,
+      "timestamp": "2025-08-08T20:01:05.331964",
+      "metadata": {
+        "belief_id": 497,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.331968"
+    },
+    {
+      "content": "Belief 497: Test belief statement",
+      "importance": 5.17,
+      "timestamp": "2025-08-08T19:57:57.354567",
+      "metadata": {
+        "belief_id": 497,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.354571"
+    },
+    {
+      "content": "Belief 496: Test belief statement",
+      "importance": 5.16,
+      "timestamp": "2025-08-08T20:01:05.299039",
+      "metadata": {
+        "belief_id": 496,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.299042"
+    },
+    {
+      "content": "Belief 496: Test belief statement",
+      "importance": 5.16,
+      "timestamp": "2025-08-08T19:57:57.322032",
+      "metadata": {
+        "belief_id": 496,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.322036"
+    },
+    {
+      "content": "Belief 495: Test belief statement",
+      "importance": 5.15,
+      "timestamp": "2025-08-08T20:01:05.266288",
+      "metadata": {
+        "belief_id": 495,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.266291"
+    },
+    {
+      "content": "Belief 495: Test belief statement",
+      "importance": 5.15,
+      "timestamp": "2025-08-08T19:57:57.289472",
+      "metadata": {
+        "belief_id": 495,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.289477"
+    },
+    {
+      "content": "Belief 494: Test belief statement",
+      "importance": 5.140000000000001,
+      "timestamp": "2025-08-08T20:01:05.233102",
+      "metadata": {
+        "belief_id": 494,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.233106"
+    },
+    {
+      "content": "Belief 494: Test belief statement",
+      "importance": 5.140000000000001,
+      "timestamp": "2025-08-08T19:57:57.257329",
+      "metadata": {
+        "belief_id": 494,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.257335"
+    },
+    {
+      "content": "Belief 493: Test belief statement",
+      "importance": 5.13,
+      "timestamp": "2025-08-08T20:01:05.200418",
+      "metadata": {
+        "belief_id": 493,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.200422"
+    },
+    {
+      "content": "Belief 493: Test belief statement",
+      "importance": 5.13,
+      "timestamp": "2025-08-08T19:57:57.224944",
+      "metadata": {
+        "belief_id": 493,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.224949"
+    },
+    {
+      "content": "Belief 492: Test belief statement",
+      "importance": 5.12,
+      "timestamp": "2025-08-08T20:01:05.167294",
+      "metadata": {
+        "belief_id": 492,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.167298"
+    },
+    {
+      "content": "Belief 492: Test belief statement",
+      "importance": 5.12,
+      "timestamp": "2025-08-08T19:57:57.192551",
+      "metadata": {
+        "belief_id": 492,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.192556"
+    },
+    {
+      "content": "Belief 491: Test belief statement",
+      "importance": 5.11,
+      "timestamp": "2025-08-08T20:01:05.131992",
+      "metadata": {
+        "belief_id": 491,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.131995"
+    },
+    {
+      "content": "Belief 491: Test belief statement",
+      "importance": 5.11,
+      "timestamp": "2025-08-08T19:57:57.160292",
+      "metadata": {
+        "belief_id": 491,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.160299"
+    },
+    {
+      "content": "Belief 490: Test belief statement",
+      "importance": 5.1000000000000005,
+      "timestamp": "2025-08-08T20:01:05.098922",
+      "metadata": {
+        "belief_id": 490,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.098925"
+    },
+    {
+      "content": "Belief 490: Test belief statement",
+      "importance": 5.1000000000000005,
+      "timestamp": "2025-08-08T19:57:57.128118",
+      "metadata": {
+        "belief_id": 490,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.128126"
+    },
+    {
+      "content": "Belief 489: Test belief statement",
+      "importance": 5.09,
+      "timestamp": "2025-08-08T20:01:05.064976",
+      "metadata": {
+        "belief_id": 489,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.064980"
+    },
+    {
+      "content": "Belief 489: Test belief statement",
+      "importance": 5.09,
+      "timestamp": "2025-08-08T19:57:57.093445",
+      "metadata": {
+        "belief_id": 489,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.093452"
+    },
+    {
+      "content": "Belief 488: Test belief statement",
+      "importance": 5.08,
+      "timestamp": "2025-08-08T20:01:05.032195",
+      "metadata": {
+        "belief_id": 488,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:05.032200"
+    },
+    {
+      "content": "Belief 488: Test belief statement",
+      "importance": 5.08,
+      "timestamp": "2025-08-08T19:57:57.061678",
+      "metadata": {
+        "belief_id": 488,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.061693"
+    },
+    {
+      "content": "Belief 487: Test belief statement",
+      "importance": 5.07,
+      "timestamp": "2025-08-08T20:01:04.998968",
+      "metadata": {
+        "belief_id": 487,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.998971"
+    },
+    {
+      "content": "Belief 487: Test belief statement",
+      "importance": 5.07,
+      "timestamp": "2025-08-08T19:57:57.029587",
+      "metadata": {
+        "belief_id": 487,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:57.029593"
+    },
+    {
+      "content": "Belief 486: Test belief statement",
+      "importance": 5.0600000000000005,
+      "timestamp": "2025-08-08T20:01:04.965883",
+      "metadata": {
+        "belief_id": 486,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.965887"
+    },
+    {
+      "content": "Belief 486: Test belief statement",
+      "importance": 5.0600000000000005,
+      "timestamp": "2025-08-08T19:57:56.997507",
+      "metadata": {
+        "belief_id": 486,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.997511"
+    },
+    {
+      "content": "Belief 485: Test belief statement",
+      "importance": 5.050000000000001,
+      "timestamp": "2025-08-08T20:01:04.932614",
+      "metadata": {
+        "belief_id": 485,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.932617"
+    },
+    {
+      "content": "Belief 485: Test belief statement",
+      "importance": 5.050000000000001,
+      "timestamp": "2025-08-08T19:57:56.965443",
+      "metadata": {
+        "belief_id": 485,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.965447"
+    },
+    {
+      "content": "Belief 484: Test belief statement",
+      "importance": 5.04,
+      "timestamp": "2025-08-08T20:01:04.899215",
+      "metadata": {
+        "belief_id": 484,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.899219"
+    },
+    {
+      "content": "Belief 484: Test belief statement",
+      "importance": 5.04,
+      "timestamp": "2025-08-08T19:57:56.933176",
+      "metadata": {
+        "belief_id": 484,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.933181"
+    },
+    {
+      "content": "Belief 483: Test belief statement",
+      "importance": 5.03,
+      "timestamp": "2025-08-08T20:01:04.866041",
+      "metadata": {
+        "belief_id": 483,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.866044"
+    },
+    {
+      "content": "Belief 483: Test belief statement",
+      "importance": 5.03,
+      "timestamp": "2025-08-08T19:57:56.901289",
+      "metadata": {
+        "belief_id": 483,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.901293"
+    },
+    {
+      "content": "Belief 482: Test belief statement",
+      "importance": 5.0200000000000005,
+      "timestamp": "2025-08-08T20:01:04.832331",
+      "metadata": {
+        "belief_id": 482,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.832335"
+    },
+    {
+      "content": "Belief 482: Test belief statement",
+      "importance": 5.0200000000000005,
+      "timestamp": "2025-08-08T19:57:56.869651",
+      "metadata": {
+        "belief_id": 482,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.869657"
+    },
+    {
+      "content": "Belief 481: Test belief statement",
+      "importance": 5.010000000000001,
+      "timestamp": "2025-08-08T20:01:04.799295",
+      "metadata": {
+        "belief_id": 481,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.799299"
+    },
+    {
+      "content": "Belief 481: Test belief statement",
+      "importance": 5.010000000000001,
+      "timestamp": "2025-08-08T19:57:56.837980",
+      "metadata": {
+        "belief_id": 481,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.837985"
+    },
+    {
+      "content": "Belief 480: Test belief statement",
+      "importance": 5.0,
+      "timestamp": "2025-08-08T20:01:04.765994",
+      "metadata": {
+        "belief_id": 480,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.765998"
+    },
+    {
+      "content": "Belief 480: Test belief statement",
+      "importance": 5.0,
+      "timestamp": "2025-08-08T19:57:56.806717",
+      "metadata": {
+        "belief_id": 480,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.806722"
+    },
+    {
+      "content": "Belief 479: Test belief statement",
+      "importance": 4.99,
+      "timestamp": "2025-08-08T20:01:04.732857",
+      "metadata": {
+        "belief_id": 479,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.732862"
+    },
+    {
+      "content": "Belief 479: Test belief statement",
+      "importance": 4.99,
+      "timestamp": "2025-08-08T19:57:56.775163",
+      "metadata": {
+        "belief_id": 479,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.775167"
+    },
+    {
+      "content": "Belief 478: Test belief statement",
+      "importance": 4.98,
+      "timestamp": "2025-08-08T20:01:04.699218",
+      "metadata": {
+        "belief_id": 478,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.699221"
+    },
+    {
+      "content": "Belief 478: Test belief statement",
+      "importance": 4.98,
+      "timestamp": "2025-08-08T19:57:56.744021",
+      "metadata": {
+        "belief_id": 478,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.744025"
+    },
+    {
+      "content": "Belief 477: Test belief statement",
+      "importance": 4.970000000000001,
+      "timestamp": "2025-08-08T20:01:04.665035",
+      "metadata": {
+        "belief_id": 477,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.665039"
+    },
+    {
+      "content": "Belief 477: Test belief statement",
+      "importance": 4.970000000000001,
+      "timestamp": "2025-08-08T19:57:56.713156",
+      "metadata": {
+        "belief_id": 477,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.713161"
+    },
+    {
+      "content": "Belief 476: Test belief statement",
+      "importance": 4.96,
+      "timestamp": "2025-08-08T20:01:04.630846",
+      "metadata": {
+        "belief_id": 476,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.630850"
+    },
+    {
+      "content": "Belief 476: Test belief statement",
+      "importance": 4.96,
+      "timestamp": "2025-08-08T19:57:56.681592",
+      "metadata": {
+        "belief_id": 476,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.681597"
+    },
+    {
+      "content": "Belief 475: Test belief statement",
+      "importance": 4.95,
+      "timestamp": "2025-08-08T20:01:04.597600",
+      "metadata": {
+        "belief_id": 475,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.597603"
+    },
+    {
+      "content": "Belief 475: Test belief statement",
+      "importance": 4.95,
+      "timestamp": "2025-08-08T19:57:56.650595",
+      "metadata": {
+        "belief_id": 475,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.650600"
+    },
+    {
+      "content": "Belief 474: Test belief statement",
+      "importance": 4.94,
+      "timestamp": "2025-08-08T20:01:04.563827",
+      "metadata": {
+        "belief_id": 474,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.563831"
+    },
+    {
+      "content": "Belief 474: Test belief statement",
+      "importance": 4.94,
+      "timestamp": "2025-08-08T19:57:56.619218",
+      "metadata": {
+        "belief_id": 474,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.619226"
+    },
+    {
+      "content": "Belief 473: Test belief statement",
+      "importance": 4.930000000000001,
+      "timestamp": "2025-08-08T20:01:04.530331",
+      "metadata": {
+        "belief_id": 473,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.530335"
+    },
+    {
+      "content": "Belief 473: Test belief statement",
+      "importance": 4.930000000000001,
+      "timestamp": "2025-08-08T19:57:56.587256",
+      "metadata": {
+        "belief_id": 473,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.587262"
+    },
+    {
+      "content": "Belief 472: Test belief statement",
+      "importance": 4.92,
+      "timestamp": "2025-08-08T20:01:04.496715",
+      "metadata": {
+        "belief_id": 472,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.496718"
+    },
+    {
+      "content": "Belief 472: Test belief statement",
+      "importance": 4.92,
+      "timestamp": "2025-08-08T19:57:56.556161",
+      "metadata": {
+        "belief_id": 472,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.556165"
+    },
+    {
+      "content": "Belief 471: Test belief statement",
+      "importance": 4.91,
+      "timestamp": "2025-08-08T20:01:04.463871",
+      "metadata": {
+        "belief_id": 471,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.463875"
+    },
+    {
+      "content": "Belief 471: Test belief statement",
+      "importance": 4.91,
+      "timestamp": "2025-08-08T19:57:56.525049",
+      "metadata": {
+        "belief_id": 471,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.525055"
+    },
+    {
+      "content": "Belief 470: Test belief statement",
+      "importance": 4.9,
+      "timestamp": "2025-08-08T20:01:04.430660",
+      "metadata": {
+        "belief_id": 470,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.430663"
+    },
+    {
+      "content": "Belief 470: Test belief statement",
+      "importance": 4.9,
+      "timestamp": "2025-08-08T19:57:56.493569",
+      "metadata": {
+        "belief_id": 470,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.493575"
+    },
+    {
+      "content": "Belief 469: Test belief statement",
+      "importance": 4.890000000000001,
+      "timestamp": "2025-08-08T20:01:04.396401",
+      "metadata": {
+        "belief_id": 469,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.396405"
+    },
+    {
+      "content": "Belief 469: Test belief statement",
+      "importance": 4.890000000000001,
+      "timestamp": "2025-08-08T19:57:56.461046",
+      "metadata": {
+        "belief_id": 469,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.461050"
+    },
+    {
+      "content": "Belief 468: Test belief statement",
+      "importance": 4.88,
+      "timestamp": "2025-08-08T20:01:04.363015",
+      "metadata": {
+        "belief_id": 468,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.363018"
+    },
+    {
+      "content": "Belief 468: Test belief statement",
+      "importance": 4.88,
+      "timestamp": "2025-08-08T19:57:56.430054",
+      "metadata": {
+        "belief_id": 468,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.430060"
+    },
+    {
+      "content": "Belief 467: Test belief statement",
+      "importance": 4.87,
+      "timestamp": "2025-08-08T20:01:04.328913",
+      "metadata": {
+        "belief_id": 467,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.328916"
+    },
+    {
+      "content": "Belief 467: Test belief statement",
+      "importance": 4.87,
+      "timestamp": "2025-08-08T19:57:56.398787",
+      "metadata": {
+        "belief_id": 467,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.398792"
+    },
+    {
+      "content": "Belief 466: Test belief statement",
+      "importance": 4.86,
+      "timestamp": "2025-08-08T20:01:04.295017",
+      "metadata": {
+        "belief_id": 466,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.295020"
+    },
+    {
+      "content": "Belief 466: Test belief statement",
+      "importance": 4.86,
+      "timestamp": "2025-08-08T19:57:56.367370",
+      "metadata": {
+        "belief_id": 466,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.367377"
+    },
+    {
+      "content": "Belief 465: Test belief statement",
+      "importance": 4.8500000000000005,
+      "timestamp": "2025-08-08T20:01:04.261272",
+      "metadata": {
+        "belief_id": 465,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.261276"
+    },
+    {
+      "content": "Belief 465: Test belief statement",
+      "importance": 4.8500000000000005,
+      "timestamp": "2025-08-08T19:57:56.335618",
+      "metadata": {
+        "belief_id": 465,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.335624"
+    },
+    {
+      "content": "Belief 464: Test belief statement",
+      "importance": 4.84,
+      "timestamp": "2025-08-08T20:01:04.227681",
+      "metadata": {
+        "belief_id": 464,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.227685"
+    },
+    {
+      "content": "Belief 464: Test belief statement",
+      "importance": 4.84,
+      "timestamp": "2025-08-08T19:57:56.304696",
+      "metadata": {
+        "belief_id": 464,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.304702"
+    },
+    {
+      "content": "Belief 463: Test belief statement",
+      "importance": 4.83,
+      "timestamp": "2025-08-08T20:01:04.194333",
+      "metadata": {
+        "belief_id": 463,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.194337"
+    },
+    {
+      "content": "Belief 463: Test belief statement",
+      "importance": 4.83,
+      "timestamp": "2025-08-08T19:57:56.273818",
+      "metadata": {
+        "belief_id": 463,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.273823"
+    },
+    {
+      "content": "Belief 462: Test belief statement",
+      "importance": 4.82,
+      "timestamp": "2025-08-08T20:01:04.159963",
+      "metadata": {
+        "belief_id": 462,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.159967"
+    },
+    {
+      "content": "Belief 462: Test belief statement",
+      "importance": 4.82,
+      "timestamp": "2025-08-08T19:57:56.243184",
+      "metadata": {
+        "belief_id": 462,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.243189"
+    },
+    {
+      "content": "Belief 461: Test belief statement",
+      "importance": 4.8100000000000005,
+      "timestamp": "2025-08-08T20:01:04.124510",
+      "metadata": {
+        "belief_id": 461,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.124514"
+    },
+    {
+      "content": "Belief 461: Test belief statement",
+      "importance": 4.8100000000000005,
+      "timestamp": "2025-08-08T19:57:56.212834",
+      "metadata": {
+        "belief_id": 461,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.212840"
+    },
+    {
+      "content": "Belief 460: Test belief statement",
+      "importance": 4.800000000000001,
+      "timestamp": "2025-08-08T20:01:04.091112",
+      "metadata": {
+        "belief_id": 460,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.091116"
+    },
+    {
+      "content": "Belief 460: Test belief statement",
+      "importance": 4.800000000000001,
+      "timestamp": "2025-08-08T19:57:56.182259",
+      "metadata": {
+        "belief_id": 460,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.182266"
+    },
+    {
+      "content": "Belief 459: Test belief statement",
+      "importance": 4.79,
+      "timestamp": "2025-08-08T20:01:04.057815",
+      "metadata": {
+        "belief_id": 459,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.057819"
+    },
+    {
+      "content": "Belief 459: Test belief statement",
+      "importance": 4.79,
+      "timestamp": "2025-08-08T19:57:56.151671",
+      "metadata": {
+        "belief_id": 459,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.151676"
+    },
+    {
+      "content": "Belief 458: Test belief statement",
+      "importance": 4.78,
+      "timestamp": "2025-08-08T20:01:04.024015",
+      "metadata": {
+        "belief_id": 458,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:04.024018"
+    },
+    {
+      "content": "Belief 458: Test belief statement",
+      "importance": 4.78,
+      "timestamp": "2025-08-08T19:57:56.121200",
+      "metadata": {
+        "belief_id": 458,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.121205"
+    },
+    {
+      "content": "Belief 457: Test belief statement",
+      "importance": 4.7700000000000005,
+      "timestamp": "2025-08-08T20:01:03.990199",
+      "metadata": {
+        "belief_id": 457,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.990202"
+    },
+    {
+      "content": "Belief 457: Test belief statement",
+      "importance": 4.7700000000000005,
+      "timestamp": "2025-08-08T19:57:56.090546",
+      "metadata": {
+        "belief_id": 457,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.090553"
+    },
+    {
+      "content": "Belief 456: Test belief statement",
+      "importance": 4.760000000000001,
+      "timestamp": "2025-08-08T20:01:03.957080",
+      "metadata": {
+        "belief_id": 456,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.957083"
+    },
+    {
+      "content": "Belief 456: Test belief statement",
+      "importance": 4.760000000000001,
+      "timestamp": "2025-08-08T19:57:56.060011",
+      "metadata": {
+        "belief_id": 456,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.060016"
+    },
+    {
+      "content": "Belief 455: Test belief statement",
+      "importance": 4.75,
+      "timestamp": "2025-08-08T20:01:03.924103",
+      "metadata": {
+        "belief_id": 455,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.924107"
+    },
+    {
+      "content": "Belief 455: Test belief statement",
+      "importance": 4.75,
+      "timestamp": "2025-08-08T19:57:56.029609",
+      "metadata": {
+        "belief_id": 455,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:56.029616"
+    },
+    {
+      "content": "Belief 454: Test belief statement",
+      "importance": 4.74,
+      "timestamp": "2025-08-08T20:01:03.890524",
+      "metadata": {
+        "belief_id": 454,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.890528"
+    },
+    {
+      "content": "Belief 454: Test belief statement",
+      "importance": 4.74,
+      "timestamp": "2025-08-08T19:57:55.998852",
+      "metadata": {
+        "belief_id": 454,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.998857"
+    },
+    {
+      "content": "Belief 453: Test belief statement",
+      "importance": 4.73,
+      "timestamp": "2025-08-08T20:01:03.857394",
+      "metadata": {
+        "belief_id": 453,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.857397"
+    },
+    {
+      "content": "Belief 453: Test belief statement",
+      "importance": 4.73,
+      "timestamp": "2025-08-08T19:57:55.968250",
+      "metadata": {
+        "belief_id": 453,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.968256"
+    },
+    {
+      "content": "Belief 452: Test belief statement",
+      "importance": 4.720000000000001,
+      "timestamp": "2025-08-08T20:01:03.824807",
+      "metadata": {
+        "belief_id": 452,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.824810"
+    },
+    {
+      "content": "Belief 452: Test belief statement",
+      "importance": 4.720000000000001,
+      "timestamp": "2025-08-08T19:57:55.937862",
+      "metadata": {
+        "belief_id": 452,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.937867"
+    },
+    {
+      "content": "Belief 451: Test belief statement",
+      "importance": 4.71,
+      "timestamp": "2025-08-08T20:01:03.792393",
+      "metadata": {
+        "belief_id": 451,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.792397"
+    },
+    {
+      "content": "Belief 451: Test belief statement",
+      "importance": 4.71,
+      "timestamp": "2025-08-08T19:57:55.907389",
+      "metadata": {
+        "belief_id": 451,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.907394"
+    },
+    {
+      "content": "Belief 450: Test belief statement",
+      "importance": 4.7,
+      "timestamp": "2025-08-08T20:01:03.759996",
+      "metadata": {
+        "belief_id": 450,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.760000"
+    },
+    {
+      "content": "Belief 450: Test belief statement",
+      "importance": 4.7,
+      "timestamp": "2025-08-08T19:57:55.876985",
+      "metadata": {
+        "belief_id": 450,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.876991"
+    },
+    {
+      "content": "Belief 449: Test belief statement",
+      "importance": 4.69,
+      "timestamp": "2025-08-08T20:01:03.727572",
+      "metadata": {
+        "belief_id": 449,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.727576"
+    },
+    {
+      "content": "Belief 449: Test belief statement",
+      "importance": 4.69,
+      "timestamp": "2025-08-08T19:57:55.847066",
+      "metadata": {
+        "belief_id": 449,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.847073"
+    },
+    {
+      "content": "Belief 448: Test belief statement",
+      "importance": 4.680000000000001,
+      "timestamp": "2025-08-08T20:01:03.694538",
+      "metadata": {
+        "belief_id": 448,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.694541"
+    },
+    {
+      "content": "Belief 448: Test belief statement",
+      "importance": 4.680000000000001,
+      "timestamp": "2025-08-08T19:57:55.816415",
+      "metadata": {
+        "belief_id": 448,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.816421"
+    },
+    {
+      "content": "Belief 447: Test belief statement",
+      "importance": 4.67,
+      "timestamp": "2025-08-08T20:01:03.661790",
+      "metadata": {
+        "belief_id": 447,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.661794"
+    },
+    {
+      "content": "Belief 447: Test belief statement",
+      "importance": 4.67,
+      "timestamp": "2025-08-08T19:57:55.786336",
+      "metadata": {
+        "belief_id": 447,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.786341"
+    },
+    {
+      "content": "Belief 446: Test belief statement",
+      "importance": 4.66,
+      "timestamp": "2025-08-08T20:01:03.629047",
+      "metadata": {
+        "belief_id": 446,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.629051"
+    },
+    {
+      "content": "Belief 446: Test belief statement",
+      "importance": 4.66,
+      "timestamp": "2025-08-08T19:57:55.756796",
+      "metadata": {
+        "belief_id": 446,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.756800"
+    },
+    {
+      "content": "Belief 445: Test belief statement",
+      "importance": 4.65,
+      "timestamp": "2025-08-08T20:01:03.595371",
+      "metadata": {
+        "belief_id": 445,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.595375"
+    },
+    {
+      "content": "Belief 445: Test belief statement",
+      "importance": 4.65,
+      "timestamp": "2025-08-08T19:57:55.725741",
+      "metadata": {
+        "belief_id": 445,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.725745"
+    },
+    {
+      "content": "Belief 444: Test belief statement",
+      "importance": 4.640000000000001,
+      "timestamp": "2025-08-08T20:01:03.561959",
+      "metadata": {
+        "belief_id": 444,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.561962"
+    },
+    {
+      "content": "Belief 444: Test belief statement",
+      "importance": 4.640000000000001,
+      "timestamp": "2025-08-08T19:57:55.696505",
+      "metadata": {
+        "belief_id": 444,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.696509"
+    },
+    {
+      "content": "Belief 443: Test belief statement",
+      "importance": 4.63,
+      "timestamp": "2025-08-08T20:01:03.528806",
+      "metadata": {
+        "belief_id": 443,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.528810"
+    },
+    {
+      "content": "Belief 443: Test belief statement",
+      "importance": 4.63,
+      "timestamp": "2025-08-08T19:57:55.666504",
+      "metadata": {
+        "belief_id": 443,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.666508"
+    },
+    {
+      "content": "Belief 442: Test belief statement",
+      "importance": 4.62,
+      "timestamp": "2025-08-08T20:01:03.495721",
+      "metadata": {
+        "belief_id": 442,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.495725"
+    },
+    {
+      "content": "Belief 442: Test belief statement",
+      "importance": 4.62,
+      "timestamp": "2025-08-08T19:57:55.636661",
+      "metadata": {
+        "belief_id": 442,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.636666"
+    },
+    {
+      "content": "Belief 441: Test belief statement",
+      "importance": 4.61,
+      "timestamp": "2025-08-08T20:01:03.461581",
+      "metadata": {
+        "belief_id": 441,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.461584"
+    },
+    {
+      "content": "Belief 441: Test belief statement",
+      "importance": 4.61,
+      "timestamp": "2025-08-08T19:57:55.606852",
+      "metadata": {
+        "belief_id": 441,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.606857"
+    },
+    {
+      "content": "Belief 440: Test belief statement",
+      "importance": 4.6000000000000005,
+      "timestamp": "2025-08-08T20:01:03.427892",
+      "metadata": {
+        "belief_id": 440,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.427896"
+    },
+    {
+      "content": "Belief 440: Test belief statement",
+      "importance": 4.6000000000000005,
+      "timestamp": "2025-08-08T19:57:55.577338",
+      "metadata": {
+        "belief_id": 440,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.577343"
+    },
+    {
+      "content": "Belief 439: Test belief statement",
+      "importance": 4.59,
+      "timestamp": "2025-08-08T20:01:03.394713",
+      "metadata": {
+        "belief_id": 439,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.394717"
+    },
+    {
+      "content": "Belief 439: Test belief statement",
+      "importance": 4.59,
+      "timestamp": "2025-08-08T19:57:55.547268",
+      "metadata": {
+        "belief_id": 439,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.547273"
+    },
+    {
+      "content": "Belief 438: Test belief statement",
+      "importance": 4.58,
+      "timestamp": "2025-08-08T20:01:03.361254",
+      "metadata": {
+        "belief_id": 438,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.361258"
+    },
+    {
+      "content": "Belief 438: Test belief statement",
+      "importance": 4.58,
+      "timestamp": "2025-08-08T19:57:55.517400",
+      "metadata": {
+        "belief_id": 438,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.517405"
+    },
+    {
+      "content": "Belief 437: Test belief statement",
+      "importance": 4.57,
+      "timestamp": "2025-08-08T20:01:03.328244",
+      "metadata": {
+        "belief_id": 437,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.328248"
+    },
+    {
+      "content": "Belief 437: Test belief statement",
+      "importance": 4.57,
+      "timestamp": "2025-08-08T19:57:55.488084",
+      "metadata": {
+        "belief_id": 437,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.488090"
+    },
+    {
+      "content": "Belief 436: Test belief statement",
+      "importance": 4.5600000000000005,
+      "timestamp": "2025-08-08T20:01:03.294929",
+      "metadata": {
+        "belief_id": 436,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.294932"
+    },
+    {
+      "content": "Belief 436: Test belief statement",
+      "importance": 4.5600000000000005,
+      "timestamp": "2025-08-08T19:57:55.455882",
+      "metadata": {
+        "belief_id": 436,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.455886"
+    },
+    {
+      "content": "Belief 435: Test belief statement",
+      "importance": 4.550000000000001,
+      "timestamp": "2025-08-08T20:01:03.261930",
+      "metadata": {
+        "belief_id": 435,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.261934"
+    },
+    {
+      "content": "Belief 435: Test belief statement",
+      "importance": 4.550000000000001,
+      "timestamp": "2025-08-08T19:57:55.426538",
+      "metadata": {
+        "belief_id": 435,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.426542"
+    },
+    {
+      "content": "Belief 434: Test belief statement",
+      "importance": 4.54,
+      "timestamp": "2025-08-08T20:01:03.228842",
+      "metadata": {
+        "belief_id": 434,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.228847"
+    },
+    {
+      "content": "Belief 434: Test belief statement",
+      "importance": 4.54,
+      "timestamp": "2025-08-08T19:57:55.397403",
+      "metadata": {
+        "belief_id": 434,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.397409"
+    },
+    {
+      "content": "Belief 433: Test belief statement",
+      "importance": 4.53,
+      "timestamp": "2025-08-08T20:01:03.195699",
+      "metadata": {
+        "belief_id": 433,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.195702"
+    },
+    {
+      "content": "Belief 433: Test belief statement",
+      "importance": 4.53,
+      "timestamp": "2025-08-08T19:57:55.368092",
+      "metadata": {
+        "belief_id": 433,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.368097"
+    },
+    {
+      "content": "Belief 432: Test belief statement",
+      "importance": 4.5200000000000005,
+      "timestamp": "2025-08-08T20:01:03.162033",
+      "metadata": {
+        "belief_id": 432,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.162036"
+    },
+    {
+      "content": "Belief 432: Test belief statement",
+      "importance": 4.5200000000000005,
+      "timestamp": "2025-08-08T19:57:55.338840",
+      "metadata": {
+        "belief_id": 432,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.338846"
+    },
+    {
+      "content": "Belief 431: Test belief statement",
+      "importance": 4.510000000000001,
+      "timestamp": "2025-08-08T20:01:03.128869",
+      "metadata": {
+        "belief_id": 431,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.128872"
+    },
+    {
+      "content": "Belief 431: Test belief statement",
+      "importance": 4.510000000000001,
+      "timestamp": "2025-08-08T19:57:55.309353",
+      "metadata": {
+        "belief_id": 431,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.309357"
+    },
+    {
+      "content": "Belief 430: Test belief statement",
+      "importance": 4.5,
+      "timestamp": "2025-08-08T20:01:03.095467",
+      "metadata": {
+        "belief_id": 430,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.095470"
+    },
+    {
+      "content": "Belief 430: Test belief statement",
+      "importance": 4.5,
+      "timestamp": "2025-08-08T19:57:55.280750",
+      "metadata": {
+        "belief_id": 430,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.280755"
+    },
+    {
+      "content": "Belief 429: Test belief statement",
+      "importance": 4.49,
+      "timestamp": "2025-08-08T20:01:03.062509",
+      "metadata": {
+        "belief_id": 429,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.062513"
+    },
+    {
+      "content": "Belief 429: Test belief statement",
+      "importance": 4.49,
+      "timestamp": "2025-08-08T19:57:55.252181",
+      "metadata": {
+        "belief_id": 429,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.252185"
+    },
+    {
+      "content": "Belief 428: Test belief statement",
+      "importance": 4.48,
+      "timestamp": "2025-08-08T20:01:03.029543",
+      "metadata": {
+        "belief_id": 428,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:03.029547"
+    },
+    {
+      "content": "Belief 428: Test belief statement",
+      "importance": 4.48,
+      "timestamp": "2025-08-08T19:57:55.223500",
+      "metadata": {
+        "belief_id": 428,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.223505"
+    },
+    {
+      "content": "Belief 427: Test belief statement",
+      "importance": 4.470000000000001,
+      "timestamp": "2025-08-08T20:01:02.996667",
+      "metadata": {
+        "belief_id": 427,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.996671"
+    },
+    {
+      "content": "Belief 427: Test belief statement",
+      "importance": 4.470000000000001,
+      "timestamp": "2025-08-08T19:57:55.194729",
+      "metadata": {
+        "belief_id": 427,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.194735"
+    },
+    {
+      "content": "Belief 426: Test belief statement",
+      "importance": 4.46,
+      "timestamp": "2025-08-08T20:01:02.964136",
+      "metadata": {
+        "belief_id": 426,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.964139"
+    },
+    {
+      "content": "Belief 426: Test belief statement",
+      "importance": 4.46,
+      "timestamp": "2025-08-08T19:57:55.166197",
+      "metadata": {
+        "belief_id": 426,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.166202"
+    },
+    {
+      "content": "Belief 425: Test belief statement",
+      "importance": 4.45,
+      "timestamp": "2025-08-08T20:01:02.931572",
+      "metadata": {
+        "belief_id": 425,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.931575"
+    },
+    {
+      "content": "Belief 425: Test belief statement",
+      "importance": 4.45,
+      "timestamp": "2025-08-08T19:57:55.137179",
+      "metadata": {
+        "belief_id": 425,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.137186"
+    },
+    {
+      "content": "Belief 424: Test belief statement",
+      "importance": 4.44,
+      "timestamp": "2025-08-08T20:01:02.899257",
+      "metadata": {
+        "belief_id": 424,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.899260"
+    },
+    {
+      "content": "Belief 424: Test belief statement",
+      "importance": 4.44,
+      "timestamp": "2025-08-08T19:57:55.107899",
+      "metadata": {
+        "belief_id": 424,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.107907"
+    },
+    {
+      "content": "Belief 423: Test belief statement",
+      "importance": 4.430000000000001,
+      "timestamp": "2025-08-08T20:01:02.865844",
+      "metadata": {
+        "belief_id": 423,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.865847"
+    },
+    {
+      "content": "Belief 423: Test belief statement",
+      "importance": 4.430000000000001,
+      "timestamp": "2025-08-08T19:57:55.079088",
+      "metadata": {
+        "belief_id": 423,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.079095"
+    },
+    {
+      "content": "Belief 422: Test belief statement",
+      "importance": 4.42,
+      "timestamp": "2025-08-08T20:01:02.832501",
+      "metadata": {
+        "belief_id": 422,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.832505"
+    },
+    {
+      "content": "Belief 422: Test belief statement",
+      "importance": 4.42,
+      "timestamp": "2025-08-08T19:57:55.049930",
+      "metadata": {
+        "belief_id": 422,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.049935"
+    },
+    {
+      "content": "Belief 421: Test belief statement",
+      "importance": 4.41,
+      "timestamp": "2025-08-08T20:01:02.799215",
+      "metadata": {
+        "belief_id": 421,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.799219"
+    },
+    {
+      "content": "Belief 421: Test belief statement",
+      "importance": 4.41,
+      "timestamp": "2025-08-08T19:57:55.020593",
+      "metadata": {
+        "belief_id": 421,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:55.020599"
+    },
+    {
+      "content": "Belief 420: Test belief statement",
+      "importance": 4.4,
+      "timestamp": "2025-08-08T20:01:02.765943",
+      "metadata": {
+        "belief_id": 420,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.765946"
+    },
+    {
+      "content": "Belief 420: Test belief statement",
+      "importance": 4.4,
+      "timestamp": "2025-08-08T19:57:54.991498",
+      "metadata": {
+        "belief_id": 420,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.991506"
+    },
+    {
+      "content": "Belief 419: Test belief statement",
+      "importance": 4.390000000000001,
+      "timestamp": "2025-08-08T20:01:02.732616",
+      "metadata": {
+        "belief_id": 419,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.732619"
+    },
+    {
+      "content": "Belief 419: Test belief statement",
+      "importance": 4.390000000000001,
+      "timestamp": "2025-08-08T19:57:54.962473",
+      "metadata": {
+        "belief_id": 419,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.962481"
+    },
+    {
+      "content": "Belief 418: Test belief statement",
+      "importance": 4.38,
+      "timestamp": "2025-08-08T20:01:02.699286",
+      "metadata": {
+        "belief_id": 418,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.699289"
+    },
+    {
+      "content": "Belief 418: Test belief statement",
+      "importance": 4.38,
+      "timestamp": "2025-08-08T19:57:54.931149",
+      "metadata": {
+        "belief_id": 418,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.931156"
+    },
+    {
+      "content": "Belief 417: Test belief statement",
+      "importance": 4.37,
+      "timestamp": "2025-08-08T20:01:02.665989",
+      "metadata": {
+        "belief_id": 417,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.665992"
+    },
+    {
+      "content": "Belief 417: Test belief statement",
+      "importance": 4.37,
+      "timestamp": "2025-08-08T19:57:54.902253",
+      "metadata": {
+        "belief_id": 417,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.902260"
+    },
+    {
+      "content": "Belief 416: Test belief statement",
+      "importance": 4.36,
+      "timestamp": "2025-08-08T20:01:02.633333",
+      "metadata": {
+        "belief_id": 416,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.633336"
+    },
+    {
+      "content": "Belief 416: Test belief statement",
+      "importance": 4.36,
+      "timestamp": "2025-08-08T19:57:54.871709",
+      "metadata": {
+        "belief_id": 416,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.871716"
+    },
+    {
+      "content": "Belief 415: Test belief statement",
+      "importance": 4.3500000000000005,
+      "timestamp": "2025-08-08T20:01:02.600377",
+      "metadata": {
+        "belief_id": 415,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.600380"
+    },
+    {
+      "content": "Belief 415: Test belief statement",
+      "importance": 4.3500000000000005,
+      "timestamp": "2025-08-08T19:57:54.843100",
+      "metadata": {
+        "belief_id": 415,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.843108"
+    },
+    {
+      "content": "Belief 414: Test belief statement",
+      "importance": 4.34,
+      "timestamp": "2025-08-08T20:01:02.566775",
+      "metadata": {
+        "belief_id": 414,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.566778"
+    },
+    {
+      "content": "Belief 414: Test belief statement",
+      "importance": 4.34,
+      "timestamp": "2025-08-08T19:57:54.814047",
+      "metadata": {
+        "belief_id": 414,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.814055"
+    },
+    {
+      "content": "Belief 413: Test belief statement",
+      "importance": 4.33,
+      "timestamp": "2025-08-08T20:01:02.533687",
+      "metadata": {
+        "belief_id": 413,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.533690"
+    },
+    {
+      "content": "Belief 413: Test belief statement",
+      "importance": 4.33,
+      "timestamp": "2025-08-08T19:57:54.784693",
+      "metadata": {
+        "belief_id": 413,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.784700"
+    },
+    {
+      "content": "Belief 412: Test belief statement",
+      "importance": 4.32,
+      "timestamp": "2025-08-08T20:01:02.500394",
+      "metadata": {
+        "belief_id": 412,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.500397"
+    },
+    {
+      "content": "Belief 412: Test belief statement",
+      "importance": 4.32,
+      "timestamp": "2025-08-08T19:57:54.756130",
+      "metadata": {
+        "belief_id": 412,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.756137"
+    },
+    {
+      "content": "Belief 411: Test belief statement",
+      "importance": 4.3100000000000005,
+      "timestamp": "2025-08-08T20:01:02.466675",
+      "metadata": {
+        "belief_id": 411,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.466678"
+    },
+    {
+      "content": "Belief 411: Test belief statement",
+      "importance": 4.3100000000000005,
+      "timestamp": "2025-08-08T19:57:54.727235",
+      "metadata": {
+        "belief_id": 411,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.727244"
+    },
+    {
+      "content": "Belief 410: Test belief statement",
+      "importance": 4.3,
+      "timestamp": "2025-08-08T20:01:02.433809",
+      "metadata": {
+        "belief_id": 410,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.433813"
+    },
+    {
+      "content": "Belief 410: Test belief statement",
+      "importance": 4.3,
+      "timestamp": "2025-08-08T19:57:54.698466",
+      "metadata": {
+        "belief_id": 410,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.698474"
+    },
+    {
+      "content": "Belief 409: Test belief statement",
+      "importance": 4.29,
+      "timestamp": "2025-08-08T20:01:02.400494",
+      "metadata": {
+        "belief_id": 409,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.400498"
+    },
+    {
+      "content": "Belief 409: Test belief statement",
+      "importance": 4.29,
+      "timestamp": "2025-08-08T19:57:54.669757",
+      "metadata": {
+        "belief_id": 409,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.669764"
+    },
+    {
+      "content": "Belief 408: Test belief statement",
+      "importance": 4.28,
+      "timestamp": "2025-08-08T20:01:02.366865",
+      "metadata": {
+        "belief_id": 408,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.366869"
+    },
+    {
+      "content": "Belief 408: Test belief statement",
+      "importance": 4.28,
+      "timestamp": "2025-08-08T19:57:54.641537",
+      "metadata": {
+        "belief_id": 408,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.641544"
+    },
+    {
+      "content": "Belief 407: Test belief statement",
+      "importance": 4.2700000000000005,
+      "timestamp": "2025-08-08T20:01:02.329212",
+      "metadata": {
+        "belief_id": 407,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.329216"
+    },
+    {
+      "content": "Belief 407: Test belief statement",
+      "importance": 4.2700000000000005,
+      "timestamp": "2025-08-08T19:57:54.613490",
+      "metadata": {
+        "belief_id": 407,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.613498"
+    },
+    {
+      "content": "Belief 406: Test belief statement",
+      "importance": 4.260000000000001,
+      "timestamp": "2025-08-08T20:01:02.295268",
+      "metadata": {
+        "belief_id": 406,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.295271"
+    },
+    {
+      "content": "Belief 406: Test belief statement",
+      "importance": 4.260000000000001,
+      "timestamp": "2025-08-08T19:57:54.585337",
+      "metadata": {
+        "belief_id": 406,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.585341"
+    },
+    {
+      "content": "Belief 405: Test belief statement",
+      "importance": 4.25,
+      "timestamp": "2025-08-08T20:01:02.262139",
+      "metadata": {
+        "belief_id": 405,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.262142"
+    },
+    {
+      "content": "Belief 405: Test belief statement",
+      "importance": 4.25,
+      "timestamp": "2025-08-08T19:57:54.557357",
+      "metadata": {
+        "belief_id": 405,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.557362"
+    },
+    {
+      "content": "Belief 404: Test belief statement",
+      "importance": 4.24,
+      "timestamp": "2025-08-08T20:01:02.228675",
+      "metadata": {
+        "belief_id": 404,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.228679"
+    },
+    {
+      "content": "Belief 404: Test belief statement",
+      "importance": 4.24,
+      "timestamp": "2025-08-08T19:57:54.529862",
+      "metadata": {
+        "belief_id": 404,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.529868"
+    },
+    {
+      "content": "Belief 403: Test belief statement",
+      "importance": 4.23,
+      "timestamp": "2025-08-08T20:01:02.194797",
+      "metadata": {
+        "belief_id": 403,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.194800"
+    },
+    {
+      "content": "Belief 403: Test belief statement",
+      "importance": 4.23,
+      "timestamp": "2025-08-08T19:57:54.500938",
+      "metadata": {
+        "belief_id": 403,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.500943"
+    },
+    {
+      "content": "Belief 402: Test belief statement",
+      "importance": 4.220000000000001,
+      "timestamp": "2025-08-08T20:01:02.161792",
+      "metadata": {
+        "belief_id": 402,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.161795"
+    },
+    {
+      "content": "Belief 402: Test belief statement",
+      "importance": 4.220000000000001,
+      "timestamp": "2025-08-08T19:57:54.472856",
+      "metadata": {
+        "belief_id": 402,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.472861"
+    },
+    {
+      "content": "Belief 401: Test belief statement",
+      "importance": 4.21,
+      "timestamp": "2025-08-08T20:01:02.129294",
+      "metadata": {
+        "belief_id": 401,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.129296"
+    },
+    {
+      "content": "Belief 401: Test belief statement",
+      "importance": 4.21,
+      "timestamp": "2025-08-08T19:57:54.445093",
+      "metadata": {
+        "belief_id": 401,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.445098"
+    },
+    {
+      "content": "Belief 400: Test belief statement",
+      "importance": 4.2,
+      "timestamp": "2025-08-08T20:01:02.096376",
+      "metadata": {
+        "belief_id": 400,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.096379"
+    },
+    {
+      "content": "Belief 400: Test belief statement",
+      "importance": 4.2,
+      "timestamp": "2025-08-08T19:57:54.417326",
+      "metadata": {
+        "belief_id": 400,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.417337"
+    },
+    {
+      "content": "Belief 399: Test belief statement",
+      "importance": 4.19,
+      "timestamp": "2025-08-08T20:01:02.062466",
+      "metadata": {
+        "belief_id": 399,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.062469"
+    },
+    {
+      "content": "Belief 399: Test belief statement",
+      "importance": 4.19,
+      "timestamp": "2025-08-08T19:57:54.389415",
+      "metadata": {
+        "belief_id": 399,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.389422"
+    },
+    {
+      "content": "Belief 398: Test belief statement",
+      "importance": 4.18,
+      "timestamp": "2025-08-08T20:01:02.028398",
+      "metadata": {
+        "belief_id": 398,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:02.028402"
+    },
+    {
+      "content": "Belief 398: Test belief statement",
+      "importance": 4.18,
+      "timestamp": "2025-08-08T19:57:54.361279",
+      "metadata": {
+        "belief_id": 398,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.361284"
+    },
+    {
+      "content": "Belief 397: Test belief statement",
+      "importance": 4.17,
+      "timestamp": "2025-08-08T20:01:01.994647",
+      "metadata": {
+        "belief_id": 397,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.994650"
+    },
+    {
+      "content": "Belief 397: Test belief statement",
+      "importance": 4.17,
+      "timestamp": "2025-08-08T19:57:54.333757",
+      "metadata": {
+        "belief_id": 397,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.333762"
+    },
+    {
+      "content": "Belief 396: Test belief statement",
+      "importance": 4.16,
+      "timestamp": "2025-08-08T20:01:01.957328",
+      "metadata": {
+        "belief_id": 396,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.957331"
+    },
+    {
+      "content": "Belief 396: Test belief statement",
+      "importance": 4.16,
+      "timestamp": "2025-08-08T19:57:54.306308",
+      "metadata": {
+        "belief_id": 396,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.306314"
+    },
+    {
+      "content": "Belief 395: Test belief statement",
+      "importance": 4.15,
+      "timestamp": "2025-08-08T20:01:01.924627",
+      "metadata": {
+        "belief_id": 395,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.924631"
+    },
+    {
+      "content": "Belief 395: Test belief statement",
+      "importance": 4.15,
+      "timestamp": "2025-08-08T19:57:54.279379",
+      "metadata": {
+        "belief_id": 395,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.279386"
+    },
+    {
+      "content": "Belief 394: Test belief statement",
+      "importance": 4.14,
+      "timestamp": "2025-08-08T20:01:01.891377",
+      "metadata": {
+        "belief_id": 394,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.891380"
+    },
+    {
+      "content": "Belief 394: Test belief statement",
+      "importance": 4.14,
+      "timestamp": "2025-08-08T19:57:54.251807",
+      "metadata": {
+        "belief_id": 394,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.251815"
+    },
+    {
+      "content": "Belief 393: Test belief statement",
+      "importance": 4.13,
+      "timestamp": "2025-08-08T20:01:01.858493",
+      "metadata": {
+        "belief_id": 393,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.858497"
+    },
+    {
+      "content": "Belief 393: Test belief statement",
+      "importance": 4.13,
+      "timestamp": "2025-08-08T19:57:54.224383",
+      "metadata": {
+        "belief_id": 393,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.224388"
+    },
+    {
+      "content": "Belief 392: Test belief statement",
+      "importance": 4.12,
+      "timestamp": "2025-08-08T20:01:01.825863",
+      "metadata": {
+        "belief_id": 392,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.825866"
+    },
+    {
+      "content": "Belief 392: Test belief statement",
+      "importance": 4.12,
+      "timestamp": "2025-08-08T19:57:54.197592",
+      "metadata": {
+        "belief_id": 392,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.197597"
+    },
+    {
+      "content": "Belief 391: Test belief statement",
+      "importance": 4.11,
+      "timestamp": "2025-08-08T20:01:01.792542",
+      "metadata": {
+        "belief_id": 391,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.792546"
+    },
+    {
+      "content": "Belief 391: Test belief statement",
+      "importance": 4.11,
+      "timestamp": "2025-08-08T19:57:54.170868",
+      "metadata": {
+        "belief_id": 391,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.170873"
+    },
+    {
+      "content": "Belief 390: Test belief statement",
+      "importance": 4.1,
+      "timestamp": "2025-08-08T20:01:01.759754",
+      "metadata": {
+        "belief_id": 390,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.759757"
+    },
+    {
+      "content": "Belief 390: Test belief statement",
+      "importance": 4.1,
+      "timestamp": "2025-08-08T19:57:54.144295",
+      "metadata": {
+        "belief_id": 390,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.144300"
+    },
+    {
+      "content": "Belief 389: Test belief statement",
+      "importance": 4.09,
+      "timestamp": "2025-08-08T20:01:01.726810",
+      "metadata": {
+        "belief_id": 389,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.726813"
+    },
+    {
+      "content": "Belief 389: Test belief statement",
+      "importance": 4.09,
+      "timestamp": "2025-08-08T19:57:54.117680",
+      "metadata": {
+        "belief_id": 389,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.117685"
+    },
+    {
+      "content": "Belief 388: Test belief statement",
+      "importance": 4.08,
+      "timestamp": "2025-08-08T20:01:01.694011",
+      "metadata": {
+        "belief_id": 388,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.694015"
+    },
+    {
+      "content": "Belief 388: Test belief statement",
+      "importance": 4.08,
+      "timestamp": "2025-08-08T19:57:54.090837",
+      "metadata": {
+        "belief_id": 388,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.090846"
+    },
+    {
+      "content": "Belief 387: Test belief statement",
+      "importance": 4.07,
+      "timestamp": "2025-08-08T20:01:01.661353",
+      "metadata": {
+        "belief_id": 387,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.661357"
+    },
+    {
+      "content": "Belief 387: Test belief statement",
+      "importance": 4.07,
+      "timestamp": "2025-08-08T19:57:54.063747",
+      "metadata": {
+        "belief_id": 387,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.063750"
+    },
+    {
+      "content": "Belief 386: Test belief statement",
+      "importance": 4.06,
+      "timestamp": "2025-08-08T20:01:01.628668",
+      "metadata": {
+        "belief_id": 386,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.628673"
+    },
+    {
+      "content": "Belief 386: Test belief statement",
+      "importance": 4.06,
+      "timestamp": "2025-08-08T19:57:54.036964",
+      "metadata": {
+        "belief_id": 386,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.036969"
+    },
+    {
+      "content": "Belief 385: Test belief statement",
+      "importance": 4.05,
+      "timestamp": "2025-08-08T20:01:01.595247",
+      "metadata": {
+        "belief_id": 385,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.595250"
+    },
+    {
+      "content": "Belief 385: Test belief statement",
+      "importance": 4.05,
+      "timestamp": "2025-08-08T19:57:54.009252",
+      "metadata": {
+        "belief_id": 385,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:54.009257"
+    },
+    {
+      "content": "Belief 384: Test belief statement",
+      "importance": 4.04,
+      "timestamp": "2025-08-08T20:01:01.562792",
+      "metadata": {
+        "belief_id": 384,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.562795"
+    },
+    {
+      "content": "Belief 384: Test belief statement",
+      "importance": 4.04,
+      "timestamp": "2025-08-08T19:57:53.982539",
+      "metadata": {
+        "belief_id": 384,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.982544"
+    },
+    {
+      "content": "Belief 383: Test belief statement",
+      "importance": 4.03,
+      "timestamp": "2025-08-08T20:01:01.529803",
+      "metadata": {
+        "belief_id": 383,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.529807"
+    },
+    {
+      "content": "Belief 383: Test belief statement",
+      "importance": 4.03,
+      "timestamp": "2025-08-08T19:57:53.955824",
+      "metadata": {
+        "belief_id": 383,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.955828"
+    },
+    {
+      "content": "Belief 382: Test belief statement",
+      "importance": 4.0200000000000005,
+      "timestamp": "2025-08-08T20:01:01.496502",
+      "metadata": {
+        "belief_id": 382,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.496506"
+    },
+    {
+      "content": "Belief 382: Test belief statement",
+      "importance": 4.0200000000000005,
+      "timestamp": "2025-08-08T19:57:53.929716",
+      "metadata": {
+        "belief_id": 382,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.929719"
+    },
+    {
+      "content": "Belief 381: Test belief statement",
+      "importance": 4.01,
+      "timestamp": "2025-08-08T20:01:01.463338",
+      "metadata": {
+        "belief_id": 381,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.463342"
+    },
+    {
+      "content": "Belief 381: Test belief statement",
+      "importance": 4.01,
+      "timestamp": "2025-08-08T19:57:53.903408",
+      "metadata": {
+        "belief_id": 381,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.903412"
+    },
+    {
+      "content": "Belief 380: Test belief statement",
+      "importance": 4.0,
+      "timestamp": "2025-08-08T20:01:01.430279",
+      "metadata": {
+        "belief_id": 380,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.430283"
+    },
+    {
+      "content": "Belief 380: Test belief statement",
+      "importance": 4.0,
+      "timestamp": "2025-08-08T19:57:53.877212",
+      "metadata": {
+        "belief_id": 380,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.877216"
+    },
+    {
+      "content": "Belief 379: Test belief statement",
+      "importance": 3.99,
+      "timestamp": "2025-08-08T20:01:01.396972",
+      "metadata": {
+        "belief_id": 379,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.396975"
+    },
+    {
+      "content": "Belief 379: Test belief statement",
+      "importance": 3.99,
+      "timestamp": "2025-08-08T19:57:53.851427",
+      "metadata": {
+        "belief_id": 379,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.851431"
+    },
+    {
+      "content": "Belief 378: Test belief statement",
+      "importance": 3.9800000000000004,
+      "timestamp": "2025-08-08T20:01:01.363415",
+      "metadata": {
+        "belief_id": 378,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.363418"
+    },
+    {
+      "content": "Belief 378: Test belief statement",
+      "importance": 3.9800000000000004,
+      "timestamp": "2025-08-08T19:57:53.825162",
+      "metadata": {
+        "belief_id": 378,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.825166"
+    },
+    {
+      "content": "Belief 377: Test belief statement",
+      "importance": 3.97,
+      "timestamp": "2025-08-08T20:01:01.330686",
+      "metadata": {
+        "belief_id": 377,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.330689"
+    },
+    {
+      "content": "Belief 377: Test belief statement",
+      "importance": 3.97,
+      "timestamp": "2025-08-08T19:57:53.799184",
+      "metadata": {
+        "belief_id": 377,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.799188"
+    },
+    {
+      "content": "Belief 376: Test belief statement",
+      "importance": 3.9600000000000004,
+      "timestamp": "2025-08-08T20:01:01.297050",
+      "metadata": {
+        "belief_id": 376,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.297054"
+    },
+    {
+      "content": "Belief 376: Test belief statement",
+      "importance": 3.9600000000000004,
+      "timestamp": "2025-08-08T19:57:53.773322",
+      "metadata": {
+        "belief_id": 376,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.773327"
+    },
+    {
+      "content": "Belief 375: Test belief statement",
+      "importance": 3.95,
+      "timestamp": "2025-08-08T20:01:01.263891",
+      "metadata": {
+        "belief_id": 375,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.263894"
+    },
+    {
+      "content": "Belief 375: Test belief statement",
+      "importance": 3.95,
+      "timestamp": "2025-08-08T19:57:53.747314",
+      "metadata": {
+        "belief_id": 375,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.747319"
+    },
+    {
+      "content": "Belief 374: Test belief statement",
+      "importance": 3.9400000000000004,
+      "timestamp": "2025-08-08T20:01:01.231064",
+      "metadata": {
+        "belief_id": 374,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.231068"
+    },
+    {
+      "content": "Belief 374: Test belief statement",
+      "importance": 3.9400000000000004,
+      "timestamp": "2025-08-08T19:57:53.721201",
+      "metadata": {
+        "belief_id": 374,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.721206"
+    },
+    {
+      "content": "Belief 373: Test belief statement",
+      "importance": 3.93,
+      "timestamp": "2025-08-08T20:01:01.198068",
+      "metadata": {
+        "belief_id": 373,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.198071"
+    },
+    {
+      "content": "Belief 373: Test belief statement",
+      "importance": 3.93,
+      "timestamp": "2025-08-08T19:57:53.695187",
+      "metadata": {
+        "belief_id": 373,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.695192"
+    },
+    {
+      "content": "Belief 372: Test belief statement",
+      "importance": 3.9200000000000004,
+      "timestamp": "2025-08-08T20:01:01.165051",
+      "metadata": {
+        "belief_id": 372,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.165054"
+    },
+    {
+      "content": "Belief 372: Test belief statement",
+      "importance": 3.9200000000000004,
+      "timestamp": "2025-08-08T19:57:53.669070",
+      "metadata": {
+        "belief_id": 372,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.669075"
+    },
+    {
+      "content": "Belief 371: Test belief statement",
+      "importance": 3.91,
+      "timestamp": "2025-08-08T20:01:01.132150",
+      "metadata": {
+        "belief_id": 371,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.132153"
+    },
+    {
+      "content": "Belief 371: Test belief statement",
+      "importance": 3.91,
+      "timestamp": "2025-08-08T19:57:53.642964",
+      "metadata": {
+        "belief_id": 371,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.642968"
+    },
+    {
+      "content": "Belief 370: Test belief statement",
+      "importance": 3.9000000000000004,
+      "timestamp": "2025-08-08T20:01:01.099069",
+      "metadata": {
+        "belief_id": 370,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.099072"
+    },
+    {
+      "content": "Belief 370: Test belief statement",
+      "importance": 3.9000000000000004,
+      "timestamp": "2025-08-08T19:57:53.617378",
+      "metadata": {
+        "belief_id": 370,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.617382"
+    },
+    {
+      "content": "Belief 369: Test belief statement",
+      "importance": 3.89,
+      "timestamp": "2025-08-08T20:01:01.065219",
+      "metadata": {
+        "belief_id": 369,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.065223"
+    },
+    {
+      "content": "Belief 369: Test belief statement",
+      "importance": 3.89,
+      "timestamp": "2025-08-08T19:57:53.591468",
+      "metadata": {
+        "belief_id": 369,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.591472"
+    },
+    {
+      "content": "Belief 368: Test belief statement",
+      "importance": 3.8800000000000003,
+      "timestamp": "2025-08-08T20:01:01.032124",
+      "metadata": {
+        "belief_id": 368,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:01.032128"
+    },
+    {
+      "content": "Belief 368: Test belief statement",
+      "importance": 3.8800000000000003,
+      "timestamp": "2025-08-08T19:57:53.565870",
+      "metadata": {
+        "belief_id": 368,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.565874"
+    },
+    {
+      "content": "Belief 367: Test belief statement",
+      "importance": 3.87,
+      "timestamp": "2025-08-08T20:01:00.998125",
+      "metadata": {
+        "belief_id": 367,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.998128"
+    },
+    {
+      "content": "Belief 367: Test belief statement",
+      "importance": 3.87,
+      "timestamp": "2025-08-08T19:57:53.540273",
+      "metadata": {
+        "belief_id": 367,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.540278"
+    },
+    {
+      "content": "Belief 366: Test belief statement",
+      "importance": 3.8600000000000003,
+      "timestamp": "2025-08-08T20:01:00.964414",
+      "metadata": {
+        "belief_id": 366,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.964418"
+    },
+    {
+      "content": "Belief 366: Test belief statement",
+      "importance": 3.8600000000000003,
+      "timestamp": "2025-08-08T19:57:53.514693",
+      "metadata": {
+        "belief_id": 366,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.514698"
+    },
+    {
+      "content": "Belief 365: Test belief statement",
+      "importance": 3.85,
+      "timestamp": "2025-08-08T20:01:00.931278",
+      "metadata": {
+        "belief_id": 365,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.931281"
+    },
+    {
+      "content": "Belief 365: Test belief statement",
+      "importance": 3.85,
+      "timestamp": "2025-08-08T19:57:53.488237",
+      "metadata": {
+        "belief_id": 365,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.488242"
+    },
+    {
+      "content": "Belief 364: Test belief statement",
+      "importance": 3.8400000000000003,
+      "timestamp": "2025-08-08T20:01:00.898232",
+      "metadata": {
+        "belief_id": 364,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.898235"
+    },
+    {
+      "content": "Belief 364: Test belief statement",
+      "importance": 3.8400000000000003,
+      "timestamp": "2025-08-08T19:57:53.462453",
+      "metadata": {
+        "belief_id": 364,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.462457"
+    },
+    {
+      "content": "Belief 363: Test belief statement",
+      "importance": 3.83,
+      "timestamp": "2025-08-08T20:01:00.865191",
+      "metadata": {
+        "belief_id": 363,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.865195"
+    },
+    {
+      "content": "Belief 363: Test belief statement",
+      "importance": 3.83,
+      "timestamp": "2025-08-08T19:57:53.436812",
+      "metadata": {
+        "belief_id": 363,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.436818"
+    },
+    {
+      "content": "Belief 362: Test belief statement",
+      "importance": 3.8200000000000003,
+      "timestamp": "2025-08-08T20:01:00.832712",
+      "metadata": {
+        "belief_id": 362,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.832716"
+    },
+    {
+      "content": "Belief 362: Test belief statement",
+      "importance": 3.8200000000000003,
+      "timestamp": "2025-08-08T19:57:53.410938",
+      "metadata": {
+        "belief_id": 362,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.410942"
+    },
+    {
+      "content": "Belief 361: Test belief statement",
+      "importance": 3.81,
+      "timestamp": "2025-08-08T20:01:00.799810",
+      "metadata": {
+        "belief_id": 361,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.799814"
+    },
+    {
+      "content": "Belief 361: Test belief statement",
+      "importance": 3.81,
+      "timestamp": "2025-08-08T19:57:53.385676",
+      "metadata": {
+        "belief_id": 361,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.385680"
+    },
+    {
+      "content": "Belief 360: Test belief statement",
+      "importance": 3.8000000000000003,
+      "timestamp": "2025-08-08T20:01:00.766667",
+      "metadata": {
+        "belief_id": 360,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.766671"
+    },
+    {
+      "content": "Belief 360: Test belief statement",
+      "importance": 3.8000000000000003,
+      "timestamp": "2025-08-08T19:57:53.360049",
+      "metadata": {
+        "belief_id": 360,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.360053"
+    },
+    {
+      "content": "Belief 359: Test belief statement",
+      "importance": 3.79,
+      "timestamp": "2025-08-08T20:01:00.732516",
+      "metadata": {
+        "belief_id": 359,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.732520"
+    },
+    {
+      "content": "Belief 359: Test belief statement",
+      "importance": 3.79,
+      "timestamp": "2025-08-08T19:57:53.334800",
+      "metadata": {
+        "belief_id": 359,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.334804"
+    },
+    {
+      "content": "Belief 358: Test belief statement",
+      "importance": 3.7800000000000002,
+      "timestamp": "2025-08-08T20:01:00.699367",
+      "metadata": {
+        "belief_id": 358,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.699370"
+    },
+    {
+      "content": "Belief 358: Test belief statement",
+      "importance": 3.7800000000000002,
+      "timestamp": "2025-08-08T19:57:53.309343",
+      "metadata": {
+        "belief_id": 358,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.309346"
+    },
+    {
+      "content": "Belief 357: Test belief statement",
+      "importance": 3.7700000000000005,
+      "timestamp": "2025-08-08T20:01:00.666116",
+      "metadata": {
+        "belief_id": 357,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.666119"
+    },
+    {
+      "content": "Belief 357: Test belief statement",
+      "importance": 3.7700000000000005,
+      "timestamp": "2025-08-08T19:57:53.284049",
+      "metadata": {
+        "belief_id": 357,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.284055"
+    },
+    {
+      "content": "Belief 356: Test belief statement",
+      "importance": 3.7600000000000002,
+      "timestamp": "2025-08-08T20:01:00.632668",
+      "metadata": {
+        "belief_id": 356,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.632672"
+    },
+    {
+      "content": "Belief 356: Test belief statement",
+      "importance": 3.7600000000000002,
+      "timestamp": "2025-08-08T19:57:53.254993",
+      "metadata": {
+        "belief_id": 356,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.254998"
+    },
+    {
+      "content": "Belief 355: Test belief statement",
+      "importance": 3.7500000000000004,
+      "timestamp": "2025-08-08T20:01:00.600243",
+      "metadata": {
+        "belief_id": 355,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.600246"
+    },
+    {
+      "content": "Belief 355: Test belief statement",
+      "importance": 3.7500000000000004,
+      "timestamp": "2025-08-08T19:57:53.229789",
+      "metadata": {
+        "belief_id": 355,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.229793"
+    },
+    {
+      "content": "Belief 354: Test belief statement",
+      "importance": 3.74,
+      "timestamp": "2025-08-08T20:01:00.567326",
+      "metadata": {
+        "belief_id": 354,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.567330"
+    },
+    {
+      "content": "Belief 354: Test belief statement",
+      "importance": 3.74,
+      "timestamp": "2025-08-08T19:57:53.204702",
+      "metadata": {
+        "belief_id": 354,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.204706"
+    },
+    {
+      "content": "Belief 353: Test belief statement",
+      "importance": 3.7300000000000004,
+      "timestamp": "2025-08-08T20:01:00.534199",
+      "metadata": {
+        "belief_id": 353,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.534202"
+    },
+    {
+      "content": "Belief 353: Test belief statement",
+      "importance": 3.7300000000000004,
+      "timestamp": "2025-08-08T19:57:53.179969",
+      "metadata": {
+        "belief_id": 353,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.179972"
+    },
+    {
+      "content": "Belief 352: Test belief statement",
+      "importance": 3.72,
+      "timestamp": "2025-08-08T20:01:00.500942",
+      "metadata": {
+        "belief_id": 352,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.500945"
+    },
+    {
+      "content": "Belief 352: Test belief statement",
+      "importance": 3.72,
+      "timestamp": "2025-08-08T19:57:53.154869",
+      "metadata": {
+        "belief_id": 352,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.154873"
+    },
+    {
+      "content": "Belief 351: Test belief statement",
+      "importance": 3.7100000000000004,
+      "timestamp": "2025-08-08T20:01:00.467045",
+      "metadata": {
+        "belief_id": 351,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.467048"
+    },
+    {
+      "content": "Belief 351: Test belief statement",
+      "importance": 3.7100000000000004,
+      "timestamp": "2025-08-08T19:57:53.130167",
+      "metadata": {
+        "belief_id": 351,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.130172"
+    },
+    {
+      "content": "Belief 350: Test belief statement",
+      "importance": 3.7,
+      "timestamp": "2025-08-08T20:01:00.433794",
+      "metadata": {
+        "belief_id": 350,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.433797"
+    },
+    {
+      "content": "Belief 350: Test belief statement",
+      "importance": 3.7,
+      "timestamp": "2025-08-08T19:57:53.105347",
+      "metadata": {
+        "belief_id": 350,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.105350"
+    },
+    {
+      "content": "Belief 349: Test belief statement",
+      "importance": 3.6900000000000004,
+      "timestamp": "2025-08-08T20:01:00.400656",
+      "metadata": {
+        "belief_id": 349,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.400659"
+    },
+    {
+      "content": "Belief 349: Test belief statement",
+      "importance": 3.6900000000000004,
+      "timestamp": "2025-08-08T19:57:53.080751",
+      "metadata": {
+        "belief_id": 349,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.080754"
+    },
+    {
+      "content": "Belief 348: Test belief statement",
+      "importance": 3.68,
+      "timestamp": "2025-08-08T20:01:00.367429",
+      "metadata": {
+        "belief_id": 348,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.367433"
+    },
+    {
+      "content": "Belief 348: Test belief statement",
+      "importance": 3.68,
+      "timestamp": "2025-08-08T19:57:53.056064",
+      "metadata": {
+        "belief_id": 348,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.056068"
+    },
+    {
+      "content": "Belief 347: Test belief statement",
+      "importance": 3.6700000000000004,
+      "timestamp": "2025-08-08T20:01:00.333932",
+      "metadata": {
+        "belief_id": 347,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.333936"
+    },
+    {
+      "content": "Belief 347: Test belief statement",
+      "importance": 3.6700000000000004,
+      "timestamp": "2025-08-08T19:57:53.031587",
+      "metadata": {
+        "belief_id": 347,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.031591"
+    },
+    {
+      "content": "Belief 346: Test belief statement",
+      "importance": 3.66,
+      "timestamp": "2025-08-08T20:01:00.300528",
+      "metadata": {
+        "belief_id": 346,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.300531"
+    },
+    {
+      "content": "Belief 346: Test belief statement",
+      "importance": 3.66,
+      "timestamp": "2025-08-08T19:57:53.006999",
+      "metadata": {
+        "belief_id": 346,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:53.007005"
+    },
+    {
+      "content": "Belief 345: Test belief statement",
+      "importance": 3.6500000000000004,
+      "timestamp": "2025-08-08T20:01:00.267046",
+      "metadata": {
+        "belief_id": 345,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.267049"
+    },
+    {
+      "content": "Belief 345: Test belief statement",
+      "importance": 3.6500000000000004,
+      "timestamp": "2025-08-08T19:57:52.982295",
+      "metadata": {
+        "belief_id": 345,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.982300"
+    },
+    {
+      "content": "Belief 344: Test belief statement",
+      "importance": 3.64,
+      "timestamp": "2025-08-08T20:01:00.233544",
+      "metadata": {
+        "belief_id": 344,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.233547"
+    },
+    {
+      "content": "Belief 344: Test belief statement",
+      "importance": 3.64,
+      "timestamp": "2025-08-08T19:57:52.957680",
+      "metadata": {
+        "belief_id": 344,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.957685"
+    },
+    {
+      "content": "Belief 343: Test belief statement",
+      "importance": 3.6300000000000003,
+      "timestamp": "2025-08-08T20:01:00.198968",
+      "metadata": {
+        "belief_id": 343,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.198971"
+    },
+    {
+      "content": "Belief 343: Test belief statement",
+      "importance": 3.6300000000000003,
+      "timestamp": "2025-08-08T19:57:52.933325",
+      "metadata": {
+        "belief_id": 343,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.933329"
+    },
+    {
+      "content": "Belief 342: Test belief statement",
+      "importance": 3.62,
+      "timestamp": "2025-08-08T20:01:00.165878",
+      "metadata": {
+        "belief_id": 342,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.165881"
+    },
+    {
+      "content": "Belief 342: Test belief statement",
+      "importance": 3.62,
+      "timestamp": "2025-08-08T19:57:52.909064",
+      "metadata": {
+        "belief_id": 342,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.909068"
+    },
+    {
+      "content": "Belief 341: Test belief statement",
+      "importance": 3.6100000000000003,
+      "timestamp": "2025-08-08T20:01:00.132953",
+      "metadata": {
+        "belief_id": 341,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.132957"
+    },
+    {
+      "content": "Belief 341: Test belief statement",
+      "importance": 3.6100000000000003,
+      "timestamp": "2025-08-08T19:57:52.884821",
+      "metadata": {
+        "belief_id": 341,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.884825"
+    },
+    {
+      "content": "Belief 340: Test belief statement",
+      "importance": 3.6,
+      "timestamp": "2025-08-08T20:01:00.100011",
+      "metadata": {
+        "belief_id": 340,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.100015"
+    },
+    {
+      "content": "Belief 340: Test belief statement",
+      "importance": 3.6,
+      "timestamp": "2025-08-08T19:57:52.860434",
+      "metadata": {
+        "belief_id": 340,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.860438"
+    },
+    {
+      "content": "Belief 339: Test belief statement",
+      "importance": 3.5900000000000003,
+      "timestamp": "2025-08-08T20:01:00.066286",
+      "metadata": {
+        "belief_id": 339,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.066290"
+    },
+    {
+      "content": "Belief 339: Test belief statement",
+      "importance": 3.5900000000000003,
+      "timestamp": "2025-08-08T19:57:52.836031",
+      "metadata": {
+        "belief_id": 339,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.836039"
+    },
+    {
+      "content": "Belief 338: Test belief statement",
+      "importance": 3.58,
+      "timestamp": "2025-08-08T20:01:00.033070",
+      "metadata": {
+        "belief_id": 338,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:00.033074"
+    },
+    {
+      "content": "Belief 338: Test belief statement",
+      "importance": 3.58,
+      "timestamp": "2025-08-08T19:57:52.810906",
+      "metadata": {
+        "belief_id": 338,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.810914"
+    },
+    {
+      "content": "Belief 337: Test belief statement",
+      "importance": 3.5700000000000003,
+      "timestamp": "2025-08-08T20:00:59.998708",
+      "metadata": {
+        "belief_id": 337,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.998711"
+    },
+    {
+      "content": "Belief 337: Test belief statement",
+      "importance": 3.5700000000000003,
+      "timestamp": "2025-08-08T19:57:52.784368",
+      "metadata": {
+        "belief_id": 337,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.784374"
+    },
+    {
+      "content": "Belief 336: Test belief statement",
+      "importance": 3.56,
+      "timestamp": "2025-08-08T20:00:59.964998",
+      "metadata": {
+        "belief_id": 336,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.965002"
+    },
+    {
+      "content": "Belief 336: Test belief statement",
+      "importance": 3.56,
+      "timestamp": "2025-08-08T19:57:52.760331",
+      "metadata": {
+        "belief_id": 336,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.760335"
+    },
+    {
+      "content": "Belief 335: Test belief statement",
+      "importance": 3.5500000000000003,
+      "timestamp": "2025-08-08T20:00:59.932089",
+      "metadata": {
+        "belief_id": 335,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.932092"
+    },
+    {
+      "content": "Belief 335: Test belief statement",
+      "importance": 3.5500000000000003,
+      "timestamp": "2025-08-08T19:57:52.736926",
+      "metadata": {
+        "belief_id": 335,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.736930"
+    },
+    {
+      "content": "Belief 334: Test belief statement",
+      "importance": 3.54,
+      "timestamp": "2025-08-08T20:00:59.899056",
+      "metadata": {
+        "belief_id": 334,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.899059"
+    },
+    {
+      "content": "Belief 334: Test belief statement",
+      "importance": 3.54,
+      "timestamp": "2025-08-08T19:57:52.713183",
+      "metadata": {
+        "belief_id": 334,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.713187"
+    },
+    {
+      "content": "Belief 333: Test belief statement",
+      "importance": 3.5300000000000002,
+      "timestamp": "2025-08-08T20:00:59.865112",
+      "metadata": {
+        "belief_id": 333,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.865115"
+    },
+    {
+      "content": "Belief 333: Test belief statement",
+      "importance": 3.5300000000000002,
+      "timestamp": "2025-08-08T19:57:52.689664",
+      "metadata": {
+        "belief_id": 333,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.689668"
+    },
+    {
+      "content": "Belief 332: Test belief statement",
+      "importance": 3.5200000000000005,
+      "timestamp": "2025-08-08T20:00:59.828190",
+      "metadata": {
+        "belief_id": 332,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.828193"
+    },
+    {
+      "content": "Belief 332: Test belief statement",
+      "importance": 3.5200000000000005,
+      "timestamp": "2025-08-08T19:57:52.666158",
+      "metadata": {
+        "belief_id": 332,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.666163"
+    },
+    {
+      "content": "Belief 331: Test belief statement",
+      "importance": 3.5100000000000002,
+      "timestamp": "2025-08-08T20:00:59.795153",
+      "metadata": {
+        "belief_id": 331,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.795157"
+    },
+    {
+      "content": "Belief 331: Test belief statement",
+      "importance": 3.5100000000000002,
+      "timestamp": "2025-08-08T19:57:52.642615",
+      "metadata": {
+        "belief_id": 331,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.642619"
+    },
+    {
+      "content": "Belief 330: Test belief statement",
+      "importance": 3.5000000000000004,
+      "timestamp": "2025-08-08T20:00:59.761748",
+      "metadata": {
+        "belief_id": 330,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.761751"
+    },
+    {
+      "content": "Belief 330: Test belief statement",
+      "importance": 3.5000000000000004,
+      "timestamp": "2025-08-08T19:57:52.619470",
+      "metadata": {
+        "belief_id": 330,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.619474"
+    },
+    {
+      "content": "Belief 329: Test belief statement",
+      "importance": 3.49,
+      "timestamp": "2025-08-08T20:00:59.728326",
+      "metadata": {
+        "belief_id": 329,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.728330"
+    },
+    {
+      "content": "Belief 329: Test belief statement",
+      "importance": 3.49,
+      "timestamp": "2025-08-08T19:57:52.596336",
+      "metadata": {
+        "belief_id": 329,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.596340"
+    },
+    {
+      "content": "Belief 328: Test belief statement",
+      "importance": 3.4800000000000004,
+      "timestamp": "2025-08-08T20:00:59.695432",
+      "metadata": {
+        "belief_id": 328,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.695435"
+    },
+    {
+      "content": "Belief 328: Test belief statement",
+      "importance": 3.4800000000000004,
+      "timestamp": "2025-08-08T19:57:52.573113",
+      "metadata": {
+        "belief_id": 328,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.573116"
+    },
+    {
+      "content": "Belief 327: Test belief statement",
+      "importance": 3.47,
+      "timestamp": "2025-08-08T20:00:59.662458",
+      "metadata": {
+        "belief_id": 327,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.662461"
+    },
+    {
+      "content": "Belief 327: Test belief statement",
+      "importance": 3.47,
+      "timestamp": "2025-08-08T19:57:52.549970",
+      "metadata": {
+        "belief_id": 327,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.549974"
+    },
+    {
+      "content": "Belief 326: Test belief statement",
+      "importance": 3.4600000000000004,
+      "timestamp": "2025-08-08T20:00:59.629582",
+      "metadata": {
+        "belief_id": 326,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.629585"
+    },
+    {
+      "content": "Belief 326: Test belief statement",
+      "importance": 3.4600000000000004,
+      "timestamp": "2025-08-08T19:57:52.526938",
+      "metadata": {
+        "belief_id": 326,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.526942"
+    },
+    {
+      "content": "Belief 325: Test belief statement",
+      "importance": 3.45,
+      "timestamp": "2025-08-08T20:00:59.595927",
+      "metadata": {
+        "belief_id": 325,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.595930"
+    },
+    {
+      "content": "Belief 325: Test belief statement",
+      "importance": 3.45,
+      "timestamp": "2025-08-08T19:57:52.503911",
+      "metadata": {
+        "belief_id": 325,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.503915"
+    },
+    {
+      "content": "Belief 324: Test belief statement",
+      "importance": 3.4400000000000004,
+      "timestamp": "2025-08-08T20:00:59.562728",
+      "metadata": {
+        "belief_id": 324,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.562731"
+    },
+    {
+      "content": "Belief 324: Test belief statement",
+      "importance": 3.4400000000000004,
+      "timestamp": "2025-08-08T19:57:52.480966",
+      "metadata": {
+        "belief_id": 324,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.480972"
+    },
+    {
+      "content": "Belief 323: Test belief statement",
+      "importance": 3.43,
+      "timestamp": "2025-08-08T20:00:59.529825",
+      "metadata": {
+        "belief_id": 323,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.529829"
+    },
+    {
+      "content": "Belief 323: Test belief statement",
+      "importance": 3.43,
+      "timestamp": "2025-08-08T19:57:52.456982",
+      "metadata": {
+        "belief_id": 323,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.456986"
+    },
+    {
+      "content": "Belief 322: Test belief statement",
+      "importance": 3.4200000000000004,
+      "timestamp": "2025-08-08T20:00:59.496599",
+      "metadata": {
+        "belief_id": 322,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.496602"
+    },
+    {
+      "content": "Belief 322: Test belief statement",
+      "importance": 3.4200000000000004,
+      "timestamp": "2025-08-08T19:57:52.433795",
+      "metadata": {
+        "belief_id": 322,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.433800"
+    },
+    {
+      "content": "Belief 321: Test belief statement",
+      "importance": 3.41,
+      "timestamp": "2025-08-08T20:00:59.462917",
+      "metadata": {
+        "belief_id": 321,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.462920"
+    },
+    {
+      "content": "Belief 321: Test belief statement",
+      "importance": 3.41,
+      "timestamp": "2025-08-08T19:57:52.410297",
+      "metadata": {
+        "belief_id": 321,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.410302"
+    },
+    {
+      "content": "Belief 320: Test belief statement",
+      "importance": 3.4000000000000004,
+      "timestamp": "2025-08-08T20:00:59.430118",
+      "metadata": {
+        "belief_id": 320,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.430121"
+    },
+    {
+      "content": "Belief 320: Test belief statement",
+      "importance": 3.4000000000000004,
+      "timestamp": "2025-08-08T19:57:52.387255",
+      "metadata": {
+        "belief_id": 320,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.387258"
+    },
+    {
+      "content": "Belief 319: Test belief statement",
+      "importance": 3.39,
+      "timestamp": "2025-08-08T20:00:59.396925",
+      "metadata": {
+        "belief_id": 319,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.396929"
+    },
+    {
+      "content": "Belief 319: Test belief statement",
+      "importance": 3.39,
+      "timestamp": "2025-08-08T19:57:52.364318",
+      "metadata": {
+        "belief_id": 319,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.364321"
+    },
+    {
+      "content": "Belief 318: Test belief statement",
+      "importance": 3.3800000000000003,
+      "timestamp": "2025-08-08T20:00:59.363269",
+      "metadata": {
+        "belief_id": 318,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.363273"
+    },
+    {
+      "content": "Belief 318: Test belief statement",
+      "importance": 3.3800000000000003,
+      "timestamp": "2025-08-08T19:57:52.341481",
+      "metadata": {
+        "belief_id": 318,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.341485"
+    },
+    {
+      "content": "Belief 317: Test belief statement",
+      "importance": 3.37,
+      "timestamp": "2025-08-08T20:00:59.330140",
+      "metadata": {
+        "belief_id": 317,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.330145"
+    },
+    {
+      "content": "Belief 317: Test belief statement",
+      "importance": 3.37,
+      "timestamp": "2025-08-08T19:57:52.318640",
+      "metadata": {
+        "belief_id": 317,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.318644"
+    },
+    {
+      "content": "Belief 316: Test belief statement",
+      "importance": 3.3600000000000003,
+      "timestamp": "2025-08-08T20:00:59.296985",
+      "metadata": {
+        "belief_id": 316,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.296988"
+    },
+    {
+      "content": "Belief 316: Test belief statement",
+      "importance": 3.3600000000000003,
+      "timestamp": "2025-08-08T19:57:52.296329",
+      "metadata": {
+        "belief_id": 316,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.296333"
+    },
+    {
+      "content": "Belief 315: Test belief statement",
+      "importance": 3.35,
+      "timestamp": "2025-08-08T20:00:59.262164",
+      "metadata": {
+        "belief_id": 315,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.262167"
+    },
+    {
+      "content": "Belief 315: Test belief statement",
+      "importance": 3.35,
+      "timestamp": "2025-08-08T19:57:52.273570",
+      "metadata": {
+        "belief_id": 315,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.273573"
+    },
+    {
+      "content": "Belief 314: Test belief statement",
+      "importance": 3.3400000000000003,
+      "timestamp": "2025-08-08T20:00:59.229056",
+      "metadata": {
+        "belief_id": 314,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.229059"
+    },
+    {
+      "content": "Belief 314: Test belief statement",
+      "importance": 3.3400000000000003,
+      "timestamp": "2025-08-08T19:57:52.251079",
+      "metadata": {
+        "belief_id": 314,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.251082"
+    },
+    {
+      "content": "Belief 313: Test belief statement",
+      "importance": 3.33,
+      "timestamp": "2025-08-08T20:00:59.195701",
+      "metadata": {
+        "belief_id": 313,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.195705"
+    },
+    {
+      "content": "Belief 313: Test belief statement",
+      "importance": 3.33,
+      "timestamp": "2025-08-08T19:57:52.228516",
+      "metadata": {
+        "belief_id": 313,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.228520"
+    },
+    {
+      "content": "Belief 312: Test belief statement",
+      "importance": 3.3200000000000003,
+      "timestamp": "2025-08-08T20:00:59.162963",
+      "metadata": {
+        "belief_id": 312,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.162966"
+    },
+    {
+      "content": "Belief 312: Test belief statement",
+      "importance": 3.3200000000000003,
+      "timestamp": "2025-08-08T19:57:52.205655",
+      "metadata": {
+        "belief_id": 312,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.205659"
+    },
+    {
+      "content": "Belief 311: Test belief statement",
+      "importance": 3.31,
+      "timestamp": "2025-08-08T20:00:59.130245",
+      "metadata": {
+        "belief_id": 311,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.130248"
+    },
+    {
+      "content": "Belief 311: Test belief statement",
+      "importance": 3.31,
+      "timestamp": "2025-08-08T19:57:52.183294",
+      "metadata": {
+        "belief_id": 311,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.183298"
+    },
+    {
+      "content": "Belief 310: Test belief statement",
+      "importance": 3.3000000000000003,
+      "timestamp": "2025-08-08T20:00:59.097522",
+      "metadata": {
+        "belief_id": 310,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.097525"
+    },
+    {
+      "content": "Belief 310: Test belief statement",
+      "importance": 3.3000000000000003,
+      "timestamp": "2025-08-08T19:57:52.160832",
+      "metadata": {
+        "belief_id": 310,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.160836"
+    },
+    {
+      "content": "Belief 309: Test belief statement",
+      "importance": 3.29,
+      "timestamp": "2025-08-08T20:00:59.064504",
+      "metadata": {
+        "belief_id": 309,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.064508"
+    },
+    {
+      "content": "Belief 309: Test belief statement",
+      "importance": 3.29,
+      "timestamp": "2025-08-08T19:57:52.138095",
+      "metadata": {
+        "belief_id": 309,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.138099"
+    },
+    {
+      "content": "Belief 308: Test belief statement",
+      "importance": 3.2800000000000002,
+      "timestamp": "2025-08-08T20:00:59.031467",
+      "metadata": {
+        "belief_id": 308,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:59.031470"
+    },
+    {
+      "content": "Belief 308: Test belief statement",
+      "importance": 3.2800000000000002,
+      "timestamp": "2025-08-08T19:57:52.115366",
+      "metadata": {
+        "belief_id": 308,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.115370"
+    },
+    {
+      "content": "Belief 307: Test belief statement",
+      "importance": 3.2700000000000005,
+      "timestamp": "2025-08-08T20:00:58.998443",
+      "metadata": {
+        "belief_id": 307,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.998446"
+    },
+    {
+      "content": "Belief 307: Test belief statement",
+      "importance": 3.2700000000000005,
+      "timestamp": "2025-08-08T19:57:52.093038",
+      "metadata": {
+        "belief_id": 307,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.093042"
+    },
+    {
+      "content": "Belief 306: Test belief statement",
+      "importance": 3.2600000000000002,
+      "timestamp": "2025-08-08T20:00:58.966109",
+      "metadata": {
+        "belief_id": 306,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.966111"
+    },
+    {
+      "content": "Belief 306: Test belief statement",
+      "importance": 3.2600000000000002,
+      "timestamp": "2025-08-08T19:57:52.070876",
+      "metadata": {
+        "belief_id": 306,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.070880"
+    },
+    {
+      "content": "Belief 305: Test belief statement",
+      "importance": 3.2500000000000004,
+      "timestamp": "2025-08-08T20:00:58.932907",
+      "metadata": {
+        "belief_id": 305,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.932910"
+    },
+    {
+      "content": "Belief 305: Test belief statement",
+      "importance": 3.2500000000000004,
+      "timestamp": "2025-08-08T19:57:52.048872",
+      "metadata": {
+        "belief_id": 305,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.048876"
+    },
+    {
+      "content": "Belief 304: Test belief statement",
+      "importance": 3.24,
+      "timestamp": "2025-08-08T20:00:58.900483",
+      "metadata": {
+        "belief_id": 304,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.900487"
+    },
+    {
+      "content": "Belief 304: Test belief statement",
+      "importance": 3.24,
+      "timestamp": "2025-08-08T19:57:52.026801",
+      "metadata": {
+        "belief_id": 304,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.026805"
+    },
+    {
+      "content": "Belief 303: Test belief statement",
+      "importance": 3.2300000000000004,
+      "timestamp": "2025-08-08T20:00:58.868384",
+      "metadata": {
+        "belief_id": 303,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.868388"
+    },
+    {
+      "content": "Belief 303: Test belief statement",
+      "importance": 3.2300000000000004,
+      "timestamp": "2025-08-08T19:57:52.004957",
+      "metadata": {
+        "belief_id": 303,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:52.004962"
+    },
+    {
+      "content": "Belief 302: Test belief statement",
+      "importance": 3.22,
+      "timestamp": "2025-08-08T20:00:58.835302",
+      "metadata": {
+        "belief_id": 302,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.835305"
+    },
+    {
+      "content": "Belief 302: Test belief statement",
+      "importance": 3.22,
+      "timestamp": "2025-08-08T19:57:51.983285",
+      "metadata": {
+        "belief_id": 302,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.983289"
+    },
+    {
+      "content": "Belief 301: Test belief statement",
+      "importance": 3.2100000000000004,
+      "timestamp": "2025-08-08T20:00:58.802477",
+      "metadata": {
+        "belief_id": 301,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.802481"
+    },
+    {
+      "content": "Belief 301: Test belief statement",
+      "importance": 3.2100000000000004,
+      "timestamp": "2025-08-08T19:57:51.961294",
+      "metadata": {
+        "belief_id": 301,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.961298"
+    },
+    {
+      "content": "Belief 300: Test belief statement",
+      "importance": 3.2,
+      "timestamp": "2025-08-08T20:00:58.769673",
+      "metadata": {
+        "belief_id": 300,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.769676"
+    },
+    {
+      "content": "Belief 300: Test belief statement",
+      "importance": 3.2,
+      "timestamp": "2025-08-08T19:57:51.939788",
+      "metadata": {
+        "belief_id": 300,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.939791"
+    },
+    {
+      "content": "Belief 299: Test belief statement",
+      "importance": 3.1900000000000004,
+      "timestamp": "2025-08-08T20:00:58.736527",
+      "metadata": {
+        "belief_id": 299,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.736530"
+    },
+    {
+      "content": "Belief 299: Test belief statement",
+      "importance": 3.1900000000000004,
+      "timestamp": "2025-08-08T19:57:51.918599",
+      "metadata": {
+        "belief_id": 299,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.918603"
+    },
+    {
+      "content": "Belief 298: Test belief statement",
+      "importance": 3.18,
+      "timestamp": "2025-08-08T20:00:58.703787",
+      "metadata": {
+        "belief_id": 298,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.703790"
+    },
+    {
+      "content": "Belief 298: Test belief statement",
+      "importance": 3.18,
+      "timestamp": "2025-08-08T19:57:51.897291",
+      "metadata": {
+        "belief_id": 298,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.897296"
+    },
+    {
+      "content": "Belief 297: Test belief statement",
+      "importance": 3.1700000000000004,
+      "timestamp": "2025-08-08T20:00:58.670127",
+      "metadata": {
+        "belief_id": 297,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.670131"
+    },
+    {
+      "content": "Belief 297: Test belief statement",
+      "importance": 3.1700000000000004,
+      "timestamp": "2025-08-08T19:57:51.875642",
+      "metadata": {
+        "belief_id": 297,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.875651"
+    },
+    {
+      "content": "Belief 296: Test belief statement",
+      "importance": 3.16,
+      "timestamp": "2025-08-08T20:00:58.637013",
+      "metadata": {
+        "belief_id": 296,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.637016"
+    },
+    {
+      "content": "Belief 296: Test belief statement",
+      "importance": 3.16,
+      "timestamp": "2025-08-08T19:57:51.851415",
+      "metadata": {
+        "belief_id": 296,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.851418"
+    },
+    {
+      "content": "Belief 295: Test belief statement",
+      "importance": 3.1500000000000004,
+      "timestamp": "2025-08-08T20:00:58.604099",
+      "metadata": {
+        "belief_id": 295,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.604102"
+    },
+    {
+      "content": "Belief 295: Test belief statement",
+      "importance": 3.1500000000000004,
+      "timestamp": "2025-08-08T19:57:51.830202",
+      "metadata": {
+        "belief_id": 295,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.830205"
+    },
+    {
+      "content": "Belief 294: Test belief statement",
+      "importance": 3.14,
+      "timestamp": "2025-08-08T20:00:58.571243",
+      "metadata": {
+        "belief_id": 294,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.571246"
+    },
+    {
+      "content": "Belief 294: Test belief statement",
+      "importance": 3.14,
+      "timestamp": "2025-08-08T19:57:51.808859",
+      "metadata": {
+        "belief_id": 294,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.808863"
+    },
+    {
+      "content": "Belief 293: Test belief statement",
+      "importance": 3.1300000000000003,
+      "timestamp": "2025-08-08T20:00:58.537988",
+      "metadata": {
+        "belief_id": 293,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.537992"
+    },
+    {
+      "content": "Belief 293: Test belief statement",
+      "importance": 3.1300000000000003,
+      "timestamp": "2025-08-08T19:57:51.787586",
+      "metadata": {
+        "belief_id": 293,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.787590"
+    },
+    {
+      "content": "Belief 292: Test belief statement",
+      "importance": 3.12,
+      "timestamp": "2025-08-08T20:00:58.504663",
+      "metadata": {
+        "belief_id": 292,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.504667"
+    },
+    {
+      "content": "Belief 292: Test belief statement",
+      "importance": 3.12,
+      "timestamp": "2025-08-08T19:57:51.766384",
+      "metadata": {
+        "belief_id": 292,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.766388"
+    },
+    {
+      "content": "Belief 291: Test belief statement",
+      "importance": 3.1100000000000003,
+      "timestamp": "2025-08-08T20:00:58.471382",
+      "metadata": {
+        "belief_id": 291,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.471386"
+    },
+    {
+      "content": "Belief 291: Test belief statement",
+      "importance": 3.1100000000000003,
+      "timestamp": "2025-08-08T19:57:51.745400",
+      "metadata": {
+        "belief_id": 291,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.745405"
+    },
+    {
+      "content": "Belief 290: Test belief statement",
+      "importance": 3.1,
+      "timestamp": "2025-08-08T20:00:58.438183",
+      "metadata": {
+        "belief_id": 290,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.438186"
+    },
+    {
+      "content": "Belief 290: Test belief statement",
+      "importance": 3.1,
+      "timestamp": "2025-08-08T19:57:51.724389",
+      "metadata": {
+        "belief_id": 290,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.724393"
+    },
+    {
+      "content": "Belief 289: Test belief statement",
+      "importance": 3.0900000000000003,
+      "timestamp": "2025-08-08T20:00:58.404444",
+      "metadata": {
+        "belief_id": 289,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.404447"
+    },
+    {
+      "content": "Belief 289: Test belief statement",
+      "importance": 3.0900000000000003,
+      "timestamp": "2025-08-08T19:57:51.703112",
+      "metadata": {
+        "belief_id": 289,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.703116"
+    },
+    {
+      "content": "Belief 288: Test belief statement",
+      "importance": 3.08,
+      "timestamp": "2025-08-08T20:00:58.371140",
+      "metadata": {
+        "belief_id": 288,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.371143"
+    },
+    {
+      "content": "Belief 288: Test belief statement",
+      "importance": 3.08,
+      "timestamp": "2025-08-08T19:57:51.682318",
+      "metadata": {
+        "belief_id": 288,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.682322"
+    },
+    {
+      "content": "Belief 287: Test belief statement",
+      "importance": 3.0700000000000003,
+      "timestamp": "2025-08-08T20:00:58.337775",
+      "metadata": {
+        "belief_id": 287,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.337779"
+    },
+    {
+      "content": "Belief 287: Test belief statement",
+      "importance": 3.0700000000000003,
+      "timestamp": "2025-08-08T19:57:51.661461",
+      "metadata": {
+        "belief_id": 287,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.661464"
+    },
+    {
+      "content": "Belief 286: Test belief statement",
+      "importance": 3.06,
+      "timestamp": "2025-08-08T20:00:58.304618",
+      "metadata": {
+        "belief_id": 286,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.304621"
+    },
+    {
+      "content": "Belief 286: Test belief statement",
+      "importance": 3.06,
+      "timestamp": "2025-08-08T19:57:51.640907",
+      "metadata": {
+        "belief_id": 286,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.640911"
+    },
+    {
+      "content": "Belief 285: Test belief statement",
+      "importance": 3.0500000000000003,
+      "timestamp": "2025-08-08T20:00:58.271512",
+      "metadata": {
+        "belief_id": 285,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.271515"
+    },
+    {
+      "content": "Belief 285: Test belief statement",
+      "importance": 3.0500000000000003,
+      "timestamp": "2025-08-08T19:57:51.620048",
+      "metadata": {
+        "belief_id": 285,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.620052"
+    },
+    {
+      "content": "Belief 284: Test belief statement",
+      "importance": 3.04,
+      "timestamp": "2025-08-08T20:00:58.234624",
+      "metadata": {
+        "belief_id": 284,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.234628"
+    },
+    {
+      "content": "Belief 284: Test belief statement",
+      "importance": 3.04,
+      "timestamp": "2025-08-08T19:57:51.599419",
+      "metadata": {
+        "belief_id": 284,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.599423"
+    },
+    {
+      "content": "Belief 283: Test belief statement",
+      "importance": 3.0300000000000002,
+      "timestamp": "2025-08-08T20:00:58.201231",
+      "metadata": {
+        "belief_id": 283,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.201235"
+    },
+    {
+      "content": "Belief 283: Test belief statement",
+      "importance": 3.0300000000000002,
+      "timestamp": "2025-08-08T19:57:51.578709",
+      "metadata": {
+        "belief_id": 283,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.578714"
+    },
+    {
+      "content": "Belief 282: Test belief statement",
+      "importance": 3.02,
+      "timestamp": "2025-08-08T20:00:58.167261",
+      "metadata": {
+        "belief_id": 282,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.167264"
+    },
+    {
+      "content": "Belief 282: Test belief statement",
+      "importance": 3.02,
+      "timestamp": "2025-08-08T19:57:51.557733",
+      "metadata": {
+        "belief_id": 282,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.557737"
+    },
+    {
+      "content": "Belief 281: Test belief statement",
+      "importance": 3.0100000000000002,
+      "timestamp": "2025-08-08T20:00:58.133638",
+      "metadata": {
+        "belief_id": 281,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.133641"
+    },
+    {
+      "content": "Belief 281: Test belief statement",
+      "importance": 3.0100000000000002,
+      "timestamp": "2025-08-08T19:57:51.536980",
+      "metadata": {
+        "belief_id": 281,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.536985"
+    },
+    {
+      "content": "Belief 280: Test belief statement",
+      "importance": 3.0000000000000004,
+      "timestamp": "2025-08-08T20:00:58.100397",
+      "metadata": {
+        "belief_id": 280,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.100401"
+    },
+    {
+      "content": "Belief 280: Test belief statement",
+      "importance": 3.0000000000000004,
+      "timestamp": "2025-08-08T19:57:51.516315",
+      "metadata": {
+        "belief_id": 280,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.516319"
+    },
+    {
+      "content": "Belief 279: Test belief statement",
+      "importance": 2.99,
+      "timestamp": "2025-08-08T20:00:58.067203",
+      "metadata": {
+        "belief_id": 279,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.067206"
+    },
+    {
+      "content": "Belief 279: Test belief statement",
+      "importance": 2.99,
+      "timestamp": "2025-08-08T19:57:51.495851",
+      "metadata": {
+        "belief_id": 279,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.495855"
+    },
+    {
+      "content": "Belief 278: Test belief statement",
+      "importance": 2.9800000000000004,
+      "timestamp": "2025-08-08T20:00:58.034198",
+      "metadata": {
+        "belief_id": 278,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:58.034201"
+    },
+    {
+      "content": "Belief 278: Test belief statement",
+      "importance": 2.9800000000000004,
+      "timestamp": "2025-08-08T19:57:51.475280",
+      "metadata": {
+        "belief_id": 278,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.475285"
+    },
+    {
+      "content": "Belief 277: Test belief statement",
+      "importance": 2.97,
+      "timestamp": "2025-08-08T20:00:57.999771",
+      "metadata": {
+        "belief_id": 277,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:57.999774"
+    },
+    {
+      "content": "Belief 277: Test belief statement",
+      "importance": 2.97,
+      "timestamp": "2025-08-08T19:57:51.454273",
+      "metadata": {
+        "belief_id": 277,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.454277"
+    },
+    {
+      "content": "Belief 276: Test belief statement",
+      "importance": 2.9600000000000004,
+      "timestamp": "2025-08-08T20:00:57.966179",
+      "metadata": {
+        "belief_id": 276,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:57.966183"
+    },
+    {
+      "content": "Belief 276: Test belief statement",
+      "importance": 2.9600000000000004,
+      "timestamp": "2025-08-08T19:57:51.433482",
+      "metadata": {
+        "belief_id": 276,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.433488"
+    },
+    {
+      "content": "Belief 275: Test belief statement",
+      "importance": 2.95,
+      "timestamp": "2025-08-08T20:00:57.931830",
+      "metadata": {
+        "belief_id": 275,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:57.931833"
+    },
+    {
+      "content": "Belief 275: Test belief statement",
+      "importance": 2.95,
+      "timestamp": "2025-08-08T19:57:51.413182",
+      "metadata": {
+        "belief_id": 275,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.413188"
+    },
+    {
+      "content": "Belief 274: Test belief statement",
+      "importance": 2.9400000000000004,
+      "timestamp": "2025-08-08T20:00:57.898353",
+      "metadata": {
+        "belief_id": 274,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:57.898356"
+    },
+    {
+      "content": "Belief 274: Test belief statement",
+      "importance": 2.9400000000000004,
+      "timestamp": "2025-08-08T19:57:51.392659",
+      "metadata": {
+        "belief_id": 274,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.392665"
+    },
+    {
+      "content": "Belief 273: Test belief statement",
+      "importance": 2.93,
+      "timestamp": "2025-08-08T20:00:57.865395",
+      "metadata": {
+        "belief_id": 273,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:57.865398"
+    },
+    {
+      "content": "Belief 273: Test belief statement",
+      "importance": 2.93,
+      "timestamp": "2025-08-08T19:57:51.372275",
+      "metadata": {
+        "belief_id": 273,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.372279"
+    },
+    {
+      "content": "Belief 272: Test belief statement",
+      "importance": 2.9200000000000004,
+      "timestamp": "2025-08-08T20:00:57.832467",
+      "metadata": {
+        "belief_id": 272,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:57.832469"
+    },
+    {
+      "content": "Belief 272: Test belief statement",
+      "importance": 2.9200000000000004,
+      "timestamp": "2025-08-08T19:57:51.351961",
+      "metadata": {
+        "belief_id": 272,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.351964"
+    },
+    {
+      "content": "Belief 271: Test belief statement",
+      "importance": 2.91,
+      "timestamp": "2025-08-08T20:00:57.799201",
+      "metadata": {
+        "belief_id": 271,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:57.799204"
+    },
+    {
+      "content": "Belief 271: Test belief statement",
+      "importance": 2.91,
+      "timestamp": "2025-08-08T19:57:51.332044",
+      "metadata": {
+        "belief_id": 271,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.332048"
+    },
+    {
+      "content": "Belief 270: Test belief statement",
+      "importance": 2.9000000000000004,
+      "timestamp": "2025-08-08T20:00:57.766140",
+      "metadata": {
+        "belief_id": 270,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:57.766144"
+    },
+    {
+      "content": "Belief 270: Test belief statement",
+      "importance": 2.9000000000000004,
+      "timestamp": "2025-08-08T19:57:51.312304",
+      "metadata": {
+        "belief_id": 270,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T19:57:51.312307"
+    },
+    {
+      "content": "Belief 269: Test belief statement",
+      "importance": 2.89,
+      "timestamp": "2025-08-08T20:00:57.732588",
+      "metadata": {
+        "belief_id": 269,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:00:57.732591"
+    },
+    {
+      "content": "Belief 519: Test belief statement",
+      "importance": 5.390000000000001,
+      "timestamp": "2025-08-08T20:01:06.061178",
+      "metadata": {
+        "belief_id": 519,
+        "category": "test"
+      },
+      "access_count": 0,
+      "last_accessed": "2025-08-08T20:01:06.061183"
+    }
+  ],
+  "ephemeral": []
 }

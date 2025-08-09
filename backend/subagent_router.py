@@ -35,7 +35,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from modules.autonomy.affect_governor import AffectGovernor
 from modules.autonomy.drift_watchdog import DriftWatchdog
 from router.arbitration import AffectContext, Candidate, HRMStateView, arbitrate
-from router.chaining import ChainPlan, Step, plan_for, reflector_call, vector_retrieve
+from router.chaining import ChainPlan, plan_for, execute_chain
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -448,9 +448,9 @@ class SubAgentRouter:
             "agent_utilization": {agent_type.value: 0 for agent_type in AgentType},
         }
 
-    self.governor = AffectGovernor()
-    self.watchdog = DriftWatchdog()
-    logger.info(f"🤖 SubAgent Router initialized with {len(self.agents)} agents")
+        self.governor = AffectGovernor()
+        self.watchdog = DriftWatchdog()
+        logger.info(f"🤖 SubAgent Router initialized with {len(self.agents)} agents")
 
     async def route(self, message: str, context: Optional[dict[str, Any]] = None) -> AgentResponse:
         """
@@ -605,10 +605,6 @@ class SubAgentRouter:
 
         budget_ms = int(context.get("budget_ms", 2000))
         cost_cap = float(context.get("cost_cap", 1.0))
-        t0 = time.perf_counter()
-        logs: list[dict[str, Any]] = []
-        cost_used = 0.0
-        elapsed_total_ms = 0
 
         # Construct minimal hrm_view/affect for planner
         hrm_view = {
@@ -624,6 +620,7 @@ class SubAgentRouter:
         if context.get("force_revise"):
             affect["force_revise"] = True
 
+        # Build the plan
         plan: ChainPlan = plan_for(task, hrm_view, affect, budget_ms=budget_ms, cost_cap=cost_cap)
 
         # Breach check upfront for chaining: refuse long chain in risk mode
@@ -632,168 +629,11 @@ class SubAgentRouter:
             logger.warning(json.dumps({"event": "chain.calm_down", "reason": "watchdog_breach"}))
             return {"status": 503, "error": "calm_down", "plan": [s.type for s in plan.steps]}
 
-        # Enforce total budget before starting
-        if plan.budget_ms <= 0:
-            over = 0
-            logger.info(
-                json.dumps({"event": "chain.budget.invalid", "plan": [s.type for s in plan.steps]})
-            )
-            return {
-                "status": 429,
-                "error": "invalid_budget",
-                "overage_ms": over,
-                "plan": [s.type for s in plan.steps],
-            }
+        # Execute the chain using the new execute_chain function
+        exec_context = {"task": task, "hrm_view": hrm_view, "affect": affect, **context}
 
-        outputs: dict[str, Any] = {}
-        revision_used = False
-
-        for idx, step in enumerate(plan.steps):
-            now_ms = int((time.perf_counter() - t0) * 1000)
-            remaining_ms = plan.budget_ms - now_ms
-            if remaining_ms < 0:
-                # Budget exceeded
-                over = -remaining_ms
-                logger.warning(
-                    json.dumps(
-                        {
-                            "event": "chain.budget.exceeded",
-                            "plan": [s.type for s in plan.steps],
-                            "budget_ms": plan.budget_ms,
-                            "overage_ms": over,
-                        }
-                    )
-                )
-                return {
-                    "status": 429,
-                    "error": "budget_exceeded",
-                    "plan": [s.type for s in plan.steps],
-                    "budget_ms": plan.budget_ms,
-                    "overage_ms": over,
-                }
-
-            # Timebox per step
-            per_cap = min(step.max_ms, max(10, remaining_ms))
-
-            # Execute step
-            s_t0 = time.perf_counter()
-            step_log: dict[str, Any] = {"step": step.type, "target": step.target}
-            try:
-                if step.type == "retrieve":
-                    # timebox vector call
-                    resp = await asyncio.wait_for(
-                        vector_retrieve(task, hrm_view), timeout=max(0.01, per_cap / 1000.0)
-                    )
-                    outputs["retrieve"] = resp
-                    step_log.update(
-                        {
-                            "_elapsed_ms": resp.get(
-                                "_elapsed_ms", int((time.perf_counter() - s_t0) * 1000)
-                            )
-                        }
-                    )
-                elif step.type in ("reason", "draft"):
-                    # Map target to local AgentType if possible
-                    # Fallback to Reasoning for unknown
-                    at = AgentType.REASONING
-                    if step.target == "logic_code":
-                        at = AgentType.TECHNICAL
-                    elif step.target == "creative_metaphor":
-                        at = AgentType.CREATIVE
-                    elif step.target == "logic_high":
-                        at = AgentType.REASONING
-
-                    agent = self.agents.get(at, self.agents[AgentType.REASONING])
-                    a_t0 = time.perf_counter()
-                    resp = await asyncio.wait_for(
-                        agent.process(task, {**context, "affect": affect, "hrm_view": hrm_view}),
-                        timeout=max(0.05, per_cap / 1000.0),
-                    )
-                    elapsed_ms = int((time.perf_counter() - a_t0) * 1000)
-                    out_key = step.type
-                    outputs[out_key] = {"text": resp.content, "_elapsed_ms": elapsed_ms}
-                    step_log.update({"_elapsed_ms": elapsed_ms})
-                elif step.type == "reflect":
-                    draft_txt = (outputs.get("draft") or {}).get("text", "")
-                    reason_txt = (outputs.get("reason") or {}).get("text", "")
-                    resp = await asyncio.wait_for(
-                        reflector_call(draft_txt, reason_txt, affect),
-                        timeout=max(0.02, per_cap / 1000.0),
-                    )
-                    outputs["reflect"] = resp
-                    step_log.update(
-                        {
-                            "_elapsed_ms": resp.get(
-                                "_elapsed_ms", int((time.perf_counter() - s_t0) * 1000)
-                            )
-                        }
-                    )
-                    # If reflect requests revise and we haven't revised yet, insert one extra draft pass
-                    if resp.get("decision") == "revise" and not revision_used:
-                        revision_used = True
-                        # Add one more draft with smaller slice of remaining time
-                        rev_cap = max(50, int(0.2 * remaining_ms))
-                        a_t0 = time.perf_counter()
-                        agent = self.agents.get(AgentType.CREATIVE)
-                        if agent is None:
-                            agent = self.agents[AgentType.REASONING]
-                        resp2 = await asyncio.wait_for(
-                            agent.process(
-                                task,
-                                {**context, "affect": affect, "hrm_view": hrm_view, "revise": True},
-                            ),
-                            timeout=max(0.05, rev_cap / 1000.0),
-                        )
-                        outputs["draft"] = {
-                            "text": resp2.content,
-                            "_elapsed_ms": int((time.perf_counter() - a_t0) * 1000),
-                            "revision": True,
-                        }
-                        logs.append(
-                            {
-                                "step": "draft",
-                                "target": agent.agent_type.value,
-                                "_elapsed_ms": outputs["draft"]["_elapsed_ms"],
-                                "revision": True,
-                            }
-                        )
-                else:
-                    step_log.update({"warning": "unknown_step"})
-            except Exception as e:
-                step_log.update({"error": str(e)})
-            finally:
-                logs.append(step_log)
-
-            # Post-step budget check
-            now_ms = int((time.perf_counter() - t0) * 1000)
-            if now_ms > plan.budget_ms:
-                over = now_ms - plan.budget_ms
-                logger.warning(
-                    json.dumps(
-                        {
-                            "event": "chain.budget.exceeded",
-                            "plan": [s.type for s in plan.steps],
-                            "budget_ms": plan.budget_ms,
-                            "overage_ms": over,
-                        }
-                    )
-                )
-                return {
-                    "status": 429,
-                    "error": "budget_exceeded",
-                    "plan": [s.type for s in plan.steps],
-                    "budget_ms": plan.budget_ms,
-                    "overage_ms": over,
-                }
-
-        elapsed_total_ms = int((time.perf_counter() - t0) * 1000)
-        return {
-            "status": 200,
-            "plan": [s.type for s in plan.steps],
-            "logs": logs,
-            "outputs": outputs,
-            "_elapsed_ms": elapsed_total_ms,
-        }
+        result = await execute_chain(plan, exec_context)
+        return result
 
     def _make_routing_decision(self, message: str, context: dict[str, Any]) -> RoutingDecision:
         """Make intelligent routing decision based on message analysis"""
@@ -817,7 +657,9 @@ class SubAgentRouter:
             [(agent, score) for agent, score in agent_scores.items() if agent != selected_agent],
             key=lambda x: x[1],
             reverse=True,
-        )[:3]  # Top 3 alternatives
+        )[
+            :3
+        ]  # Top 3 alternatives
 
         reasoning = [
             f"Analyzed message: '{message[:50]}...'",

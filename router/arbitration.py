@@ -60,6 +60,7 @@ logger = logging.getLogger(__name__)
 try:
     from common.logging_config import log_moe_arbitration as _log_moe  # type: ignore
 except Exception:
+
     def _log_moe(
         experts: list,
         selected_expert: str,
@@ -77,7 +78,7 @@ _METRICS: dict[str, Any] = {
     "total": 0,
     "errors": 0,
     "by_strategy": {},  # dict[str,int]
-    "by_winner": {},    # dict[str,int]
+    "by_winner": {},  # dict[str,int]
     "latency": {"count": 0, "total_ms": 0.0, "max_ms": 0.0},
 }
 
@@ -147,6 +148,7 @@ class ExpertCandidate:
 
 # ---------- Legacy compatibility dataclasses ----------
 
+
 @dataclass
 class Candidate:
     """Legacy candidate type used by subagent_router.
@@ -166,7 +168,7 @@ class Candidate:
 class AffectContext:
     arousal: float  # [-1..1]
     valence: float  # [-1..1]
-    drift: float    # [0..1]
+    drift: float  # [0..1]
     risk_mode: str  # 'normal' | 'cautious' | 'aggressive'
 
 
@@ -242,14 +244,14 @@ class MoEArbitrator:
         if not logger:
             logger = globals()["logger"]
 
-    dry = is_dry_run()
-    effective_strategy = strategy or self.default_strategy
+        dry = is_dry_run()
+        effective_strategy = strategy or self.default_strategy
 
-    # Metrics: start timer and pre-increment totals/strategy
-    t0 = perf_counter()
-    _METRICS["total"] = int(_METRICS.get("total", 0)) + 1
-    strat_key = effective_strategy.value
-    _METRICS["by_strategy"][strat_key] = int(_METRICS["by_strategy"].get(strat_key, 0)) + 1
+        # Metrics: start timer and pre-increment totals/strategy
+        t0 = perf_counter()
+        _METRICS["total"] = int(_METRICS.get("total", 0)) + 1
+        strat_key = effective_strategy.value
+        _METRICS["by_strategy"][strat_key] = int(_METRICS["by_strategy"].get(strat_key, 0)) + 1
 
         # Filter candidates by availability and confidence
         viable_candidates = [
@@ -279,7 +281,7 @@ class MoEArbitrator:
             prefer_low_cost=prefer_low_cost,
         )
 
-    winner = ranked[0]
+        winner = ranked[0]
 
         # Generate rationale
         rationale = self._generate_rationale(winner, ranked, effective_strategy, affect)
@@ -294,8 +296,8 @@ class MoEArbitrator:
             dry_run=dry,
         )
 
-    # Log decision
-    if logger:
+        # Log decision
+        if logger:
             log_details: dict[str, Any] = {
                 "winner": winner.slim_name,
                 "confidence": winner.confidence,
@@ -319,13 +321,18 @@ class MoEArbitrator:
                 dry_log(logger, "moe.arbitrate", log_details)
             else:
                 logger.info({"event": "moe.arbitrate", "dry_run": dry, **log_details})
+
             # Standardized arbitration log
             try:
                 _log_moe(
                     experts=[c.slim_name for c in candidates],
                     selected_expert=winner.slim_name,
                     confidence=winner.confidence,
-                    context={"strategy": effective_strategy.value, "viable": len(viable_candidates), "latency_ms": round(duration_ms, 3)},
+                    context={
+                        "strategy": effective_strategy.value,
+                        "viable": len(viable_candidates),
+                        "latency_ms": round(duration_ms, 3),
+                    },
                     dry_run=dry,
                 )
             except Exception:
@@ -344,9 +351,9 @@ class MoEArbitrator:
 
         # Metrics: record winner and latency
         try:
-            _METRICS["by_winner"][winner.slim_name] = int(
-                _METRICS["by_winner"].get(winner.slim_name, 0)
-            ) + 1
+            _METRICS["by_winner"][winner.slim_name] = (
+                int(_METRICS["by_winner"].get(winner.slim_name, 0)) + 1
+            )
             duration_ms = (perf_counter() - t0) * 1000.0
             _record_latency(duration_ms)
         except Exception:
@@ -519,7 +526,9 @@ def _legacy_risk_adjustment(base: float, affect: AffectContext) -> float:
     return base * drift_penalty * mode_mult * mood_bias
 
 
-def _arbitrate_legacy(candidates: list[Candidate], hrm_view: HRMStateView, affect: AffectContext) -> LegacyArbitrationResult:
+def _arbitrate_legacy(
+    candidates: list[Candidate], hrm_view: HRMStateView, affect: AffectContext
+) -> LegacyArbitrationResult:
     if not candidates:
         raise ValueError("No candidates provided")
 
@@ -612,7 +621,9 @@ def arbitrate(
         # Positional hrm_view and affect provided
         if hrm_or_view is None or affect_or_logger is None:
             raise TypeError("Legacy arbitrate expects (candidates, hrm_view, affect)")
-        if not isinstance(hrm_or_view, HRMStateView) or not isinstance(affect_or_logger, AffectContext):
+        if not isinstance(hrm_or_view, HRMStateView) or not isinstance(
+            affect_or_logger, AffectContext
+        ):
             raise TypeError("Invalid legacy arbitrate arguments")
         return _arbitrate_legacy(
             cast(list[Candidate], candidates),
@@ -630,7 +641,11 @@ def arbitrate(
         hrm=hrm,
         affect=affect,
         prefer_low_cost=prefer_low_cost,
-        logger=logger if logger is not None else (affect_or_logger if isinstance(affect_or_logger, logging.Logger) else None),
+        logger=(
+            logger
+            if logger is not None
+            else (affect_or_logger if isinstance(affect_or_logger, logging.Logger) else None)
+        ),
     )
 
 
