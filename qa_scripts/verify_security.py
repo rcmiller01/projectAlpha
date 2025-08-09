@@ -5,8 +5,6 @@ Tests core security functionality without complex imports.
 """
 
 import json
-import os
-import sys
 from pathlib import Path
 
 
@@ -38,7 +36,7 @@ def test_token_masking():
         if result == expected:
             print(f"   ✅ '{token or 'None'}' -> '{result}'")
         else:
-            print(f"   ❌ '{token or 'None'}' -> '{result}' (expected '{expected}')")
+            print(f"   ❌ '{token or 'None'}' -> '{result}' " f"(expected '{expected}')")
             all_passed = False
 
     return all_passed
@@ -80,7 +78,7 @@ def test_audit_log_structure():
         print(f"   ✅ Audit log exists: {audit_file}")
 
         try:
-            with open(audit_file) as f:
+            with audit_file.open() as f:
                 lines = f.readlines()
 
             print(f"   ✅ Found {len(lines)} audit entries")
@@ -89,14 +87,23 @@ def test_audit_log_structure():
                 # Test last entry structure
                 try:
                     last_entry = json.loads(lines[-1])
-                    required_fields = ["timestamp", "route", "action", "success", "request_id"]
+                    required_fields = [
+                        "timestamp",
+                        "route",
+                        "action",
+                        "success",
+                        "request_id",
+                    ]
 
                     missing_fields = [field for field in required_fields if field not in last_entry]
                     if not missing_fields:
                         print("   ✅ Audit entries have required fields")
                         return True
                     else:
-                        print(f"   ❌ Missing fields in audit entry: {missing_fields}")
+                        print(
+                            "   ❌ Missing fields in audit entry:",
+                            missing_fields,
+                        )
                         return False
                 except json.JSONDecodeError:
                     print("   ❌ Invalid JSON in audit log")

@@ -5,11 +5,10 @@ Tests all implemented security features across the enhanced APIs.
 """
 
 import json
-import sys
 from pathlib import Path
 
 # Add backend to path
-sys.path.insert(0, str(Path(__file__).parent / "backend"))
+# Keep tests self-contained; avoid path hacks
 
 
 def test_security_module():
@@ -19,12 +18,9 @@ def test_security_module():
 
     try:
         from backend.common.security import (
-            audit_action,
             extract_token,
             get_token_type,
             mask_token,
-            require_scope,
-            validate_json_schema,
         )
 
         # Test token masking
@@ -45,9 +41,8 @@ def test_security_module():
 
         # Test token extraction
         print("\n📋 Testing token extraction:")
-        headers = {"Authorization": "Bearer test_bearer_token", "X-API-Key": "test_api_key"}
-
         # Mock request object
+
         class MockRequest:
             def __init__(self, headers):
                 self.headers = headers
@@ -88,7 +83,10 @@ def test_json_schemas():
     print("=" * 40)
 
     try:
-        from backend.common.security import MEMORY_CREATE_SCHEMA, validate_json_data
+        from backend.common.security import (
+            MEMORY_CREATE_SCHEMA,
+            validate_json_data,
+        )
 
         # Valid memory data
         valid_data = {
@@ -109,7 +107,11 @@ def test_json_schemas():
         print("   ✅ Missing required field correctly rejected")
 
         # Test unknown field
-        invalid_data = {"content": "Test", "layer": "ephemeral", "unknown_field": "bad"}
+        invalid_data = {
+            "content": "Test",
+            "layer": "ephemeral",
+            "unknown_field": "bad",
+        }
         errors = validate_json_data(invalid_data, MEMORY_CREATE_SCHEMA)
         assert errors, "Unknown field should fail validation"
         print("   ✅ Unknown field correctly rejected")
@@ -146,13 +148,20 @@ def test_audit_logging():
         # Check if audit log was created
         audit_file = Path("logs/audit.jsonl")
         if audit_file.exists():
-            with open(audit_file) as f:
+            with audit_file.open() as f:
                 lines = f.readlines()
 
             if lines:
                 # Parse last entry
                 last_entry = json.loads(lines[-1])
-                required_fields = ["timestamp", "route", "action", "success", "layer", "request_id"]
+                required_fields = [
+                    "timestamp",
+                    "route",
+                    "action",
+                    "success",
+                    "layer",
+                    "request_id",
+                ]
 
                 for field in required_fields:
                     assert field in last_entry, f"Missing required field: {field}"
@@ -176,12 +185,16 @@ def test_weighting_strategy_enum():
     """Test WeightingStrategy enum usage."""
     print("\n🧪 Testing WeightingStrategy Enum")
     print("=" * 40)
-
     try:
         from core.core_arbiter import WeightingStrategy
 
         # Test enum values
-        strategies = ["logic_dominant", "emotional_priority", "harmonic", "adaptive"]
+        strategies = [
+            "logic_dominant",
+            "emotional_priority",
+            "harmonic",
+            "adaptive",
+        ]
 
         for strategy_name in strategies:
             try:
@@ -193,7 +206,7 @@ def test_weighting_strategy_enum():
 
         # Test invalid strategy
         try:
-            invalid_strategy = WeightingStrategy("invalid_strategy")
+            WeightingStrategy("invalid_strategy")
             print("   ❌ Should have failed for invalid strategy")
             return False
         except ValueError:
@@ -229,7 +242,7 @@ def check_security_files():
         full_path = Path(file_path)
         if full_path.exists():
             try:
-                with open(full_path, encoding="utf-8") as f:
+                with full_path.open(encoding="utf-8") as f:
                     content = f.read()
 
                 # Check for security imports

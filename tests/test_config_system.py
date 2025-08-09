@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ruff: noqa: PLR0911, PLR0912
 """
 Test script for ProjectAlpha centralized configuration system.
 Verifies that settings load correctly and validation works.
@@ -6,7 +7,6 @@ Verifies that settings load correctly and validation works.
 
 import os
 import sys
-import tempfile
 from pathlib import Path
 
 # Add project root to path
@@ -43,13 +43,9 @@ def test_configuration_loading():
         assert (
             settings.MAX_PENALTY_THRESHOLD == 0.85
         ), f"Expected 0.85, got {settings.MAX_PENALTY_THRESHOLD}"
-        assert (
-            settings.EMOTION_LOOP_ENABLED == True
-        ), f"Expected True, got {settings.EMOTION_LOOP_ENABLED}"
-        assert (
-            settings.AUTOPILOT_ENABLED == True
-        ), f"Expected True, got {settings.AUTOPILOT_ENABLED}"
-        assert settings.SAFE_MODE_FORCE == False, f"Expected False, got {settings.SAFE_MODE_FORCE}"
+        assert settings.EMOTION_LOOP_ENABLED, f"Expected True, got {settings.EMOTION_LOOP_ENABLED}"
+        assert settings.AUTOPILOT_ENABLED, f"Expected True, got {settings.AUTOPILOT_ENABLED}"
+        assert not settings.SAFE_MODE_FORCE, f"Expected False, got {settings.SAFE_MODE_FORCE}"
         print("✅ Default values applied correctly")
 
         log_configuration_summary(settings)
@@ -90,9 +86,9 @@ def test_configuration_loading():
         assert settings.RATE_LIMIT_WINDOW == 30, f"Expected 30, got {settings.RATE_LIMIT_WINDOW}"
         assert settings.RATE_LIMIT_MAX == 200, f"Expected 200, got {settings.RATE_LIMIT_MAX}"
         assert (
-            settings.EMOTION_LOOP_ENABLED == False
+            not settings.EMOTION_LOOP_ENABLED
         ), f"Expected False, got {settings.EMOTION_LOOP_ENABLED}"
-        assert settings.SAFE_MODE_FORCE == True, f"Expected True, got {settings.SAFE_MODE_FORCE}"
+        assert settings.SAFE_MODE_FORCE, f"Expected True, got {settings.SAFE_MODE_FORCE}"
         assert settings.LOG_LEVEL == "DEBUG", f"Expected DEBUG, got {settings.LOG_LEVEL}"
         print("✅ Environment variable overrides applied correctly")
 
@@ -151,24 +147,26 @@ def test_configuration_loading():
 
         importlib.reload(config.settings)
 
-        from config.settings import get_rate_limit_config, is_feature_enabled, is_safe_mode_active
+        from config.settings import (
+            get_rate_limit_config,
+            is_feature_enabled,
+            is_safe_mode_active,
+        )
 
         # These should work with current env vars
         safe_mode_status = is_safe_mode_active()
         print(f"   Safe mode status: {safe_mode_status}")
-        assert safe_mode_status == True, f"Safe mode should be active, got {safe_mode_status}"
+        assert safe_mode_status, f"Safe mode should be active, got {safe_mode_status}"
 
         emotion_loop_status = is_feature_enabled("emotion_loop")
         print(f"   Emotion loop status: {emotion_loop_status}")
         assert (
-            emotion_loop_status == False
+            not emotion_loop_status
         ), f"Emotion loop should be disabled, got {emotion_loop_status}"
 
         safe_mode_feature = is_feature_enabled("safe_mode")
         print(f"   Safe mode feature: {safe_mode_feature}")
-        assert (
-            safe_mode_feature == True
-        ), f"Safe mode feature should be enabled, got {safe_mode_feature}"
+        assert safe_mode_feature, f"Safe mode feature should be enabled, got {safe_mode_feature}"
 
         rate_config = get_rate_limit_config()
         assert rate_config["window"] == 30, f"Expected window 30, got {rate_config['window']}"
@@ -218,7 +216,7 @@ def test_schema_validation():
             print("❌ .env.schema.json not found")
             return False
 
-        with open(schema_path) as f:
+        with schema_path.open() as f:
             schema = json.load(f)
 
         required_props = [
@@ -237,16 +235,16 @@ def test_schema_validation():
                 return False
             print(f"✅ Found {prop} in schema")
 
-        # Check that DRIFT_SCALING_FACTOR and MAX_PENALTY_THRESHOLD have correct defaults
+        # Check that DRIFT_SCALING_FACTOR and MAX_PENALTY_THRESHOLD have defaults
         drift_prop = schema["properties"]["DRIFT_SCALING_FACTOR"]
         penalty_prop = schema["properties"]["MAX_PENALTY_THRESHOLD"]
 
-        assert (
-            drift_prop.get("default") == 0.35
-        ), f"DRIFT_SCALING_FACTOR default should be 0.35, got {drift_prop.get('default')}"
-        assert (
-            penalty_prop.get("default") == 0.85
-        ), f"MAX_PENALTY_THRESHOLD default should be 0.85, got {penalty_prop.get('default')}"
+        assert drift_prop.get("default") == 0.35, (
+            "DRIFT_SCALING_FACTOR default should be 0.35, got " f"{drift_prop.get('default')}"
+        )
+        assert penalty_prop.get("default") == 0.85, (
+            "MAX_PENALTY_THRESHOLD default should be 0.85, got " f"{penalty_prop.get('default')}"
+        )
 
         print("✅ Schema validation passed")
         return True
@@ -286,7 +284,7 @@ def main():
             status = "✅ PASS" if result else "❌ FAIL"
             print(f"{status} {test_name}")
 
-        print(f"\n📈 SUMMARY: {passed}/{total} tests passed ({passed/total*100:.1f}%)")
+        print(f"\n📈 SUMMARY: {passed}/{total} tests passed (" f"{passed/total*100:.1f}%)")
 
         if passed == total:
             print("🎉 ALL TESTS PASSED - Configuration system is ready!")

@@ -161,7 +161,6 @@ def test_retry_logic():
         from backend.common.retry import (
             RetryableError,
             RetryConfig,
-            backoff_delay,
             calculate_delay,
             retry_with_backoff,
         )
@@ -201,14 +200,15 @@ def test_retry_logic():
 
         # Test non-retryable exception
         @retry_with_backoff(
-            config=RetryConfig(max_attempts=3, base_delay=0.1), exceptions=(RetryableError,)
+            config=RetryConfig(max_attempts=3, base_delay=0.1),
+            exceptions=(RetryableError,),
         )
         def non_retryable_function():
             raise ValueError("This should not be retried")
 
         try:
             non_retryable_function()
-            assert False, "Should have raised ValueError"
+            raise AssertionError("Should have raised ValueError")
         except ValueError:
             print("   ✅ Non-retryable exception correctly propagated")
 
@@ -246,7 +246,9 @@ def test_memory_quotas():
         status = memory_system.get_memory_quota_status()
         ephemeral_status = status["ephemeral"]
         print(
-            f"   Current usage: {ephemeral_status['current_items']}/{ephemeral_status['max_items']}"
+            "   Current usage: "
+            f"{ephemeral_status['current_items']}/"
+            f"{ephemeral_status['max_items']}"
         )
         assert not ephemeral_status["is_over_quota"], "Should not be over quota yet"
         print("   ✅ Within quota operation successful")
@@ -265,7 +267,9 @@ def test_memory_quotas():
         status = memory_system.get_memory_quota_status()
         ephemeral_status = status["ephemeral"]
         print(
-            f"   After quota enforcement: {ephemeral_status['current_items']}/{ephemeral_status['max_items']}"
+            "   After quota enforcement: "
+            f"{ephemeral_status['current_items']}/"
+            f"{ephemeral_status['max_items']}"
         )
         assert (
             ephemeral_status["current_items"] <= ephemeral_status["max_items"]
@@ -275,11 +279,11 @@ def test_memory_quotas():
         # Check pruning log
         pruning_log_path = Path("logs/memory_pruning.jsonl")
         if pruning_log_path.exists():
-            with open(pruning_log_path) as f:
+            with pruning_log_path.open() as f:
                 lines = f.readlines()
             if lines:
                 last_entry = json.loads(lines[-1])
-                print(f"   Pruning event logged: {last_entry['pruned_count']} items removed")
+                print("   Pruning event logged: " f"{last_entry['pruned_count']} items removed")
                 print("   ✅ Pruning events properly logged")
 
         print("\n📋 Test 3: Manual quota status and pruning")
@@ -290,7 +294,9 @@ def test_memory_quotas():
         for layer, layer_status in full_status.items():
             usage_pct = layer_status["usage_percentage"]
             print(
-                f"     {layer}: {layer_status['current_items']}/{layer_status['max_items']} ({usage_pct:.1f}%)"
+                f"     {layer}: "
+                f"{layer_status['current_items']}/"
+                f"{layer_status['max_items']} ({usage_pct:.1f}%)"
             )
 
         # Test manual pruning
@@ -312,7 +318,9 @@ def test_memory_quotas():
 
 
 def test_api_endpoints():
-    """Test API endpoints for graceful degradation (requires running services)."""
+    """Test API endpoints for graceful degradation.
+    Requires running services.
+    """
     print("\n🌐 Testing API Endpoints")
     print("=" * 50)
 
@@ -329,12 +337,15 @@ def test_api_endpoints():
                 health_data = response.json()
                 if "safe_mode_enabled" in health_data:
                     print(
-                        f"   ✅ {base_url} - Safe mode status: {health_data['safe_mode_enabled']}"
+                        "   ✅ "
+                        f"{base_url} - Safe mode status: "
+                        f"{health_data['safe_mode_enabled']}"
                     )
                 else:
                     print(f"   ✅ {base_url} - Health check passed")
             else:
-                print(f"   ⚠️  {base_url} - Health check failed: {response.status_code}")
+                print("   ⚠️  ", end="")
+                print(f"{base_url} - Health check failed: {response.status_code}")
 
         except requests.exceptions.ConnectionError:
             print(f"   ⚠️  {base_url} - Service not running")
@@ -358,10 +369,11 @@ def test_api_endpoints():
         response2 = requests.post(test_url, json=data, headers=headers, timeout=5)
 
         if response1.status_code == response2.status_code:
-            print(f"   ✅ Idempotency test: Both requests returned {response1.status_code}")
+            print("   ✅ Idempotency test: Both requests returned " f"{response1.status_code}")
         else:
             print(
-                f"   ⚠️  Idempotency test: Different status codes {response1.status_code} vs {response2.status_code}"
+                "   ⚠️  Idempotency test: Different status codes "
+                f"{response1.status_code} vs {response2.status_code}"
             )
 
     except requests.exceptions.ConnectionError:

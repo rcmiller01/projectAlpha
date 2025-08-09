@@ -5,8 +5,6 @@ Tests RBAC, input validation, and audit logging.
 """
 
 import json
-import sys
-import time
 from pathlib import Path
 
 import requests
@@ -27,7 +25,8 @@ def test_memory_api_security():
     # Test 1: Add memory entry without token (should fail)
     print("\n📋 Test 1: No authentication")
     response = requests.post(
-        f"{BASE_URL}/api/memory/add_entry", json={"content": "test", "layer": "ephemeral"}
+        f"{BASE_URL}/api/memory/add_entry",
+        json={"content": "test", "layer": "ephemeral"},
     )
     assert response.status_code == 401, f"Expected 401, got {response.status_code}"
     print("✅ Correctly rejected request without token")
@@ -118,7 +117,9 @@ def test_hrm_api_security():
     print("\n📋 Test 4: Identity layer update with admin token")
     headers = {"X-API-Key": ADMIN_TOKEN}
     response = requests.post(
-        f"{BASE_URL}/api/hrm/identity", json={"core_values": {"test": "value"}}, headers=headers
+        f"{BASE_URL}/api/hrm/identity",
+        json={"core_values": {"test": "value"}},
+        headers=headers,
     )
     print(f"   Response status: {response.status_code}")
     print(f"   Response: {response.text}")
@@ -135,7 +136,7 @@ def test_audit_logging():
         print(f"✅ Audit log file exists: {audit_log_path}")
 
         # Read last few audit entries
-        with open(audit_log_path) as f:
+        with audit_log_path.open() as f:
             lines = f.readlines()
 
         print(f"✅ Found {len(lines)} audit entries")
@@ -147,7 +148,9 @@ def test_audit_logging():
                 try:
                     entry = json.loads(line)
                     print(
-                        f"   {entry.get('timestamp', 'unknown')} - {entry.get('action', 'unknown')} - Success: {entry.get('success', 'unknown')}"
+                        f"   {entry.get('timestamp', 'unknown')} - "
+                        f"{entry.get('action', 'unknown')} - Success: "
+                        f"{entry.get('success', 'unknown')}"
                     )
                 except json.JSONDecodeError:
                     print(f"   Invalid JSON: {line[:50]}...")
@@ -198,12 +201,7 @@ def run_security_tests():
     print("   - python backend/memory_symbol_api.py")
     print("   - python backend/hrm_api.py")
 
-    # Uncomment these when servers are running:
-    # try:
-    #     test_memory_api_security()
-    #     test_hrm_api_security()
-    # except requests.exceptions.ConnectionError:
-    #     print("❌ API servers not running - skipping endpoint tests")
+    # Endpoint tests require live servers; intentionally skipped here.
 
     print("\n🎉 Security tests completed!")
 
