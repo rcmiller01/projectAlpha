@@ -128,9 +128,9 @@ All requested security enhancements have been successfully implemented across th
 ## 🚀 Testing & Verification
 
 ### Verification Scripts Created
-- `verify_security.py`: Comprehensive security verification
-- `test_security_system.py`: API endpoint testing
-- `test_complete_security.py`: Full system testing
+- `qa_scripts/verify_security.py`: Comprehensive security verification
+- `tests/test_security_system.py`: API endpoint testing
+- `tests/test_complete_security.py`: Full system testing
 
 ### Test Coverage
 - Token masking functionality

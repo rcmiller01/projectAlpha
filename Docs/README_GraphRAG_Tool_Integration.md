@@ -30,7 +30,7 @@ projectAlpha/
 │   └── graphrag_tool_integration_demo.py  # Complete demo
 ├── data/                           # Memory persistence
 ├── logs/                           # Tool request logs
-└── requirements_graphrag.txt       # Additional dependencies
+└── requirements_graphrag.txt       # Additional dependencies (includes base)
 ```
 
 ## Components
@@ -303,6 +303,7 @@ class EnhancedHRMCore(ExistingHRMCore):
 
 1. **Install dependencies:**
 ```bash
+# requirements_graphrag.txt includes -r requirements.txt for the base stack
 pip install -r requirements_graphrag.txt
 ```
 

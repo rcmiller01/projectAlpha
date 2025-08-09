@@ -182,7 +182,7 @@ ANCHOR_HEALTH_CHECK_ENABLED=true      # Enable anchor checks
 
 ### New Files:
 - `backend/common/retry.py` - Retry framework with exponential backoff
-- `test_graceful_degradation.py` - Comprehensive test suite
+- `tests/test_graceful_degradation.py` - Comprehensive test suite
 
 ### Enhanced Files:
 - `src/core/core_conductor.py` - Safe mode implementation
@@ -203,7 +203,7 @@ ANCHOR_HEALTH_CHECK_ENABLED=true      # Enable anchor checks
 
 **Run Tests:**
 ```bash
-python test_graceful_degradation.py
+python -m pytest tests/test_graceful_degradation.py -q
 ```
 
 ## 💡 Usage Examples
