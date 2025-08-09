@@ -124,8 +124,8 @@ async def execute_chain(plan: ChainPlan, context: dict) -> dict:
     Returns:
         dict with result, steps_log, budget_used_ms, and status information
     """
-    import time
     import asyncio
+    import time
 
     t0 = time.perf_counter()
     logs: list[dict[str, Any]] = []

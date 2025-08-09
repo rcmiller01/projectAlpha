@@ -35,7 +35,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from modules.autonomy.affect_governor import AffectGovernor
 from modules.autonomy.drift_watchdog import DriftWatchdog
 from router.arbitration import AffectContext, Candidate, HRMStateView, arbitrate
-from router.chaining import ChainPlan, plan_for, execute_chain
+from router.chaining import ChainPlan, execute_chain, plan_for
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -657,9 +657,7 @@ class SubAgentRouter:
             [(agent, score) for agent, score in agent_scores.items() if agent != selected_agent],
             key=lambda x: x[1],
             reverse=True,
-        )[
-            :3
-        ]  # Top 3 alternatives
+        )[:3]  # Top 3 alternatives
 
         reasoning = [
             f"Analyzed message: '{message[:50]}...'",

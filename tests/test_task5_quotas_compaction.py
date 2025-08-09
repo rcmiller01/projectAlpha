@@ -175,7 +175,7 @@ def test_ttl_cleanup_logging():
         assert log_path.exists(), "TTL cleanup log should be created"
 
         # Read and verify log content
-        with open(log_path, "r", encoding="utf-8") as f:
+        with open(log_path, encoding="utf-8") as f:
             log_lines = f.readlines()
 
         assert len(log_lines) > 0, "Log should contain cleanup events"

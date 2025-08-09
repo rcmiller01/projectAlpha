@@ -14,13 +14,13 @@ This preserves existing callers (e.g., backend/subagent_router.py).
 import logging
 import os
 import sys
+from collections import deque
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional, cast
 from time import perf_counter
-from collections import deque
+from typing import Any, Optional, cast
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent
@@ -419,7 +419,9 @@ class MoEArbitrator:
                 base_score += 0.2
 
             # Boost creative experts for creative/metaphorical tasks
-            if "creative" in candidate.capabilities and bool(affect.get("creativity_requested", False)):  # type: ignore[union-attr]
+            if "creative" in candidate.capabilities and bool(
+                affect.get("creativity_requested", False)
+            ):  # type: ignore[union-attr]
                 base_score += 0.15
 
             # Boost logical experts for analytical contexts

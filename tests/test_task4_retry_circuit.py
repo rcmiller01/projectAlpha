@@ -2,15 +2,16 @@
 Test basic retry and circuit breaker functionality for Task 4.
 """
 
-import pytest
 import time
+
+import pytest
 
 from backend.common.retry import (
     CircuitBreaker,
     CircuitBreakerOpenError,
     CircuitState,
-    RetryConfig,
     RetryableError,
+    RetryConfig,
     retry_with_backoff,
 )
 
